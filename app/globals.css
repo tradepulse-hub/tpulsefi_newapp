@@ -1,0 +1,114 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@keyframes slideRight {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.3;
+  }
+  90% {
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateX(100vw);
+    opacity: 0;
+  }
+}
+
+@keyframes slideDown {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.3;
+  }
+  90% {
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+}
+
+@keyframes vibrateLogo {
+  0% {
+    transform: translate(0) rotate(0deg) scale(1);
+  }
+  25% {
+    transform: translate(2px, 2px) rotate(1deg) scale(1.02);
+  }
+  50% {
+    transform: translate(-2px, 2px) rotate(-1deg) scale(0.98);
+  }
+  75% {
+    transform: translate(2px, -2px) rotate(1deg) scale(1.02);
+  }
+  100% {
+    transform: translate(-2px, -2px) rotate(-1deg) scale(0.98);
+  }
+}
+
+@keyframes vibrateContainer {
+  0% {
+    transform: translate(0);
+  }
+  25% {
+    transform: translate(1px, 1px);
+  }
+  50% {
+    transform: translate(-1px, 1px);
+  }
+  75% {
+    transform: translate(1px, -1px);
+  }
+  100% {
+    transform: translate(-1px, -1px);
+  }
+}
+
+@keyframes pulseGlow {
+  0% {
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.3), 0 0 30px rgba(59, 130, 246, 0.4), 0 0 45px rgba(34, 211, 238, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.5), 0 0 50px rgba(59, 130, 246, 0.6), 0 0 75px rgba(34, 211, 238, 0.4);
+  }
+  100% {
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.3), 0 0 30px rgba(59, 130, 246, 0.4), 0 0 45px rgba(34, 211, 238, 0.2);
+  }
+}
+
+.animate-slide-right {
+  animation: slideRight linear infinite;
+}
+
+.animate-slide-down {
+  animation: slideDown linear infinite;
+}
+
+.animate-vibrate-logo {
+  animation: vibrateLogo 0.06s linear infinite;
+}
+
+.animate-vibrate-container {
+  animation: vibrateContainer 0.08s linear infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 1s ease-in-out infinite;
+}
