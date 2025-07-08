@@ -12,7 +12,7 @@ export function MiniKitProvider({ children }: { children: ReactNode }) {
       // Configurar o MiniKit apenas se não estiver já instalado
       if (!MiniKit.isInstalled()) {
         MiniKit.install({
-          appId: process.env.NEXT_PUBLIC_APP_ID || "app_staging_b8e2b5b5c6b8e2b5b5c6b8e2",
+          appId: process.env.NEXT_PUBLIC_APP_ID || "app_a3a55e132983350c67923dd57dc22c5e",
           enableTelemetry: true,
         })
         console.log("MiniKit installed successfully")
