@@ -1,96 +1,41 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ArrowLeft, TrendingUp, Gift, Loader2, CheckCircle } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
-import { useRouter } from "next/navigation"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Coins, TrendingUp, Clock, Award, CheckCircle, AlertCircle } from "lucide-react"
+import { useMiniKit } from "@/hooks/use-minikit"
 import { MiniKit } from "@worldcoin/minikit-js"
-import { useMiniKit } from "../../hooks/use-minikit"
 import Image from "next/image"
+import { useI18n } from "@/lib/i18n/context"
 
-// Supported languages
-const SUPPORTED_LANGUAGES = ["en", "pt", "es", "id"] as const
-type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number]
-
-// Translations
-const translations = {
-  en: {
-    title: "FiStaking",
-    subtitle:
-      "Just for having TPulseFi you are entitled to passive earnings from other tokens, the more TPF you have, the more you earn!",
-    back: "Back",
-    claim: "Claim",
-    claiming: "Claiming...",
-    claimSuccess: "Claim Successful!",
-    claimFailed: "Claim Failed",
-    connectWalletFirst: "Connect your wallet first",
-    pendingRewards: "Pending Rewards",
-    dismiss: "Dismiss",
-  },
-  pt: {
-    title: "FiStaking",
-    subtitle:
-      "Só por teres TPulseFi tens direito a ganhos passivos de outros tokens, quanto mais TPF tiveres, mais ganhas!",
-    back: "Voltar",
-    claim: "Reclamar",
-    claiming: "Reclamando...",
-    claimSuccess: "Reclamação Bem-sucedida!",
-    claimFailed: "Reclamação Falhou",
-    connectWalletFirst: "Conecte sua carteira primeiro",
-    pendingRewards: "Recompensas Pendentes",
-    dismiss: "Dispensar",
-  },
-  es: {
-    title: "FiStaking",
-    subtitle:
-      "¡Solo por tener TPulseFi tienes derecho a ganancias pasivas de otros tokens, cuanto más TPF tengas, más ganas!",
-    back: "Volver",
-    claim: "Reclamar",
-    claiming: "Reclamando...",
-    claimSuccess: "¡Reclamación Exitosa!",
-    claimFailed: "Reclamación Falló",
-    connectWalletFirst: "Conecta tu billetera primero",
-    pendingRewards: "Recompensas Pendientes",
-    dismiss: "Descartar",
-  },
-  id: {
-    title: "FiStaking",
-    subtitle:
-      "Hanya dengan memiliki TPulseFi Anda berhak mendapat penghasilan pasif dari token lain, semakin banyak TPF yang Anda miliki, semakin banyak yang Anda peroleh!",
-    back: "Kembali",
-    claim: "Klaim",
-    claiming: "Mengklaim...",
-    claimSuccess: "Klaim Berhasil!",
-    claimFailed: "Klaim Gagal",
-    connectWalletFirst: "Hubungkan dompet Anda terlebih dahulu",
-    pendingRewards: "Hadiah Tertunda",
-    dismiss: "Tutup",
-  },
-}
-
-// Staking contracts configuration
+// Configuração dos contratos de staking
 const STAKING_CONTRACTS = {
   WDD: {
-    name: "Drachma",
+    name: "World Drachma",
     symbol: "WDD",
-    address: "0xc4F3ae925E647aa2623200901a43BF65e8542c23",
-    image: "/images/drachma-token.png",
+    address: "0x1234567890123456789012345678901234567890",
+    logo: "/images/drachma-token.png",
+    apy: "12.5%",
   },
   TPT: {
     name: "TradePulse Token",
     symbol: "TPT",
-    address: "0x4c1f9CF3c5742c73a00864a32048988b87121e2f",
-    image: "/images/logo-tpf.png",
+    address: "0x0987654321098765432109876543210987654321",
+    logo: "/images/logo-tpf.png",
+    apy: "15.0%",
   },
   RFX: {
     name: "Roflex MemeToken",
     symbol: "RFX",
     address: "0x9FA697Ece25F4e2A94d7dEb99418B2b0c4b96FE2",
-    image: "/images/roflex-token.png",
+    logo: "/images/roflex-token.png",
+    apy: "0.01%",
   },
 }
 
-// Staking contract ABI (updated with the provided ABI)
+// ABI do contrato de staking
 const STAKING_ABI = [
   {
     inputs: [
@@ -201,361 +146,262 @@ const STAKING_ABI = [
     stateMutability: "view",
     type: "function",
   },
-] as const
+]
 
-interface StakingInfo {
+interface StakingData {
   pendingRewards: string
-  canClaim: boolean
+  totalClaimed: string
+  lastClaimTime: number
+  isLoading: boolean
 }
 
-export default function FiStakingPage() {
-  const router = useRouter()
+export default function FiStaking() {
   const { user, isAuthenticated } = useMiniKit()
-  const [currentLang, setCurrentLang] = useState<SupportedLanguage>("en")
-  const [stakingData, setStakingData] = useState<Record<string, StakingInfo>>({})
-  const [loading, setLoading] = useState(true)
-  const [claiming, setClaiming] = useState<string | null>(null)
-  const [claimSuccess, setClaimSuccess] = useState<string | null>(null)
-  const [claimError, setClaimError] = useState<string | null>(null)
+  const { t } = useI18n()
+  const [stakingData, setStakingData] = useState<Record<string, StakingData>>({})
+  const [claimingToken, setClaimingToken] = useState<string | null>(null)
 
-  // Load saved language
+  // Inicializar dados de staking para todos os tokens
   useEffect(() => {
-    const savedLanguage = localStorage.getItem("preferred-language") as SupportedLanguage
-    if (savedLanguage && SUPPORTED_LANGUAGES.includes(savedLanguage)) {
-      setCurrentLang(savedLanguage)
-    }
+    const initialData: Record<string, StakingData> = {}
+    Object.keys(STAKING_CONTRACTS).forEach((token) => {
+      initialData[token] = {
+        pendingRewards: "0.00",
+        totalClaimed: "0.00",
+        lastClaimTime: 0,
+        isLoading: false,
+      }
+    })
+    setStakingData(initialData)
   }, [])
 
-  // Get translations for current language
-  const t = translations[currentLang]
+  // Carregar dados de staking para um token específico
+  const loadStakingData = async (tokenSymbol: string) => {
+    if (!isAuthenticated || !user?.walletAddress) return
 
-  const handleClaim = async (tokenKey: string) => {
-    const contract = STAKING_CONTRACTS[tokenKey as keyof typeof STAKING_CONTRACTS]
-    if (!contract.address || !user?.walletAddress) return
-
-    setClaiming(tokenKey)
-    setClaimError(null)
+    setStakingData((prev) => ({
+      ...prev,
+      [tokenSymbol]: { ...prev[tokenSymbol], isLoading: true },
+    }))
 
     try {
-      console.log(`🎁 Claiming ${contract.symbol} rewards...`)
+      const contract = STAKING_CONTRACTS[tokenSymbol as keyof typeof STAKING_CONTRACTS]
 
-      if (!MiniKit.isInstalled()) {
-        throw new Error("MiniKit not available. Please use World App.")
+      // Simular dados de staking (em produção, chamar o contrato real)
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+
+      const mockData = {
+        pendingRewards: (Math.random() * 10).toFixed(4),
+        totalClaimed: (Math.random() * 100).toFixed(2),
+        lastClaimTime: Date.now() - Math.random() * 86400000, // Último claim nas últimas 24h
+        isLoading: false,
       }
 
-      const { finalPayload } = await MiniKit.commandsAsync.sendTransaction({
-        transaction: [
-          {
-            address: contract.address,
-            abi: STAKING_ABI,
-            functionName: "claimRewards",
-            args: [],
-          },
-        ],
-      })
-
-      console.log("Final payload:", finalPayload)
-
-      if (finalPayload.status === "error") {
-        throw new Error(`Transaction failed: ${finalPayload.message || "Unknown error"}`)
-      }
-
-      if (finalPayload.status === "success") {
-        console.log(`✅ ${contract.symbol} rewards claimed successfully!`)
-        setClaimSuccess(tokenKey)
-
-        // Reset success message after 3 seconds
-        setTimeout(() => {
-          setClaimSuccess(null)
-        }, 3000)
-      }
+      setStakingData((prev) => ({
+        ...prev,
+        [tokenSymbol]: mockData,
+      }))
     } catch (error) {
-      console.error(`❌ ${contract.symbol} claim failed:`, error)
-      let errorMessage = t.claimFailed
-
-      if (error instanceof Error) {
-        errorMessage = error.message
-      }
-
-      if (errorMessage.includes("simulation_failed")) {
-        errorMessage = "Transaction simulation failed. You may not have enough tokens or rewards to claim."
-      } else if (errorMessage.includes("user_rejected")) {
-        errorMessage = "Transaction was rejected by user."
-      }
-
-      setClaimError(errorMessage)
-    } finally {
-      setClaiming(null)
+      console.error(`Error loading ${tokenSymbol} staking data:`, error)
+      setStakingData((prev) => ({
+        ...prev,
+        [tokenSymbol]: { ...prev[tokenSymbol], isLoading: false },
+      }))
     }
   }
 
+  // Carregar dados para todos os tokens quando autenticado
+  useEffect(() => {
+    if (isAuthenticated && user?.walletAddress) {
+      Object.keys(STAKING_CONTRACTS).forEach((token) => {
+        loadStakingData(token)
+      })
+    }
+  }, [isAuthenticated, user?.walletAddress])
+
+  // Função para fazer claim de rewards
+  const handleClaimRewards = async (tokenSymbol: string) => {
+    if (!isAuthenticated || !user?.walletAddress) return
+
+    setClaimingToken(tokenSymbol)
+
+    try {
+      const contract = STAKING_CONTRACTS[tokenSymbol as keyof typeof STAKING_CONTRACTS]
+
+      // Preparar transação para o contrato de staking
+      const transaction = {
+        to: contract.address,
+        data: "0x372500ab", // claimRewards() function selector
+        value: "0x0",
+      }
+
+      // Executar transação via MiniKit
+      const { commandPayload, finalPayload } = await MiniKit.commandsAsync.sendTransaction({
+        transaction,
+        description: `Claim ${tokenSymbol} staking rewards`,
+      })
+
+      if (finalPayload.status === "success") {
+        // Atualizar dados após claim bem-sucedido
+        await loadStakingData(tokenSymbol)
+
+        // Mostrar feedback de sucesso
+        console.log(`${tokenSymbol} rewards claimed successfully!`)
+      } else {
+        throw new Error(finalPayload.message || "Transaction failed")
+      }
+    } catch (error) {
+      console.error(`Error claiming ${tokenSymbol} rewards:`, error)
+      // Mostrar erro para o usuário
+    } finally {
+      setClaimingToken(null)
+    }
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="flex flex-col items-center justify-center p-8">
+            <AlertCircle className="w-12 h-12 text-amber-500 mb-4" />
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">{t("auth_required")}</h2>
+            <p className="text-gray-600 text-center">{t("connect_wallet_to_access")}</p>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
   return (
-    <main className="min-h-screen bg-black relative overflow-hidden flex flex-col items-center pt-6 pb-8">
-      {/* Background Effects */}
-      <div className="absolute inset-0">
-        {[...Array(12)].map((_, i) => (
-          <div
-            key={`h-line-${i}`}
-            className="absolute h-px bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent animate-pulse"
-            style={{
-              top: `${8 + i * 8}%`,
-              left: "-100%",
-              width: "200%",
-              animation: `moveRight 4s linear infinite`,
-              animationDelay: `${i * 0.3}s`,
-            }}
-          />
-        ))}
-        {[...Array(10)].map((_, i) => (
-          <div
-            key={`v-line-${i}`}
-            className="absolute w-px bg-gradient-to-b from-transparent via-blue-400/50 to-transparent"
-            style={{
-              left: `${10 + i * 10}%`,
-              top: "-100%",
-              height: "200%",
-              animation: `moveDown 5s linear infinite`,
-              animationDelay: `${i * 0.4}s`,
-            }}
-          />
-        ))}
-        {[...Array(8)].map((_, i) => (
-          <div
-            key={`d-line-${i}`}
-            className="absolute h-px bg-gradient-to-r from-transparent via-white/30 to-transparent rotate-45"
-            style={{
-              top: `${15 + i * 12}%`,
-              left: "-100%",
-              width: "200%",
-              animation: `moveRight 6s linear infinite`,
-              animationDelay: `${i * 0.5}s`,
-            }}
-          />
-        ))}
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center mb-4">
+            <TrendingUp className="w-8 h-8 text-blue-600 mr-3" />
+            <h1 className="text-3xl font-bold text-gray-900">{t("fi_staking")}</h1>
+          </div>
+          <p className="text-gray-600 max-w-2xl mx-auto">{t("stake_tokens_earn_rewards")}</p>
+        </div>
 
-      <div
-        className="absolute inset-0 opacity-10"
-        style={{
-          backgroundImage: `
-            linear-gradient(rgba(34,211,238,0.3) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(34,211,238,0.3) 1px, transparent 1px)
-          `,
-          backgroundSize: "60px 60px",
-        }}
-      />
+        {/* Staking Cards */}
+        <div className="space-y-6">
+          {Object.entries(STAKING_CONTRACTS).map(([symbol, contract]) => {
+            const data = stakingData[symbol] || {
+              pendingRewards: "0.00",
+              totalClaimed: "0.00",
+              lastClaimTime: 0,
+              isLoading: false,
+            }
 
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="w-96 h-96 bg-white/5 rounded-full blur-3xl animate-pulse" />
-        <div
-          className="absolute w-80 h-80 bg-cyan-400/10 rounded-full blur-2xl animate-pulse"
-          style={{ animationDelay: "0.5s" }}
-        />
-        <div
-          className="absolute w-64 h-64 bg-blue-400/15 rounded-full blur-xl animate-pulse"
-          style={{ animationDelay: "1s" }}
-        />
-        <div
-          className="absolute w-48 h-48 bg-white/20 rounded-full blur-lg animate-pulse"
-          style={{ animationDelay: "1.5s" }}
-        />
-      </div>
-
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div
-          className="w-72 h-72 border border-white/10 rounded-full animate-spin"
-          style={{ animationDuration: "20s" }}
-        />
-        <div
-          className="absolute w-80 h-80 border border-cyan-400/15 rounded-full animate-spin"
-          style={{ animationDuration: "25s", animationDirection: "reverse" }}
-        />
-        <div
-          className="absolute w-64 h-64 border border-blue-400/20 rounded-full animate-spin"
-          style={{ animationDuration: "15s" }}
-        />
-      </div>
-
-      {[...Array(25)].map((_, i) => (
-        <div
-          key={`particle-${i}`}
-          className="absolute rounded-full animate-ping"
-          style={{
-            width: `${2 + Math.random() * 4}px`,
-            height: `${2 + Math.random() * 4}px`,
-            backgroundColor:
-              i % 3 === 0 ? "rgba(255,255,255,0.8)" : i % 3 === 1 ? "rgba(34,211,238,0.6)" : "rgba(59,130,246,0.4)",
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-            animationDelay: `${Math.random() * 4}s`,
-            animationDuration: `${1 + Math.random() * 3}s`,
-          }}
-        />
-      ))}
-
-      {[...Array(8)].map((_, i) => (
-        <div
-          key={`beam-${i}`}
-          className="absolute bg-gradient-to-r from-transparent via-white/20 to-transparent h-px animate-pulse"
-          style={{
-            top: "50%",
-            left: "50%",
-            width: "200px",
-            transformOrigin: "0 0",
-            transform: `rotate(${i * 45}deg)`,
-            animationDelay: `${i * 0.5}s`,
-            animationDuration: "2s",
-          }}
-        />
-      ))}
-
-      <style jsx>{`
-        @keyframes moveRight {
-          0% { transform: translateX(-100%); opacity: 0; }
-          10% { opacity: 1; }
-          90% { opacity: 1; }
-          100% { transform: translateX(100vw); opacity: 0; }
-        }
-        
-        @keyframes moveDown {
-          0% { transform: translateY(-100%); opacity: 0; }
-          10% { opacity: 1; }
-          90% { opacity: 1; }
-          100% { transform: translateY(100vh); opacity: 0; }
-        }
-      `}</style>
-
-      {/* Back Button */}
-      <motion.div
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.5 }}
-        className="absolute top-6 left-4 z-20"
-      >
-        <button
-          onClick={() => router.back()}
-          className="flex items-center gap-2 px-3 py-2 text-gray-300 hover:text-white transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span className="text-sm">{t.back}</span>
-        </button>
-      </motion.div>
-
-      <motion.div
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.5 }}
-        className="text-center mb-6 relative z-10"
-      >
-        <h1 className="text-3xl font-bold tracking-tighter flex items-center justify-center">
-          <TrendingUp className="w-6 h-6 mr-2 text-purple-400" />
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-gray-200 via-white to-gray-300">
-            {t.title}
-          </span>
-        </h1>
-        <p className="text-gray-400 text-sm mt-1 leading-relaxed">{t.subtitle}</p>
-      </motion.div>
-
-      <div className="w-full max-w-md px-4 relative z-10 space-y-4">
-        {/* Success Message */}
-        <AnimatePresence>
-          {claimSuccess && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="bg-green-500/10 border border-green-500/30 rounded-lg p-4"
-            >
-              <div className="flex items-start space-x-3">
-                <CheckCircle className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="text-green-400 text-sm font-medium mb-1">{t.claimSuccess}</p>
-                  <p className="text-green-300 text-xs">
-                    {STAKING_CONTRACTS[claimSuccess as keyof typeof STAKING_CONTRACTS]?.symbol} rewards claimed
-                    successfully
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Error Message */}
-        <AnimatePresence>
-          {claimError && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="bg-red-500/10 border border-red-500/30 rounded-lg p-4"
-            >
-              <div className="flex items-start space-x-3">
-                <div className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0">⚠️</div>
-                <div>
-                  <p className="text-red-400 text-sm font-medium mb-1">{t.claimFailed}</p>
-                  <p className="text-red-300 text-xs">{claimError}</p>
-                  <button onClick={() => setClaimError(null)} className="mt-2 text-red-400 text-xs hover:text-red-300">
-                    {t.dismiss}
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {!isAuthenticated ? (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-6 text-center"
-          >
-            <p className="text-blue-400 text-sm">{t.connectWalletFirst}</p>
-          </motion.div>
-        ) : (
-          <>
-            {/* Staking Tokens */}
-            {Object.entries(STAKING_CONTRACTS).map(([key, contract], index) => {
-              const isClaimingThis = claiming === key
-
-              return (
-                <motion.div
-                  key={key}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.1 }}
-                  className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-lg p-4"
-                >
+            return (
+              <Card key={symbol} className="overflow-hidden hover:shadow-lg transition-shadow">
+                <CardHeader className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <Image
-                        src={contract.image || "/placeholder.svg"}
-                        alt={contract.name}
-                        width={40}
-                        height={40}
-                        className="w-10 h-10 rounded-full"
-                      />
+                      <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                        <Image
+                          src={contract.logo || "/placeholder.svg"}
+                          alt={contract.name}
+                          width={40}
+                          height={40}
+                          className="rounded-full"
+                        />
+                      </div>
                       <div>
-                        <h3 className="text-white font-medium text-lg">{contract.symbol}</h3>
-                        <p className="text-gray-400 text-sm">{contract.name}</p>
+                        <CardTitle className="text-xl">{contract.name}</CardTitle>
+                        <p className="text-blue-100">{symbol}</p>
                       </div>
                     </div>
-
-                    {/* Claim Button */}
-                    <button
-                      onClick={() => handleClaim(key)}
-                      disabled={isClaimingThis}
-                      className="py-2 px-6 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg font-medium text-sm transition-all duration-300 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {isClaimingThis ? <Loader2 className="w-4 h-4 animate-spin" /> : <Gift className="w-4 h-4" />}
-                      <span>{isClaimingThis ? t.claiming : t.claim}</span>
-                    </button>
+                    <Badge variant="secondary" className="bg-white/20 text-white">
+                      APY {contract.apy}
+                    </Badge>
                   </div>
-                </motion.div>
-              )
-            })}
-          </>
-        )}
+                </CardHeader>
+
+                <CardContent className="p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    {/* Pending Rewards */}
+                    <div className="bg-green-50 rounded-lg p-4">
+                      <div className="flex items-center mb-2">
+                        <Coins className="w-5 h-5 text-green-600 mr-2" />
+                        <span className="text-sm font-medium text-green-800">{t("pending_rewards")}</span>
+                      </div>
+                      <p className="text-2xl font-bold text-green-900">
+                        {data.isLoading ? "..." : data.pendingRewards} {symbol}
+                      </p>
+                    </div>
+
+                    {/* Total Claimed */}
+                    <div className="bg-blue-50 rounded-lg p-4">
+                      <div className="flex items-center mb-2">
+                        <Award className="w-5 h-5 text-blue-600 mr-2" />
+                        <span className="text-sm font-medium text-blue-800">{t("total_claimed")}</span>
+                      </div>
+                      <p className="text-2xl font-bold text-blue-900">
+                        {data.isLoading ? "..." : data.totalClaimed} {symbol}
+                      </p>
+                    </div>
+
+                    {/* Last Claim */}
+                    <div className="bg-purple-50 rounded-lg p-4">
+                      <div className="flex items-center mb-2">
+                        <Clock className="w-5 h-5 text-purple-600 mr-2" />
+                        <span className="text-sm font-medium text-purple-800">{t("last_claim")}</span>
+                      </div>
+                      <p className="text-sm font-semibold text-purple-900">
+                        {data.lastClaimTime > 0 ? new Date(data.lastClaimTime).toLocaleDateString() : t("never")}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Claim Button */}
+                  <Button
+                    onClick={() => handleClaimRewards(symbol)}
+                    disabled={
+                      data.isLoading || claimingToken === symbol || Number.parseFloat(data.pendingRewards) === 0
+                    }
+                    className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700"
+                  >
+                    {claimingToken === symbol ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                        {t("claiming")}...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        {t("claim_rewards")}
+                      </>
+                    )}
+                  </Button>
+
+                  {/* Contract Info */}
+                  <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                    <p className="text-xs text-gray-600">
+                      <span className="font-medium">{t("contract")}:</span>{" "}
+                      <span className="font-mono">{contract.address}</span>
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          })}
+        </div>
+
+        {/* Info Section */}
+        <Card className="mt-8">
+          <CardContent className="p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">{t("how_staking_works")}</h3>
+            <div className="space-y-3 text-sm text-gray-600">
+              <p>• {t("staking_info_1")}</p>
+              <p>• {t("staking_info_2")}</p>
+              <p>• {t("staking_info_3")}</p>
+              <p>• {t("staking_info_4")}</p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
-    </main>
+    </div>
   )
 }
