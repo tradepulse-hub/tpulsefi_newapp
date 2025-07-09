@@ -346,11 +346,25 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden flex items-center justify-center">
-      {/* Top Navigation - Only Language Selector on Right */}
+      {/* Top Navigation - Wallet Left, Language Right */}
       <div className="absolute top-0 left-0 right-0 z-50 p-6">
         <div className="flex items-center justify-between">
-          {/* Left Side - Connect Wallet Button (only when not connected) */}
+          {/* Left Side - Wallet Controls */}
           <div className="flex items-center space-x-3">
+            {/* Wallet Button (when wallet is connected but hidden) */}
+            {isAuthenticated && !showMiniWallet && (
+              <button onClick={handleShowWallet} className="relative group">
+                <div className="px-3 py-2 bg-black/20 backdrop-blur-md border border-green-400/30 rounded-full flex items-center space-x-2 hover:bg-green-500/10 transition-all duration-300">
+                  <div className="absolute inset-0 bg-gradient-to-r from-green-400/10 to-emerald-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <Eye className="w-4 h-4 text-green-300 relative z-10" />
+                  <span className="text-green-300 text-sm font-medium relative z-10">
+                    {t.common?.wallet || "Wallet"}
+                  </span>
+                </div>
+              </button>
+            )}
+
+            {/* Connect Wallet Button (only when not connected) */}
             {!isAuthenticated && (
               <button onClick={handleWalletConnect} disabled={isLoading} className="relative group">
                 <div className="px-6 py-3 bg-black/20 backdrop-blur-md border border-cyan-400/30 rounded-full flex items-center space-x-2 hover:bg-cyan-500/10 transition-all duration-300 disabled:opacity-50">
@@ -491,7 +505,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
         </AnimatePresence>
       </div>
 
-      {/* Bottom Navigation Bar with Wallet Button */}
+      {/* Bottom Navigation Bar with Wallet Icon + Menu Button */}
       <div className="fixed bottom-6 left-6 right-6 z-50">
         {/* Futuristic Bottom Bar */}
         <div className="relative">
@@ -500,7 +514,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
           {/* Main Bar */}
           <div className="relative bg-black/40 backdrop-blur-xl border border-white/10 rounded-xl">
             <div className="flex items-center justify-center py-2 px-4 space-x-4">
-              {/* Wallet Button (when wallet is connected but hidden) */}
+              {/* Wallet Icon (when wallet is connected but hidden) */}
               {isAuthenticated && !showMiniWallet && (
                 <button onClick={handleShowWallet} className="relative group">
                   <div className="w-8 h-8 bg-gradient-to-r from-green-400/20 to-emerald-400/20 backdrop-blur-md border border-green-400/30 rounded-full flex items-center justify-center hover:from-green-400/30 hover:to-emerald-400/30 transition-all duration-300 shadow-xl">
