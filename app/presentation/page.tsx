@@ -78,6 +78,7 @@ const translations = {
     },
     navigation: {
       home: "Home",
+      wallet: "Wallet",
       news: "News",
       airdrop: "Airdrop",
       fistaking: "Fi Staking",
@@ -101,6 +102,7 @@ const translations = {
     },
     navigation: {
       home: "Início",
+      wallet: "Carteira",
       news: "Notícias",
       airdrop: "Airdrop",
       fistaking: "Fi Staking",
@@ -124,6 +126,7 @@ const translations = {
     },
     navigation: {
       home: "Inicio",
+      wallet: "Billetera",
       news: "Noticias",
       airdrop: "Airdrop",
       fistaking: "Fi Staking",
@@ -147,6 +150,7 @@ const translations = {
     },
     navigation: {
       home: "Beranda",
+      wallet: "Dompet",
       news: "Berita",
       airdrop: "Airdrop",
       fistaking: "Fi Staking",
@@ -290,6 +294,12 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
       labelKey: "home",
       icon: Home,
       href: "/",
+    },
+    {
+      id: "wallet",
+      labelKey: "wallet",
+      icon: Wallet,
+      href: "/wallet",
     },
     {
       id: "news",
