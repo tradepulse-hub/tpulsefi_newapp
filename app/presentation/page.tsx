@@ -424,10 +424,10 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
         </div>
       </div>
 
-      {/* Mini Wallet - Positioned in top LEFT when connected */}
+      {/* Mini Wallet - Positioned HIGHER in top LEFT when connected */}
       <AnimatePresence>
         {showMiniWallet && user && (
-          <div className="absolute top-24 left-6 z-40">
+          <div className="absolute top-16 left-6 z-40">
             <MiniWallet
               walletAddress={user.walletAddress}
               onMinimize={handleMinimizeWallet}
