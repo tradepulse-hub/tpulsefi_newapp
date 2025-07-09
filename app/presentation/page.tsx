@@ -288,7 +288,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
       id: "wallet",
       labelKey: "wallet",
       icon: Wallet,
-      action: handleWalletMenuClick,
+      href: "/",
     },
     {
       id: "news",
@@ -566,7 +566,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
               <div className="p-4 pb-4">
                 {/* Menu Glow Effect */}
                 <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/5 to-blue-400/5 rounded-2xl" />
-                {/* Menu Items Grid - Now 7 items in flexible layout */}
+                {/* Menu Items Grid */}
                 <div className="relative z-10 grid grid-cols-2 gap-3 mb-4">
                   {navigationItems.map((item, index) => (
                     <motion.button
@@ -582,11 +582,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                           setIsMenuOpen(false)
                         }
                       }}
-                      className={`group p-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg hover:bg-white/10 transition-all duration-300 ${
-                        index === navigationItems.length - 1 && navigationItems.length % 2 === 1
-                          ? "col-span-2 mx-auto max-w-[calc(50%-0.375rem)]"
-                          : ""
-                      }`}
+                      className="group p-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg hover:bg-white/10 transition-all duration-300"
                     >
                       <div className="flex flex-col items-center space-y-1">
                         <div className="w-6 h-6 bg-gradient-to-r from-cyan-400/20 to-blue-400/20 rounded-full flex items-center justify-center group-hover:from-cyan-400/30 group-hover:to-blue-400/30 transition-all duration-300">
