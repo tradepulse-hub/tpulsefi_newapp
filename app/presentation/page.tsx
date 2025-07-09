@@ -345,42 +345,42 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
         )}
       </AnimatePresence>
 
-      {/* Bottom Navigation Bar */}
+      {/* Bottom Navigation Bar - REDUCED SIZE */}
       <div className="fixed bottom-6 left-6 right-6 z-50">
         {/* Futuristic Bottom Bar */}
         <div className="relative">
           {/* Glow Effect */}
-          <div className="absolute inset-0 bg-gradient-to-t from-cyan-400/20 via-blue-400/10 to-transparent blur-xl" />
+          <div className="absolute inset-0 bg-gradient-to-t from-cyan-400/20 via-blue-400/10 to-transparent blur-lg" />
 
-          {/* Main Bar */}
-          <div className="relative bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl">
-            <div className="flex items-center justify-center py-4 px-6">
-              {/* Central Menu Button */}
+          {/* Main Bar - REDUCED PADDING */}
+          <div className="relative bg-black/40 backdrop-blur-xl border border-white/10 rounded-xl">
+            <div className="flex items-center justify-center py-2 px-4">
+              {/* Central Menu Button - REDUCED SIZE */}
               <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="relative group">
-                <div className="w-16 h-16 bg-gradient-to-r from-cyan-400/20 to-blue-400/20 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center hover:from-cyan-400/30 hover:to-blue-400/30 transition-all duration-300 shadow-2xl">
-                  {/* Pulsing Ring */}
+                <div className="w-8 h-8 bg-gradient-to-r from-cyan-400/20 to-blue-400/20 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center hover:from-cyan-400/30 hover:to-blue-400/30 transition-all duration-300 shadow-xl">
+                  {/* Pulsing Ring - REDUCED SIZE */}
                   <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/30 to-blue-400/30 rounded-full animate-ping opacity-75" />
 
                   {/* Inner Glow */}
-                  <div className="absolute inset-2 bg-gradient-to-r from-white/10 to-white/5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute inset-1 bg-gradient-to-r from-white/10 to-white/5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                  {/* Icon */}
+                  {/* Icon - REDUCED SIZE */}
                   {isMenuOpen ? (
-                    <X className="w-8 h-8 text-white relative z-10 transition-transform duration-300 rotate-90" />
+                    <X className="w-4 h-4 text-white relative z-10 transition-transform duration-300 rotate-90" />
                   ) : (
-                    <Menu className="w-8 h-8 text-white relative z-10 transition-transform duration-300" />
+                    <Menu className="w-4 h-4 text-white relative z-10 transition-transform duration-300" />
                   )}
                 </div>
 
-                {/* Button Glow */}
-                <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/20 to-blue-400/20 rounded-full blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                {/* Button Glow - REDUCED SIZE */}
+                <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/20 to-blue-400/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Sliding Menu from Bottom */}
+      {/* Sliding Menu from Bottom - REDUCED SIZES */}
       <AnimatePresence>
         {isMenuOpen && (
           <motion.div
@@ -390,19 +390,19 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
             className="fixed bottom-6 left-6 right-6 z-40"
           >
-            <div className="bg-black/30 backdrop-blur-xl border border-white/10 rounded-2xl mb-20">
+            <div className="bg-black/30 backdrop-blur-xl border border-white/10 rounded-2xl mb-12">
               {/* Menu Handle */}
-              <div className="flex justify-center pt-4 pb-2">
-                <div className="w-12 h-1 bg-white/30 rounded-full" />
+              <div className="flex justify-center pt-3 pb-1">
+                <div className="w-8 h-0.5 bg-white/30 rounded-full" />
               </div>
 
-              {/* Menu Content */}
-              <div className="p-6 pb-6">
+              {/* Menu Content - REDUCED PADDING */}
+              <div className="p-4 pb-4">
                 {/* Menu Glow Effect */}
                 <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/5 to-blue-400/5 rounded-2xl" />
 
-                {/* Menu Items Grid */}
-                <div className="relative z-10 grid grid-cols-2 gap-4 mb-6">
+                {/* Menu Items Grid - REDUCED SIZES */}
+                <div className="relative z-10 grid grid-cols-2 gap-3 mb-4">
                   {navigationItems.map((item, index) => (
                     <motion.button
                       key={item.id}
@@ -413,13 +413,13 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                         router.push(item.href)
                         setIsMenuOpen(false)
                       }}
-                      className="group p-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl hover:bg-white/10 transition-all duration-300"
+                      className="group p-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg hover:bg-white/10 transition-all duration-300"
                     >
-                      <div className="flex flex-col items-center space-y-2">
-                        <div className="w-12 h-12 bg-gradient-to-r from-cyan-400/20 to-blue-400/20 rounded-full flex items-center justify-center group-hover:from-cyan-400/30 group-hover:to-blue-400/30 transition-all duration-300">
-                          <item.icon className="w-6 h-6 text-cyan-400 group-hover:text-white transition-colors" />
+                      <div className="flex flex-col items-center space-y-1">
+                        <div className="w-6 h-6 bg-gradient-to-r from-cyan-400/20 to-blue-400/20 rounded-full flex items-center justify-center group-hover:from-cyan-400/30 group-hover:to-blue-400/30 transition-all duration-300">
+                          <item.icon className="w-3 h-3 text-cyan-400 group-hover:text-white transition-colors" />
                         </div>
-                        <span className="text-white/80 group-hover:text-white font-medium text-sm tracking-wide">
+                        <span className="text-white/80 group-hover:text-white font-medium text-xs tracking-wide">
                           {t.navigation?.[item.labelKey] || item.labelKey}
                         </span>
                       </div>
@@ -427,36 +427,36 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                   ))}
                 </div>
 
-                {/* Settings Section */}
+                {/* Settings Section - REDUCED SIZES */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.6 }}
-                  className="border-t border-white/10 pt-4"
+                  className="border-t border-white/10 pt-3"
                 >
                   <button
                     onClick={() => setShowLanguageMenu(!showLanguageMenu)}
-                    className="w-full group p-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl hover:bg-white/10 transition-all duration-300"
+                    className="w-full group p-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg hover:bg-white/10 transition-all duration-300"
                   >
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full flex items-center justify-center group-hover:from-purple-400/30 group-hover:to-pink-400/30 transition-all duration-300">
-                          <Settings className="w-5 h-5 text-purple-400 group-hover:text-white transition-colors" />
+                      <div className="flex items-center space-x-2">
+                        <div className="w-5 h-5 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full flex items-center justify-center group-hover:from-purple-400/30 group-hover:to-pink-400/30 transition-all duration-300">
+                          <Settings className="w-2.5 h-2.5 text-purple-400 group-hover:text-white transition-colors" />
                         </div>
-                        <span className="text-white/80 group-hover:text-white font-medium">
+                        <span className="text-white/80 group-hover:text-white font-medium text-xs">
                           {t.common?.language || "Language"}
                         </span>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <span className="text-sm text-gray-400">{currentLanguage?.flag}</span>
-                        <span className="text-sm text-gray-400">{currentLanguage?.code.toUpperCase()}</span>
+                      <div className="flex items-center space-x-1">
+                        <span className="text-xs text-gray-400">{currentLanguage?.flag}</span>
+                        <span className="text-xs text-gray-400">{currentLanguage?.code.toUpperCase()}</span>
                       </div>
                     </div>
                   </button>
                 </motion.div>
 
-                {/* Menu Bottom Glow */}
-                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-20 h-1 bg-gradient-to-r from-cyan-400/50 to-blue-400/50 rounded-full" />
+                {/* Menu Bottom Glow - REDUCED SIZE */}
+                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-12 h-0.5 bg-gradient-to-r from-cyan-400/50 to-blue-400/50 rounded-full" />
               </div>
             </div>
           </motion.div>
