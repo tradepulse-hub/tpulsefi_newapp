@@ -346,25 +346,11 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden flex items-center justify-center">
-      {/* Top Navigation - Wallet Left, Language Right */}
+      {/* Top Navigation - Only Language Selector on Right */}
       <div className="absolute top-0 left-0 right-0 z-50 p-6">
         <div className="flex items-center justify-between">
-          {/* Left Side - Wallet Controls */}
+          {/* Left Side - Connect Wallet Button (only when not connected) */}
           <div className="flex items-center space-x-3">
-            {/* Wallet Button (when wallet is connected but hidden) */}
-            {isAuthenticated && !showMiniWallet && (
-              <button onClick={handleShowWallet} className="relative group">
-                <div className="px-3 py-2 bg-black/20 backdrop-blur-md border border-green-400/30 rounded-full flex items-center space-x-2 hover:bg-green-500/10 transition-all duration-300">
-                  <div className="absolute inset-0 bg-gradient-to-r from-green-400/10 to-emerald-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <Eye className="w-4 h-4 text-green-300 relative z-10" />
-                  <span className="text-green-300 text-sm font-medium relative z-10">
-                    {t.common?.wallet || "Wallet"}
-                  </span>
-                </div>
-              </button>
-            )}
-
-            {/* Connect Wallet Button (only when not connected) */}
             {!isAuthenticated && (
               <button onClick={handleWalletConnect} disabled={isLoading} className="relative group">
                 <div className="px-6 py-3 bg-black/20 backdrop-blur-md border border-cyan-400/30 rounded-full flex items-center space-x-2 hover:bg-cyan-500/10 transition-all duration-300 disabled:opacity-50">
@@ -424,7 +410,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
         </div>
       </div>
 
-      {/* Mini Wallet - Positioned VERY HIGH in top LEFT when connected */}
+      {/* Mini Wallet - Positioned with safe spacing from top navigation */}
       <AnimatePresence>
         {showMiniWallet && user && (
           <div className="absolute top-6 left-6 z-40">
@@ -505,30 +491,42 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
         </AnimatePresence>
       </div>
 
-      {/* Bottom Navigation Bar - REDUCED SIZE */}
+      {/* Bottom Navigation Bar with Wallet Button */}
       <div className="fixed bottom-6 left-6 right-6 z-50">
         {/* Futuristic Bottom Bar */}
         <div className="relative">
           {/* Glow Effect */}
           <div className="absolute inset-0 bg-gradient-to-t from-cyan-400/20 via-blue-400/10 to-transparent blur-lg" />
-          {/* Main Bar - REDUCED PADDING */}
+          {/* Main Bar */}
           <div className="relative bg-black/40 backdrop-blur-xl border border-white/10 rounded-xl">
-            <div className="flex items-center justify-center py-2 px-4">
-              {/* Central Menu Button - REDUCED SIZE */}
+            <div className="flex items-center justify-center py-2 px-4 space-x-4">
+              {/* Wallet Button (when wallet is connected but hidden) */}
+              {isAuthenticated && !showMiniWallet && (
+                <button onClick={handleShowWallet} className="relative group">
+                  <div className="w-8 h-8 bg-gradient-to-r from-green-400/20 to-emerald-400/20 backdrop-blur-md border border-green-400/30 rounded-full flex items-center justify-center hover:from-green-400/30 hover:to-emerald-400/30 transition-all duration-300 shadow-xl">
+                    <div className="absolute inset-0 bg-gradient-to-r from-green-400/30 to-emerald-400/30 rounded-full animate-ping opacity-75" />
+                    <div className="absolute inset-1 bg-gradient-to-r from-white/10 to-white/5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <Eye className="w-4 h-4 text-green-300 relative z-10" />
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-green-400/20 to-emerald-400/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </button>
+              )}
+
+              {/* Central Menu Button */}
               <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="relative group">
                 <div className="w-8 h-8 bg-gradient-to-r from-cyan-400/20 to-blue-400/20 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center hover:from-cyan-400/30 hover:to-blue-400/30 transition-all duration-300 shadow-xl">
-                  {/* Pulsing Ring - REDUCED SIZE */}
+                  {/* Pulsing Ring */}
                   <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/30 to-blue-400/30 rounded-full animate-ping opacity-75" />
                   {/* Inner Glow */}
                   <div className="absolute inset-1 bg-gradient-to-r from-white/10 to-white/5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  {/* Icon - REDUCED SIZE */}
+                  {/* Icon */}
                   {isMenuOpen ? (
                     <X className="w-4 h-4 text-white relative z-10 transition-transform duration-300 rotate-90" />
                   ) : (
                     <Menu className="w-4 h-4 text-white relative z-10 transition-transform duration-300" />
                   )}
                 </div>
-                {/* Button Glow - REDUCED SIZE */}
+                {/* Button Glow */}
                 <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/20 to-blue-400/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </button>
             </div>
@@ -536,7 +534,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
         </div>
       </div>
 
-      {/* Sliding Menu from Bottom - REDUCED SIZES */}
+      {/* Sliding Menu from Bottom */}
       <AnimatePresence>
         {isMenuOpen && (
           <motion.div
@@ -551,11 +549,11 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
               <div className="flex justify-center pt-3 pb-1">
                 <div className="w-8 h-0.5 bg-white/30 rounded-full" />
               </div>
-              {/* Menu Content - REDUCED PADDING */}
+              {/* Menu Content */}
               <div className="p-4 pb-4">
                 {/* Menu Glow Effect */}
                 <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/5 to-blue-400/5 rounded-2xl" />
-                {/* Menu Items Grid - REDUCED SIZES */}
+                {/* Menu Items Grid */}
                 <div className="relative z-10 grid grid-cols-2 gap-3 mb-4">
                   {navigationItems.map((item, index) => (
                     <motion.button
@@ -580,7 +578,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                     </motion.button>
                   ))}
                 </div>
-                {/* Menu Bottom Glow - REDUCED SIZE */}
+                {/* Menu Bottom Glow */}
                 <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-12 h-0.5 bg-gradient-to-r from-cyan-400/50 to-blue-400/50 rounded-full" />
               </div>
             </div>
