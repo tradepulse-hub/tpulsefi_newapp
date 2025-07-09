@@ -259,149 +259,76 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden flex items-center justify-center">
-      {/* Futuristic Navigation Menu */}
+      {/* Top Navigation - Only Wallet Controls */}
       <div className="absolute top-0 left-0 right-0 z-50 p-6">
-        <div className="flex items-center justify-between">
-          {/* Menu Toggle Button */}
-          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="relative group">
-            <div className="w-12 h-12 bg-black/20 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center hover:bg-white/10 transition-all duration-300">
-              <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/20 to-blue-400/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              {isMenuOpen ? (
-                <X className="w-6 h-6 text-white relative z-10" />
-              ) : (
-                <Menu className="w-6 h-6 text-white relative z-10" />
-              )}
-            </div>
-          </button>
-
-          {/* Wallet Controls */}
-          <div className="flex items-center space-x-3">
-            {/* Language Selector */}
-            <div className="relative">
-              <button onClick={() => setShowLanguageMenu(!showLanguageMenu)} className="relative group">
-                <div className="px-3 py-2 bg-black/20 backdrop-blur-md border border-white/10 rounded-full flex items-center space-x-2 hover:bg-white/10 transition-all duration-300">
-                  <div className="absolute inset-0 bg-gradient-to-r from-purple-400/10 to-pink-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <Globe className="w-4 h-4 text-purple-300 relative z-10" />
-                  <span className="text-purple-300 text-sm font-medium relative z-10">
-                    {currentLanguage?.flag} {currentLanguage?.code.toUpperCase()}
-                  </span>
-                </div>
-              </button>
-
-              {/* Language Dropdown */}
-              <AnimatePresence>
-                {showLanguageMenu && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                    className="absolute top-12 right-0 bg-black/90 backdrop-blur-xl border border-white/10 rounded-xl p-2 min-w-[200px] shadow-2xl"
-                  >
-                    {LANGUAGES.map((lang) => (
-                      <button
-                        key={lang.code}
-                        onClick={() => handleLanguageChange(lang.code as keyof typeof translations)}
-                        className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-all duration-200 ${
-                          currentLang === lang.code
-                            ? `bg-gradient-to-r ${lang.gradient} bg-opacity-20 text-white`
-                            : "hover:bg-white/5 text-gray-300 hover:text-white"
-                        }`}
-                      >
-                        <span className="text-lg">{lang.flag}</span>
-                        <div className="text-left">
-                          <div className="text-sm font-medium">{lang.nativeName}</div>
-                          <div className="text-xs opacity-70">{lang.name}</div>
-                        </div>
-                        {currentLang === lang.code && <div className="ml-auto text-green-400">✓</div>}
-                      </button>
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* Wallet Button (when wallet is connected but hidden) */}
-            {isAuthenticated && !showMiniWallet && (
-              <button onClick={handleShowWallet} className="relative group">
-                <div className="px-3 py-2 bg-black/20 backdrop-blur-md border border-green-400/30 rounded-full flex items-center space-x-2 hover:bg-green-500/10 transition-all duration-300">
-                  <div className="absolute inset-0 bg-gradient-to-r from-green-400/10 to-emerald-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <Eye className="w-4 h-4 text-green-300 relative z-10" />
-                  <span className="text-green-300 text-sm font-medium relative z-10">
-                    {t.common?.wallet || "Wallet"}
-                  </span>
-                </div>
-              </button>
-            )}
-
-            {/* Connect Wallet Button (only when not connected) */}
-            {!isAuthenticated && (
-              <button onClick={handleWalletConnect} disabled={isLoading} className="relative group">
-                <div className="px-6 py-3 bg-black/20 backdrop-blur-md border border-cyan-400/30 rounded-full flex items-center space-x-2 hover:bg-cyan-500/10 transition-all duration-300 disabled:opacity-50">
-                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/10 to-blue-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <Wallet className="w-5 h-5 text-cyan-300 relative z-10" />
-                  <span className="text-white font-medium relative z-10">
-                    {isLoading ? t.common?.loading || "Loading..." : t.presentation?.connectWallet || "Connect Wallet"}
-                  </span>
-                </div>
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Sliding Menu */}
-        <div
-          className={`absolute top-20 left-6 transition-all duration-500 ease-out ${
-            isMenuOpen
-              ? "opacity-100 transform translate-y-0"
-              : "opacity-0 transform -translate-y-4 pointer-events-none"
-          }`}
-        >
-          <div className="bg-black/30 backdrop-blur-xl border border-white/10 rounded-2xl p-6 min-w-[280px]">
-            {/* Menu Glow Effect */}
-            <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/5 to-blue-400/5 rounded-2xl" />
-
-            {/* Menu Items */}
-            <nav className="relative z-10 space-y-4">
-              {navigationItems.map((item, index) => (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    router.push(item.href)
-                    setIsMenuOpen(false)
-                  }}
-                  className="block group w-full text-left"
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                >
-                  <div className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/5 transition-all duration-300 group-hover:transform group-hover:translate-x-2">
-                    <item.icon className="w-5 h-5 text-cyan-400 group-hover:text-white transition-colors" />
-                    <div className="w-2 h-2 bg-gradient-to-r from-cyan-400 to-blue-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    <span className="text-white/80 group-hover:text-white font-medium tracking-wide">
-                      {t.navigation?.[item.labelKey] || item.labelKey}
-                    </span>
-                  </div>
-                </button>
-              ))}
-
-              {/* Settings/Language in menu */}
-              <div className="border-t border-white/10 pt-4 mt-4">
-                <button onClick={() => setShowLanguageMenu(!showLanguageMenu)} className="block group w-full text-left">
-                  <div className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/5 transition-all duration-300 group-hover:transform group-hover:translate-x-2">
-                    <Settings className="w-5 h-5 text-purple-400 group-hover:text-white transition-colors" />
-                    <div className="w-2 h-2 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    <span className="text-white/80 group-hover:text-white font-medium tracking-wide">
-                      {t.common?.language || "Language"}
-                    </span>
-                    <span className="ml-auto text-sm text-gray-400">
-                      {currentLanguage?.flag} {currentLanguage?.code.toUpperCase()}
-                    </span>
-                  </div>
-                </button>
+        <div className="flex items-center justify-end">
+          {/* Language Selector */}
+          <div className="relative mr-3">
+            <button onClick={() => setShowLanguageMenu(!showLanguageMenu)} className="relative group">
+              <div className="px-3 py-2 bg-black/20 backdrop-blur-md border border-white/10 rounded-full flex items-center space-x-2 hover:bg-white/10 transition-all duration-300">
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-400/10 to-pink-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <Globe className="w-4 h-4 text-purple-300 relative z-10" />
+                <span className="text-purple-300 text-sm font-medium relative z-10">
+                  {currentLanguage?.flag} {currentLanguage?.code.toUpperCase()}
+                </span>
               </div>
-            </nav>
+            </button>
 
-            {/* Menu Bottom Glow */}
-            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-20 h-1 bg-gradient-to-r from-cyan-400/50 to-blue-400/50 rounded-full" />
+            {/* Language Dropdown */}
+            <AnimatePresence>
+              {showLanguageMenu && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                  className="absolute top-12 right-0 bg-black/90 backdrop-blur-xl border border-white/10 rounded-xl p-2 min-w-[200px] shadow-2xl"
+                >
+                  {LANGUAGES.map((lang) => (
+                    <button
+                      key={lang.code}
+                      onClick={() => handleLanguageChange(lang.code as keyof typeof translations)}
+                      className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-all duration-200 ${
+                        currentLang === lang.code
+                          ? `bg-gradient-to-r ${lang.gradient} bg-opacity-20 text-white`
+                          : "hover:bg-white/5 text-gray-300 hover:text-white"
+                      }`}
+                    >
+                      <span className="text-lg">{lang.flag}</span>
+                      <div className="text-left">
+                        <div className="text-sm font-medium">{lang.nativeName}</div>
+                        <div className="text-xs opacity-70">{lang.name}</div>
+                      </div>
+                      {currentLang === lang.code && <div className="ml-auto text-green-400">✓</div>}
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
+
+          {/* Wallet Button (when wallet is connected but hidden) */}
+          {isAuthenticated && !showMiniWallet && (
+            <button onClick={handleShowWallet} className="relative group mr-3">
+              <div className="px-3 py-2 bg-black/20 backdrop-blur-md border border-green-400/30 rounded-full flex items-center space-x-2 hover:bg-green-500/10 transition-all duration-300">
+                <div className="absolute inset-0 bg-gradient-to-r from-green-400/10 to-emerald-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <Eye className="w-4 h-4 text-green-300 relative z-10" />
+                <span className="text-green-300 text-sm font-medium relative z-10">{t.common?.wallet || "Wallet"}</span>
+              </div>
+            </button>
+          )}
+
+          {/* Connect Wallet Button (only when not connected) */}
+          {!isAuthenticated && (
+            <button onClick={handleWalletConnect} disabled={isLoading} className="relative group">
+              <div className="px-6 py-3 bg-black/20 backdrop-blur-md border border-cyan-400/30 rounded-full flex items-center space-x-2 hover:bg-cyan-500/10 transition-all duration-300 disabled:opacity-50">
+                <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/10 to-blue-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <Wallet className="w-5 h-5 text-cyan-300 relative z-10" />
+                <span className="text-white font-medium relative z-10">
+                  {isLoading ? t.common?.loading || "Loading..." : t.presentation?.connectWallet || "Connect Wallet"}
+                </span>
+              </div>
+            </button>
+          )}
         </div>
       </div>
 
@@ -415,6 +342,124 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
               onDisconnect={handleWalletDisconnect}
             />
           </div>
+        )}
+      </AnimatePresence>
+
+      {/* Bottom Navigation Bar */}
+      <div className="fixed bottom-6 left-6 right-6 z-50">
+        {/* Futuristic Bottom Bar */}
+        <div className="relative">
+          {/* Glow Effect */}
+          <div className="absolute inset-0 bg-gradient-to-t from-cyan-400/20 via-blue-400/10 to-transparent blur-xl" />
+
+          {/* Main Bar */}
+          <div className="relative bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl">
+            <div className="flex items-center justify-center py-4 px-6">
+              {/* Central Menu Button */}
+              <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="relative group">
+                <div className="w-16 h-16 bg-gradient-to-r from-cyan-400/20 to-blue-400/20 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center hover:from-cyan-400/30 hover:to-blue-400/30 transition-all duration-300 shadow-2xl">
+                  {/* Pulsing Ring */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/30 to-blue-400/30 rounded-full animate-ping opacity-75" />
+
+                  {/* Inner Glow */}
+                  <div className="absolute inset-2 bg-gradient-to-r from-white/10 to-white/5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                  {/* Icon */}
+                  {isMenuOpen ? (
+                    <X className="w-8 h-8 text-white relative z-10 transition-transform duration-300 rotate-90" />
+                  ) : (
+                    <Menu className="w-8 h-8 text-white relative z-10 transition-transform duration-300" />
+                  )}
+                </div>
+
+                {/* Button Glow */}
+                <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/20 to-blue-400/20 rounded-full blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Sliding Menu from Bottom */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div
+            initial={{ y: "100%", opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: "100%", opacity: 0 }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="fixed bottom-6 left-6 right-6 z-40"
+          >
+            <div className="bg-black/30 backdrop-blur-xl border border-white/10 rounded-2xl mb-20">
+              {/* Menu Handle */}
+              <div className="flex justify-center pt-4 pb-2">
+                <div className="w-12 h-1 bg-white/30 rounded-full" />
+              </div>
+
+              {/* Menu Content */}
+              <div className="p-6 pb-6">
+                {/* Menu Glow Effect */}
+                <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/5 to-blue-400/5 rounded-2xl" />
+
+                {/* Menu Items Grid */}
+                <div className="relative z-10 grid grid-cols-2 gap-4 mb-6">
+                  {navigationItems.map((item, index) => (
+                    <motion.button
+                      key={item.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      onClick={() => {
+                        router.push(item.href)
+                        setIsMenuOpen(false)
+                      }}
+                      className="group p-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl hover:bg-white/10 transition-all duration-300"
+                    >
+                      <div className="flex flex-col items-center space-y-2">
+                        <div className="w-12 h-12 bg-gradient-to-r from-cyan-400/20 to-blue-400/20 rounded-full flex items-center justify-center group-hover:from-cyan-400/30 group-hover:to-blue-400/30 transition-all duration-300">
+                          <item.icon className="w-6 h-6 text-cyan-400 group-hover:text-white transition-colors" />
+                        </div>
+                        <span className="text-white/80 group-hover:text-white font-medium text-sm tracking-wide">
+                          {t.navigation?.[item.labelKey] || item.labelKey}
+                        </span>
+                      </div>
+                    </motion.button>
+                  ))}
+                </div>
+
+                {/* Settings Section */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.6 }}
+                  className="border-t border-white/10 pt-4"
+                >
+                  <button
+                    onClick={() => setShowLanguageMenu(!showLanguageMenu)}
+                    className="w-full group p-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl hover:bg-white/10 transition-all duration-300"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full flex items-center justify-center group-hover:from-purple-400/30 group-hover:to-pink-400/30 transition-all duration-300">
+                          <Settings className="w-5 h-5 text-purple-400 group-hover:text-white transition-colors" />
+                        </div>
+                        <span className="text-white/80 group-hover:text-white font-medium">
+                          {t.common?.language || "Language"}
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-sm text-gray-400">{currentLanguage?.flag}</span>
+                        <span className="text-sm text-gray-400">{currentLanguage?.code.toUpperCase()}</span>
+                      </div>
+                    </div>
+                  </button>
+                </motion.div>
+
+                {/* Menu Bottom Glow */}
+                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-20 h-1 bg-gradient-to-r from-cyan-400/50 to-blue-400/50 rounded-full" />
+              </div>
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
 
