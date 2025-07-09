@@ -173,7 +173,8 @@ interface NavItem {
   id: string
   labelKey: keyof typeof translations.en.navigation
   icon: React.ComponentType<any>
-  href: string
+  href?: string
+  action?: () => void
 }
 
 interface PresentationProps {
@@ -268,6 +269,18 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
     }
   }
 
+  // Handle wallet menu item click
+  const handleWalletMenuClick = () => {
+    if (isAuthenticated) {
+      setShowMiniWallet(true)
+      setIsMenuOpen(false)
+    } else {
+      // If not authenticated, try to connect
+      handleWalletConnect()
+      setIsMenuOpen(false)
+    }
+  }
+
   // Typewriter effect
   useEffect(() => {
     const typeSpeed = isDeleting ? 50 : 150
@@ -299,7 +312,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
       id: "wallet",
       labelKey: "wallet",
       icon: Wallet,
-      href: "/wallet",
+      action: handleWalletMenuClick,
     },
     {
       id: "news",
@@ -586,8 +599,12 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1 }}
                       onClick={() => {
-                        router.push(item.href)
-                        setIsMenuOpen(false)
+                        if (item.action) {
+                          item.action()
+                        } else if (item.href) {
+                          router.push(item.href)
+                          setIsMenuOpen(false)
+                        }
                       }}
                       className="group p-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg hover:bg-white/10 transition-all duration-300"
                     >
