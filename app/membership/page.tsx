@@ -27,6 +27,7 @@ const translations = {
       "If you subscribe, you are entitled to a part of the transaction fees that TPulseFi earns! And it's not little! What are you waiting for, it's a lifetime payment! It's the best membership in the world, we promise long-term investment recovery.",
     oneTimePayment: "One-time payment",
     emailInstruction: "After payment, send proof to support@tradepulsetoken.com",
+    monthlyPayments: "Payments to exclusive members occur every month on the 9th",
   },
   pt: {
     title: "Membros TPulseFi",
@@ -42,6 +43,7 @@ const translations = {
       "Se assinares tem direito a uma parte das taxas de transações que TPulseFi ganha! E não é pouco! De que estás à espera, é um pagamento para a vida toda! É o melhor membership do mundo, prometemos a recuperação do investido a longo prazo.",
     oneTimePayment: "Pagamento único",
     emailInstruction: "Após pagamento enviar comprovativo para support@tradepulsetoken.com",
+    monthlyPayments: "Os pagamentos aos membros exclusivos decorrem todos os meses ao dia 9",
   },
   es: {
     title: "Membresía TPulseFi",
@@ -57,6 +59,7 @@ const translations = {
       "¡Si te suscribes tienes derecho a una parte de las tarifas de transacción que gana TPulseFi! ¡Y no es poco! ¿Qué estás esperando? ¡Es un pago de por vida! Es la mejor membresía del mundo, prometemos recuperación de la inversión a largo plazo.",
     oneTimePayment: "Pago único",
     emailInstruction: "Después del pago, envía comprobante a support@tradepulsetoken.com",
+    monthlyPayments: "Los pagos a miembros exclusivos ocurren todos los meses el día 9",
   },
   id: {
     title: "Keanggotaan TPulseFi",
@@ -72,6 +75,7 @@ const translations = {
       "Jika Anda berlangganan, Anda berhak mendapat bagian dari biaya transaksi yang diperoleh TPulseFi! Dan itu tidak sedikit! Apa yang Anda tunggu, ini pembayaran seumur hidup! Ini adalah keanggotaan terbaik di dunia, kami berjanji pemulihan investasi jangka panjang.",
     oneTimePayment: "Pembayaran sekali",
     emailInstruction: "Setelah pembayaran, kirim bukti ke support@tradepulsetoken.com",
+    monthlyPayments: "Pembayaran kepada anggota eksklusif terjadi setiap bulan pada tanggal 9",
   },
 }
 
@@ -473,6 +477,11 @@ export default function MembershipPage() {
                 <Copy className="w-3 h-3" />
               </button>
             </div>
+          </div>
+
+          {/* Monthly Payments Info */}
+          <div className="mb-4 p-2 bg-green-500/10 border border-green-500/20 rounded-lg">
+            <p className="text-green-300 text-xs text-center leading-relaxed">💰 {t.monthlyPayments}</p>
           </div>
 
           {/* Get Membership Button */}
