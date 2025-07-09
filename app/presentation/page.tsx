@@ -3,7 +3,21 @@
 import type React from "react"
 import { useEffect, useState } from "react"
 import Image from "next/image"
-import { Menu, X, Wallet, Eye, Home, Newspaper, Users, Info, Gift, TrendingUp, Settings, Globe } from "lucide-react"
+import {
+  Menu,
+  X,
+  Wallet,
+  Eye,
+  Home,
+  Newspaper,
+  Users,
+  Info,
+  Gift,
+  TrendingUp,
+  Hand,
+  Globe,
+  ExternalLink,
+} from "lucide-react"
 import { useMiniKit } from "../../hooks/use-minikit"
 import MiniWallet from "../../components/mini-wallet"
 import { AnimatePresence, motion } from "framer-motion"
@@ -23,6 +37,38 @@ const LANGUAGES = [
   },
 ]
 
+// Partnerships data
+const PARTNERSHIPS = [
+  {
+    id: "holdstation",
+    name: "HoldStation",
+    image: "/images/holdstation-logo.jpg",
+    gradient: "from-blue-500 to-purple-600",
+    url: "https://world.org/mini-app?app_id=app_0d4b759921490adc1f2bd569fda9b53a&path=/ref/f5S3wA",
+  },
+  {
+    id: "axo",
+    name: "AXO",
+    image: "/images/axo.jpg",
+    gradient: "from-pink-500 to-rose-600",
+    url: "https://worldcoin.org/mini-app?app_id=app_8aeb55d57b7be834fb8d67e2f803d258&app_mode=mini-app",
+  },
+  {
+    id: "dropwallet",
+    name: "Drop Wallet",
+    image: "/images/HUB.png",
+    gradient: "from-yellow-500 to-orange-600",
+    url: "https://worldcoin.org/mini-app?app_id=app_459cd0d0d3125864ea42bd4c19d1986c&app_mode=mini-app",
+  },
+  {
+    id: "humantap",
+    name: "Human Tap",
+    image: "/images/human-tap.jpg",
+    gradient: "from-green-500 to-emerald-600",
+    url: "https://worldcoin.org/mini-app?app_id=app_25cf6ee1d9660721e651d43cf126953a&app_mode=mini-app",
+  },
+]
+
 // Translations
 const translations = {
   en: {
@@ -33,16 +79,19 @@ const translations = {
     navigation: {
       home: "Home",
       news: "News",
-      learn: "Learn",
       airdrop: "Airdrop",
       fistaking: "Fi Staking",
       membership: "Membership",
+      partnerships: "Partnerships",
       about: "About",
     },
     common: {
       wallet: "Wallet",
       loading: "Loading...",
       language: "Language",
+    },
+    partnerships: {
+      visitApp: "Visit App",
     },
   },
   pt: {
@@ -53,16 +102,19 @@ const translations = {
     navigation: {
       home: "Início",
       news: "Notícias",
-      learn: "Aprender",
       airdrop: "Airdrop",
       fistaking: "Fi Staking",
       membership: "Membros",
+      partnerships: "Parcerias",
       about: "Sobre",
     },
     common: {
       wallet: "Carteira",
       loading: "Carregando...",
       language: "Idioma",
+    },
+    partnerships: {
+      visitApp: "Visitar App",
     },
   },
   es: {
@@ -73,16 +125,19 @@ const translations = {
     navigation: {
       home: "Inicio",
       news: "Noticias",
-      learn: "Aprender",
       airdrop: "Airdrop",
       fistaking: "Fi Staking",
       membership: "Membresía",
+      partnerships: "Asociaciones",
       about: "Acerca de",
     },
     common: {
       wallet: "Billetera",
       loading: "Cargando...",
       language: "Idioma",
+    },
+    partnerships: {
+      visitApp: "Visitar App",
     },
   },
   id: {
@@ -93,16 +148,19 @@ const translations = {
     navigation: {
       home: "Beranda",
       news: "Berita",
-      learn: "Belajar",
       airdrop: "Airdrop",
       fistaking: "Fi Staking",
       membership: "Keanggotaan",
+      partnerships: "Kemitraan",
       about: "Tentang",
     },
     common: {
       wallet: "Dompet",
       loading: "Memuat...",
       language: "Bahasa",
+    },
+    partnerships: {
+      visitApp: "Kunjungi App",
     },
   },
 }
@@ -127,13 +185,22 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
   const [showMiniWallet, setShowMiniWallet] = useState(false)
   const [showLanguageMenu, setShowLanguageMenu] = useState(false)
   const [currentLang, setCurrentLang] = useState<keyof typeof translations>("en")
+  const [currentPartnerIndex, setCurrentPartnerIndex] = useState(0)
   const router = useRouter()
 
   // Get translations for current language
   const t = translations[currentLang]
   const fullText = t.presentation?.tagline || "The Future of Decentralized Finance"
 
-  const { user, isAuthenticated, isLoading, connectWallet, disconnectWallet } = useMiniKit()
+  // Safe MiniKit usage with fallbacks
+  const miniKitContext = useMiniKit()
+  const {
+    user = null,
+    isAuthenticated = false,
+    isLoading = false,
+    connectWallet = async () => {},
+    disconnectWallet = async () => {},
+  } = miniKitContext || {}
 
   // Load saved language
   useEffect(() => {
@@ -152,6 +219,15 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
     }
   }, [isAuthenticated, user])
 
+  // Partnership slideshow effect
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentPartnerIndex((prev) => (prev + 1) % PARTNERSHIPS.length)
+    }, 3000)
+
+    return () => clearInterval(interval)
+  }, [])
+
   // REAL wallet connection handler
   const handleWalletConnect = async () => {
     if (!isAuthenticated) {
@@ -164,7 +240,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
     }
   }
 
-  // Handle disconnect - CORRIGIDO
+  // Handle disconnect
   const handleWalletDisconnect = async () => {
     console.log("🔌 Disconnect button clicked")
     try {
@@ -240,6 +316,12 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
       href: "/membership",
     },
     {
+      id: "partnerships",
+      labelKey: "partnerships",
+      icon: Hand,
+      href: "/partnerships",
+    },
+    {
       id: "about",
       labelKey: "about",
       icon: Info,
@@ -256,14 +338,48 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
   }
 
   const currentLanguage = LANGUAGES.find((lang) => lang.code === currentLang)
+  const currentPartner = PARTNERSHIPS[currentPartnerIndex]
+
+  const handlePartnerClick = () => {
+    window.open(currentPartner.url, "_blank")
+  }
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden flex items-center justify-center">
-      {/* Top Navigation - Only Wallet Controls */}
+      {/* Top Navigation - Wallet Left, Language Right */}
       <div className="absolute top-0 left-0 right-0 z-50 p-6">
-        <div className="flex items-center justify-end">
-          {/* Language Selector */}
-          <div className="relative mr-3">
+        <div className="flex items-center justify-between">
+          {/* Left Side - Wallet Controls */}
+          <div className="flex items-center space-x-3">
+            {/* Wallet Button (when wallet is connected but hidden) */}
+            {isAuthenticated && !showMiniWallet && (
+              <button onClick={handleShowWallet} className="relative group">
+                <div className="px-3 py-2 bg-black/20 backdrop-blur-md border border-green-400/30 rounded-full flex items-center space-x-2 hover:bg-green-500/10 transition-all duration-300">
+                  <div className="absolute inset-0 bg-gradient-to-r from-green-400/10 to-emerald-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <Eye className="w-4 h-4 text-green-300 relative z-10" />
+                  <span className="text-green-300 text-sm font-medium relative z-10">
+                    {t.common?.wallet || "Wallet"}
+                  </span>
+                </div>
+              </button>
+            )}
+
+            {/* Connect Wallet Button (only when not connected) */}
+            {!isAuthenticated && (
+              <button onClick={handleWalletConnect} disabled={isLoading} className="relative group">
+                <div className="px-6 py-3 bg-black/20 backdrop-blur-md border border-cyan-400/30 rounded-full flex items-center space-x-2 hover:bg-cyan-500/10 transition-all duration-300 disabled:opacity-50">
+                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/10 to-blue-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <Wallet className="w-5 h-5 text-cyan-300 relative z-10" />
+                  <span className="text-white font-medium relative z-10">
+                    {isLoading ? t.common?.loading || "Loading..." : t.presentation?.connectWallet || "Connect Wallet"}
+                  </span>
+                </div>
+              </button>
+            )}
+          </div>
+
+          {/* Right Side - Language Selector */}
+          <div className="relative">
             <button onClick={() => setShowLanguageMenu(!showLanguageMenu)} className="relative group">
               <div className="px-3 py-2 bg-black/20 backdrop-blur-md border border-white/10 rounded-full flex items-center space-x-2 hover:bg-white/10 transition-all duration-300">
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-400/10 to-pink-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -305,30 +421,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
               )}
             </AnimatePresence>
           </div>
-
-          {/* Wallet Button (when wallet is connected but hidden) */}
-          {isAuthenticated && !showMiniWallet && (
-            <button onClick={handleShowWallet} className="relative group mr-3">
-              <div className="px-3 py-2 bg-black/20 backdrop-blur-md border border-green-400/30 rounded-full flex items-center space-x-2 hover:bg-green-500/10 transition-all duration-300">
-                <div className="absolute inset-0 bg-gradient-to-r from-green-400/10 to-emerald-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <Eye className="w-4 h-4 text-green-300 relative z-10" />
-                <span className="text-green-300 text-sm font-medium relative z-10">{t.common?.wallet || "Wallet"}</span>
-              </div>
-            </button>
-          )}
-
-          {/* Connect Wallet Button (only when not connected) */}
-          {!isAuthenticated && (
-            <button onClick={handleWalletConnect} disabled={isLoading} className="relative group">
-              <div className="px-6 py-3 bg-black/20 backdrop-blur-md border border-cyan-400/30 rounded-full flex items-center space-x-2 hover:bg-cyan-500/10 transition-all duration-300 disabled:opacity-50">
-                <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/10 to-blue-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <Wallet className="w-5 h-5 text-cyan-300 relative z-10" />
-                <span className="text-white font-medium relative z-10">
-                  {isLoading ? t.common?.loading || "Loading..." : t.presentation?.connectWallet || "Connect Wallet"}
-                </span>
-              </div>
-            </button>
-          )}
         </div>
       </div>
 
@@ -345,13 +437,80 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
         )}
       </AnimatePresence>
 
+      {/* Partnership Slideshow - Between subtitle and bottom bar */}
+      <div className="fixed bottom-20 left-0 right-0 z-30 flex justify-center">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentPartnerIndex}
+            initial={{ x: -300, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: 300, opacity: 0 }}
+            transition={{
+              type: "spring",
+              stiffness: 100,
+              damping: 20,
+              duration: 0.8,
+            }}
+            className="relative group cursor-pointer"
+            onClick={handlePartnerClick}
+          >
+            {/* Partnership Card */}
+            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-xl p-2 hover:bg-black/60 transition-all duration-300 shadow-2xl">
+              {/* Glow Effect */}
+              <div
+                className={`absolute inset-0 bg-gradient-to-r ${currentPartner.gradient} opacity-0 group-hover:opacity-20 rounded-xl blur-xl transition-opacity duration-300`}
+              />
+
+              {/* Content */}
+              <div className="relative z-10 flex items-center space-x-3">
+                {/* Partner Logo */}
+                <div className="w-8 h-8 rounded-lg overflow-hidden bg-gray-700/50 flex-shrink-0">
+                  <Image
+                    src={currentPartner.image || "/placeholder.svg"}
+                    alt={currentPartner.name}
+                    width={32}
+                    height={32}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+
+                {/* Partner Info */}
+                <div className="flex-1">
+                  <h3 className="text-white font-semibold text-sm">{currentPartner.name}</h3>
+                  <div className={`h-0.5 w-12 bg-gradient-to-r ${currentPartner.gradient} rounded-full mt-0.5`} />
+                </div>
+
+                {/* Visit Button */}
+                <div
+                  className={`bg-gradient-to-r ${currentPartner.gradient} text-white px-3 py-1.5 rounded-lg font-medium flex items-center space-x-1.5 group-hover:scale-105 transition-transform duration-300`}
+                >
+                  <span className="text-xs">{t.partnerships?.visitApp || "Visit App"}</span>
+                  <ExternalLink className="w-3 h-3" />
+                </div>
+              </div>
+
+              {/* Progress Indicators */}
+              <div className="flex justify-center space-x-1.5 mt-2">
+                {PARTNERSHIPS.map((_, index) => (
+                  <div
+                    key={index}
+                    className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                      index === currentPartnerIndex ? `bg-gradient-to-r ${currentPartner.gradient}` : "bg-white/20"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
       {/* Bottom Navigation Bar - REDUCED SIZE */}
       <div className="fixed bottom-6 left-6 right-6 z-50">
         {/* Futuristic Bottom Bar */}
         <div className="relative">
           {/* Glow Effect */}
           <div className="absolute inset-0 bg-gradient-to-t from-cyan-400/20 via-blue-400/10 to-transparent blur-lg" />
-
           {/* Main Bar - REDUCED PADDING */}
           <div className="relative bg-black/40 backdrop-blur-xl border border-white/10 rounded-xl">
             <div className="flex items-center justify-center py-2 px-4">
@@ -360,10 +519,8 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                 <div className="w-8 h-8 bg-gradient-to-r from-cyan-400/20 to-blue-400/20 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center hover:from-cyan-400/30 hover:to-blue-400/30 transition-all duration-300 shadow-xl">
                   {/* Pulsing Ring - REDUCED SIZE */}
                   <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/30 to-blue-400/30 rounded-full animate-ping opacity-75" />
-
                   {/* Inner Glow */}
                   <div className="absolute inset-1 bg-gradient-to-r from-white/10 to-white/5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
                   {/* Icon - REDUCED SIZE */}
                   {isMenuOpen ? (
                     <X className="w-4 h-4 text-white relative z-10 transition-transform duration-300 rotate-90" />
@@ -371,7 +528,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                     <Menu className="w-4 h-4 text-white relative z-10 transition-transform duration-300" />
                   )}
                 </div>
-
                 {/* Button Glow - REDUCED SIZE */}
                 <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/20 to-blue-400/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </button>
@@ -395,12 +551,10 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
               <div className="flex justify-center pt-3 pb-1">
                 <div className="w-8 h-0.5 bg-white/30 rounded-full" />
               </div>
-
               {/* Menu Content - REDUCED PADDING */}
               <div className="p-4 pb-4">
                 {/* Menu Glow Effect */}
                 <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/5 to-blue-400/5 rounded-2xl" />
-
                 {/* Menu Items Grid - REDUCED SIZES */}
                 <div className="relative z-10 grid grid-cols-2 gap-3 mb-4">
                   {navigationItems.map((item, index) => (
@@ -426,35 +580,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                     </motion.button>
                   ))}
                 </div>
-
-                {/* Settings Section - REDUCED SIZES */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.6 }}
-                  className="border-t border-white/10 pt-3"
-                >
-                  <button
-                    onClick={() => setShowLanguageMenu(!showLanguageMenu)}
-                    className="w-full group p-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg hover:bg-white/10 transition-all duration-300"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-5 h-5 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full flex items-center justify-center group-hover:from-purple-400/30 group-hover:to-pink-400/30 transition-all duration-300">
-                          <Settings className="w-2.5 h-2.5 text-purple-400 group-hover:text-white transition-colors" />
-                        </div>
-                        <span className="text-white/80 group-hover:text-white font-medium text-xs">
-                          {t.common?.language || "Language"}
-                        </span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <span className="text-xs text-gray-400">{currentLanguage?.flag}</span>
-                        <span className="text-xs text-gray-400">{currentLanguage?.code.toUpperCase()}</span>
-                      </div>
-                    </div>
-                  </button>
-                </motion.div>
-
                 {/* Menu Bottom Glow - REDUCED SIZE */}
                 <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-12 h-0.5 bg-gradient-to-r from-cyan-400/50 to-blue-400/50 rounded-full" />
               </div>
@@ -654,7 +779,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
         </h1>
 
         {/* Animated Subtitle */}
-        <div className="h-8 flex items-center justify-center">
+        <div className="h-8 flex items-center justify-center mb-16">
           <div className="flex items-center space-x-4">
             <div className="h-px w-12 bg-gradient-to-r from-transparent to-white/50" />
             <p className="text-lg md:text-xl text-gray-300 font-light tracking-widest uppercase min-w-[400px] text-center">
