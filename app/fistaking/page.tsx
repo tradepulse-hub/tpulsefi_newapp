@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ArrowLeft, TrendingUp, Gift, Loader2, CheckCircle } from "lucide-react"
+import { ArrowLeft, TrendingUp, Gift, Loader2, CheckCircle, Clock } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { MiniKit } from "@worldcoin/minikit-js"
@@ -21,6 +21,7 @@ const translations = {
     back: "Back",
     claim: "Claim",
     claiming: "Claiming...",
+    soon: "Soon",
     claimSuccess: "Claim Successful!",
     claimFailed: "Claim Failed",
     connectWalletFirst: "Connect your wallet first",
@@ -34,6 +35,7 @@ const translations = {
     back: "Voltar",
     claim: "Reclamar",
     claiming: "Reclamando...",
+    soon: "Em Breve",
     claimSuccess: "Reclamação Bem-sucedida!",
     claimFailed: "Reclamação Falhou",
     connectWalletFirst: "Conecte sua carteira primeiro",
@@ -47,6 +49,7 @@ const translations = {
     back: "Volver",
     claim: "Reclamar",
     claiming: "Reclamando...",
+    soon: "Pronto",
     claimSuccess: "¡Reclamación Exitosa!",
     claimFailed: "Reclamación Falló",
     connectWalletFirst: "Conecta tu billetera primero",
@@ -60,6 +63,7 @@ const translations = {
     back: "Kembali",
     claim: "Klaim",
     claiming: "Mengklaim...",
+    soon: "Segera",
     claimSuccess: "Klaim Berhasil!",
     claimFailed: "Klaim Gagal",
     connectWalletFirst: "Hubungkan dompet Anda terlebih dahulu",
@@ -522,6 +526,7 @@ export default function FiStakingPage() {
             {/* Staking Tokens */}
             {Object.entries(STAKING_CONTRACTS).map(([key, contract], index) => {
               const isClaimingThis = claiming === key
+              const isRCC = key === "RCC"
 
               return (
                 <motion.div
@@ -548,12 +553,32 @@ export default function FiStakingPage() {
 
                     {/* Claim Button */}
                     <button
-                      onClick={() => handleClaim(key)}
-                      disabled={isClaimingThis}
-                      className="py-2 px-6 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg font-medium text-sm transition-all duration-300 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      onClick={() => !isRCC && handleClaim(key)}
+                      disabled={isClaimingThis || isRCC}
+                      className={`py-2 px-6 rounded-lg font-medium text-sm transition-all duration-300 flex items-center justify-center space-x-2 ${
+                        isRCC
+                          ? "bg-gray-600/50 text-gray-400 cursor-not-allowed"
+                          : isClaimingThis
+                            ? "bg-gray-600/50 text-gray-400 cursor-not-allowed"
+                            : "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+                      }`}
                     >
-                      {isClaimingThis ? <Loader2 className="w-4 h-4 animate-spin" /> : <Gift className="w-4 h-4" />}
-                      <span>{isClaimingThis ? t.claiming : t.claim}</span>
+                      {isRCC ? (
+                        <>
+                          <Clock className="w-4 h-4" />
+                          <span>{t.soon}</span>
+                        </>
+                      ) : isClaimingThis ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>{t.claiming}</span>
+                        </>
+                      ) : (
+                        <>
+                          <Gift className="w-4 h-4" />
+                          <span>{t.claim}</span>
+                        </>
+                      )}
                     </button>
                   </div>
                 </motion.div>
