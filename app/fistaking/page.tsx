@@ -88,6 +88,12 @@ const STAKING_CONTRACTS = {
     address: "0x9FA697Ece25F4e2A94d7dEb99418B2b0c4b96FE2",
     image: "/images/roflex-token.png",
   },
+  RCC: {
+    name: "RoseChana Coin",
+    symbol: "RCC",
+    address: "0xA8785DABbc9902173b819f488e5A6A0Dbc45A9dF",
+    image: "/images/rosechana-coin.png",
+  },
 }
 
 // Staking contract ABI (updated with the provided ABI)
