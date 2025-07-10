@@ -1,266 +1,670 @@
 "use client"
-import { useEffect, useState } from "react"
-import { ArrowLeft, Crown, Loader2, CheckCircle, Copy } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
-import { useRouter } from "next/navigation"
-import { MiniKit } from "@worldcoin/minikit-js"
-import { useMiniKit } from "../../hooks/use-minikit"
 
-// Supported languages
-const SUPPORTED_LANGUAGES = ["en", "pt", "es", "id"] as const
-type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number]
+import type React from "react"
+import { useEffect, useState } from "react"
+import {
+  Menu,
+  X,
+  Wallet,
+  Eye,
+  Home,
+  Newspaper,
+  Users,
+  Info,
+  Gift,
+  TrendingUp,
+  Hand,
+  Globe,
+  Crown,
+  Star,
+  Zap,
+  Shield,
+  CheckCircle,
+  Mail,
+} from "lucide-react"
+import { useMiniKit } from "../../hooks/use-minikit"
+import MiniWallet from "../../components/mini-wallet"
+import { AnimatePresence, motion } from "framer-motion"
+import { useRouter } from "next/navigation"
+
+// Simplified language support
+const LANGUAGES = [
+  { code: "en", name: "English", flag: "🇺🇸", nativeName: "English", gradient: "from-blue-400 to-blue-600" },
+  { code: "pt", name: "Português", flag: "🇧🇷", nativeName: "Português", gradient: "from-green-400 to-green-600" },
+  { code: "es", name: "Español", flag: "🇪🇸", nativeName: "Español", gradient: "from-red-400 to-red-600" },
+  {
+    code: "id",
+    name: "Bahasa Indonesia",
+    flag: "🇮🇩",
+    nativeName: "Bahasa Indonesia",
+    gradient: "from-red-400 to-white",
+  },
+]
 
 // Translations
 const translations = {
   en: {
-    title: "TPulseFi Membership",
-    subtitle: "Join our exclusive premium membership",
-    back: "Back",
-    getMembership: "Get Membership",
-    processing: "Processing...",
-    connectWalletFirst: "Connect Wallet First",
-    paymentSuccess: "Payment Successful!",
-    paymentFailed: "Payment Failed",
-    dismiss: "Dismiss",
-    membershipDescription:
-      "If you subscribe, you are entitled to a part of the transaction fees that TPulseFi earns! And it's not little! What are you waiting for, it's a lifetime payment! It's the best membership in the world, we promise long-term investment recovery.",
-    oneTimePayment: "One-time payment",
-    emailInstruction: "After payment, send proof to support@tradepulsetoken.com",
-    monthlyPayments: "Payments to exclusive members occur every month on the 9th",
+    membership: {
+      title: "Exclusive Membership",
+      subtitle: "Join the Elite Circle",
+      description: "Unlock premium features and exclusive benefits",
+      benefits: {
+        title: "Premium Benefits",
+        items: [
+          "Priority customer support",
+          "Exclusive airdrops and rewards",
+          "Advanced trading features",
+          "VIP community access",
+          "Early access to new features",
+          "Reduced transaction fees",
+        ],
+      },
+      pricing: {
+        monthly: "Monthly",
+        price: "$29.99",
+        currency: "USD",
+        period: "/month",
+      },
+      emailInstructions: {
+        title: "Membership Instructions",
+        text: "After purchase, send your transaction hash and wallet address to:",
+        email: "membership@tpulsefi.com",
+        note: "You will receive confirmation within 24 hours",
+      },
+      paymentSchedule: {
+        text: "Payments to exclusive members occur every month on the 9th",
+      },
+      purchaseButton: "Purchase Membership",
+      comingSoon: "Coming Soon",
+    },
+    navigation: {
+      home: "Home",
+      news: "News",
+      airdrop: "Airdrop",
+      fistaking: "Fi Staking",
+      membership: "Membership",
+      partnerships: "Partnerships",
+      about: "About",
+    },
+    common: {
+      wallet: "Wallet",
+      loading: "Loading...",
+      language: "Language",
+    },
   },
   pt: {
-    title: "Membros TPulseFi",
-    subtitle: "Junte-se à nossa membros premium exclusiva",
-    back: "Voltar",
-    getMembership: "Obter Membros",
-    processing: "Processando...",
-    connectWalletFirst: "Conectar Carteira Primeiro",
-    paymentSuccess: "Pagamento Bem-sucedido!",
-    paymentFailed: "Pagamento Falhou",
-    dismiss: "Dispensar",
-    membershipDescription:
-      "Se assinares tem direito a uma parte das taxas de transações que TPulseFi ganha! E não é pouco! De que estás à espera, é um pagamento para a vida toda! É o melhor membership do mundo, prometemos a recuperação do investido a longo prazo.",
-    oneTimePayment: "Pagamento único",
-    emailInstruction: "Após pagamento enviar comprovativo para support@tradepulsetoken.com",
-    monthlyPayments: "Os pagamentos aos membros exclusivos decorrem todos os meses ao dia 9",
+    membership: {
+      title: "Membros Exclusivos",
+      subtitle: "Junte-se ao Círculo Elite",
+      description: "Desbloqueie recursos premium e benefícios exclusivos",
+      benefits: {
+        title: "Benefícios Premium",
+        items: [
+          "Suporte ao cliente prioritário",
+          "Airdrops e recompensas exclusivas",
+          "Recursos de negociação avançados",
+          "Acesso à comunidade VIP",
+          "Acesso antecipado a novos recursos",
+          "Taxas de transação reduzidas",
+        ],
+      },
+      pricing: {
+        monthly: "Mensal",
+        price: "$29.99",
+        currency: "USD",
+        period: "/mês",
+      },
+      emailInstructions: {
+        title: "Instruções de Membros",
+        text: "Após a compra, envie seu hash de transação e endereço da carteira para:",
+        email: "membership@tpulsefi.com",
+        note: "Você receberá confirmação em até 24 horas",
+      },
+      paymentSchedule: {
+        text: "Os pagamentos aos membros exclusivos decorrem todos os meses ao dia 9",
+      },
+      purchaseButton: "Comprar Membros",
+      comingSoon: "Em Breve",
+    },
+    navigation: {
+      home: "Início",
+      news: "Notícias",
+      airdrop: "Airdrop",
+      fistaking: "Fi Staking",
+      membership: "Membros",
+      partnerships: "Parcerias",
+      about: "Sobre",
+    },
+    common: {
+      wallet: "Carteira",
+      loading: "Carregando...",
+      language: "Idioma",
+    },
   },
   es: {
-    title: "Membresía TPulseFi",
-    subtitle: "Únete a nuestra membresía premium exclusiva",
-    back: "Volver",
-    getMembership: "Obtener Membresía",
-    processing: "Procesando...",
-    connectWalletFirst: "Conectar Billetera Primero",
-    paymentSuccess: "¡Pago Exitoso!",
-    paymentFailed: "Pago Falló",
-    dismiss: "Descartar",
-    membershipDescription:
-      "¡Si te suscribes tienes derecho a una parte de las tarifas de transacción que gana TPulseFi! ¡Y no es poco! ¿Qué estás esperando? ¡Es un pago de por vida! Es la mejor membresía del mundo, prometemos recuperación de la inversión a largo plazo.",
-    oneTimePayment: "Pago único",
-    emailInstruction: "Después del pago, envía comprobante a support@tradepulsetoken.com",
-    monthlyPayments: "Los pagos a miembros exclusivos ocurren todos los meses el día 9",
+    membership: {
+      title: "Membresía Exclusiva",
+      subtitle: "Únete al Círculo Elite",
+      description: "Desbloquea características premium y beneficios exclusivos",
+      benefits: {
+        title: "Beneficios Premium",
+        items: [
+          "Soporte al cliente prioritario",
+          "Airdrops y recompensas exclusivas",
+          "Características de trading avanzadas",
+          "Acceso a comunidad VIP",
+          "Acceso temprano a nuevas características",
+          "Tarifas de transacción reducidas",
+        ],
+      },
+      pricing: {
+        monthly: "Mensual",
+        price: "$29.99",
+        currency: "USD",
+        period: "/mes",
+      },
+      emailInstructions: {
+        title: "Instrucciones de Membresía",
+        text: "Después de la compra, envía tu hash de transacción y dirección de billetera a:",
+        email: "membership@tpulsefi.com",
+        note: "Recibirás confirmación dentro de 24 horas",
+      },
+      paymentSchedule: {
+        text: "Los pagos a miembros exclusivos ocurren todos los meses el día 9",
+      },
+      purchaseButton: "Comprar Membresía",
+      comingSoon: "Próximamente",
+    },
+    navigation: {
+      home: "Inicio",
+      news: "Noticias",
+      airdrop: "Airdrop",
+      fistaking: "Fi Staking",
+      membership: "Membresía",
+      partnerships: "Asociaciones",
+      about: "Acerca de",
+    },
+    common: {
+      wallet: "Billetera",
+      loading: "Cargando...",
+      language: "Idioma",
+    },
   },
   id: {
-    title: "Keanggotaan TPulseFi",
-    subtitle: "Bergabunglah dengan keanggotaan premium eksklusif kami",
-    back: "Kembali",
-    getMembership: "Dapatkan Keanggotaan",
-    processing: "Memproses...",
-    connectWalletFirst: "Hubungkan Dompet Terlebih Dahulu",
-    paymentSuccess: "Pembayaran Berhasil!",
-    paymentFailed: "Pembayaran Gagal",
-    dismiss: "Tutup",
-    membershipDescription:
-      "Jika Anda berlangganan, Anda berhak mendapat bagian dari biaya transaksi yang diperoleh TPulseFi! Dan itu tidak sedikit! Apa yang Anda tunggu, ini pembayaran seumur hidup! Ini adalah keanggotaan terbaik di dunia, kami berjanji pemulihan investasi jangka panjang.",
-    oneTimePayment: "Pembayaran sekali",
-    emailInstruction: "Setelah pembayaran, kirim bukti ke support@tradepulsetoken.com",
-    monthlyPayments: "Pembayaran kepada anggota eksklusif terjadi setiap bulan pada tanggal 9",
+    membership: {
+      title: "Keanggotaan Eksklusif",
+      subtitle: "Bergabung dengan Lingkaran Elite",
+      description: "Buka fitur premium dan manfaat eksklusif",
+      benefits: {
+        title: "Manfaat Premium",
+        items: [
+          "Dukungan pelanggan prioritas",
+          "Airdrop dan hadiah eksklusif",
+          "Fitur trading lanjutan",
+          "Akses komunitas VIP",
+          "Akses awal ke fitur baru",
+          "Biaya transaksi berkurang",
+        ],
+      },
+      pricing: {
+        monthly: "Bulanan",
+        price: "$29.99",
+        currency: "USD",
+        period: "/bulan",
+      },
+      emailInstructions: {
+        title: "Instruksi Keanggotaan",
+        text: "Setelah pembelian, kirim hash transaksi dan alamat dompet Anda ke:",
+        email: "membership@tpulsefi.com",
+        note: "Anda akan menerima konfirmasi dalam 24 jam",
+      },
+      paymentSchedule: {
+        text: "Pembayaran kepada anggota eksklusif terjadi setiap bulan pada tanggal 9",
+      },
+      purchaseButton: "Beli Keanggotaan",
+      comingSoon: "Segera Hadir",
+    },
+    navigation: {
+      home: "Beranda",
+      news: "Berita",
+      airdrop: "Airdrop",
+      fistaking: "Fi Staking",
+      membership: "Keanggotaan",
+      partnerships: "Kemitraan",
+      about: "Tentang",
+    },
+    common: {
+      wallet: "Dompet",
+      loading: "Memuat...",
+      language: "Bahasa",
+    },
   },
 }
 
-// WLD Token Contract Address on Worldchain
-const WLD_TOKEN_ADDRESS = "0x2cFc85d8E48F8EAB294be644d9E25C3030863003"
-const MEMBERSHIP_RECIPIENT = "0xf04a78df4cc3017c0c23f37528d7b6cbbeea6677"
-const MEMBERSHIP_AMOUNT = "30" // 30 WLD
+interface NavItem {
+  id: string
+  labelKey: keyof typeof translations.en.navigation
+  icon: React.ComponentType<any>
+  href: string
+}
 
-// ERC20 ABI for transfer function
-const ERC20_ABI = [
-  {
-    inputs: [
-      { internalType: "address", name: "to", type: "address" },
-      { internalType: "uint256", name: "amount", type: "uint256" },
-    ],
-    name: "transfer",
-    outputs: [{ internalType: "bool", name: "", type: "bool" }],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-] as const
+interface MembershipProps {
+  address?: string
+  shortAddress?: string
+  copy?: () => void
+}
 
-export default function MembershipPage() {
+const Membership: React.FC<MembershipProps> = ({ address, shortAddress, copy }) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [showMiniWallet, setShowMiniWallet] = useState(false)
+  const [showLanguageMenu, setShowLanguageMenu] = useState(false)
+  const [currentLang, setCurrentLang] = useState<keyof typeof translations>("en")
   const router = useRouter()
-  const { user, isAuthenticated } = useMiniKit()
-  const [currentLang, setCurrentLang] = useState<SupportedLanguage>("en")
-  const [isProcessing, setIsProcessing] = useState(false)
-  const [paymentSuccess, setPaymentSuccess] = useState(false)
-  const [paymentError, setPaymentError] = useState<string | null>(null)
-
-  // Load saved language
-  useEffect(() => {
-    const savedLanguage = localStorage.getItem("preferred-language") as SupportedLanguage
-    if (savedLanguage && SUPPORTED_LANGUAGES.includes(savedLanguage)) {
-      setCurrentLang(savedLanguage)
-    }
-  }, [])
 
   // Get translations for current language
   const t = translations[currentLang]
 
-  const handleGetMembership = async () => {
+  // Safe MiniKit usage with fallbacks
+  const miniKitContext = useMiniKit()
+  const {
+    user = null,
+    isAuthenticated = false,
+    isLoading = false,
+    connectWallet = async () => {},
+    disconnectWallet = async () => {},
+  } = miniKitContext || {}
+
+  // Load saved language
+  useEffect(() => {
+    const savedLanguage = localStorage.getItem("preferred-language") as keyof typeof translations
+    if (savedLanguage && translations[savedLanguage]) {
+      setCurrentLang(savedLanguage)
+    }
+  }, [])
+
+  // Show mini wallet when authenticated
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      setShowMiniWallet(true)
+    } else {
+      setShowMiniWallet(false)
+    }
+  }, [isAuthenticated, user])
+
+  // REAL wallet connection handler
+  const handleWalletConnect = async () => {
     if (!isAuthenticated) {
-      alert(t.connectWalletFirst)
-      return
-    }
-
-    if (!user?.walletAddress) {
-      alert("Wallet address not found")
-      return
-    }
-
-    setIsProcessing(true)
-    setPaymentError(null)
-
-    try {
-      console.log("🚀 Starting membership payment...")
-      console.log("WLD Token Address:", WLD_TOKEN_ADDRESS)
-      console.log("Recipient Address:", MEMBERSHIP_RECIPIENT)
-      console.log("Amount:", MEMBERSHIP_AMOUNT, "WLD")
-      console.log("User Address:", user.walletAddress)
-
-      if (!MiniKit.isInstalled()) {
-        throw new Error("MiniKit is not installed")
+      try {
+        await connectWallet()
+      } catch (error) {
+        console.error("Failed to connect wallet:", error)
+        alert(error instanceof Error ? error.message : "Failed to connect wallet")
       }
-
-      // Convert 30 WLD to wei (18 decimals)
-      const amountInWei = (BigInt(MEMBERSHIP_AMOUNT) * BigInt(10 ** 18)).toString()
-      console.log("Amount in wei:", amountInWei)
-
-      console.log("Calling MiniKit.commandsAsync.sendTransaction...")
-      const { finalPayload } = await MiniKit.commandsAsync.sendTransaction({
-        transaction: [
-          {
-            address: WLD_TOKEN_ADDRESS,
-            abi: ERC20_ABI,
-            functionName: "transfer",
-            args: [MEMBERSHIP_RECIPIENT, amountInWei],
-          },
-        ],
-      })
-
-      console.log("MiniKit transaction response:", finalPayload)
-
-      if (finalPayload.status === "error") {
-        console.error("Error sending payment:", finalPayload.message)
-        throw new Error(finalPayload.message || "Failed to send payment")
-      }
-
-      console.log("Payment sent successfully:", finalPayload)
-      setPaymentSuccess(true)
-
-      // Reset success message after 3 seconds
-      setTimeout(() => {
-        setPaymentSuccess(false)
-      }, 3000)
-    } catch (error) {
-      console.error("Error processing membership payment:", error)
-      let errorMessage = t.paymentFailed
-
-      if (error instanceof Error) {
-        if (error.message.includes("user_rejected")) {
-          errorMessage = "Transaction was rejected by user."
-        } else if (error.message.includes("insufficient_funds")) {
-          errorMessage = "Insufficient WLD balance to complete this transaction."
-        } else {
-          errorMessage = error.message
-        }
-      }
-
-      setPaymentError(errorMessage)
-    } finally {
-      setIsProcessing(false)
     }
   }
 
-  const handleBack = () => {
-    console.log("🔙 Back button clicked")
+  // Handle disconnect
+  const handleWalletDisconnect = async () => {
+    console.log("🔌 Disconnect button clicked")
     try {
-      // Try to go back in history first
-      if (window.history.length > 1) {
-        router.back()
-      } else {
-        // Fallback to home page if no history
-        router.push("/")
-      }
+      await disconnectWallet()
+      setShowMiniWallet(false)
+      console.log("✅ Wallet disconnected and mini wallet hidden")
     } catch (error) {
-      console.error("Error navigating back:", error)
-      // Final fallback
-      router.push("/")
+      console.error("❌ Error during disconnect:", error)
     }
   }
+
+  // Handle minimize wallet
+  const handleMinimizeWallet = () => {
+    setShowMiniWallet(false)
+  }
+
+  // Handle show wallet again
+  const handleShowWallet = () => {
+    if (isAuthenticated) {
+      setShowMiniWallet(true)
+    }
+  }
+
+  const navigationItems: NavItem[] = [
+    {
+      id: "home",
+      labelKey: "home",
+      icon: Home,
+      href: "/",
+    },
+    {
+      id: "news",
+      labelKey: "news",
+      icon: Newspaper,
+      href: "/news",
+    },
+    {
+      id: "airdrop",
+      labelKey: "airdrop",
+      icon: Gift,
+      href: "/airdrop",
+    },
+    {
+      id: "fistaking",
+      labelKey: "fistaking",
+      icon: TrendingUp,
+      href: "/fistaking",
+    },
+    {
+      id: "membership",
+      labelKey: "membership",
+      icon: Users,
+      href: "/membership",
+    },
+    {
+      id: "partnerships",
+      labelKey: "partnerships",
+      icon: Hand,
+      href: "/partnerships",
+    },
+    {
+      id: "about",
+      labelKey: "about",
+      icon: Info,
+      href: "/about",
+    },
+  ]
+
+  const handleLanguageChange = (newLanguage: keyof typeof translations) => {
+    console.log("Changing language from", currentLang, "to", newLanguage)
+    setCurrentLang(newLanguage)
+    localStorage.setItem("preferred-language", newLanguage)
+    setShowLanguageMenu(false)
+    setIsMenuOpen(false)
+  }
+
+  const currentLanguage = LANGUAGES.find((lang) => lang.code === currentLang)
 
   return (
-    <main className="min-h-screen bg-black relative overflow-hidden flex flex-col items-center pt-6 pb-8">
-      {/* Same animated background as other pages */}
+    <div className="min-h-screen bg-black relative overflow-hidden">
+      {/* Top Navigation - Wallet Left, Language Right */}
+      <div className="absolute top-0 left-0 right-0 z-50 p-6">
+        <div className="flex items-center justify-between">
+          {/* Left Side - Wallet Controls */}
+          <div className="flex items-center space-x-3">
+            {/* Wallet Button (when wallet is connected but hidden) */}
+            {isAuthenticated && !showMiniWallet && (
+              <button onClick={handleShowWallet} className="relative group">
+                <div className="px-3 py-2 bg-black/20 backdrop-blur-md border border-green-400/30 rounded-full flex items-center space-x-2 hover:bg-green-500/10 transition-all duration-300">
+                  <div className="absolute inset-0 bg-gradient-to-r from-green-400/10 to-emerald-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <Eye className="w-4 h-4 text-green-300 relative z-10" />
+                  <span className="text-green-300 text-sm font-medium relative z-10">
+                    {t.common?.wallet || "Wallet"}
+                  </span>
+                </div>
+              </button>
+            )}
+
+            {/* Connect Wallet Button (only when not connected) */}
+            {!isAuthenticated && (
+              <button onClick={handleWalletConnect} disabled={isLoading} className="relative group">
+                <div className="px-6 py-3 bg-black/20 backdrop-blur-md border border-cyan-400/30 rounded-full flex items-center space-x-2 hover:bg-cyan-500/10 transition-all duration-300 disabled:opacity-50">
+                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/10 to-blue-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <Wallet className="w-5 h-5 text-cyan-300 relative z-10" />
+                  <span className="text-white font-medium relative z-10">
+                    {isLoading ? t.common?.loading || "Loading..." : "Connect Wallet"}
+                  </span>
+                </div>
+              </button>
+            )}
+          </div>
+
+          {/* Right Side - Language Selector */}
+          <div className="relative">
+            <button onClick={() => setShowLanguageMenu(!showLanguageMenu)} className="relative group">
+              <div className="px-3 py-2 bg-black/20 backdrop-blur-md border border-white/10 rounded-full flex items-center space-x-2 hover:bg-white/10 transition-all duration-300">
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-400/10 to-pink-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <Globe className="w-4 h-4 text-purple-300 relative z-10" />
+                <span className="text-purple-300 text-sm font-medium relative z-10">
+                  {currentLanguage?.flag} {currentLanguage?.code.toUpperCase()}
+                </span>
+              </div>
+            </button>
+
+            {/* Language Dropdown */}
+            <AnimatePresence>
+              {showLanguageMenu && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                  className="absolute top-12 right-0 bg-black/90 backdrop-blur-xl border border-white/10 rounded-xl p-2 min-w-[200px] shadow-2xl"
+                >
+                  {LANGUAGES.map((lang) => (
+                    <button
+                      key={lang.code}
+                      onClick={() => handleLanguageChange(lang.code as keyof typeof translations)}
+                      className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-all duration-200 ${
+                        currentLang === lang.code
+                          ? `bg-gradient-to-r ${lang.gradient} bg-opacity-20 text-white`
+                          : "hover:bg-white/5 text-gray-300 hover:text-white"
+                      }`}
+                    >
+                      <span className="text-lg">{lang.flag}</span>
+                      <div className="text-left">
+                        <div className="text-sm font-medium">{lang.nativeName}</div>
+                        <div className="text-xs opacity-70">{lang.name}</div>
+                      </div>
+                      {currentLang === lang.code && <div className="ml-auto text-green-400">✓</div>}
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      </div>
+
+      {/* Mini Wallet - Positioned in top left when connected */}
+      <AnimatePresence>
+        {showMiniWallet && user && (
+          <div className="absolute top-24 left-6 z-40">
+            <MiniWallet
+              walletAddress={user.walletAddress}
+              onMinimize={handleMinimizeWallet}
+              onDisconnect={handleWalletDisconnect}
+            />
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Main Content */}
+      <div className="relative z-10 min-h-screen flex items-center justify-center p-6">
+        <div className="max-w-4xl mx-auto">
+          {/* Header */}
+          <div className="text-center mb-12">
+            <div className="flex items-center justify-center mb-6">
+              <Crown className="w-16 h-16 text-yellow-400 mr-4" />
+              <div>
+                <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-500 bg-clip-text text-transparent">
+                  {t.membership?.title || "Exclusive Membership"}
+                </h1>
+                <p className="text-xl text-gray-300 mt-2">{t.membership?.subtitle || "Join the Elite Circle"}</p>
+              </div>
+            </div>
+            <p className="text-lg text-gray-400 max-w-2xl mx-auto">
+              {t.membership?.description || "Unlock premium features and exclusive benefits"}
+            </p>
+          </div>
+
+          {/* Benefits Grid */}
+          <div className="grid md:grid-cols-2 gap-8 mb-12">
+            {/* Benefits List */}
+            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-8">
+              <h3 className="text-2xl font-bold text-white mb-6 flex items-center">
+                <Star className="w-6 h-6 text-yellow-400 mr-3" />
+                {t.membership?.benefits?.title || "Premium Benefits"}
+              </h3>
+              <div className="space-y-4">
+                {(t.membership?.benefits?.items || []).map((benefit, index) => (
+                  <div key={index} className="flex items-center space-x-3">
+                    <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
+                    <span className="text-gray-300">{benefit}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Pricing Card */}
+            <div className="bg-gradient-to-br from-yellow-400/10 to-yellow-600/10 backdrop-blur-xl border border-yellow-400/20 rounded-2xl p-8">
+              <div className="text-center">
+                <div className="bg-yellow-400/20 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
+                  <Zap className="w-10 h-10 text-yellow-400" />
+                </div>
+                <h3 className="text-xl font-semibold text-white mb-2">{t.membership?.pricing?.monthly || "Monthly"}</h3>
+                <div className="text-4xl font-bold text-yellow-400 mb-1">
+                  {t.membership?.pricing?.price || "$29.99"}
+                </div>
+                <p className="text-gray-400 mb-6">
+                  {t.membership?.pricing?.currency || "USD"} {t.membership?.pricing?.period || "/month"}
+                </p>
+                <div className="bg-yellow-400/10 rounded-lg p-4 mb-6">
+                  <Shield className="w-6 h-6 text-yellow-400 mx-auto mb-2" />
+                  <p className="text-sm text-gray-300">Premium Access Guaranteed</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Email Instructions */}
+          <div className="bg-blue-500/10 backdrop-blur-xl border border-blue-400/20 rounded-2xl p-8 mb-6">
+            <h3 className="text-xl font-bold text-white mb-4 flex items-center">
+              <Mail className="w-6 h-6 text-blue-400 mr-3" />
+              {t.membership?.emailInstructions?.title || "Membership Instructions"}
+            </h3>
+            <p className="text-gray-300 mb-4">
+              {t.membership?.emailInstructions?.text ||
+                "After purchase, send your transaction hash and wallet address to:"}
+            </p>
+            <div className="bg-black/30 rounded-lg p-4 mb-4">
+              <p className="text-blue-400 font-mono text-lg text-center">
+                {t.membership?.emailInstructions?.email || "membership@tpulsefi.com"}
+              </p>
+            </div>
+            <p className="text-sm text-gray-400 text-center">
+              {t.membership?.emailInstructions?.note || "You will receive confirmation within 24 hours"}
+            </p>
+          </div>
+
+          {/* Payment Schedule Information */}
+          <div className="bg-green-500/10 backdrop-blur-xl border border-green-400/20 rounded-2xl p-6 mb-8">
+            <div className="flex items-center justify-center space-x-3">
+              <div className="text-2xl">💰</div>
+              <p className="text-green-300 font-medium text-center">
+                {t.membership?.paymentSchedule?.text || "Payments to exclusive members occur every month on the 9th"}
+              </p>
+            </div>
+          </div>
+
+          {/* Purchase Button */}
+          <div className="text-center">
+            <button className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-black font-bold py-4 px-12 rounded-full text-lg hover:from-yellow-300 hover:to-yellow-500 transition-all duration-300 transform hover:scale-105 shadow-2xl">
+              {t.membership?.comingSoon || "Coming Soon"}
+            </button>
+            <p className="text-gray-400 text-sm mt-4">Membership system will be available soon</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Navigation Bar */}
+      <div className="fixed bottom-6 left-6 right-6 z-50">
+        <div className="relative">
+          <div className="absolute inset-0 bg-gradient-to-t from-cyan-400/20 via-blue-400/10 to-transparent blur-lg" />
+          <div className="relative bg-black/40 backdrop-blur-xl border border-white/10 rounded-xl">
+            <div className="flex items-center justify-center py-3 px-6">
+              <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="relative group">
+                <div className="w-10 h-10 bg-gradient-to-r from-cyan-400/20 to-blue-400/20 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center hover:from-cyan-400/30 hover:to-blue-400/30 transition-all duration-300 shadow-xl">
+                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/30 to-blue-400/30 rounded-full animate-ping opacity-75" />
+                  <div className="absolute inset-1 bg-gradient-to-r from-white/10 to-white/5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  {isMenuOpen ? (
+                    <X className="w-5 h-5 text-white relative z-10 transition-transform duration-300 rotate-90" />
+                  ) : (
+                    <Menu className="w-5 h-5 text-white relative z-10 transition-transform duration-300" />
+                  )}
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/20 to-blue-400/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Sliding Menu from Bottom */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div
+            initial={{ y: "100%", opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: "100%", opacity: 0 }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="fixed bottom-6 left-6 right-6 z-40"
+          >
+            <div className="bg-black/30 backdrop-blur-xl border border-white/10 rounded-2xl mb-16">
+              <div className="flex justify-center pt-4 pb-2">
+                <div className="w-12 h-1 bg-white/30 rounded-full" />
+              </div>
+              <div className="p-6 pb-6">
+                <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/5 to-blue-400/5 rounded-2xl" />
+                <div className="relative z-10 grid grid-cols-2 gap-4 mb-6">
+                  {navigationItems.map((item, index) => (
+                    <motion.button
+                      key={item.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      onClick={() => {
+                        router.push(item.href)
+                        setIsMenuOpen(false)
+                      }}
+                      className="group p-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl hover:bg-white/10 transition-all duration-300"
+                    >
+                      <div className="flex flex-col items-center space-y-2">
+                        <div className="w-8 h-8 bg-gradient-to-r from-cyan-400/20 to-blue-400/20 rounded-full flex items-center justify-center group-hover:from-cyan-400/30 group-hover:to-blue-400/30 transition-all duration-300">
+                          <item.icon className="w-4 h-4 text-cyan-400 group-hover:text-white transition-colors" />
+                        </div>
+                        <span className="text-white/80 group-hover:text-white font-medium text-sm tracking-wide">
+                          {t.navigation?.[item.labelKey] || item.labelKey}
+                        </span>
+                      </div>
+                    </motion.button>
+                  ))}
+                </div>
+                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-gradient-to-r from-cyan-400/50 to-blue-400/50 rounded-full" />
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Background Effects */}
       <div className="absolute inset-0">
-        {/* Horizontal Moving Lines */}
-        {[...Array(12)].map((_, i) => (
+        {[...Array(20)].map((_, i) => (
           <div
-            key={`h-line-${i}`}
-            className="absolute h-px bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent animate-pulse"
+            key={`particle-${i}`}
+            className="absolute rounded-full animate-ping"
             style={{
-              top: `${8 + i * 8}%`,
-              left: "-100%",
-              width: "200%",
-              animation: `moveRight 4s linear infinite`,
-              animationDelay: `${i * 0.3}s`,
-            }}
-          />
-        ))}
-
-        {/* Vertical Moving Lines */}
-        {[...Array(10)].map((_, i) => (
-          <div
-            key={`v-line-${i}`}
-            className="absolute w-px bg-gradient-to-b from-transparent via-blue-400/50 to-transparent"
-            style={{
-              left: `${10 + i * 10}%`,
-              top: "-100%",
-              height: "200%",
-              animation: `moveDown 5s linear infinite`,
-              animationDelay: `${i * 0.4}s`,
-            }}
-          />
-        ))}
-
-        {/* Diagonal Moving Lines */}
-        {[...Array(8)].map((_, i) => (
-          <div
-            key={`d-line-${i}`}
-            className="absolute h-px bg-gradient-to-r from-transparent via-white/30 to-transparent rotate-45"
-            style={{
-              top: `${15 + i * 12}%`,
-              left: "-100%",
-              width: "200%",
-              animation: `moveRight 6s linear infinite`,
-              animationDelay: `${i * 0.5}s`,
+              width: `${2 + Math.random() * 4}px`,
+              height: `${2 + Math.random() * 4}px`,
+              backgroundColor:
+                i % 3 === 0 ? "rgba(255,255,255,0.3)" : i % 3 === 1 ? "rgba(34,211,238,0.4)" : "rgba(59,130,246,0.3)",
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 4}s`,
+              animationDuration: `${2 + Math.random() * 3}s`,
             }}
           />
         ))}
       </div>
 
-      {/* Static Grid for Reference */}
       <div
-        className="absolute inset-0 opacity-10"
+        className="absolute inset-0 opacity-5"
         style={{
           backgroundImage: `
             linear-gradient(rgba(34,211,238,0.3) 1px, transparent 1px),
@@ -269,259 +673,8 @@ export default function MembershipPage() {
           backgroundSize: "60px 60px",
         }}
       />
-
-      {/* Central Glow Effect */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="w-96 h-96 bg-white/5 rounded-full blur-3xl animate-pulse" />
-        <div
-          className="absolute w-80 h-80 bg-cyan-400/10 rounded-full blur-2xl animate-pulse"
-          style={{ animationDelay: "0.5s" }}
-        />
-        <div
-          className="absolute w-64 h-64 bg-blue-400/15 rounded-full blur-xl animate-pulse"
-          style={{ animationDelay: "1s" }}
-        />
-        <div
-          className="absolute w-48 h-48 bg-white/20 rounded-full blur-lg animate-pulse"
-          style={{ animationDelay: "1.5s" }}
-        />
-      </div>
-
-      {/* Rotating Rings */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div
-          className="w-72 h-72 border border-white/10 rounded-full animate-spin"
-          style={{ animationDuration: "20s" }}
-        />
-        <div
-          className="absolute w-80 h-80 border border-cyan-400/15 rounded-full animate-spin"
-          style={{ animationDuration: "25s", animationDirection: "reverse" }}
-        />
-        <div
-          className="absolute w-64 h-64 border border-blue-400/20 rounded-full animate-spin"
-          style={{ animationDuration: "15s" }}
-        />
-      </div>
-
-      {/* Enhanced Floating Particles */}
-      {[...Array(25)].map((_, i) => (
-        <div
-          key={`particle-${i}`}
-          className="absolute rounded-full animate-ping"
-          style={{
-            width: `${2 + Math.random() * 4}px`,
-            height: `${2 + Math.random() * 4}px`,
-            backgroundColor:
-              i % 3 === 0 ? "rgba(255,255,255,0.8)" : i % 3 === 1 ? "rgba(34,211,238,0.6)" : "rgba(59,130,246,0.4)",
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-            animationDelay: `${Math.random() * 4}s`,
-            animationDuration: `${1 + Math.random() * 3}s`,
-          }}
-        />
-      ))}
-
-      {/* Energy Beams */}
-      {[...Array(8)].map((_, i) => (
-        <div
-          key={`beam-${i}`}
-          className="absolute bg-gradient-to-r from-transparent via-white/20 to-transparent h-px animate-pulse"
-          style={{
-            top: "50%",
-            left: "50%",
-            width: "200px",
-            transformOrigin: "0 0",
-            transform: `rotate(${i * 45}deg)`,
-            animationDelay: `${i * 0.5}s`,
-            animationDuration: "2s",
-          }}
-        />
-      ))}
-
-      <style jsx>{`
-        @keyframes moveRight {
-          0% { transform: translateX(-100%); opacity: 0; }
-          10% { opacity: 1; }
-          90% { opacity: 1; }
-          100% { transform: translateX(100vw); opacity: 0; }
-        }
-        
-        @keyframes moveDown {
-          0% { transform: translateY(-100%); opacity: 0; }
-          10% { opacity: 1; }
-          90% { opacity: 1; }
-          100% { transform: translateY(100vh); opacity: 0; }
-        }
-      `}</style>
-
-      {/* Back Button */}
-      <motion.div
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.5 }}
-        className="absolute top-6 left-4 z-20"
-      >
-        <button
-          onClick={handleBack}
-          className="flex items-center space-x-2 text-white/80 hover:text-white transition-colors"
-        >
-          <div className="w-10 h-10 bg-black/20 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center hover:bg-white/10 transition-all duration-300">
-            <ArrowLeft className="w-5 h-5" />
-          </div>
-          <span className="text-sm font-medium">{t.back}</span>
-        </button>
-      </motion.div>
-
-      {/* Title */}
-      <motion.div
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.5 }}
-        className="text-center mb-8 relative z-10"
-      >
-        <h1 className="text-4xl font-bold tracking-tighter flex items-center justify-center mb-2">
-          <Crown className="w-8 h-8 mr-3 text-yellow-400" />
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-yellow-200 via-yellow-400 to-orange-400">
-            {t.title}
-          </span>
-        </h1>
-        <p className="text-gray-400 text-sm leading-relaxed px-4">{t.subtitle}</p>
-      </motion.div>
-
-      {/* Main Content */}
-      <div className="w-full max-w-sm px-4 relative z-10 space-y-4">
-        {/* Success Message */}
-        <AnimatePresence>
-          {paymentSuccess && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="bg-green-500/10 border border-green-500/30 rounded-lg p-3"
-            >
-              <div className="flex items-start space-x-2">
-                <CheckCircle className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="text-green-400 text-xs font-medium mb-1">{t.paymentSuccess}</p>
-                  <p className="text-green-300 text-xs">
-                    Welcome to our membership program! Your payment of 30 WLD has been processed.
-                  </p>
-                  <p className="text-green-300 text-xs mt-1">{t.emailInstruction}</p>
-                  <div className="flex items-center gap-1 mt-1 p-1.5 bg-gray-800/50 rounded border">
-                    <span className="text-xs text-gray-300 font-mono">support@tradepulsetoken.com</span>
-                    <button
-                      onClick={() => {
-                        navigator.clipboard.writeText("support@tradepulsetoken.com")
-                      }}
-                      className="p-0.5 text-gray-400 hover:text-white transition-colors"
-                    >
-                      <Copy className="w-3 h-3" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Error Message */}
-        <AnimatePresence>
-          {paymentError && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="bg-red-500/10 border border-red-500/30 rounded-lg p-3"
-            >
-              <div className="flex items-start space-x-2">
-                <div className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0">⚠️</div>
-                <div>
-                  <p className="text-red-400 text-xs font-medium mb-1">{t.paymentFailed}</p>
-                  <p className="text-red-300 text-xs">{paymentError}</p>
-                  <button
-                    onClick={() => setPaymentError(null)}
-                    className="mt-1 text-red-400 text-xs hover:text-red-300"
-                  >
-                    {t.dismiss}
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Membership Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="bg-gradient-to-br from-yellow-500/10 to-orange-500/10 backdrop-blur-xl border border-yellow-500/20 rounded-xl p-4 shadow-2xl"
-        >
-          <div className="text-center mb-4">
-            <div className="w-12 h-12 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
-              <Crown className="w-6 h-6 text-yellow-400" />
-            </div>
-            <h2 className="text-xl font-bold text-white mb-1">Premium Membership</h2>
-          </div>
-
-          {/* Description */}
-          <div className="mb-4">
-            <p className="text-gray-300 text-xs leading-relaxed text-center">{t.membershipDescription}</p>
-          </div>
-
-          {/* Price */}
-          <div className="text-center mb-4">
-            <div className="text-2xl font-bold text-white mb-0.5">30 WLD</div>
-            <div className="text-gray-400 text-xs">{t.oneTimePayment}</div>
-          </div>
-
-          {/* Email Instruction */}
-          <div className="mb-4 p-2 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-            <p className="text-blue-300 text-xs text-center leading-relaxed">📧 {t.emailInstruction}</p>
-            <div className="flex items-center justify-center gap-1 mt-1 p-1 bg-gray-800/50 rounded">
-              <span className="text-xs text-gray-300 font-mono">support@tradepulsetoken.com</span>
-              <button
-                onClick={() => {
-                  navigator.clipboard.writeText("support@tradepulsetoken.com")
-                }}
-                className="p-0.5 text-gray-400 hover:text-white transition-colors"
-              >
-                <Copy className="w-3 h-3" />
-              </button>
-            </div>
-          </div>
-
-          {/* Monthly Payments Info */}
-          <div className="mb-4 p-2 bg-green-500/10 border border-green-500/20 rounded-lg">
-            <p className="text-green-300 text-xs text-center leading-relaxed">💰 {t.monthlyPayments}</p>
-          </div>
-
-          {/* Get Membership Button */}
-          <button
-            onClick={handleGetMembership}
-            disabled={isProcessing}
-            className={`w-full py-3 px-4 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center space-x-2 ${
-              isProcessing
-                ? "bg-gray-600/50 text-gray-400 cursor-not-allowed"
-                : "bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white shadow-lg hover:shadow-xl transform hover:scale-105"
-            }`}
-          >
-            {isProcessing ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span className="text-sm">{t.processing}</span>
-              </>
-            ) : (
-              <>
-                <Crown className="w-4 h-4" />
-                <span className="text-sm">{t.getMembership}</span>
-              </>
-            )}
-          </button>
-
-          {!isAuthenticated && <p className="text-center text-gray-400 text-xs mt-2">{t.connectWalletFirst}</p>}
-        </motion.div>
-      </div>
-    </main>
+    </div>
   )
 }
+
+export default Membership
