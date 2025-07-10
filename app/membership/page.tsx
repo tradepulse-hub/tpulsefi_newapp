@@ -1,6 +1,5 @@
 "use client"
-
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
 import { ArrowLeft, Crown, Loader2, CheckCircle, Copy } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useRouter } from "next/navigation"
@@ -193,7 +192,20 @@ export default function MembershipPage() {
   }
 
   const handleBack = () => {
-    router.back()
+    console.log("🔙 Back button clicked")
+    try {
+      // Try to go back in history first
+      if (window.history.length > 1) {
+        router.back()
+      } else {
+        // Fallback to home page if no history
+        router.push("/")
+      }
+    } catch (error) {
+      console.error("Error navigating back:", error)
+      // Final fallback
+      router.push("/")
+    }
   }
 
   return (
