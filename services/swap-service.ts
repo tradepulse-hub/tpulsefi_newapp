@@ -14,7 +14,7 @@ import {
 } from "@holdstation/worldchain-sdk"
 import { Client, Multicall3 } from "@holdstation/worldchain-ethers-v6"
 
-// --- Token definitions (updated with project tokens) ---
+// --- Token definitions ---
 const TOKENS = [
   {
     address: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003",
@@ -27,15 +27,15 @@ const TOKENS = [
   {
     address: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45",
     symbol: "TPF",
-    name: "TPulseFi",
+    name: "TPulseFi Token",
     decimals: 18,
     logo: "/images/logo-tpf.png",
-    color: "#00D4FF",
+    color: "#FFFFFF",
   },
   {
     address: "0xEdE54d9c024ee80C85ec0a75eD2d8774c7Fbac9B",
     symbol: "WDD",
-    name: "Drachma",
+    name: "World Digital Dollar",
     decimals: 18,
     logo: "/images/drachma-token.png",
     color: "#FFD700",
@@ -43,15 +43,12 @@ const TOKENS = [
   {
     address: "0x868D08798F91ba9D6AC126148fdE8bBdfb6354D5",
     symbol: "TPT",
-    name: "TradePulse Token",
+    name: "Trade Pulse Token",
     decimals: 18,
-    logo: "/images/logo-tpf.png",
-    color: "#FF6B35",
+    logo: "/images/roflex-token.png",
+    color: "#00FF00",
   },
 ]
-
-const wldToken = TOKENS.find((t) => t.symbol === "WLD")!
-const tpfToken = TOKENS.find((t) => t.symbol === "TPF")!
 
 // --- Provider and SDK setup ---
 const RPC_URL = "https://worldchain-mainnet.g.alchemy.com/public"
@@ -75,38 +72,31 @@ async function loadTokenBalances(address: string) {
   // Placeholder for reloading token balances after swap
   console.log(`Token balances loaded for address: ${address}`)
 }
-async function loadTpfBalance(address: string) {
-  // Placeholder for reloading TPF balance after swap
-  console.log(`TPF balance loaded for address: ${address}`)
+async function loadAniBalance(address: string) {
+  // Placeholder for reloading ANI balance after swap
+  console.log(`ANI balance loaded for address: ${address}`)
 }
 
-// --- Helper function to get quote ---
-export async function getSwapQuote({
-  tokenInAddress,
-  tokenOutAddress,
-  amountIn,
-}: {
-  tokenInAddress: string
-  tokenOutAddress: string
-  amountIn: string
-}) {
+// Export tokens for use in other components
+export { TOKENS }
+
+// Export helper functions
+export async function getQuote(tokenInAddress: string, tokenOutAddress: string, amountIn: string) {
   try {
-    const params: SwapParams["quoteInput"] = {
+    console.log("Getting quote for:", { tokenInAddress, tokenOutAddress, amountIn })
+
+    const quote = await swapHelper.estimate.quote({
       tokenIn: tokenInAddress,
       tokenOut: tokenOutAddress,
-      amountIn: amountIn,
-      slippage: "3", // 3% slippage
-      fee: "0.2", // 0.2% fee
-    }
+      amountIn,
+      slippage: 3, // 3% slippage
+    })
 
-    console.log("Getting quote with params:", params)
-    const estimate = await swapHelper.quote(params)
-    console.log("Quote estimate:", estimate)
-
-    return estimate
+    console.log("Quote received:", quote)
+    return { success: true, quote }
   } catch (error) {
     console.error("Error getting quote:", error)
-    throw error
+    return { success: false, error: error instanceof Error ? error.message : "Unknown error" }
   }
 }
 
@@ -114,7 +104,7 @@ export async function getSwapQuote({
 /**
  * Executes a token swap using the Worldchain SDK.
  * @param walletAddress The user's wallet address
- * @param quote The quote object returned from swapHelper.quote
+ * @param quote The quote object returned from swapHelper.estimate.quote
  * @param amountIn The amount to swap (as a string)
  * @param tokenInAddress The input token address
  * @param tokenOutAddress The output token address
@@ -132,7 +122,10 @@ export async function doSwap({
   tokenInAddress: string
   tokenOutAddress: string
 }) {
-  if (!walletAddress || !quote || !amountIn) return
+  if (!walletAddress || !quote || !amountIn) {
+    return { success: false, error: "Missing required parameters" }
+  }
+
   try {
     const swapParams: SwapParams["input"] = {
       tokenIn: tokenInAddress,
@@ -143,33 +136,33 @@ export async function doSwap({
         to: quote.to,
         value: quote.value,
       },
+      partnerCode: "14298",
       feeAmountOut: quote.addons?.feeAmountOut,
       fee: "0.2",
       feeReceiver: "0x4bb270ef6dcb052a083bd5cff518e2e019c0f4ee",
     }
+
     console.log("Swapping with params:", swapParams)
     const result = await swapHelper.swap(swapParams)
+
     if (result.success) {
       // Wait for transaction to be confirmed
       await new Promise((res) => setTimeout(res, 2500))
       await provider.getBlockNumber()
       await updateUserData(walletAddress)
       await loadTokenBalances(walletAddress)
-      await loadTpfBalance(walletAddress)
+      await loadAniBalance(walletAddress)
       console.log("Swap successful!")
       return { success: true, result }
     } else {
       console.error("Swap failed: ", result)
-      return { success: false, error: result }
+      return { success: false, error: "Swap transaction failed" }
     }
   } catch (error) {
     console.error("Swap failed:", error)
-    return { success: false, error }
+    return { success: false, error: error instanceof Error ? error.message : "Unknown error" }
   }
 }
-
-// Export helper functions for the mini wallet
-export { TOKENS, swapHelper, provider }
 
 // Example usage (uncomment and fill in real values to test):
 // doSwap({ walletAddress: "0x...", quote: { ... }, amountIn: "1.0", tokenInAddress: "0x...", tokenOutAddress: "0x..." })
