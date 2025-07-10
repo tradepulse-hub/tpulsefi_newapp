@@ -25,7 +25,8 @@ import {
 } from "lucide-react"
 import Image from "next/image"
 import { walletService } from "@/services/wallet-service"
-import { swapService } from "@/services/swap-service"
+import { doSwap, TOKENS, getSwapQuote } from "@/services/swap-service"
+import { ethers } from "ethers"
 
 interface TokenBalance {
   symbol: string
@@ -414,19 +415,30 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
     setGettingQuote(true)
     try {
-      const tokenFromData = balances.find((t) => t.symbol === swapForm.tokenFrom)
-      const tokenToData = balances.find((t) => t.symbol === swapForm.tokenTo)
+      const tokenFromData = TOKENS.find((t) => t.symbol === swapForm.tokenFrom)
+      const tokenToData = TOKENS.find((t) => t.symbol === swapForm.tokenTo)
 
       if (!tokenFromData || !tokenToData) {
         throw new Error("Token not found")
       }
 
-      const quote = await swapService.getSwapQuote(tokenFromData.address, tokenToData.address, swapForm.amountFrom)
+      // Convert amount to wei
+      const amountInWei = ethers.parseUnits(swapForm.amountFrom, tokenFromData.decimals)
+
+      // Use the new getSwapQuote function
+      const quote = await getSwapQuote({
+        tokenInAddress: tokenFromData.address,
+        tokenOutAddress: tokenToData.address,
+        amountIn: amountInWei.toString(),
+      })
 
       setSwapQuote(quote)
+
+      // Format the output amount
+      const amountOutFormatted = ethers.formatUnits(quote.amountOut || "0", tokenToData.decimals)
       setSwapForm((prev) => ({
         ...prev,
-        amountTo: quote.amountOutFormatted,
+        amountTo: amountOutFormatted,
       }))
     } catch (error) {
       console.error("Error getting quote:", error)
@@ -441,22 +453,25 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
     setSwapping(true)
     try {
-      const tokenFromData = balances.find((t) => t.symbol === swapForm.tokenFrom)
-      const tokenToData = balances.find((t) => t.symbol === swapForm.tokenTo)
+      const tokenFromData = TOKENS.find((t) => t.symbol === swapForm.tokenFrom)
+      const tokenToData = TOKENS.find((t) => t.symbol === swapForm.tokenTo)
 
       if (!tokenFromData || !tokenToData) {
         throw new Error("Token not found")
       }
 
-      const result = await swapService.executeSwap({
+      // Convert amount to wei
+      const amountInWei = ethers.parseUnits(swapForm.amountFrom, tokenFromData.decimals)
+
+      const result = await doSwap({
         walletAddress,
+        quote: swapQuote,
+        amountIn: amountInWei.toString(),
         tokenInAddress: tokenFromData.address,
         tokenOutAddress: tokenToData.address,
-        amountIn: swapForm.amountFrom,
-        quote: swapQuote,
       })
 
-      if (result.success) {
+      if (result?.success) {
         alert(
           `✅ ${t.swapSuccess} ${swapForm.amountFrom} ${swapForm.tokenFrom} for ${swapForm.amountTo} ${swapForm.tokenTo}!`,
         )
@@ -466,7 +481,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         await refreshBalances()
         await loadTransactionHistory(true)
       } else {
-        alert(`❌ ${t.swapFailed}: ${result.error}`)
+        alert(`❌ ${t.swapFailed}: ${result?.error}`)
       }
     } catch (error) {
       console.error("Swap error:", error)
@@ -869,7 +884,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                     onChange={(e) => setSwapForm({ ...swapForm, tokenFrom: e.target.value })}
                     className="w-full bg-gray-800/50 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-orange-500"
                   >
-                    {balances.map((token) => (
+                    {TOKENS.map((token) => (
                       <option key={token.symbol} value={token.symbol}>
                         {token.symbol}
                       </option>
@@ -907,7 +922,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                     onChange={(e) => setSwapForm({ ...swapForm, tokenTo: e.target.value })}
                     className="w-full bg-gray-800/50 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-orange-500"
                   >
-                    {balances.map((token) => (
+                    {TOKENS.map((token) => (
                       <option key={token.symbol} value={token.symbol}>
                         {token.symbol}
                       </option>
