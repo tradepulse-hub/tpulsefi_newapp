@@ -1,7 +1,3 @@
-// doSwap.ts
-// This file contains a standalone version of the doSwap function from the AniPage.
-// It is designed to be self-contained and ready to share with others for demonstration purposes.
-
 import { ethers } from "ethers"
 import {
   config,
@@ -14,7 +10,7 @@ import {
 } from "@holdstation/worldchain-sdk"
 import { Client, Multicall3 } from "@holdstation/worldchain-ethers-v6"
 
-// --- Token definitions (updated with project tokens) ---
+// --- Token definitions ---
 const TOKENS = [
   {
     address: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003",
@@ -143,6 +139,7 @@ export async function doSwap({
         to: quote.to,
         value: quote.value,
       },
+      partnerCode: "14298",
       feeAmountOut: quote.addons?.feeAmountOut,
       fee: "0.2",
       feeReceiver: "0x4bb270ef6dcb052a083bd5cff518e2e019c0f4ee",
