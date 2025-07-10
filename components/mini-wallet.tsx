@@ -20,9 +20,12 @@ import {
   History,
   ExternalLink,
   ChevronDown,
+  ArrowLeftRight,
+  TrendingUp,
 } from "lucide-react"
 import Image from "next/image"
 import { walletService } from "@/services/wallet-service"
+import { swapService } from "@/services/swap-service"
 
 interface TokenBalance {
   symbol: string
@@ -63,20 +66,25 @@ const translations = {
     send: "Send",
     receive: "Receive",
     history: "History",
+    swap: "Swap",
     back: "Back",
     sendTokens: "Send Tokens",
     receiveTokens: "Receive Tokens",
+    swapTokens: "Swap Tokens",
     transactionHistory: "Transaction History",
     token: "Token",
     amount: "Amount",
     recipientAddress: "Recipient Address",
     sending: "Sending...",
+    swapping: "Swapping...",
     yourWalletAddress: "Your Wallet Address:",
     networkWarning: "Only send Worldchain network supported tokens to this address.",
     sendWarning:
       "Only send assets supported by the Worldchain network, do not send to exchanges, your sending may result in loss of assets",
     sendSuccess: "Successfully sent",
     sendFailed: "Send failed",
+    swapSuccess: "Successfully swapped",
+    swapFailed: "Swap failed",
     copyAddress: "Copy Address",
     minimize: "Minimize",
     disconnect: "Disconnect",
@@ -91,6 +99,14 @@ const translations = {
     viewOnExplorer: "View on Explorer",
     loadMore: "Load More",
     loading: "Loading...",
+    from: "From",
+    to: "To",
+    getQuote: "Get Quote",
+    gettingQuote: "Getting Quote...",
+    youWillReceive: "You will receive",
+    priceImpact: "Price Impact",
+    swapRate: "Swap Rate",
+    selectToken: "Select Token",
   },
   pt: {
     connected: "Conectado",
@@ -98,20 +114,25 @@ const translations = {
     send: "Enviar",
     receive: "Receber",
     history: "Histórico",
+    swap: "Trocar",
     back: "Voltar",
     sendTokens: "Enviar Tokens",
     receiveTokens: "Receber Tokens",
+    swapTokens: "Trocar Tokens",
     transactionHistory: "Histórico de Transações",
     token: "Token",
     amount: "Quantidade",
     recipientAddress: "Endereço do Destinatário",
     sending: "Enviando...",
+    swapping: "Trocando...",
     yourWalletAddress: "Seu Endereço da Carteira:",
     networkWarning: "Apenas envie para o seu endereço tokens suportados da rede Worldchain.",
     sendWarning:
       "Apenas envia ativos suportados pela rede Worldchain, não envie para exchanges, o seu envio poderá significar a perda dos ativos",
     sendSuccess: "Enviado com sucesso",
     sendFailed: "Falha no envio",
+    swapSuccess: "Trocado com sucesso",
+    swapFailed: "Falha na troca",
     copyAddress: "Copiar Endereço",
     minimize: "Minimizar",
     disconnect: "Desconectar",
@@ -126,6 +147,14 @@ const translations = {
     viewOnExplorer: "Ver no Explorer",
     loadMore: "Carregar Mais",
     loading: "Carregando...",
+    from: "De",
+    to: "Para",
+    getQuote: "Obter Cotação",
+    gettingQuote: "Obtendo Cotação...",
+    youWillReceive: "Você receberá",
+    priceImpact: "Impacto no Preço",
+    swapRate: "Taxa de Troca",
+    selectToken: "Selecionar Token",
   },
   es: {
     connected: "Conectado",
@@ -133,20 +162,25 @@ const translations = {
     send: "Enviar",
     receive: "Recibir",
     history: "Historial",
+    swap: "Intercambiar",
     back: "Volver",
     sendTokens: "Enviar Tokens",
     receiveTokens: "Recibir Tokens",
+    swapTokens: "Intercambiar Tokens",
     transactionHistory: "Historial de Transacciones",
     token: "Token",
     amount: "Cantidad",
     recipientAddress: "Dirección del Destinatario",
     sending: "Enviando...",
+    swapping: "Intercambiando...",
     yourWalletAddress: "Tu Dirección de Billetera:",
     networkWarning: "Solo envía tokens soportados por la red Worldchain a esta dirección.",
     sendWarning:
       "Solo envía activos soportados por la red Worldchain, no envíes a exchanges, tu envío podría resultar en la pérdida de activos",
     sendSuccess: "Enviado exitosamente",
     sendFailed: "Envío fallido",
+    swapSuccess: "Intercambiado exitosamente",
+    swapFailed: "Intercambio fallido",
     copyAddress: "Copiar Dirección",
     minimize: "Minimizar",
     disconnect: "Desconectar",
@@ -161,6 +195,14 @@ const translations = {
     viewOnExplorer: "Ver en Explorer",
     loadMore: "Cargar Más",
     loading: "Cargando...",
+    from: "Desde",
+    to: "Hacia",
+    getQuote: "Obtener Cotización",
+    gettingQuote: "Obteniendo Cotización...",
+    youWillReceive: "Recibirás",
+    priceImpact: "Impacto en el Precio",
+    swapRate: "Tasa de Intercambio",
+    selectToken: "Seleccionar Token",
   },
   id: {
     connected: "Terhubung",
@@ -168,20 +210,25 @@ const translations = {
     send: "Kirim",
     receive: "Terima",
     history: "Riwayat",
+    swap: "Tukar",
     back: "Kembali",
     sendTokens: "Kirim Token",
     receiveTokens: "Terima Token",
+    swapTokens: "Tukar Token",
     transactionHistory: "Riwayat Transaksi",
     token: "Token",
     amount: "Jumlah",
     recipientAddress: "Alamat Penerima",
     sending: "Mengirim...",
+    swapping: "Menukar...",
     yourWalletAddress: "Alamat Dompet Anda:",
     networkWarning: "Hanya kirim token yang didukung jaringan Worldchain ke alamat ini.",
     sendWarning:
       "Hanya kirim aset yang didukung oleh jaringan Worldchain, jangan kirim ke exchange, pengiriman Anda dapat mengakibatkan kehilangan aset",
     sendSuccess: "Berhasil dikirim",
     sendFailed: "Pengiriman gagal",
+    swapSuccess: "Berhasil ditukar",
+    swapFailed: "Penukaran gagal",
     copyAddress: "Salin Alamat",
     minimize: "Minimalkan",
     disconnect: "Putuskan",
@@ -196,10 +243,18 @@ const translations = {
     viewOnExplorer: "Lihat di Explorer",
     loadMore: "Muat Lebih Banyak",
     loading: "Memuat...",
+    from: "Dari",
+    to: "Ke",
+    getQuote: "Dapatkan Kutipan",
+    gettingQuote: "Mendapatkan Kutipan...",
+    youWillReceive: "Anda akan menerima",
+    priceImpact: "Dampak Harga",
+    swapRate: "Tingkat Tukar",
+    selectToken: "Pilih Token",
   },
 }
 
-type ViewMode = "main" | "send" | "receive" | "history"
+type ViewMode = "main" | "send" | "receive" | "history" | "swap"
 
 export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: MiniWalletProps) {
   const [currentLang, setCurrentLang] = useState<SupportedLanguage>("en")
@@ -221,7 +276,16 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     amount: "",
     recipient: "",
   })
+  const [swapForm, setSwapForm] = useState({
+    tokenFrom: "TPF",
+    tokenTo: "WLD",
+    amountFrom: "",
+    amountTo: "",
+  })
   const [sending, setSending] = useState(false)
+  const [swapping, setSwapping] = useState(false)
+  const [gettingQuote, setGettingQuote] = useState(false)
+  const [swapQuote, setSwapQuote] = useState<any>(null)
   const [error, setError] = useState<string | null>(null)
   const [isMinimized, setIsMinimized] = useState(false)
 
@@ -345,9 +409,78 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     }
   }
 
+  const handleGetQuote = async () => {
+    if (!swapForm.amountFrom || swapForm.tokenFrom === swapForm.tokenTo) return
+
+    setGettingQuote(true)
+    try {
+      const tokenFromData = balances.find((t) => t.symbol === swapForm.tokenFrom)
+      const tokenToData = balances.find((t) => t.symbol === swapForm.tokenTo)
+
+      if (!tokenFromData || !tokenToData) {
+        throw new Error("Token not found")
+      }
+
+      const quote = await swapService.getSwapQuote(tokenFromData.address, tokenToData.address, swapForm.amountFrom)
+
+      setSwapQuote(quote)
+      setSwapForm((prev) => ({
+        ...prev,
+        amountTo: quote.amountOutFormatted,
+      }))
+    } catch (error) {
+      console.error("Error getting quote:", error)
+      alert("Failed to get quote. Please try again.")
+    } finally {
+      setGettingQuote(false)
+    }
+  }
+
+  const handleSwap = async () => {
+    if (!swapQuote || !swapForm.amountFrom) return
+
+    setSwapping(true)
+    try {
+      const tokenFromData = balances.find((t) => t.symbol === swapForm.tokenFrom)
+      const tokenToData = balances.find((t) => t.symbol === swapForm.tokenTo)
+
+      if (!tokenFromData || !tokenToData) {
+        throw new Error("Token not found")
+      }
+
+      const result = await swapService.executeSwap({
+        walletAddress,
+        tokenInAddress: tokenFromData.address,
+        tokenOutAddress: tokenToData.address,
+        amountIn: swapForm.amountFrom,
+        quote: swapQuote,
+      })
+
+      if (result.success) {
+        alert(
+          `✅ ${t.swapSuccess} ${swapForm.amountFrom} ${swapForm.tokenFrom} for ${swapForm.amountTo} ${swapForm.tokenTo}!`,
+        )
+        setViewMode("main")
+        setSwapForm({ tokenFrom: "TPF", tokenTo: "WLD", amountFrom: "", amountTo: "" })
+        setSwapQuote(null)
+        await refreshBalances()
+        await loadTransactionHistory(true)
+      } else {
+        alert(`❌ ${t.swapFailed}: ${result.error}`)
+      }
+    } catch (error) {
+      console.error("Swap error:", error)
+      alert(`❌ ${t.swapFailed}. Please try again.`)
+    } finally {
+      setSwapping(false)
+    }
+  }
+
   const handleBackToMain = () => {
     setViewMode("main")
     setSendForm({ token: "TPF", amount: "", recipient: "" })
+    setSwapForm({ tokenFrom: "TPF", tokenTo: "WLD", amountFrom: "", amountTo: "" })
+    setSwapQuote(null)
   }
 
   const openTransactionInExplorer = (hash: string) => {
@@ -561,27 +694,34 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
             {/* Quick Actions */}
             <div className="mt-4 pt-4 border-t border-white/10">
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-4 gap-2">
                 <button
                   onClick={() => setViewMode("send")}
-                  className="flex items-center justify-center space-x-2 py-2 px-3 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 rounded-lg transition-all duration-200 text-blue-300 hover:text-blue-200"
+                  className="flex flex-col items-center justify-center space-y-1 py-2 px-2 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 rounded-lg transition-all duration-200 text-blue-300 hover:text-blue-200"
                 >
                   <ArrowUpRight className="w-4 h-4" />
-                  <span className="text-sm font-medium">{t.send}</span>
+                  <span className="text-xs font-medium">{t.send}</span>
                 </button>
                 <button
                   onClick={() => setViewMode("receive")}
-                  className="flex items-center justify-center space-x-2 py-2 px-3 bg-green-600/20 hover:bg-green-600/30 border border-green-500/30 rounded-lg transition-all duration-200 text-green-300 hover:text-green-200"
+                  className="flex flex-col items-center justify-center space-y-1 py-2 px-2 bg-green-600/20 hover:bg-green-600/30 border border-green-500/30 rounded-lg transition-all duration-200 text-green-300 hover:text-green-200"
                 >
                   <ArrowDownLeft className="w-4 h-4" />
-                  <span className="text-sm font-medium">{t.receive}</span>
+                  <span className="text-xs font-medium">{t.receive}</span>
+                </button>
+                <button
+                  onClick={() => setViewMode("swap")}
+                  className="flex flex-col items-center justify-center space-y-1 py-2 px-2 bg-orange-600/20 hover:bg-orange-600/30 border border-orange-500/30 rounded-lg transition-all duration-200 text-orange-300 hover:text-orange-200"
+                >
+                  <ArrowLeftRight className="w-4 h-4" />
+                  <span className="text-xs font-medium">{t.swap}</span>
                 </button>
                 <button
                   onClick={() => setViewMode("history")}
-                  className="flex items-center justify-center space-x-2 py-2 px-3 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 rounded-lg transition-all duration-200 text-purple-300 hover:text-purple-200"
+                  className="flex flex-col items-center justify-center space-y-1 py-2 px-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 rounded-lg transition-all duration-200 text-purple-300 hover:text-purple-200"
                 >
                   <History className="w-4 h-4" />
-                  <span className="text-sm font-medium">{t.history}</span>
+                  <span className="text-xs font-medium">{t.history}</span>
                 </button>
               </div>
             </div>
@@ -690,6 +830,145 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                   </>
                 )}
               </button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Swap View */}
+        {viewMode === "swap" && (
+          <motion.div
+            key="swap"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            className="p-4"
+          >
+            {/* Header with Back Button */}
+            <div className="flex items-center justify-between mb-6">
+              <button
+                onClick={handleBackToMain}
+                className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span className="text-sm font-medium">{t.back}</span>
+              </button>
+              <h3 className="text-lg font-bold text-white flex items-center">
+                <ArrowLeftRight className="w-5 h-5 mr-2 text-orange-400" />
+                {t.swapTokens}
+              </h3>
+              <div className="w-16" /> {/* Spacer for centering */}
+            </div>
+
+            <div className="space-y-4">
+              {/* From Token */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">{t.from}</label>
+                <div className="space-y-2">
+                  <select
+                    value={swapForm.tokenFrom}
+                    onChange={(e) => setSwapForm({ ...swapForm, tokenFrom: e.target.value })}
+                    className="w-full bg-gray-800/50 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-orange-500"
+                  >
+                    {balances.map((token) => (
+                      <option key={token.symbol} value={token.symbol}>
+                        {token.symbol}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="number"
+                    value={swapForm.amountFrom}
+                    onChange={(e) => setSwapForm({ ...swapForm, amountFrom: e.target.value })}
+                    placeholder="0.00"
+                    className="w-full bg-gray-800/50 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-orange-500"
+                  />
+                  <div className="text-xs text-gray-400">
+                    {t.available}: {(() => {
+                      const selectedToken = balances.find((t) => t.symbol === swapForm.tokenFrom)
+                      return selectedToken ? formatBalance(selectedToken.balance) : "0"
+                    })()} {swapForm.tokenFrom}
+                  </div>
+                </div>
+              </div>
+
+              {/* Swap Direction Indicator */}
+              <div className="flex justify-center">
+                <div className="w-8 h-8 bg-orange-600/20 border border-orange-500/30 rounded-full flex items-center justify-center">
+                  <ArrowLeftRight className="w-4 h-4 text-orange-400" />
+                </div>
+              </div>
+
+              {/* To Token */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">{t.to}</label>
+                <div className="space-y-2">
+                  <select
+                    value={swapForm.tokenTo}
+                    onChange={(e) => setSwapForm({ ...swapForm, tokenTo: e.target.value })}
+                    className="w-full bg-gray-800/50 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-orange-500"
+                  >
+                    {balances.map((token) => (
+                      <option key={token.symbol} value={token.symbol}>
+                        {token.symbol}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="number"
+                    value={swapForm.amountTo}
+                    readOnly
+                    placeholder="0.00"
+                    className="w-full bg-gray-700/50 border border-white/10 rounded-lg px-3 py-2 text-gray-300 cursor-not-allowed"
+                  />
+                  {swapQuote && (
+                    <div className="text-xs text-green-400">
+                      {t.youWillReceive}: {swapForm.amountTo} {swapForm.tokenTo}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Get Quote Button */}
+              {!swapQuote && (
+                <button
+                  onClick={handleGetQuote}
+                  disabled={gettingQuote || !swapForm.amountFrom || swapForm.tokenFrom === swapForm.tokenTo}
+                  className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2"
+                >
+                  {gettingQuote ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-t-white border-r-transparent border-l-transparent border-b-white rounded-full animate-spin" />
+                      <span>{t.gettingQuote}</span>
+                    </>
+                  ) : (
+                    <>
+                      <TrendingUp className="w-4 h-4" />
+                      <span>{t.getQuote}</span>
+                    </>
+                  )}
+                </button>
+              )}
+
+              {/* Swap Button */}
+              {swapQuote && (
+                <button
+                  onClick={handleSwap}
+                  disabled={swapping}
+                  className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2"
+                >
+                  {swapping ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-t-white border-r-transparent border-l-transparent border-b-white rounded-full animate-spin" />
+                      <span>{t.swapping}</span>
+                    </>
+                  ) : (
+                    <>
+                      <ArrowLeftRight className="w-4 h-4" />
+                      <span>{t.swap}</span>
+                    </>
+                  )}
+                </button>
+              )}
             </div>
           </motion.div>
         )}
