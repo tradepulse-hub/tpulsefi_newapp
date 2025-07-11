@@ -447,23 +447,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         return "0"
       }
 
-      // Check if it's a very large number string (likely wei)
-      // Wei values are typically 18+ digits
-      if (stringValue.length >= 15 && /^\d+$/.test(stringValue)) {
-        console.log("🔍 Detected large number string (likely wei):", stringValue)
-        try {
-          const weiFormatted = ethers.formatUnits(stringValue, 18)
-          console.log("💱 Converted from wei:", weiFormatted)
-          return Number.parseFloat(weiFormatted).toFixed(6)
-        } catch (error) {
-          console.warn("⚠️ Error formatting from wei:", error)
-          // Fallback: divide by 1e18
-          const numValue = Number.parseFloat(stringValue)
-          return (numValue / 1e18).toFixed(6)
-        }
-      }
-
-      // Try to parse as number
+      // Try to parse as number first
       const numValue = Number.parseFloat(stringValue)
       console.log("📝 Parsed number:", numValue)
 
@@ -473,16 +457,33 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         return "0"
       }
 
-      // If it's a very large number (likely wei in number format)
-      if (numValue > 1000000000000000) {
-        // Lower threshold for better detection
+      // IMPROVED WEI DETECTION:
+      // If the number is greater than 1 million, it's likely in wei
+      // Most token amounts in normal format are under 1 million
+      if (numValue > 1000000) {
         console.log("🔍 Detected large number (likely wei):", numValue)
         try {
+          // Try to format as wei (18 decimals)
           const weiFormatted = ethers.formatUnits(stringValue, 18)
-          console.log("💱 Converted large number from wei:", weiFormatted)
+          console.log("💱 Converted from wei:", weiFormatted)
+          const finalValue = Number.parseFloat(weiFormatted)
+          return finalValue.toFixed(6)
+        } catch (error) {
+          console.warn("⚠️ Error formatting from wei:", error)
+          // Fallback: divide by 1e18
+          return (numValue / 1e18).toFixed(6)
+        }
+      }
+
+      // If it's a string with many digits (15+), also treat as wei
+      if (stringValue.length >= 15 && /^\d+$/.test(stringValue)) {
+        console.log("🔍 Detected long digit string (likely wei):", stringValue)
+        try {
+          const weiFormatted = ethers.formatUnits(stringValue, 18)
+          console.log("💱 Converted long string from wei:", weiFormatted)
           return Number.parseFloat(weiFormatted).toFixed(6)
         } catch (error) {
-          console.warn("⚠️ Error formatting large number from wei:", error)
+          console.warn("⚠️ Error formatting long string from wei:", error)
           return (numValue / 1e18).toFixed(6)
         }
       }
@@ -1303,6 +1304,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
           )}
         </AnimatePresence>
       </motion.div>
+      {/* DebugConsole sempre visível */}
       <DebugConsole />
     </>
   )
