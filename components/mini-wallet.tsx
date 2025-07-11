@@ -19,12 +19,11 @@ import {
   AlertTriangle,
   History,
   ExternalLink,
-  ChevronDown,
   ArrowLeftRight,
 } from "lucide-react"
 import Image from "next/image"
 import { walletService } from "@/services/wallet-service"
-import { doSwap, swapHelper, testSwapHelper } from "@/services/swap-service"
+import { doSwap, testSwapHelper, getRealQuote } from "@/services/swap-service"
 import { ethers } from "ethers"
 import { DebugConsole } from "@/components/debug-console"
 
@@ -426,89 +425,9 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     }
   }
 
-  // Safe number formatting function with better wei detection
-  const safeFormatNumber = (value: any): string => {
-    try {
-      console.log("🔍 safeFormatNumber input:", { value, type: typeof value, string: String(value) })
-
-      // Handle null, undefined, empty string
-      if (value === null || value === undefined || value === "") {
-        console.log("📝 Returning 0 for null/undefined/empty")
-        return "0"
-      }
-
-      // Convert to string first
-      const stringValue = String(value).trim()
-      console.log("📝 String value:", stringValue)
-
-      // Handle empty string after trim
-      if (stringValue === "") {
-        console.log("📝 Returning 0 for empty string")
-        return "0"
-      }
-
-      // Try to parse as number first
-      const numValue = Number.parseFloat(stringValue)
-      console.log("📝 Parsed number:", numValue)
-
-      // Check if it's a valid number
-      if (isNaN(numValue) || !isFinite(numValue)) {
-        console.warn("⚠️ Invalid number value:", value)
-        return "0"
-      }
-
-      // IMPROVED WEI DETECTION:
-      // If the number is greater than 1 million, it's likely in wei
-      // Most token amounts in normal format are under 1 million
-      if (numValue > 1000000) {
-        console.log("🔍 Detected large number (likely wei):", numValue)
-        try {
-          // Try to format as wei (18 decimals)
-          const weiFormatted = ethers.formatUnits(stringValue, 18)
-          console.log("💱 Converted from wei:", weiFormatted)
-          const finalValue = Number.parseFloat(weiFormatted)
-          return finalValue.toFixed(6)
-        } catch (error) {
-          console.warn("⚠️ Error formatting from wei:", error)
-          // Fallback: divide by 1e18
-          return (numValue / 1e18).toFixed(6)
-        }
-      }
-
-      // If it's a string with many digits (15+), also treat as wei
-      if (stringValue.length >= 15 && /^\d+$/.test(stringValue)) {
-        console.log("🔍 Detected long digit string (likely wei):", stringValue)
-        try {
-          const weiFormatted = ethers.formatUnits(stringValue, 18)
-          console.log("💱 Converted long string from wei:", weiFormatted)
-          return Number.parseFloat(weiFormatted).toFixed(6)
-        } catch (error) {
-          console.warn("⚠️ Error formatting long string from wei:", error)
-          return (numValue / 1e18).toFixed(6)
-        }
-      }
-
-      // Return formatted number (already in correct format)
-      console.log("📝 Returning formatted number:", numValue.toFixed(6))
-      return numValue.toFixed(6)
-    } catch (error) {
-      console.error("❌ Error in safeFormatNumber:", error, "for value:", value)
-      return "0"
-    }
-  }
-
-  // Get quote function for WLD to TPF swap only
+  // Get REAL quote from Holdstation SDK
   const getSwapQuote = useCallback(
     async (amountFrom: string) => {
-      // Check if swapHelper is available
-      if (!swapHelper) {
-        console.error("❌ swapHelper not available")
-        setQuoteError("Swap service not available")
-        return
-      }
-
-      console.log("✅ swapHelper available:", !!swapHelper.estimate?.quote)
-
       if (!amountFrom || Number.parseFloat(amountFrom) <= 0 || isNaN(Number.parseFloat(amountFrom))) {
         setSwapQuote(null)
         setSwapForm((prev) => ({ ...prev, amountTo: "" }))
@@ -520,64 +439,26 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       setQuoteError(null)
 
       try {
-        console.log("🔄 Getting swap quote for WLD to TPF:", { amountFrom })
+        console.log("🔄 Getting REAL quote from Holdstation SDK for:", amountFrom, "WLD")
 
-        // Convert amount to wei using ethers v6 syntax
-        const amountInWei = ethers.parseUnits(amountFrom, 18)
-        console.log("💰 Amount in wei:", amountInWei.toString())
+        // Use the new getRealQuote function
+        const { quote, outputAmount, rawOutputAmount } = await getRealQuote(amountFrom)
 
-        // Use the swapHelper to get quote with proper error handling
-        console.log("🔄 Calling swapHelper.estimate.quote with params:", {
-          tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003",
-          tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45",
-          amountIn: amountInWei.toString(),
-          preferRouters: ["0x", "holdso"],
-          timeout: 30000,
-        })
-
-        const quote = await swapHelper.estimate.quote({
-          tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
-          tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
-          amountIn: amountInWei.toString(),
-          preferRouters: ["0x", "holdso"],
-          timeout: 30000, // 30 seconds timeout
-        })
-
-        console.log("✅ Quote response FULL:", JSON.stringify(quote, null, 2))
-        console.log("✅ Quote response structure:", {
-          hasData: !!quote.data,
-          hasTo: !!quote.to,
-          hasValue: !!quote.value,
-          hasAddons: !!quote.addons,
-          outAmount: quote.addons?.outAmount,
-          outAmountType: typeof quote.addons?.outAmount,
-          outAmountString: String(quote.addons?.outAmount),
-          outAmountRaw: quote.addons?.outAmount,
+        console.log("✅ REAL quote received:", {
+          outputAmount,
+          rawOutputAmount,
+          hasQuoteData: !!quote.data,
         })
 
         setSwapQuote(quote)
-
-        // Format the output amount using safe formatting
-        let amountOutFormatted = "0"
-        if (quote.addons?.outAmount) {
-          console.log("🔍 Processing outAmount:", quote.addons.outAmount)
-          amountOutFormatted = safeFormatNumber(quote.addons.outAmount)
-          console.log("💱 Final formatted output amount:", amountOutFormatted)
-        } else {
-          console.warn("⚠️ No outAmount in quote.addons")
-        }
-
         setSwapForm((prev) => ({
           ...prev,
-          amountTo: amountOutFormatted,
+          amountTo: outputAmount,
         }))
+
+        console.log("💱 Updated swap form with real amount:", outputAmount, "TPF")
       } catch (error) {
-        console.error("❌ Error getting quote:", error)
-        console.error("❌ Error details:", {
-          message: error?.message,
-          stack: error?.stack,
-          name: error?.name,
-        })
+        console.error("❌ Error getting REAL quote:", error)
         setQuoteError(`${t.quoteError}: ${error?.message || "Unknown error"}`)
         setSwapQuote(null)
         setSwapForm((prev) => ({ ...prev, amountTo: "" }))
@@ -604,7 +485,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
     setSwapping(true)
     try {
-      console.log("🚀 Starting swap transaction:", swapForm)
+      console.log("🚀 Starting REAL swap transaction:", swapForm)
 
       // Convert amount to wei using ethers v6 syntax
       const amountInWei = ethers.parseUnits(swapForm.amountFrom, 18)
@@ -616,7 +497,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         amountIn: amountInWei.toString(),
       })
 
-      console.log("✅ Swap completed:", result)
+      console.log("✅ REAL swap completed:", result)
       alert(`✅ ${t.swapSuccess} ${swapForm.amountFrom} WLD for ${swapForm.amountTo} TPF!`)
       setViewMode("main")
       setSwapForm({ tokenFrom: "WLD", tokenTo: "TPF", amountFrom: "", amountTo: "" })
@@ -624,7 +505,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       await refreshBalances()
       await loadTransactionHistory(true)
     } catch (error) {
-      console.error("❌ Swap error:", error)
+      console.error("❌ REAL swap error:", error)
       alert(`❌ ${t.swapFailed}. Please try again.`)
     } finally {
       setSwapping(false)
@@ -681,20 +562,20 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     }
   }, [walletAddress])
 
-  // Test swapHelper on component mount
+  // Test Holdstation SDK on component mount
   useEffect(() => {
-    const testSwap = async () => {
-      console.log("🧪 Testing swapHelper on component mount...")
+    const testSDK = async () => {
+      console.log("🧪 Testing Holdstation SDK on component mount...")
       const isWorking = await testSwapHelper()
       if (!isWorking) {
-        console.error("❌ swapHelper is not working properly")
-        setQuoteError("Swap service initialization failed")
+        console.error("❌ Holdstation SDK is not working properly")
+        setQuoteError("Holdstation SDK initialization failed")
       } else {
-        console.log("✅ swapHelper is working correctly")
+        console.log("✅ Holdstation SDK is working correctly")
       }
     }
 
-    testSwap()
+    testSDK()
   }, [])
 
   const formatBalance = (balance: string): string => {
@@ -1255,13 +1136,15 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                           <div className="text-right">
                             <p className="text-white font-medium text-sm">
                               {tx.type === "sent" ? "-" : "+"}
-                              {formatBalance(tx.amount)}
+                              {formatBalance(tx.amount)} {tx.token}
                             </p>
-                            <div className="flex items-center space-x-1">
+                            <div className="flex items-center space-x-2">
                               <span className={`text-xs ${getStatusColor(tx.status)}`}>
-                                {tx.status === "confirmed" && t.confirmed}
-                                {tx.status === "pending" && t.pending}
-                                {tx.status === "failed" && t.failed}
+                                {tx.status === "confirmed"
+                                  ? t.confirmed
+                                  : tx.status === "pending"
+                                    ? t.pending
+                                    : t.failed}
                               </span>
                               <button
                                 onClick={() => openTransactionInExplorer(tx.hash)}
@@ -1282,18 +1165,15 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                       <button
                         onClick={loadMoreTransactions}
                         disabled={loadingMore}
-                        className="w-full py-2 px-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-gray-300 hover:text-white transition-all duration-200 flex items-center justify-center space-x-2"
+                        className="w-full py-2 text-sm text-gray-400 hover:text-white transition-colors border border-white/10 rounded-lg hover:bg-white/5 disabled:opacity-50"
                       >
                         {loadingMore ? (
-                          <>
+                          <div className="flex items-center justify-center space-x-2">
                             <RefreshCw className="w-4 h-4 animate-spin" />
                             <span>{t.loading}</span>
-                          </>
+                          </div>
                         ) : (
-                          <>
-                            <ChevronDown className="w-4 h-4" />
-                            <span>{t.loadMore}</span>
-                          </>
+                          t.loadMore
                         )}
                       </button>
                     )}
@@ -1304,7 +1184,6 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
           )}
         </AnimatePresence>
       </motion.div>
-      {/* DebugConsole sempre visível */}
       <DebugConsole />
     </>
   )
