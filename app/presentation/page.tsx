@@ -554,7 +554,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.8, opacity: 0, y: 50 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="relative bg-black/90 backdrop-blur-xl border border-white/20 rounded-2xl p-4 max-w-sm w-full mx-4 shadow-2xl"
+              className="relative bg-black/90 backdrop-blur-xl border border-white/20 rounded-2xl p-3 max-w-xs w-full mx-4 shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Close Button */}
@@ -566,75 +566,75 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
               </button>
 
               {/* Modal Header with TPF Logo */}
-              <div className="text-center mb-6">
+              <div className="text-center mb-3">
                 {/* Back Button */}
                 <button
                   onClick={() => setShowEventsModal(false)}
-                  className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors mb-4"
+                  className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors mb-2"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   <span className="text-sm">{t.common?.back || "Back"}</span>
                 </button>
                 {/* Animated TPF Logo */}
-                <div className="relative mb-4 flex justify-center">
+                <div className="relative mb-2 flex justify-center">
                   {/* Glow Effects */}
-                  <div className="absolute w-20 h-20 bg-gradient-to-r from-yellow-400/30 to-orange-400/30 rounded-full blur-xl animate-pulse" />
+                  <div className="absolute w-12 h-12 bg-gradient-to-r from-yellow-400/30 to-orange-400/30 rounded-full blur-xl animate-pulse" />
                   <div
-                    className="absolute w-16 h-16 bg-gradient-to-r from-white/20 to-white/10 rounded-full blur-lg animate-pulse"
+                    className="absolute w-10 h-10 bg-gradient-to-r from-white/20 to-white/10 rounded-full blur-lg animate-pulse"
                     style={{ animationDelay: "0.5s" }}
                   />
 
                   {/* Logo Container */}
-                  <div className="relative w-16 h-16 bg-white rounded-full p-2 shadow-2xl animate-bounce">
+                  <div className="relative w-12 h-12 bg-white rounded-full p-2 shadow-2xl animate-bounce">
                     <Image
                       src="/images/logo-tpf.png"
                       alt="TPulseFi Logo"
-                      width={48}
-                      height={48}
+                      width={32}
+                      height={32}
                       className="w-full h-full object-contain"
                     />
                   </div>
                 </div>
 
                 {/* Live Badge */}
-                <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-red-500 to-pink-500 px-3 py-1 rounded-full mb-2">
+                <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-red-500 to-pink-500 px-2 py-0.5 rounded-full mb-1">
                   <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
                   <span className="text-white text-xs font-bold tracking-wider">
                     {t.events?.liveEvent || "LIVE EVENT"}
                   </span>
                 </div>
 
-                <h2 className="text-lg font-bold text-white mb-2">{t.events?.title || "Live Events"}</h2>
+                <h2 className="text-sm font-bold text-white mb-1">{t.events?.title || "Live Events"}</h2>
               </div>
 
               {/* Event Content */}
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {/* Event Title */}
-                <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 rounded-lg p-3">
+                <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 rounded-lg p-2">
                   <div className="flex items-center space-x-2 mb-2">
-                    <Star className="w-5 h-5 text-yellow-400" />
-                    <h3 className="text-base font-semibold text-white">
+                    <Star className="w-3 h-3 text-yellow-400" />
+                    <h3 className="text-xs font-semibold text-white">
                       {t.events?.eventTitle || "Earn 10% TPF on your TPF purchase"}
                     </h3>
                   </div>
 
                   <div className="flex items-center space-x-2 mb-2">
-                    <DollarSign className="w-4 h-4 text-green-400" />
-                    <p className="text-green-300 font-medium">
+                    <DollarSign className="w-3 h-3 text-green-400" />
+                    <p className="text-green-300 text-xs">
                       {t.events?.eventDescription || "$50 minimum TPF purchase required!"}
                     </p>
                   </div>
 
-                  <p className="text-gray-300 text-sm">
+                  <p className="text-gray-300 text-xs">
                     {t.events?.eventDetails || "The 10% bonus applies only to the amount purchased during the event"}
                   </p>
                 </div>
 
                 {/* Warning */}
-                <div className="bg-gradient-to-r from-red-500/20 to-pink-500/20 border border-red-500/30 rounded-lg p-3">
+                <div className="bg-gradient-to-r from-red-500/20 to-pink-500/20 border border-red-500/30 rounded-lg p-2">
                   <div className="flex items-start space-x-2">
-                    <AlertTriangle className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0" />
-                    <p className="text-red-300 text-sm">
+                    <AlertTriangle className="w-3 h-3 text-red-400 mt-0.5 flex-shrink-0" />
+                    <p className="text-red-300 text-xs">
                       {t.events?.eventWarning ||
                         "You must hold these assets without selling until the end of the event, otherwise you will be disqualified!"}
                     </p>
@@ -642,20 +642,22 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                 </div>
 
                 {/* Event Period */}
-                <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 rounded-lg p-3">
+                <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 rounded-lg p-2">
                   <div className="flex items-center space-x-2 mb-2">
-                    <Clock className="w-4 h-4 text-blue-400" />
-                    <h4 className="text-white font-medium">{t.events?.eventPeriod || "Event Period"}</h4>
+                    <Clock className="w-3 h-3 text-blue-400" />
+                    <h4 className="text-white text-xs">{t.events?.eventPeriod || "Event Period"}</h4>
                   </div>
-                  <p className="text-blue-300 font-mono">{t.events?.eventDates || "July 11, 2025 - August 11, 2025"}</p>
+                  <p className="text-blue-300 font-mono text-xs">
+                    {t.events?.eventDates || "July 11, 2025 - August 11, 2025"}
+                  </p>
                 </div>
 
                 {/* Action Buttons */}
                 <div className="flex space-x-3 pt-2">
-                  <button className="flex-1 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105">
+                  <button className="flex-1 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-semibold py-2 px-3 rounded-lg transition-all duration-300 transform hover:scale-105 text-xs">
                     {t.events?.participateNow || "Participate Now"}
                   </button>
-                  <button className="px-4 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all duration-300 text-sm">
+                  <button className="px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all duration-300 text-xs">
                     {t.events?.termsConditions || "Terms & Conditions"}
                   </button>
                 </div>
