@@ -452,9 +452,8 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         console.log("🔄 Getting swap quote for WLD to TPF:", { amountFrom })
 
         // Convert amount to wei using ethers v6 syntax
-        // Limpar o valor para remover decimais excessivos
-        const cleanAmount = Number.parseFloat(amountFrom).toFixed(6) // Reduzir para 6 decimais
-        const amountInWei = ethers.parseUnits(cleanAmount, 18)
+        // O usuário insere valores normais (ex: 1 WLD), não em wei
+        const amountInWei = ethers.parseUnits(amountFrom, 18) // Converter diretamente sem toFixed
         console.log("💰 Amount in wei:", amountInWei.toString())
 
         // Use the swapHelper to get quote with proper error handling
@@ -491,21 +490,24 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         let amountOutFormatted = "0"
         if (quote.addons?.outAmount) {
           try {
-            // Se outAmount é um número decimal, converter para string inteira primeiro
-            const outAmountStr = quote.addons.outAmount.toString()
-            console.log("🔄 Raw outAmount:", outAmountStr)
+            // Se outAmount já vem em wei (string), usar diretamente
+            // Se vem como número decimal, converter para wei primeiro
+            let outAmountWei = quote.addons.outAmount.toString()
 
-            // Se contém ponto decimal, truncar para inteiro
-            const cleanOutAmount = outAmountStr.includes(".") ? outAmountStr.split(".")[0] : outAmountStr
+            // Se contém ponto decimal, assumir que é valor normal e converter para wei
+            if (outAmountWei.includes(".")) {
+              const normalValue = Number.parseFloat(outAmountWei).toFixed(6)
+              outAmountWei = ethers.parseUnits(normalValue, 18).toString()
+            }
 
-            console.log("🔄 Clean outAmount:", cleanOutAmount)
-            amountOutFormatted = ethers.formatUnits(cleanOutAmount, 18)
+            console.log("🔄 OutAmount in wei:", outAmountWei)
+            amountOutFormatted = ethers.formatUnits(outAmountWei, 18)
             console.log("💱 Formatted output amount:", amountOutFormatted)
           } catch (formatError) {
             console.error("❌ Error formatting outAmount:", formatError)
-            // Fallback: tentar converter diretamente se for um número
+            // Fallback: se for um número, assumir que já está em formato normal
             if (typeof quote.addons.outAmount === "number") {
-              amountOutFormatted = (quote.addons.outAmount / 1e18).toFixed(6)
+              amountOutFormatted = quote.addons.outAmount.toString()
             }
           }
         }
@@ -549,9 +551,8 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     try {
       console.log("🚀 Starting swap transaction:", swapForm)
 
-      // Convert amount to wei using ethers v6 syntax with safe conversion
-      const cleanAmount = Number.parseFloat(swapForm.amountFrom).toFixed(6)
-      const amountInWei = ethers.parseUnits(cleanAmount, 18)
+      // Convert amount to wei using ethers v6 syntax
+      const amountInWei = ethers.parseUnits(swapForm.amountFrom, 18) // Converter diretamente
       console.log("💰 Swap amount in wei:", amountInWei.toString())
 
       const result = await doSwap({
