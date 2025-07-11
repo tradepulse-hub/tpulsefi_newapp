@@ -110,16 +110,20 @@ export async function getSwapQuote({
       amountIn: humanReadableAmount,
       slippage: "3", // 3% slippage
       fee: "0.2", // 0.2% fee
+      preferRouters: ["hold-so", "0x"], // Specify preferred routers
+      timeout: 30000, // 30 second timeout
     }
 
     console.log("🔄 Quote params:", params)
-    const quote = await swapHelper.quote(params)
+
+    // Use estimate.quote method instead of quote method
+    const quote = await swapHelper.estimate.quote(params)
     console.log("✅ Quote received:", quote)
 
     return {
       ...quote,
-      amountOut: quote.amountOut,
-      estimatedGas: quote.estimatedGas,
+      amountOut: quote.addons?.outAmount || "0",
+      estimatedGas: "21000", // Default gas estimate
     }
   } catch (error) {
     console.error("❌ Error getting quote:", error)
@@ -131,7 +135,7 @@ export async function getSwapQuote({
 /**
  * Executes a token swap using the Worldchain SDK.
  * @param walletAddress The user's wallet address
- * @param quote The quote object returned from swapHelper.quote
+ * @param quote The quote object returned from swapHelper.estimate.quote
  * @param amountIn The amount to swap (as a string in wei)
  * @param tokenInAddress The input token address
  * @param tokenOutAddress The output token address
@@ -177,7 +181,7 @@ export async function doSwap({
       tx: {
         data: quote.data,
         to: quote.to,
-        value: quote.value,
+        value: quote.value || "0",
       },
       partnerCode: "24568", // Partner code TPulseFi
       feeAmountOut: quote.addons?.feeAmountOut,
@@ -202,15 +206,15 @@ export async function doSwap({
 
       return {
         success: true,
-        transactionHash: result.transactionHash,
-        amountOut: result.amountOut,
+        transactionHash: result.transactionId,
+        amountOut: quote.addons?.outAmount || "0",
         result,
       }
     } else {
       console.error("❌ Swap failed:", result)
       return {
         success: false,
-        error: result.error || "Swap failed",
+        error: result.errorCode || "Swap failed",
       }
     }
   } catch (error) {
@@ -276,7 +280,7 @@ export async function getMultipleTokenDetails(tokenAddresses: string[]) {
   }
 }
 
-// Helper function for getting estimate quote
+// Helper function for getting estimate quote (alternative method)
 export async function getEstimateQuote(tokenInAddress: string, tokenOutAddress: string, amountIn: string) {
   try {
     console.log("🔄 Getting estimate quote:", { tokenInAddress, tokenOutAddress, amountIn })
@@ -294,9 +298,11 @@ export async function getEstimateQuote(tokenInAddress: string, tokenOutAddress: 
       amountIn: humanReadableAmount,
       slippage: "3", // 3% slippage
       fee: "0.2", // 0.2% fee
+      preferRouters: ["hold-so", "0x"],
+      timeout: 30000,
     }
 
-    const quote = await swapHelper.quote(params)
+    const quote = await swapHelper.estimate.quote(params)
     console.log("✅ Estimate quote:", quote)
     return quote
   } catch (error) {
