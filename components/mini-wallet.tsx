@@ -438,7 +438,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
       console.log("✅ swapHelper available:", !!swapHelper.estimate?.quote)
 
-      if (!amountFrom || Number.parseFloat(amountFrom) <= 0) {
+      if (!amountFrom || Number.parseFloat(amountFrom) <= 0 || isNaN(Number.parseFloat(amountFrom))) {
         setSwapQuote(null)
         setSwapForm((prev) => ({ ...prev, amountTo: "" }))
         setQuoteError(null)
@@ -452,7 +452,9 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         console.log("🔄 Getting swap quote for WLD to TPF:", { amountFrom })
 
         // Convert amount to wei using ethers v6 syntax
-        const amountInWei = ethers.parseUnits(amountFrom, 18) // WLD has 18 decimals
+        // Limpar o valor para remover decimais excessivos
+        const cleanAmount = Number.parseFloat(amountFrom).toFixed(18)
+        const amountInWei = ethers.parseUnits(cleanAmount, 18)
         console.log("💰 Amount in wei:", amountInWei.toString())
 
         // Use the swapHelper to get quote with proper error handling
@@ -527,7 +529,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       console.log("🚀 Starting swap transaction:", swapForm)
 
       // Convert amount to wei using ethers v6 syntax
-      const amountInWei = ethers.parseUnits(swapForm.amountFrom, 18) // WLD has 18 decimals
+      const amountInWei = ethers.parseUnits(swapForm.amountFrom.toString(), 18) // WLD has 18 decimals
       console.log("💰 Swap amount in wei:", amountInWei.toString())
 
       const result = await doSwap({
