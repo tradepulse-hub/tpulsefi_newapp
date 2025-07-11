@@ -448,7 +448,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
           throw new Error("Token not found")
         }
 
-        // Convert amount to wei
+        // Convert amount to wei using ethers v6 syntax
         const amountInWei = ethers.parseUnits(amountFrom, tokenFromData.decimals)
         console.log("💰 Amount in wei:", amountInWei.toString())
 
@@ -462,7 +462,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         console.log("✅ Quote received:", quote)
         setSwapQuote(quote)
 
-        // Format the output amount
+        // Format the output amount using ethers v6 syntax
         const amountOutFormatted = ethers.formatUnits(quote.amountOut || "0", tokenToData.decimals)
         console.log("💱 Formatted output amount:", amountOutFormatted)
         setSwapForm((prev) => ({
@@ -503,7 +503,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         throw new Error("Token not found")
       }
 
-      // Convert amount to wei
+      // Convert amount to wei using ethers v6 syntax
       const amountInWei = ethers.parseUnits(swapForm.amountFrom, tokenFromData.decimals)
       console.log("💰 Swap amount in wei:", amountInWei.toString())
 
@@ -1163,15 +1163,13 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                           <div className="text-right">
                             <p className="text-white font-medium text-sm">
                               {tx.type === "sent" ? "-" : "+"}
-                              {formatBalance(tx.amount)}
+                              {formatBalance(tx.amount)} {tx.token}
                             </p>
                             <div className="flex items-center space-x-2">
                               <span className={`text-xs ${getStatusColor(tx.status)}`}>
-                                {tx.status === "confirmed"
-                                  ? t.confirmed
-                                  : tx.status === "pending"
-                                    ? t.pending
-                                    : t.failed}
+                                {tx.status === "pending" && t.pending}
+                                {tx.status === "confirmed" && t.confirmed}
+                                {tx.status === "failed" && t.failed}
                               </span>
                               <button
                                 onClick={() => openTransactionInExplorer(tx.hash)}
@@ -1192,17 +1190,17 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                       <button
                         onClick={loadMoreTransactions}
                         disabled={loadingMore}
-                        className="w-full py-2 px-4 bg-gray-800/50 hover:bg-gray-700/50 border border-white/10 rounded-lg text-gray-300 hover:text-white transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50"
+                        className="w-full py-2 px-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-gray-300 hover:text-white transition-all duration-200 flex items-center justify-center space-x-2"
                       >
                         {loadingMore ? (
                           <>
                             <RefreshCw className="w-4 h-4 animate-spin" />
-                            <span>{t.loading}</span>
+                            <span className="text-sm">{t.loading}</span>
                           </>
                         ) : (
                           <>
                             <ChevronDown className="w-4 h-4" />
-                            <span>{t.loadMore}</span>
+                            <span className="text-sm">{t.loadMore}</span>
                           </>
                         )}
                       </button>
