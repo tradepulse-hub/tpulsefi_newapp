@@ -3,7 +3,25 @@
 import type React from "react"
 import { useEffect, useState } from "react"
 import Image from "next/image"
-import { Menu, X, Wallet, Eye, Newspaper, Users, Info, Gift, TrendingUp, Hand, Globe, ExternalLink } from "lucide-react"
+import {
+  Menu,
+  X,
+  Wallet,
+  Eye,
+  Newspaper,
+  Users,
+  Info,
+  Gift,
+  TrendingUp,
+  Hand,
+  Globe,
+  ExternalLink,
+  Calendar,
+  Star,
+  Clock,
+  DollarSign,
+  AlertTriangle,
+} from "lucide-react"
 import { useMiniKit } from "../../hooks/use-minikit"
 import MiniWallet from "../../components/mini-wallet"
 import { AnimatePresence, motion } from "framer-motion"
@@ -70,14 +88,29 @@ const translations = {
       membership: "Membership",
       partnerships: "Partnerships",
       about: "About",
+      events: "Events",
     },
     common: {
       wallet: "Wallet",
       loading: "Loading...",
       language: "Language",
+      close: "Close",
     },
     partnerships: {
       visitApp: "Visit App",
+    },
+    events: {
+      title: "Live Events",
+      liveEvent: "LIVE EVENT",
+      eventTitle: "Earn 10% TPF on your TPF purchase",
+      eventDescription: "$50 minimum TPF purchase required!",
+      eventDetails: "The 10% bonus applies only to the amount purchased during the event",
+      eventWarning:
+        "You must hold these assets without selling until the end of the event, otherwise you will be disqualified!",
+      eventPeriod: "Event Period",
+      eventDates: "July 11, 2025 - August 11, 2025",
+      participateNow: "Participate Now",
+      termsConditions: "Terms & Conditions",
     },
   },
   pt: {
@@ -93,14 +126,28 @@ const translations = {
       membership: "Membros",
       partnerships: "Parcerias",
       about: "Sobre",
+      events: "Eventos",
     },
     common: {
       wallet: "Carteira",
       loading: "Carregando...",
       language: "Idioma",
+      close: "Fechar",
     },
     partnerships: {
       visitApp: "Visitar App",
+    },
+    events: {
+      title: "Eventos Ao Vivo",
+      liveEvent: "EVENTO AO VIVO",
+      eventTitle: "Ganha 10% TPF na tua compra de TPF",
+      eventDescription: "$50 de TPF que compres, valor mínimo!",
+      eventDetails: "Os 10% incidem apenas sobre o valor comprado durante o evento",
+      eventWarning: "Até ao fim do evento deves manter esses ativos sem venda, caso contrário és desqualificado!",
+      eventPeriod: "Período do Evento",
+      eventDates: "11 de Julho, 2025 - 11 de Agosto, 2025",
+      participateNow: "Participar Agora",
+      termsConditions: "Termos e Condições",
     },
   },
   es: {
@@ -116,14 +163,29 @@ const translations = {
       membership: "Membresía",
       partnerships: "Asociaciones",
       about: "Acerca de",
+      events: "Eventos",
     },
     common: {
       wallet: "Billetera",
       loading: "Cargando...",
       language: "Idioma",
+      close: "Cerrar",
     },
     partnerships: {
       visitApp: "Visitar App",
+    },
+    events: {
+      title: "Eventos En Vivo",
+      liveEvent: "EVENTO EN VIVO",
+      eventTitle: "Gana 10% TPF en tu compra de TPF",
+      eventDescription: "$50 mínimo de compra de TPF requerido!",
+      eventDetails: "El 10% de bonificación se aplica solo al monto comprado durante el evento",
+      eventWarning:
+        "Debes mantener estos activos sin vender hasta el final del evento, ¡de lo contrario serás descalificado!",
+      eventPeriod: "Período del Evento",
+      eventDates: "11 de Julio, 2025 - 11 de Agosto, 2025",
+      participateNow: "Participar Ahora",
+      termsConditions: "Términos y Condiciones",
     },
   },
   id: {
@@ -139,14 +201,29 @@ const translations = {
       membership: "Keanggotaan",
       partnerships: "Kemitraan",
       about: "Tentang",
+      events: "Acara",
     },
     common: {
       wallet: "Dompet",
       loading: "Memuat...",
       language: "Bahasa",
+      close: "Tutup",
     },
     partnerships: {
       visitApp: "Kunjungi App",
+    },
+    events: {
+      title: "Acara Langsung",
+      liveEvent: "ACARA LANGSUNG",
+      eventTitle: "Dapatkan 10% TPF pada pembelian TPF Anda",
+      eventDescription: "Pembelian TPF minimum $50 diperlukan!",
+      eventDetails: "Bonus 10% hanya berlaku untuk jumlah yang dibeli selama acara",
+      eventWarning:
+        "Anda harus menyimpan aset ini tanpa menjual sampai akhir acara, jika tidak Anda akan didiskualifikasi!",
+      eventPeriod: "Periode Acara",
+      eventDates: "11 Juli, 2025 - 11 Agustus, 2025",
+      participateNow: "Berpartisipasi Sekarang",
+      termsConditions: "Syarat & Ketentuan",
     },
   },
 }
@@ -171,6 +248,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [showMiniWallet, setShowMiniWallet] = useState(false)
   const [showLanguageMenu, setShowLanguageMenu] = useState(false)
+  const [showEventsModal, setShowEventsModal] = useState(false)
   const [currentLang, setCurrentLang] = useState<keyof typeof translations>("en")
   const [currentPartnerIndex, setCurrentPartnerIndex] = useState(0)
   const router = useRouter()
@@ -303,6 +381,12 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
       href: "/airdrop",
     },
     {
+      id: "events",
+      labelKey: "events",
+      icon: Calendar,
+      action: () => setShowEventsModal(true),
+    },
+    {
       id: "fistaking",
       labelKey: "fistaking",
       icon: TrendingUp,
@@ -433,6 +517,145 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
               onDisconnect={handleWalletDisconnect}
             />
           </div>
+        )}
+      </AnimatePresence>
+
+      {/* Events Modal */}
+      <AnimatePresence>
+        {showEventsModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            onClick={() => setShowEventsModal(false)}
+          >
+            {/* Backdrop */}
+            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+
+            {/* Modal */}
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0, y: 50 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.8, opacity: 0, y: 50 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="relative bg-black/90 backdrop-blur-xl border border-white/20 rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => setShowEventsModal(false)}
+                className="absolute top-4 right-4 w-8 h-8 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all duration-200"
+              >
+                <X className="w-4 h-4 text-white" />
+              </button>
+
+              {/* Modal Header with TPF Logo */}
+              <div className="text-center mb-6">
+                {/* Animated TPF Logo */}
+                <div className="relative mb-4 flex justify-center">
+                  {/* Glow Effects */}
+                  <div className="absolute w-20 h-20 bg-gradient-to-r from-yellow-400/30 to-orange-400/30 rounded-full blur-xl animate-pulse" />
+                  <div
+                    className="absolute w-16 h-16 bg-gradient-to-r from-white/20 to-white/10 rounded-full blur-lg animate-pulse"
+                    style={{ animationDelay: "0.5s" }}
+                  />
+
+                  {/* Logo Container */}
+                  <div className="relative w-16 h-16 bg-white rounded-full p-2 shadow-2xl animate-bounce">
+                    <Image
+                      src="/images/logo-tpf.png"
+                      alt="TPulseFi Logo"
+                      width={48}
+                      height={48}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                </div>
+
+                {/* Live Badge */}
+                <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-red-500 to-pink-500 px-3 py-1 rounded-full mb-2">
+                  <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                  <span className="text-white text-xs font-bold tracking-wider">
+                    {t.events?.liveEvent || "LIVE EVENT"}
+                  </span>
+                </div>
+
+                <h2 className="text-xl font-bold text-white mb-2">{t.events?.title || "Live Events"}</h2>
+              </div>
+
+              {/* Event Content */}
+              <div className="space-y-4">
+                {/* Event Title */}
+                <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 rounded-lg p-4">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <Star className="w-5 h-5 text-yellow-400" />
+                    <h3 className="text-lg font-semibold text-white">
+                      {t.events?.eventTitle || "Earn 10% TPF on your TPF purchase"}
+                    </h3>
+                  </div>
+
+                  <div className="flex items-center space-x-2 mb-2">
+                    <DollarSign className="w-4 h-4 text-green-400" />
+                    <p className="text-green-300 font-medium">
+                      {t.events?.eventDescription || "$50 minimum TPF purchase required!"}
+                    </p>
+                  </div>
+
+                  <p className="text-gray-300 text-sm">
+                    {t.events?.eventDetails || "The 10% bonus applies only to the amount purchased during the event"}
+                  </p>
+                </div>
+
+                {/* Warning */}
+                <div className="bg-gradient-to-r from-red-500/20 to-pink-500/20 border border-red-500/30 rounded-lg p-4">
+                  <div className="flex items-start space-x-2">
+                    <AlertTriangle className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0" />
+                    <p className="text-red-300 text-sm">
+                      {t.events?.eventWarning ||
+                        "You must hold these assets without selling until the end of the event, otherwise you will be disqualified!"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Event Period */}
+                <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 rounded-lg p-4">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <Clock className="w-4 h-4 text-blue-400" />
+                    <h4 className="text-white font-medium">{t.events?.eventPeriod || "Event Period"}</h4>
+                  </div>
+                  <p className="text-blue-300 font-mono">{t.events?.eventDates || "July 11, 2025 - August 11, 2025"}</p>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex space-x-3 pt-2">
+                  <button className="flex-1 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105">
+                    {t.events?.participateNow || "Participate Now"}
+                  </button>
+                  <button className="px-4 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all duration-300 text-sm">
+                    {t.events?.termsConditions || "Terms & Conditions"}
+                  </button>
+                </div>
+              </div>
+
+              {/* Floating Particles */}
+              {[...Array(8)].map((_, i) => (
+                <div
+                  key={`modal-particle-${i}`}
+                  className="absolute rounded-full animate-ping"
+                  style={{
+                    width: `${2 + Math.random() * 3}px`,
+                    height: `${2 + Math.random() * 3}px`,
+                    backgroundColor: i % 2 === 0 ? "rgba(255,215,0,0.6)" : "rgba(255,165,0,0.4)",
+                    left: `${10 + Math.random() * 80}%`,
+                    top: `${10 + Math.random() * 80}%`,
+                    animationDelay: `${Math.random() * 2}s`,
+                    animationDuration: `${1 + Math.random() * 2}s`,
+                  }}
+                />
+              ))}
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
 
@@ -577,6 +800,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                       onClick={() => {
                         if (item.action) {
                           item.action()
+                          setIsMenuOpen(false)
                         } else if (item.href) {
                           router.push(item.href)
                           setIsMenuOpen(false)
@@ -585,8 +809,12 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                       className="group p-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg hover:bg-white/10 transition-all duration-300"
                     >
                       <div className="flex flex-col items-center space-y-1">
-                        <div className="w-6 h-6 bg-gradient-to-r from-cyan-400/20 to-blue-400/20 rounded-full flex items-center justify-center group-hover:from-cyan-400/30 group-hover:to-blue-400/30 transition-all duration-300">
-                          <item.icon className="w-3 h-3 text-cyan-400 group-hover:text-white transition-colors" />
+                        <div
+                          className={`w-6 h-6 ${item.id === "events" ? "bg-gradient-to-r from-yellow-400/30 to-orange-400/30" : "bg-gradient-to-r from-cyan-400/20 to-blue-400/20"} rounded-full flex items-center justify-center group-hover:from-cyan-400/30 group-hover:to-blue-400/30 transition-all duration-300`}
+                        >
+                          <item.icon
+                            className={`w-3 h-3 ${item.id === "events" ? "text-yellow-400" : "text-cyan-400"} group-hover:text-white transition-colors`}
+                          />
                         </div>
                         <span className="text-white/80 group-hover:text-white font-medium text-xs tracking-wide">
                           {t.navigation?.[item.labelKey] || item.labelKey}
