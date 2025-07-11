@@ -74,20 +74,7 @@ swapHelper.load(zeroX)
 swapHelper.load(holdSo)
 console.log("✅ SwapHelper fully initialized with routers")
 
-// --- Real helper functions ---
-async function updateUserData(address: string) {
-  console.log(`🔄 Updating user data for address: ${address}`)
-}
-
-async function loadTokenBalances(address: string) {
-  console.log(`🔄 Loading token balances for address: ${address}`)
-}
-
-async function loadTpfBalance(address: string) {
-  console.log(`🔄 Loading TPF balance for address: ${address}`)
-}
-
-// --- The doSwap function - IMPLEMENTAÇÃO CORRETA ---
+// --- The doSwap function - IMPLEMENTAÇÃO CORRETA BASEADA NOS EXEMPLOS ---
 export async function doSwap({
   walletAddress,
   quote,
@@ -104,39 +91,45 @@ export async function doSwap({
 
   try {
     console.log("🚀 Starting REAL swap with Holdstation SDK...")
-    console.log("📋 Swap parameters:", {
-      walletAddress,
-      amountIn,
-      tokenIn: wldToken.address,
-      tokenOut: tpfToken.address,
-      quoteData: quote.data,
-      quoteTo: quote.to,
-      quoteValue: quote.value,
-    })
+    console.log("📋 Swap parameters:")
+    console.log("  - walletAddress:", walletAddress)
+    console.log("  - amountIn:", amountIn)
+    console.log("  - tokenIn:", wldToken.address)
+    console.log("  - tokenOut:", tpfToken.address)
+    console.log("  - quote.data:", quote.data?.substring(0, 100) + "...")
+    console.log("  - quote.to:", quote.to)
+    console.log("  - quote.value:", quote.value)
+    console.log("  - quote.addons:", quote.addons)
 
-    // Parâmetros corretos baseados exatamente nos exemplos do Holdstation
+    // Verificar se o quote tem os campos obrigatórios
+    if (!quote.data || !quote.to) {
+      throw new Error("Invalid quote: missing data or to field")
+    }
+
+    // Parâmetros corretos baseados EXATAMENTE nos exemplos do Holdstation
+    // Usar apenas os campos obrigatórios primeiro
     const swapParams: SwapParams["input"] = {
       tokenIn: wldToken.address,
       tokenOut: tpfToken.address,
-      amountIn, // Já vem em wei do componente
+      amountIn, // Já vem em wei
       tx: {
         data: quote.data,
         to: quote.to,
         value: quote.value || "0",
       },
-      // Usar os mesmos parâmetros dos exemplos
-      partnerCode: "24568",
-      feeAmountOut: quote.addons?.feeAmountOut,
-      fee: "0.2",
-      feeReceiver: "0x4bb270ef6dcb052a083bd5cff518e2e019c0f4ee",
     }
 
-    console.log("📤 Executing swap with params:", JSON.stringify(swapParams, null, 2))
+    console.log("📤 Executing swap with minimal params:")
+    console.log(JSON.stringify(swapParams, null, 2))
 
     // Usar o swapHelper.swap diretamente como nos exemplos
     const result = await swapHelper.swap(swapParams)
 
-    console.log("📥 Swap result:", JSON.stringify(result, null, 2))
+    console.log("📥 Swap result:")
+    console.log("  - success:", result.success)
+    console.log("  - transactionId:", result.transactionId)
+    console.log("  - errorCode:", result.errorCode)
+    console.log("  - full result:", JSON.stringify(result, null, 2))
 
     // Verificar o resultado baseado na interface SwapParams["output"]
     if (result.success) {
@@ -145,10 +138,6 @@ export async function doSwap({
 
       // Wait for transaction to be confirmed
       await new Promise((resolve) => setTimeout(resolve, 3000))
-
-      // Get latest block to ensure network sync
-      const latestBlock = await provider.getBlockNumber()
-      console.log("📊 Latest block number:", latestBlock)
 
       console.log("🎉 Swap completed successfully!")
       return {
@@ -168,30 +157,47 @@ export async function doSwap({
       stack: error?.stack,
       name: error?.name,
     })
+
+    // Log específico para erro de contrato inválido
+    if (error?.message?.includes("invalid contract") || error?.message?.includes("Invalid contract")) {
+      console.error("🔍 INVALID CONTRACT ERROR DETAILS:")
+      console.error("  - quote.to:", quote.to)
+      console.error("  - quote.data length:", quote.data?.length)
+      console.error("  - tokenIn:", wldToken.address)
+      console.error("  - tokenOut:", tpfToken.address)
+      console.error("  - amountIn:", amountIn)
+    }
+
     throw error
   }
 }
 
-// Função para verificar saldo antes do swap
-export async function checkWLDBalance(walletAddress: string, amountWLD: string) {
+// Função para verificar se os contratos são válidos
+export async function validateContracts() {
   try {
-    console.log("🔍 Checking WLD balance for:", walletAddress)
+    console.log("🔍 Validating contracts...")
 
-    // Simular verificação de saldo (você pode implementar a verificação real)
-    const wldBalance = "1.0" // Placeholder - implementar verificação real
-    const requiredAmount = Number.parseFloat(amountWLD)
-    const availableAmount = Number.parseFloat(wldBalance)
+    // Verificar se os tokens existem
+    const wldCode = await provider.getCode(wldToken.address)
+    const tpfCode = await provider.getCode(tpfToken.address)
 
-    console.log("💰 Available WLD:", availableAmount)
-    console.log("💰 Required WLD:", requiredAmount)
+    console.log("📋 Contract validation:")
+    console.log("  - WLD contract exists:", wldCode !== "0x")
+    console.log("  - TPF contract exists:", tpfCode !== "0x")
+    console.log("  - WLD address:", wldToken.address)
+    console.log("  - TPF address:", tpfToken.address)
 
-    if (availableAmount < requiredAmount) {
-      throw new Error(`Insufficient WLD balance. Available: ${availableAmount}, Required: ${requiredAmount}`)
+    if (wldCode === "0x") {
+      throw new Error("WLD contract not found at address: " + wldToken.address)
+    }
+
+    if (tpfCode === "0x") {
+      throw new Error("TPF contract not found at address: " + tpfToken.address)
     }
 
     return true
   } catch (error) {
-    console.error("❌ Error checking WLD balance:", error)
+    console.error("❌ Contract validation failed:", error)
     throw error
   }
 }
@@ -202,6 +208,9 @@ export async function getRealQuote(amountFromWLD: string) {
     console.log("🔄 Getting REAL quote from Holdstation SDK...")
     console.log("📊 Input amount WLD:", amountFromWLD)
 
+    // Primeiro validar contratos
+    await validateContracts()
+
     if (!swapHelper?.estimate?.quote) {
       throw new Error("SwapHelper not properly initialized")
     }
@@ -211,9 +220,9 @@ export async function getRealQuote(amountFromWLD: string) {
       tokenIn: wldToken.address, // WLD
       tokenOut: tpfToken.address, // TPF
       amountIn: amountFromWLD, // Valor em formato decimal (não wei)
-      slippage: "0.3", // 0.3% slippage
+      slippage: "0.5", // Aumentar slippage para 0.5%
       fee: "0.2", // 0.2% fee
-      preferRouters: ["hold-so", "0x"], // Routers corretos
+      preferRouters: ["hold-so"], // Usar apenas hold-so primeiro
       timeout: 30000,
     }
 
@@ -223,28 +232,37 @@ export async function getRealQuote(amountFromWLD: string) {
     const quote = await swapHelper.estimate.quote(quoteParams)
 
     console.log("📥 REAL quote from Holdstation SDK:")
-    console.log("  - data:", quote.data?.substring(0, 50) + "...")
+    console.log("  - data exists:", !!quote.data)
+    console.log("  - data length:", quote.data?.length)
     console.log("  - to:", quote.to)
     console.log("  - value:", quote.value)
     console.log("  - addons:", quote.addons)
 
+    // Validar se o quote.to é um contrato válido
+    if (quote.to) {
+      const contractCode = await provider.getCode(quote.to)
+      console.log("  - quote.to contract exists:", contractCode !== "0x")
+      if (contractCode === "0x") {
+        throw new Error("Quote points to invalid contract: " + quote.to)
+      }
+    }
+
     // Extract the real output amount
     const realOutputAmount = quote.addons?.outAmount
     console.log("💱 Real output amount (raw):", realOutputAmount)
-    console.log("💱 Real output amount (type):", typeof realOutputAmount)
 
     if (!realOutputAmount) {
       throw new Error("No output amount in quote")
     }
 
-    // O outAmount já vem formatado corretamente (não em wei)
-    const formattedOutput = realOutputAmount.toString()
-    console.log("✅ Final formatted TPF amount:", formattedOutput)
-
     // Validar se o quote tem todos os campos necessários
     if (!quote.data || !quote.to) {
       throw new Error("Invalid quote: missing data or to field")
     }
+
+    // O outAmount já vem formatado corretamente (não em wei)
+    const formattedOutput = realOutputAmount.toString()
+    console.log("✅ Final formatted TPF amount:", formattedOutput)
 
     return {
       quote,
@@ -257,12 +275,75 @@ export async function getRealQuote(amountFromWLD: string) {
   }
 }
 
+// Test function baseado nos exemplos
+export async function testSwapHelper() {
+  try {
+    console.log("🧪 Testing swapHelper with REAL Holdstation SDK...")
+
+    // Primeiro validar contratos
+    await validateContracts()
+
+    console.log("🔍 SwapHelper methods:", Object.keys(swapHelper))
+    console.log("🔍 SwapHelper estimate available:", !!swapHelper.estimate)
+    console.log("🔍 SwapHelper estimate.quote available:", typeof swapHelper.estimate?.quote)
+
+    if (swapHelper.estimate?.quote) {
+      console.log("✅ swapHelper.estimate.quote is available")
+
+      // Test com parâmetros corretos baseados nos exemplos
+      try {
+        console.log("🧪 Testing quote with 0.001 WLD...")
+
+        const testParams: SwapParams["quoteInput"] = {
+          tokenIn: wldToken.address,
+          tokenOut: tpfToken.address,
+          amountIn: "0.001", // Valor decimal pequeno
+          slippage: "0.5",
+          fee: "0.2",
+          preferRouters: ["hold-so"], // Apenas hold-so
+          timeout: 10000,
+        }
+
+        const testQuote = await swapHelper.estimate.quote(testParams)
+
+        console.log("✅ Test quote successful:", {
+          hasData: !!testQuote.data,
+          hasTo: !!testQuote.to,
+          hasValue: !!testQuote.value,
+          hasAddons: !!testQuote.addons,
+          outAmount: testQuote.addons?.outAmount,
+        })
+
+        // Validar o contrato do quote
+        if (testQuote.to) {
+          const contractCode = await provider.getCode(testQuote.to)
+          console.log("✅ Quote contract is valid:", contractCode !== "0x")
+        }
+
+        return true
+      } catch (testError) {
+        console.error("❌ Test quote failed:", testError)
+        return false
+      }
+    } else {
+      console.error("❌ swapHelper.estimate.quote is not available")
+      return false
+    }
+  } catch (error) {
+    console.error("❌ Error testing swapHelper:", error)
+    return false
+  }
+}
+
 // Debug functions para entender a estrutura
 export async function debugHoldstationSDK() {
   console.log("🔍 DEBUGGING HOLDSTATION SDK STRUCTURE")
 
   try {
-    // 1. Check SwapHelper structure
+    // 1. Validar contratos primeiro
+    await validateContracts()
+
+    // 2. Check SwapHelper structure
     console.log("📋 SwapHelper structure:", {
       swapHelper: !!swapHelper,
       methods: Object.keys(swapHelper),
@@ -272,49 +353,46 @@ export async function debugHoldstationSDK() {
       swapType: typeof swapHelper.swap,
     })
 
-    // 2. Check if estimate.quote exists and its type
-    if (swapHelper.estimate) {
-      console.log("📋 Estimate object:", {
-        quote: !!swapHelper.estimate.quote,
-        quoteType: typeof swapHelper.estimate.quote,
-      })
-    }
-
-    // 3. Token addresses
-    console.log("📋 Token addresses:", {
-      WLD: wldToken.address,
-      TPF: tpfToken.address,
-    })
-
-    // 4. Test with minimal amount usando parâmetros corretos
-    console.log("🧪 Attempting quote with correct parameters...")
-
-    try {
-      const testParams: SwapParams["quoteInput"] = {
-        tokenIn: wldToken.address,
-        tokenOut: tpfToken.address,
-        amountIn: "0.001", // Valor decimal pequeno
-        slippage: "0.3",
-        fee: "0.2",
-        preferRouters: ["hold-so", "0x"],
-        timeout: 10000,
-      }
-
-      const basicQuote = await swapHelper.estimate.quote(testParams)
-      console.log("✅ Basic quote successful:", basicQuote)
-    } catch (basicError) {
-      console.log("❌ Basic quote failed:", basicError.message)
-    }
-
-    // 5. Check provider connection
+    // 3. Check provider connection
     const blockNumber = await provider.getBlockNumber()
     console.log("📋 Provider connected, latest block:", blockNumber)
 
-    // 6. Check client connection
+    // 4. Check client connection
     console.log("📋 Client structure:", {
       client: !!client,
       clientMethods: Object.keys(client),
     })
+
+    // 5. Test basic quote
+    console.log("🧪 Attempting basic quote...")
+    try {
+      const testParams: SwapParams["quoteInput"] = {
+        tokenIn: wldToken.address,
+        tokenOut: tpfToken.address,
+        amountIn: "0.001",
+        slippage: "0.5",
+        fee: "0.2",
+        preferRouters: ["hold-so"],
+        timeout: 10000,
+      }
+
+      const basicQuote = await swapHelper.estimate.quote(testParams)
+      console.log("✅ Basic quote successful")
+      console.log("  - has data:", !!basicQuote.data)
+      console.log("  - has to:", !!basicQuote.to)
+      console.log("  - to address:", basicQuote.to)
+
+      // Verificar se o contrato do quote é válido
+      if (basicQuote.to) {
+        const contractCode = await provider.getCode(basicQuote.to)
+        console.log("  - contract valid:", contractCode !== "0x")
+        if (contractCode === "0x") {
+          console.error("❌ Quote points to invalid contract!")
+        }
+      }
+    } catch (basicError) {
+      console.log("❌ Basic quote failed:", basicError.message)
+    }
   } catch (error) {
     console.error("❌ Debug failed:", error)
   }
@@ -325,39 +403,41 @@ export async function testQuoteParameters(amountWLD: string) {
   console.log("🧪 TESTING DIFFERENT QUOTE PARAMETERS")
 
   const testCases = [
-    // Parâmetros básicos corretos
+    // Apenas hold-so
     {
-      name: "Basic",
-      params: {
-        tokenIn: wldToken.address,
-        tokenOut: tpfToken.address,
-        amountIn: amountWLD, // Valor decimal
-        slippage: "0.3",
-        fee: "0.2",
-      } as SwapParams["quoteInput"],
-    },
-    // Com routers preferenciais
-    {
-      name: "With Routers",
+      name: "Hold-So Only",
       params: {
         tokenIn: wldToken.address,
         tokenOut: tpfToken.address,
         amountIn: amountWLD,
-        slippage: "0.3",
+        slippage: "0.5",
         fee: "0.2",
         preferRouters: ["hold-so"],
+        timeout: 30000,
       } as SwapParams["quoteInput"],
     },
-    // Com timeout
+    // Apenas 0x
     {
-      name: "With Timeout",
+      name: "0x Only",
       params: {
         tokenIn: wldToken.address,
         tokenOut: tpfToken.address,
         amountIn: amountWLD,
-        slippage: "0.3",
+        slippage: "0.5",
         fee: "0.2",
-        preferRouters: ["hold-so", "0x"],
+        preferRouters: ["0x"],
+        timeout: 30000,
+      } as SwapParams["quoteInput"],
+    },
+    // Sem preferência de router
+    {
+      name: "No Router Preference",
+      params: {
+        tokenIn: wldToken.address,
+        tokenOut: tpfToken.address,
+        amountIn: amountWLD,
+        slippage: "0.5",
+        fee: "0.2",
         timeout: 30000,
       } as SwapParams["quoteInput"],
     },
@@ -367,15 +447,27 @@ export async function testQuoteParameters(amountWLD: string) {
     try {
       console.log(`🧪 Testing ${testCase.name} parameters:`, testCase.params)
       const quote = await swapHelper.estimate.quote(testCase.params)
+
+      // Validar o contrato
+      let contractValid = false
+      if (quote.to) {
+        const contractCode = await provider.getCode(quote.to)
+        contractValid = contractCode !== "0x"
+      }
+
       console.log(`✅ ${testCase.name} quote successful:`, {
         hasData: !!quote.data,
         hasTo: !!quote.to,
         hasValue: !!quote.value,
         hasAddons: !!quote.addons,
         outAmount: quote.addons?.outAmount,
-        fullQuote: quote,
+        contractValid,
+        toAddress: quote.to,
       })
-      return quote // Return first successful quote
+
+      if (contractValid) {
+        return quote // Return first valid quote
+      }
     } catch (error) {
       console.log(`❌ ${testCase.name} quote failed:`, error.message)
     }
