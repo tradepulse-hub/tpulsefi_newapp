@@ -27,8 +27,6 @@ import { walletService } from "@/services/wallet-service"
 import { doSwap, TOKENS, getSwapQuote } from "@/services/swap-service"
 import { ethers } from "ethers"
 import { DebugConsole } from "@/components/debug-console"
-import { Card, CardContent } from "@/components/ui/card"
-import { useMiniKit } from "@/hooks/use-minikit"
 
 interface TokenBalance {
   symbol: string
@@ -38,9 +36,6 @@ interface TokenBalance {
   decimals: number
   icon?: string
   formattedBalance: string
-  usdValue: string
-  logo: string
-  color: string
 }
 
 interface Transaction {
@@ -271,19 +266,10 @@ const translations = {
 type ViewMode = "main" | "send" | "receive" | "history" | "swap"
 
 export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: MiniWalletProps) {
-  const { isConnected, walletAddress: connectedWalletAddress } = useMiniKit()
-  const [selectedTokenIn, setSelectedTokenIn] = useState(TOKENS[0])
-  const [selectedTokenOut, setSelectedTokenOut] = useState(TOKENS[1])
-  const [amountIn, setAmountIn] = useState("")
-  const [amountOut, setAmountOut] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const [isSwapping, setIsSwapping] = useState(false)
-  const [quote, setQuote] = useState<any>(null)
-  const [balances, setBalances] = useState<TokenBalance[]>([])
-  const [error, setError] = useState<string | null>(null)
   const [currentLang, setCurrentLang] = useState<SupportedLanguage>("en")
   const [viewMode, setViewMode] = useState<ViewMode>("main")
   const [copied, setCopied] = useState(false)
+  const [balances, setBalances] = useState<TokenBalance[]>([])
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [allTransactions, setAllTransactions] = useState<Transaction[]>([])
   const [displayedTransactions, setDisplayedTransactions] = useState<Transaction[]>([])
@@ -306,11 +292,11 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     amountTo: "",
   })
   const [sending, setSending] = useState(false)
-  const [swappingOld, setSwappingOld] = useState(false)
+  const [swapping, setSwapping] = useState(false)
   const [gettingQuote, setGettingQuote] = useState(false)
   const [swapQuote, setSwapQuote] = useState<any>(null)
   const [quoteError, setQuoteError] = useState<string | null>(null)
-  const [errorOld, setErrorOld] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
   const [isMinimized, setIsMinimized] = useState(false)
 
   const TRANSACTIONS_PER_PAGE = 5
@@ -339,14 +325,14 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
   const loadBalances = async () => {
     try {
       setLoading(true)
-      setErrorOld(null)
+      setError(null)
       console.log("🔄 Loading token balances for:", walletAddress)
       const tokenBalances = await walletService.getTokenBalances(walletAddress)
       console.log("✅ Token balances loaded:", tokenBalances)
       setBalances(tokenBalances)
     } catch (error) {
       console.error("❌ Error loading balances:", error)
-      setErrorOld("Failed to load balances")
+      setError("Failed to load balances")
     } finally {
       setLoading(false)
     }
@@ -507,7 +493,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
   const handleSwap = async () => {
     if (!swapQuote || !swapForm.amountFrom) return
 
-    setSwappingOld(true)
+    setSwapping(true)
     try {
       console.log("🚀 Starting swap transaction:", swapForm)
       const tokenFromData = TOKENS.find((t) => t.symbol === swapForm.tokenFrom)
@@ -547,7 +533,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       console.error("❌ Swap error:", error)
       alert(`❌ ${t.swapFailed}. Please try again.`)
     } finally {
-      setSwappingOld(false)
+      setSwapping(false)
     }
   }
 
@@ -611,127 +597,6 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     return `${(num / 1000000).toFixed(1)}M`
   }
 
-  // Mock balances for demonstration
-  useEffect(() => {
-    if (isConnected) {
-      setBalances([
-        {
-          symbol: "WLD",
-          name: "Worldcoin",
-          balance: "1234.56",
-          usdValue: "$2,469.12",
-          address: TOKENS[0].address,
-          logo: TOKENS[0].logo,
-          color: TOKENS[0].color,
-          decimals: 8,
-          formattedBalance: "1234.56",
-        },
-        {
-          symbol: "TPF",
-          name: "Test Preference",
-          balance: "5678.90",
-          usdValue: "$567.89",
-          address: TOKENS[1].address,
-          logo: TOKENS[1].logo,
-          color: TOKENS[1].color,
-          decimals: 8,
-          formattedBalance: "5678.90",
-        },
-        {
-          symbol: "WDD",
-          name: "World Donation",
-          balance: "987.65",
-          usdValue: "$98.77",
-          address: TOKENS[2].address,
-          logo: TOKENS[2].logo,
-          color: TOKENS[2].color,
-          decimals: 8,
-          formattedBalance: "987.65",
-        },
-        {
-          symbol: "TPT",
-          name: "Test Preference Token",
-          balance: "432.10",
-          usdValue: "$43.21",
-          address: TOKENS[3].address,
-          logo: TOKENS[3].logo,
-          color: TOKENS[3].color,
-          decimals: 8,
-          formattedBalance: "432.10",
-        },
-      ])
-    }
-  }, [isConnected])
-
-  const handleGetQuote = async () => {
-    if (!amountIn || !selectedTokenIn || !selectedTokenOut) return
-
-    setIsLoading(true)
-    setError(null)
-
-    try {
-      // Convert amount to wei
-      const amountInWei = (Number.parseFloat(amountIn) * Math.pow(10, selectedTokenIn.decimals)).toString()
-
-      const quoteResult = await getSwapQuote({
-        tokenInAddress: selectedTokenIn.address,
-        tokenOutAddress: selectedTokenOut.address,
-        amountIn: amountInWei,
-      })
-
-      setQuote(quoteResult)
-      setAmountOut(quoteResult.amountOut || "0")
-    } catch (err) {
-      console.error("Quote error:", err)
-      setError(err instanceof Error ? err.message : "Failed to get quote")
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleSwapNew = async () => {
-    if (!quote || !connectedWalletAddress || !amountIn) return
-
-    setIsSwapping(true)
-    setError(null)
-
-    try {
-      const amountInWei = (Number.parseFloat(amountIn) * Math.pow(10, selectedTokenIn.decimals)).toString()
-
-      const result = await doSwap({
-        walletAddress: connectedWalletAddress,
-        quote,
-        amountIn: amountInWei,
-        tokenInAddress: selectedTokenIn.address,
-        tokenOutAddress: selectedTokenOut.address,
-      })
-
-      if (result.success) {
-        console.log("Swap successful:", result)
-        // Reset form
-        setAmountIn("")
-        setAmountOut("")
-        setQuote(null)
-      } else {
-        setError(result.error || "Swap failed")
-      }
-    } catch (err) {
-      console.error("Swap error:", err)
-      setError(err instanceof Error ? err.message : "Swap failed")
-    } finally {
-      setIsSwapping(false)
-    }
-  }
-
-  const handleSwapTokens = () => {
-    const temp = selectedTokenIn
-    setSelectedTokenIn(selectedTokenOut)
-    setSelectedTokenOut(temp)
-    setAmountIn("")
-    setAmountOut("")
-    setQuote(null)
-  }
-
   if (isMinimized) {
     return (
       <>
@@ -747,17 +612,6 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         </motion.div>
         <DebugConsole />
       </>
-    )
-  }
-
-  if (!isConnected) {
-    return (
-      <Card className="w-full max-w-md mx-auto">
-        <CardContent className="flex flex-col items-center justify-center p-8">
-          <Wallet className="h-12 w-12 text-muted-foreground mb-4" />
-          <p className="text-muted-foreground text-center">Connect your wallet to access the mini wallet</p>
-        </CardContent>
-      </Card>
     )
   }
 
@@ -850,10 +704,10 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                           <RefreshCw className="w-4 h-4 text-gray-400 animate-spin mr-2" />
                           <span className="text-gray-400 text-sm">{t.loading}</span>
                         </div>
-                      ) : errorOld ? (
+                      ) : error ? (
                         <div className="flex items-center justify-center py-4">
                           <AlertCircle className="w-4 h-4 text-red-400 mr-2" />
-                          <span className="text-red-400 text-sm">{errorOld}</span>
+                          <span className="text-red-400 text-sm">{error}</span>
                         </div>
                       ) : balances.length === 0 ? (
                         <div className="text-center py-4">
@@ -1166,12 +1020,10 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                 {/* Swap Button */}
                 <button
                   onClick={handleSwap}
-                  disabled={
-                    swappingOld || !swapQuote || !swapForm.amountFrom || swapForm.tokenFrom === swapForm.tokenTo
-                  }
+                  disabled={swapping || !swapQuote || !swapForm.amountFrom || swapForm.tokenFrom === swapForm.tokenTo}
                   className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2"
                 >
-                  {swappingOld ? (
+                  {swapping ? (
                     <>
                       <div className="w-4 h-4 border-2 border-t-white border-r-transparent border-l-transparent border-b-white rounded-full animate-spin" />
                       <span>{t.swapping}</span>
@@ -1264,19 +1116,19 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                   <History className="w-5 h-5 mr-2 text-purple-400" />
                   {t.transactionHistory}
                 </h3>
-                <div className="w-16">{/* Spacer for centering */}</div>
+                <div className="w-16" /> {/* Spacer for centering */}
               </div>
 
               <div className="space-y-3 max-h-80 overflow-y-auto">
                 {loadingHistory ? (
                   <div className="flex items-center justify-center py-8">
                     <RefreshCw className="w-5 h-5 text-gray-400 animate-spin mr-2" />
-                    <span className="text-gray-400">{t.loading}</span>
+                    <span className="text-gray-400 text-sm">{t.loading}</span>
                   </div>
                 ) : displayedTransactions.length === 0 ? (
                   <div className="text-center py-8">
                     <History className="w-8 h-8 text-gray-500 mx-auto mb-2" />
-                    <p className="text-gray-400 text-sm">{t.noTransactions}</p>
+                    <span className="text-gray-400 text-sm">{t.noTransactions}</span>
                   </div>
                 ) : (
                   <>
@@ -1286,7 +1138,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.05 }}
-                        className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-lg p-3 hover:bg-white/5 transition-all duration-200"
+                        className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl p-3 hover:bg-white/5 transition-all duration-200"
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-3">
@@ -1311,12 +1163,12 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                           <div className="text-right">
                             <p className="text-white font-medium text-sm">
                               {tx.type === "sent" ? "-" : "+"}
-                              {formatBalance(tx.amount)}
+                              {formatBalance(tx.amount)} {tx.token}
                             </p>
-                            <div className="flex items-center space-x-1">
+                            <div className="flex items-center space-x-2">
                               <span className={`text-xs ${getStatusColor(tx.status)}`}>
-                                {tx.status === "confirmed" && t.confirmed}
                                 {tx.status === "pending" && t.pending}
+                                {tx.status === "confirmed" && t.confirmed}
                                 {tx.status === "failed" && t.failed}
                               </span>
                               <button
@@ -1343,12 +1195,12 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                         {loadingMore ? (
                           <>
                             <RefreshCw className="w-4 h-4 animate-spin" />
-                            <span>{t.loading}</span>
+                            <span className="text-sm">{t.loading}</span>
                           </>
                         ) : (
                           <>
                             <ChevronDown className="w-4 h-4" />
-                            <span>{t.loadMore}</span>
+                            <span className="text-sm">{t.loadMore}</span>
                           </>
                         )}
                       </button>
