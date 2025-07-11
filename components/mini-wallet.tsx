@@ -453,7 +453,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
         // Convert amount to wei using ethers v6 syntax
         // Limpar o valor para remover decimais excessivos
-        const cleanAmount = Number.parseFloat(amountFrom).toFixed(18)
+        const cleanAmount = Number.parseFloat(amountFrom).toFixed(6) // Reduzir para 6 decimais
         const amountInWei = ethers.parseUnits(cleanAmount, 18)
         console.log("💰 Amount in wei:", amountInWei.toString())
 
@@ -480,15 +480,36 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
           hasValue: !!quote.value,
           hasAddons: !!quote.addons,
           outAmount: quote.addons?.outAmount,
+          outAmountType: typeof quote.addons?.outAmount,
           fullQuote: quote,
         })
 
         console.log("✅ Quote received:", quote)
         setSwapQuote(quote)
 
-        // Format the output amount using ethers v6 syntax
-        const amountOutFormatted = ethers.formatUnits(quote.addons?.outAmount || "0", 18) // TPF has 18 decimals
-        console.log("💱 Formatted output amount:", amountOutFormatted)
+        // Format the output amount using ethers v6 syntax with safe conversion
+        let amountOutFormatted = "0"
+        if (quote.addons?.outAmount) {
+          try {
+            // Se outAmount é um número decimal, converter para string inteira primeiro
+            const outAmountStr = quote.addons.outAmount.toString()
+            console.log("🔄 Raw outAmount:", outAmountStr)
+
+            // Se contém ponto decimal, truncar para inteiro
+            const cleanOutAmount = outAmountStr.includes(".") ? outAmountStr.split(".")[0] : outAmountStr
+
+            console.log("🔄 Clean outAmount:", cleanOutAmount)
+            amountOutFormatted = ethers.formatUnits(cleanOutAmount, 18)
+            console.log("💱 Formatted output amount:", amountOutFormatted)
+          } catch (formatError) {
+            console.error("❌ Error formatting outAmount:", formatError)
+            // Fallback: tentar converter diretamente se for um número
+            if (typeof quote.addons.outAmount === "number") {
+              amountOutFormatted = (quote.addons.outAmount / 1e18).toFixed(6)
+            }
+          }
+        }
+
         setSwapForm((prev) => ({
           ...prev,
           amountTo: amountOutFormatted,
@@ -528,8 +549,9 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     try {
       console.log("🚀 Starting swap transaction:", swapForm)
 
-      // Convert amount to wei using ethers v6 syntax
-      const amountInWei = ethers.parseUnits(swapForm.amountFrom.toString(), 18) // WLD has 18 decimals
+      // Convert amount to wei using ethers v6 syntax with safe conversion
+      const cleanAmount = Number.parseFloat(swapForm.amountFrom).toFixed(6)
+      const amountInWei = ethers.parseUnits(cleanAmount, 18)
       console.log("💰 Swap amount in wei:", amountInWei.toString())
 
       const result = await doSwap({
