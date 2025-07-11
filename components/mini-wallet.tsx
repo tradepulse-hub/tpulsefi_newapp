@@ -1116,19 +1116,19 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                   <History className="w-5 h-5 mr-2 text-purple-400" />
                   {t.transactionHistory}
                 </h3>
-                <div className="w-16" /> {/* Spacer for centering */}
+                <div className="w-16">{/* Spacer for centering */}</div>
               </div>
 
               <div className="space-y-3 max-h-80 overflow-y-auto">
                 {loadingHistory ? (
                   <div className="flex items-center justify-center py-8">
                     <RefreshCw className="w-5 h-5 text-gray-400 animate-spin mr-2" />
-                    <span className="text-gray-400 text-sm">{t.loading}</span>
+                    <span className="text-gray-400">{t.loading}</span>
                   </div>
                 ) : displayedTransactions.length === 0 ? (
                   <div className="text-center py-8">
                     <History className="w-8 h-8 text-gray-500 mx-auto mb-2" />
-                    <span className="text-gray-400 text-sm">{t.noTransactions}</span>
+                    <p className="text-gray-400 text-sm">{t.noTransactions}</p>
                   </div>
                 ) : (
                   <>
@@ -1138,7 +1138,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.05 }}
-                        className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl p-3 hover:bg-white/5 transition-all duration-200"
+                        className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-lg p-3 hover:bg-white/5 transition-all duration-200"
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-3">
@@ -1163,12 +1163,12 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                           <div className="text-right">
                             <p className="text-white font-medium text-sm">
                               {tx.type === "sent" ? "-" : "+"}
-                              {formatBalance(tx.amount)} {tx.token}
+                              {formatBalance(tx.amount)}
                             </p>
-                            <div className="flex items-center space-x-2">
+                            <div className="flex items-center space-x-1">
                               <span className={`text-xs ${getStatusColor(tx.status)}`}>
-                                {tx.status === "pending" && t.pending}
                                 {tx.status === "confirmed" && t.confirmed}
+                                {tx.status === "pending" && t.pending}
                                 {tx.status === "failed" && t.failed}
                               </span>
                               <button
@@ -1195,12 +1195,12 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                         {loadingMore ? (
                           <>
                             <RefreshCw className="w-4 h-4 animate-spin" />
-                            <span className="text-sm">{t.loading}</span>
+                            <span>{t.loading}</span>
                           </>
                         ) : (
                           <>
                             <ChevronDown className="w-4 h-4" />
-                            <span className="text-sm">{t.loadMore}</span>
+                            <span>{t.loadMore}</span>
                           </>
                         )}
                       </button>
