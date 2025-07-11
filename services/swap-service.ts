@@ -34,11 +34,7 @@ const tpfToken = TOKENS.find((t) => t.symbol === "TPF")!
 
 // --- Provider and SDK setup ---
 const RPC_URL = "https://worldchain-mainnet.g.alchemy.com/public"
-const provider = new ethers.JsonRpcProvider(
-  RPC_URL,
-  { chainId: 480, name: "worldchain" },
-  { staticNetwork: true },
-)
+const provider = new ethers.JsonRpcProvider(RPC_URL, { chainId: 480, name: "worldchain" }, { staticNetwork: true })
 const client = new Client(provider)
 config.client = client
 config.multicall3 = new Multicall3(provider)
@@ -113,5 +109,5 @@ export async function doSwap({
   }
 }
 
-// Example usage (uncomment and fill in real values to test):
-// doSwap({ walletAddress: "0x...", quote: { ... }, amountIn: "1.0" }) 
+// Export tokens, helper and provider for use in components
+export { TOKENS, swapHelper, provider }
