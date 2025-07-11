@@ -603,7 +603,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="bg-black/60 backdrop-blur-xl border border-cyan-400/30 rounded-full p-3 shadow-2xl"
+          className="bg-black/60 backdrop-blur-xl border border-cyan-400/30 rounded-full p-3 shadow-2xl fixed top-20 right-4 z-40"
         >
           <button onClick={() => setIsMinimized(false)} className="flex items-center space-x-2">
             <Wallet className="w-5 h-5 text-cyan-400" />
@@ -621,7 +621,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         initial={{ opacity: 0, y: -20, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: -20, scale: 0.95 }}
-        className="bg-black/40 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl min-w-[320px] max-w-[380px] overflow-hidden fixed top-20 right-4 z-50"
+        className="bg-black/40 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl min-w-[320px] max-w-[380px] overflow-hidden fixed top-20 right-4 z-40"
       >
         <AnimatePresence mode="wait">
           {/* Main View */}
