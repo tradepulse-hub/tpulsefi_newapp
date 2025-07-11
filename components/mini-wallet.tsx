@@ -453,7 +453,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
         // Convert amount to wei using ethers v6 syntax
         // O usuário insere valores normais (ex: 1 WLD), não em wei
-        const amountInWei = ethers.parseUnits(amountFrom, 18) // Converter diretamente sem toFixed
+        const amountInWei = ethers.parseUnits(amountFrom, 18)
         console.log("💰 Amount in wei:", amountInWei.toString())
 
         // Use the swapHelper to get quote with proper error handling
@@ -473,6 +473,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
           timeout: 30000, // 30 seconds timeout
         })
 
+        console.log("✅ Quote response FULL:", JSON.stringify(quote, null, 2))
         console.log("✅ Quote response structure:", {
           hasData: !!quote.data,
           hasTo: !!quote.to,
@@ -480,35 +481,60 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
           hasAddons: !!quote.addons,
           outAmount: quote.addons?.outAmount,
           outAmountType: typeof quote.addons?.outAmount,
-          fullQuote: quote,
+          outAmountString: String(quote.addons?.outAmount),
+          outAmountRaw: quote.addons?.outAmount,
         })
 
-        console.log("✅ Quote received:", quote)
         setSwapQuote(quote)
 
-        // Format the output amount using ethers v6 syntax with safe conversion
+        // Format the output amount - DEBUGGING APPROACH
         let amountOutFormatted = "0"
         if (quote.addons?.outAmount) {
           try {
-            // Se outAmount já vem em wei (string), usar diretamente
-            // Se vem como número decimal, converter para wei primeiro
-            let outAmountWei = quote.addons.outAmount.toString()
+            const rawOutAmount = quote.addons.outAmount
+            console.log("🔍 DEBUG - Raw outAmount:", rawOutAmount)
+            console.log("🔍 DEBUG - Type:", typeof rawOutAmount)
+            console.log("🔍 DEBUG - String value:", String(rawOutAmount))
 
-            // Se contém ponto decimal, assumir que é valor normal e converter para wei
-            if (outAmountWei.includes(".")) {
-              const normalValue = Number.parseFloat(outAmountWei).toFixed(6)
-              outAmountWei = ethers.parseUnits(normalValue, 18).toString()
+            // Try different approaches based on the actual data type
+            if (typeof rawOutAmount === "string") {
+              // If it's a string, check if it looks like wei (very large number)
+              if (rawOutAmount.length > 10) {
+                // Probably wei, format it
+                console.log("🔍 Treating as wei string")
+                amountOutFormatted = ethers.formatUnits(rawOutAmount, 18)
+              } else {
+                // Probably already formatted
+                console.log("🔍 Treating as normal string")
+                amountOutFormatted = rawOutAmount
+              }
+            } else if (typeof rawOutAmount === "number") {
+              // If it's a number, check if it's very large (wei) or normal
+              if (rawOutAmount > 1000000000000000000) {
+                // Probably wei
+                console.log("🔍 Treating as wei number")
+                amountOutFormatted = ethers.formatUnits(rawOutAmount.toString(), 18)
+              } else {
+                // Probably already formatted
+                console.log("🔍 Treating as normal number")
+                amountOutFormatted = rawOutAmount.toString()
+              }
+            } else {
+              // Try to convert to string and format
+              console.log("🔍 Unknown type, converting to string")
+              const stringValue = String(rawOutAmount)
+              if (stringValue.length > 10) {
+                amountOutFormatted = ethers.formatUnits(stringValue, 18)
+              } else {
+                amountOutFormatted = stringValue
+              }
             }
 
-            console.log("🔄 OutAmount in wei:", outAmountWei)
-            amountOutFormatted = ethers.formatUnits(outAmountWei, 18)
-            console.log("💱 Formatted output amount:", amountOutFormatted)
+            console.log("💱 Final formatted output amount:", amountOutFormatted)
           } catch (formatError) {
             console.error("❌ Error formatting outAmount:", formatError)
-            // Fallback: se for um número, assumir que já está em formato normal
-            if (typeof quote.addons.outAmount === "number") {
-              amountOutFormatted = quote.addons.outAmount.toString()
-            }
+            // Ultimate fallback
+            amountOutFormatted = "Error formatting"
           }
         }
 
