@@ -114,16 +114,17 @@ export async function doSwap({
       quoteValue: quote.value,
     })
 
-    // Parâmetros corretos baseados na interface SwapParams["input"]
+    // Parâmetros corretos baseados exatamente nos exemplos do Holdstation
     const swapParams: SwapParams["input"] = {
       tokenIn: wldToken.address,
       tokenOut: tpfToken.address,
-      amountIn,
+      amountIn, // Já vem em wei do componente
       tx: {
         data: quote.data,
         to: quote.to,
         value: quote.value || "0",
       },
+      // Usar os mesmos parâmetros dos exemplos
       partnerCode: "24568",
       feeAmountOut: quote.addons?.feeAmountOut,
       fee: "0.2",
@@ -132,30 +133,32 @@ export async function doSwap({
 
     console.log("📤 Executing swap with params:", JSON.stringify(swapParams, null, 2))
 
+    // Usar o swapHelper.swap diretamente como nos exemplos
     const result = await swapHelper.swap(swapParams)
 
     console.log("📥 Swap result:", JSON.stringify(result, null, 2))
 
+    // Verificar o resultado baseado na interface SwapParams["output"]
     if (result.success) {
       console.log("✅ Swap executed successfully!")
-      console.log("⏳ Waiting for transaction confirmation...")
+      console.log("🎯 Transaction ID:", result.transactionId)
 
       // Wait for transaction to be confirmed
-      await new Promise((resolve) => setTimeout(resolve, 2500))
+      await new Promise((resolve) => setTimeout(resolve, 3000))
 
       // Get latest block to ensure network sync
       const latestBlock = await provider.getBlockNumber()
       console.log("📊 Latest block number:", latestBlock)
 
-      // Update user data after successful swap
-      await updateUserData(walletAddress)
-      await loadTokenBalances(walletAddress)
-      await loadTpfBalance(walletAddress)
-
       console.log("🎉 Swap completed successfully!")
-      return { success: true, result }
+      return {
+        success: true,
+        result,
+        transactionId: result.transactionId,
+      }
     } else {
       console.error("❌ Swap failed:", result)
+      console.error("❌ Error code:", result.errorCode)
       throw new Error(`Swap failed: ${result.errorCode || "Unknown error"}`)
     }
   } catch (error) {
@@ -169,54 +172,27 @@ export async function doSwap({
   }
 }
 
-// Test function baseado nos exemplos
-export async function testSwapHelper() {
+// Função para verificar saldo antes do swap
+export async function checkWLDBalance(walletAddress: string, amountWLD: string) {
   try {
-    console.log("🧪 Testing swapHelper with REAL Holdstation SDK...")
-    console.log("🔍 SwapHelper methods:", Object.keys(swapHelper))
-    console.log("🔍 SwapHelper estimate available:", !!swapHelper.estimate)
-    console.log("🔍 SwapHelper estimate.quote available:", typeof swapHelper.estimate?.quote)
+    console.log("🔍 Checking WLD balance for:", walletAddress)
 
-    if (swapHelper.estimate?.quote) {
-      console.log("✅ swapHelper.estimate.quote is available")
+    // Simular verificação de saldo (você pode implementar a verificação real)
+    const wldBalance = "1.0" // Placeholder - implementar verificação real
+    const requiredAmount = Number.parseFloat(amountWLD)
+    const availableAmount = Number.parseFloat(wldBalance)
 
-      // Test com parâmetros corretos baseados nos exemplos
-      try {
-        console.log("🧪 Testing quote with 0.01 WLD...")
+    console.log("💰 Available WLD:", availableAmount)
+    console.log("💰 Required WLD:", requiredAmount)
 
-        const testParams: SwapParams["quoteInput"] = {
-          tokenIn: wldToken.address,
-          tokenOut: tpfToken.address,
-          amountIn: "0.01", // Valor em formato decimal, não wei
-          slippage: "0.3",
-          fee: "0.2",
-          preferRouters: ["hold-so", "0x"], // Nomes corretos dos routers
-          timeout: 10000,
-        }
-
-        const testQuote = await swapHelper.estimate.quote(testParams)
-
-        console.log("✅ Test quote successful:", {
-          hasData: !!testQuote.data,
-          hasTo: !!testQuote.to,
-          hasValue: !!testQuote.value,
-          hasAddons: !!testQuote.addons,
-          outAmount: testQuote.addons?.outAmount,
-          fullQuote: testQuote,
-        })
-
-        return true
-      } catch (testError) {
-        console.error("❌ Test quote failed:", testError)
-        return false
-      }
-    } else {
-      console.error("❌ swapHelper.estimate.quote is not available")
-      return false
+    if (availableAmount < requiredAmount) {
+      throw new Error(`Insufficient WLD balance. Available: ${availableAmount}, Required: ${requiredAmount}`)
     }
+
+    return true
   } catch (error) {
-    console.error("❌ Error testing swapHelper:", error)
-    return false
+    console.error("❌ Error checking WLD balance:", error)
+    throw error
   }
 }
 
@@ -246,7 +222,11 @@ export async function getRealQuote(amountFromWLD: string) {
     // Get quote from Holdstation SDK
     const quote = await swapHelper.estimate.quote(quoteParams)
 
-    console.log("📥 REAL quote from Holdstation SDK:", JSON.stringify(quote, null, 2))
+    console.log("📥 REAL quote from Holdstation SDK:")
+    console.log("  - data:", quote.data?.substring(0, 50) + "...")
+    console.log("  - to:", quote.to)
+    console.log("  - value:", quote.value)
+    console.log("  - addons:", quote.addons)
 
     // Extract the real output amount
     const realOutputAmount = quote.addons?.outAmount
@@ -260,6 +240,11 @@ export async function getRealQuote(amountFromWLD: string) {
     // O outAmount já vem formatado corretamente (não em wei)
     const formattedOutput = realOutputAmount.toString()
     console.log("✅ Final formatted TPF amount:", formattedOutput)
+
+    // Validar se o quote tem todos os campos necessários
+    if (!quote.data || !quote.to) {
+      throw new Error("Invalid quote: missing data or to field")
+    }
 
     return {
       quote,
