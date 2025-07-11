@@ -996,25 +996,22 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                     </div>
 
                     {/* Quote Status Messages */}
-                    {!swapForm.amountFrom && <div className="text-xs text-gray-500">{t.enterAmount}</div>}
-
-                    {gettingQuote && swapForm.amountFrom && (
+                    {!swapForm.amountFrom && <div className="text-xs text-gray-400">{t.enterAmount}</div>}
+                    {gettingQuote && (
                       <div className="text-xs text-orange-400 flex items-center">
-                        <RefreshCw className="w-3 h-3 animate-spin mr-1" />
+                        <RefreshCw className="w-3 h-3 mr-1 animate-spin" />
                         {t.gettingQuote}
                       </div>
                     )}
-
-                    {swapQuote && swapForm.amountTo && (
-                      <div className="text-xs text-green-400">
-                        {t.youWillReceive}: {swapForm.amountTo} {swapForm.tokenTo}
-                      </div>
-                    )}
-
                     {quoteError && (
                       <div className="text-xs text-red-400 flex items-center">
                         <AlertCircle className="w-3 h-3 mr-1" />
                         {quoteError}
+                      </div>
+                    )}
+                    {swapQuote && swapForm.amountTo && (
+                      <div className="text-xs text-green-400">
+                        {t.youWillReceive} ~{formatBalance(swapForm.amountTo)} {swapForm.tokenTo}
                       </div>
                     )}
                   </div>
@@ -1023,7 +1020,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                 {/* Swap Button */}
                 <button
                   onClick={handleSwap}
-                  disabled={swapping || !swapQuote || !swapForm.amountFrom || gettingQuote}
+                  disabled={swapping || !swapQuote || !swapForm.amountFrom || swapForm.tokenFrom === swapForm.tokenTo}
                   className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2"
                 >
                   {swapping ? (
@@ -1034,7 +1031,9 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                   ) : (
                     <>
                       <ArrowLeftRight className="w-4 h-4" />
-                      <span>{t.swap}</span>
+                      <span>
+                        {t.swap} {swapForm.tokenFrom} → {swapForm.tokenTo}
+                      </span>
                     </>
                   )}
                 </button>
@@ -1067,26 +1066,28 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                 <div className="w-16" /> {/* Spacer for centering */}
               </div>
 
-              <div className="text-center space-y-4">
-                {/* Address Display */}
-                <div className="bg-gradient-to-r from-green-600/10 to-emerald-600/10 border border-green-500/30 rounded-xl p-6">
-                  <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <ArrowDownLeft className="w-8 h-8 text-white" />
-                  </div>
-                  <p className="text-gray-300 text-sm mb-3">{t.yourWalletAddress}</p>
-                  <div className="bg-gray-800/50 border border-white/20 rounded-lg p-3 flex items-center justify-between">
-                    <code className="text-white text-sm font-mono break-all">{walletAddress}</code>
-                    <button onClick={copyAddress} className="ml-2 p-1 text-gray-400 hover:text-white transition-colors">
-                      {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
-                    </button>
-                  </div>
+              {/* Warning Message */}
+              <div className="mb-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3">
+                <div className="flex items-start space-x-2">
+                  <AlertTriangle className="w-4 h-4 text-yellow-400 mt-0.5 flex-shrink-0" />
+                  <p className="text-yellow-300 text-xs leading-relaxed">{t.networkWarning}</p>
                 </div>
+              </div>
 
-                {/* Warning Message for Receive */}
-                <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
-                  <div className="flex items-start space-x-2">
-                    <AlertCircle className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
-                    <p className="text-blue-300 text-xs leading-relaxed">{t.networkWarning}</p>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">{t.yourWalletAddress}:</label>
+                  <div className="bg-gray-800/50 border border-white/20 rounded-lg p-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-white font-mono text-sm break-all">{walletAddress}</span>
+                      <button
+                        onClick={copyAddress}
+                        className="ml-2 p-2 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-white/10 flex-shrink-0"
+                        title={t.copyAddress}
+                      >
+                        {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1100,10 +1101,10 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 20 }}
-              className="p-4 max-h-[80vh] overflow-hidden flex flex-col"
+              className="p-4"
             >
               {/* Header with Back Button */}
-              <div className="flex items-center justify-between mb-4 flex-shrink-0">
+              <div className="flex items-center justify-between mb-6">
                 <button
                   onClick={handleBackToMain}
                   className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors"
@@ -1118,8 +1119,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                 <div className="w-16" /> {/* Spacer for centering */}
               </div>
 
-              {/* Transactions List */}
-              <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+              <div className="space-y-3 max-h-80 overflow-y-auto">
                 {loadingHistory ? (
                   <div className="flex items-center justify-center py-8">
                     <RefreshCw className="w-5 h-5 text-gray-400 animate-spin mr-2" />
@@ -1127,86 +1127,89 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                   </div>
                 ) : displayedTransactions.length === 0 ? (
                   <div className="text-center py-8">
-                    <History className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-                    <p className="text-gray-400 text-sm">{t.noTransactions}</p>
+                    <History className="w-8 h-8 text-gray-500 mx-auto mb-2" />
+                    <span className="text-gray-400 text-sm">{t.noTransactions}</span>
                   </div>
                 ) : (
-                  displayedTransactions.map((tx, index) => (
-                    <motion.div
-                      key={tx.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-lg p-2 hover:bg-white/5 transition-all duration-200"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <div
-                            className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                              tx.type === "sent" ? "bg-red-500/20 text-red-400" : "bg-green-500/20 text-green-400"
-                            }`}
-                          >
-                            {tx.type === "sent" ? (
-                              <ArrowUpRight className="w-3 h-3" />
-                            ) : (
-                              <ArrowDownLeft className="w-3 h-3" />
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center space-x-1">
-                              <p className="text-white font-medium text-xs truncate">
-                                {tx.type === "sent" ? t.sent : t.received} {Number.parseFloat(tx.amount).toFixed(4)}{" "}
-                                {tx.token}
-                              </p>
-                              <span
-                                className={`text-xs px-1 py-0.5 rounded ${getStatusColor(tx.status)} bg-current/10 flex-shrink-0`}
-                              >
-                                {tx.status === "confirmed" ? "✓" : tx.status === "pending" ? "⏳" : "✗"}
-                              </span>
+                  <>
+                    {displayedTransactions.map((tx, index) => (
+                      <motion.div
+                        key={tx.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl p-3 hover:bg-white/5 transition-all duration-200"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div
+                              className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                                tx.type === "sent" ? "bg-red-500/20 text-red-400" : "bg-green-500/20 text-green-400"
+                              }`}
+                            >
+                              {tx.type === "sent" ? (
+                                <ArrowUpRight className="w-4 h-4" />
+                              ) : (
+                                <ArrowDownLeft className="w-4 h-4" />
+                              )}
                             </div>
-                            <div className="flex items-center justify-between">
-                              <p className="text-gray-400 text-xs truncate">{formatAddress(tx.address)}</p>
-                              <p className="text-gray-500 text-xs flex-shrink-0 ml-2">
-                                {formatTimestamp(tx.timestamp)}
+                            <div>
+                              <p className="text-white font-medium text-sm">
+                                {tx.type === "sent" ? t.sent : t.received} {tx.token}
                               </p>
+                              <p className="text-gray-400 text-xs">{formatAddress(tx.address)}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-white font-medium text-sm">
+                              {tx.type === "sent" ? "-" : "+"}
+                              {formatBalance(tx.amount)}
+                            </p>
+                            <div className="flex items-center space-x-2">
+                              <span className={`text-xs ${getStatusColor(tx.status)}`}>
+                                {tx.status === "confirmed"
+                                  ? t.confirmed
+                                  : tx.status === "pending"
+                                    ? t.pending
+                                    : t.failed}
+                              </span>
+                              <button
+                                onClick={() => openTransactionInExplorer(tx.hash)}
+                                className="text-gray-400 hover:text-white transition-colors"
+                                title={t.viewOnExplorer}
+                              >
+                                <ExternalLink className="w-3 h-3" />
+                              </button>
                             </div>
                           </div>
                         </div>
-                        <button
-                          onClick={() => openTransactionInExplorer(tx.hash)}
-                          className="p-1 text-gray-400 hover:text-white transition-colors rounded hover:bg-white/10 flex-shrink-0"
-                          title={t.viewOnExplorer}
-                        >
-                          <ExternalLink className="w-3 h-3" />
-                        </button>
-                      </div>
-                    </motion.div>
-                  ))
+                        <div className="mt-2 text-xs text-gray-500">{formatTimestamp(tx.timestamp)}</div>
+                      </motion.div>
+                    ))}
+
+                    {/* Load More Button */}
+                    {hasMoreTransactions && (
+                      <button
+                        onClick={loadMoreTransactions}
+                        disabled={loadingMore}
+                        className="w-full py-2 px-4 bg-gray-800/50 hover:bg-gray-700/50 border border-white/10 rounded-lg text-gray-300 hover:text-white transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50"
+                      >
+                        {loadingMore ? (
+                          <>
+                            <RefreshCw className="w-4 h-4 animate-spin" />
+                            <span>{t.loading}</span>
+                          </>
+                        ) : (
+                          <>
+                            <ChevronDown className="w-4 h-4" />
+                            <span>{t.loadMore}</span>
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </>
                 )}
               </div>
-
-              {/* Load More Button */}
-              {hasMoreTransactions && !loadingHistory && (
-                <div className="mt-3 pt-3 border-t border-white/10 flex-shrink-0">
-                  <button
-                    onClick={loadMoreTransactions}
-                    disabled={loadingMore}
-                    className="w-full bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 rounded-lg py-2 px-3 text-purple-300 hover:text-purple-200 transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50"
-                  >
-                    {loadingMore ? (
-                      <>
-                        <RefreshCw className="w-4 h-4 animate-spin" />
-                        <span className="text-sm font-medium">{t.loading}</span>
-                      </>
-                    ) : (
-                      <>
-                        <ChevronDown className="w-4 h-4" />
-                        <span className="text-sm font-medium">{t.loadMore}</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-              )}
             </motion.div>
           )}
         </AnimatePresence>
