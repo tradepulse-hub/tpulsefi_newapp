@@ -1,3 +1,7 @@
+// doSwap.ts
+// This file contains a standalone version of the doSwap function from the AniPage.
+// It is designed to be self-contained and ready to share with others for demonstration purposes.
+
 import { ethers } from "ethers"
 import {
   config,
@@ -139,7 +143,7 @@ export async function doSwap({
         to: quote.to,
         value: quote.value,
       },
-      partnerCode: "14298",
+      partnerCode: "24568",
       feeAmountOut: quote.addons?.feeAmountOut,
       fee: "0.2",
       feeReceiver: "0x4bb270ef6dcb052a083bd5cff518e2e019c0f4ee",
