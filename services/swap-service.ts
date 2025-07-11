@@ -1,6 +1,14 @@
 import { ethers } from "ethers"
-import { Client, Multicall3, Quoter, SwapHelper } from "@holdstation/worldchain-ethers-v6"
-import { config, inmemoryTokenStorage, TokenProvider } from "@holdstation/worldchain-sdk"
+import {
+  config,
+  HoldSo,
+  SwapHelper,
+  TokenProvider,
+  ZeroX,
+  inmemoryTokenStorage,
+  type SwapParams,
+} from "@holdstation/worldchain-sdk"
+import { Client, Multicall3 } from "@holdstation/worldchain-ethers-v6"
 
 // --- Token definitions ---
 export const TOKENS = [
@@ -13,30 +21,33 @@ export const TOKENS = [
     color: "#000000",
   },
   {
-    address: "0x4200000000000000000000000000000000000042",
+    address: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45",
     symbol: "TPF",
-    name: "The People's Fund",
+    name: "TPulseFi",
     decimals: 18,
     logo: "/images/logo-tpf.png",
-    color: "#FFFFFF",
+    color: "#00D4FF",
   },
   {
-    address: "0x79A02482A880bCE3F13e09Da970dC34db4CD24d1",
-    symbol: "USDC",
-    name: "USD Coin",
-    decimals: 6,
-    logo: "/placeholder.svg?height=32&width=32&text=USDC",
-    color: "#2775CA",
-  },
-  {
-    address: "0x4200000000000000000000000000000000000006",
-    symbol: "WETH",
-    name: "Wrapped Ethereum",
+    address: "0xEdE54d9c024ee80C85ec0a75eD2d8774c7Fbac9B",
+    symbol: "WDD",
+    name: "Drachma",
     decimals: 18,
-    logo: "/placeholder.svg?height=32&width=32&text=WETH",
-    color: "#627EEA",
+    logo: "/images/drachma-token.png",
+    color: "#FFD700",
+  },
+  {
+    address: "0x868D08798F91ba9D6AC126148fdE8bBdfb6354D5",
+    symbol: "TPT",
+    name: "TradePulse Token",
+    decimals: 18,
+    logo: "/images/logo-tpf.png",
+    color: "#FF6B35",
   },
 ]
+
+const wldToken = TOKENS.find((t) => t.symbol === "WLD")!
+const tpfToken = TOKENS.find((t) => t.symbol === "TPF")!
 
 // --- Provider and SDK setup ---
 const RPC_URL = "https://worldchain-mainnet.g.alchemy.com/public"
@@ -46,11 +57,30 @@ const client = new Client(provider)
 config.client = client
 config.multicall3 = new Multicall3(provider)
 
+const swapHelper = new SwapHelper(client, { tokenStorage: inmemoryTokenStorage })
 const tokenProvider = new TokenProvider({ client, multicall3: config.multicall3 })
-const quoter = new Quoter(client)
-const swapHelper = new SwapHelper(client, {
-  tokenStorage: inmemoryTokenStorage,
-})
+const zeroX = new ZeroX(tokenProvider, inmemoryTokenStorage)
+const worldSwap = new HoldSo(tokenProvider, inmemoryTokenStorage)
+
+// Load swap providers
+swapHelper.load(zeroX)
+swapHelper.load(worldSwap)
+
+// --- Mocked helper functions (replace with real implementations as needed) ---
+async function updateUserData(address: string) {
+  // Placeholder for updating user data after swap
+  console.log(`User data updated for address: ${address}`)
+}
+
+async function loadTokenBalances(address: string) {
+  // Placeholder for reloading token balances after swap
+  console.log(`Token balances loaded for address: ${address}`)
+}
+
+async function loadTpfBalance(address: string) {
+  // Placeholder for reloading TPF balance after swap
+  console.log(`TPF balance loaded for address: ${address}`)
+}
 
 // --- Get Quote function ---
 export async function getSwapQuote({
@@ -74,11 +104,11 @@ export async function getSwapQuote({
     const humanReadableAmount = ethers.formatUnits(amountIn, tokenIn.decimals)
     console.log("💰 Human readable amount:", humanReadableAmount)
 
-    const params = {
+    const params: SwapParams["quoteInput"] = {
       tokenIn: tokenInAddress,
       tokenOut: tokenOutAddress,
       amountIn: humanReadableAmount,
-      slippage: "0.3", // 0.3% slippage
+      slippage: "3", // 3% slippage
       fee: "0.2", // 0.2% fee
     }
 
@@ -98,6 +128,14 @@ export async function getSwapQuote({
 }
 
 // --- The doSwap function ---
+/**
+ * Executes a token swap using the Worldchain SDK.
+ * @param walletAddress The user's wallet address
+ * @param quote The quote object returned from swapHelper.quote
+ * @param amountIn The amount to swap (as a string in wei)
+ * @param tokenInAddress The input token address
+ * @param tokenOutAddress The output token address
+ */
 export async function doSwap({
   walletAddress,
   quote,
@@ -132,7 +170,7 @@ export async function doSwap({
     const humanReadableAmount = ethers.formatUnits(amountIn, tokenIn.decimals)
     console.log("💰 Human readable swap amount:", humanReadableAmount)
 
-    const swapParams = {
+    const swapParams: SwapParams["input"] = {
       tokenIn: tokenInAddress,
       tokenOut: tokenOutAddress,
       amountIn: humanReadableAmount,
@@ -141,6 +179,7 @@ export async function doSwap({
         to: quote.to,
         value: quote.value,
       },
+      partnerCode: "24568", // Partner code TPulseFi
       feeAmountOut: quote.addons?.feeAmountOut,
       fee: "0.2", // 0.2% fee
       feeReceiver: "0x4bb270ef6dcb052a083bd5cff518e2e019c0f4ee", // Fee receiver address
@@ -151,10 +190,21 @@ export async function doSwap({
 
     if (result.success) {
       console.log("✅ Swap successful:", result)
+
+      // Wait for transaction to be confirmed
+      await new Promise((resolve) => setTimeout(resolve, 2500))
+      await provider.getBlockNumber()
+
+      // Update user data and balances
+      await updateUserData(walletAddress)
+      await loadTokenBalances(walletAddress)
+      await loadTpfBalance(walletAddress)
+
       return {
         success: true,
         transactionHash: result.transactionHash,
         amountOut: result.amountOut,
+        result,
       }
     } else {
       console.error("❌ Swap failed:", result)
@@ -226,31 +276,34 @@ export async function getMultipleTokenDetails(tokenAddresses: string[]) {
   }
 }
 
-// Helper function for simple quote (preview)
-export async function getSimpleQuote(tokenInAddress: string, tokenOutAddress: string) {
+// Helper function for getting estimate quote
+export async function getEstimateQuote(tokenInAddress: string, tokenOutAddress: string, amountIn: string) {
   try {
-    console.log("🔄 Getting simple quote:", { tokenInAddress, tokenOutAddress })
-    const quote = await quoter.simple(tokenInAddress, tokenOutAddress)
-    console.log("✅ Simple quote:", quote)
+    console.log("🔄 Getting estimate quote:", { tokenInAddress, tokenOutAddress, amountIn })
+
+    const tokenIn = TOKENS.find((t) => t.address.toLowerCase() === tokenInAddress.toLowerCase())
+    if (!tokenIn) {
+      throw new Error(`Token not found for address: ${tokenInAddress}`)
+    }
+
+    const humanReadableAmount = ethers.formatUnits(amountIn, tokenIn.decimals)
+
+    const params: SwapParams["quoteInput"] = {
+      tokenIn: tokenInAddress,
+      tokenOut: tokenOutAddress,
+      amountIn: humanReadableAmount,
+      slippage: "3", // 3% slippage
+      fee: "0.2", // 0.2% fee
+    }
+
+    const quote = await swapHelper.quote(params)
+    console.log("✅ Estimate quote:", quote)
     return quote
   } catch (error) {
-    console.error("❌ Error getting simple quote:", error)
+    console.error("❌ Error getting estimate quote:", error)
     throw error
   }
 }
 
-// Helper function for smart quote with slippage and deadline
-export async function getSmartQuote(tokenInAddress: string, slippage = 3, deadline = 10) {
-  try {
-    console.log("🔄 Getting smart quote:", { tokenInAddress, slippage, deadline })
-    const quote = await quoter.smart(tokenInAddress, {
-      slippage,
-      deadline,
-    })
-    console.log("✅ Smart quote:", quote)
-    return quote
-  } catch (error) {
-    console.error("❌ Error getting smart quote:", error)
-    throw error
-  }
-}
+// Export helper functions and instances for the mini wallet
+export { swapHelper, provider, wldToken, tpfToken }
