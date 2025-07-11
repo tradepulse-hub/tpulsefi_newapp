@@ -88,7 +88,6 @@ const translations = {
       membership: "Membership",
       partnerships: "Partnerships",
       about: "About",
-      events: "Events",
     },
     common: {
       wallet: "Wallet",
@@ -126,7 +125,6 @@ const translations = {
       membership: "Membros",
       partnerships: "Parcerias",
       about: "Sobre",
-      events: "Eventos",
     },
     common: {
       wallet: "Carteira",
@@ -163,7 +161,6 @@ const translations = {
       membership: "Membresía",
       partnerships: "Asociaciones",
       about: "Acerca de",
-      events: "Eventos",
     },
     common: {
       wallet: "Billetera",
@@ -201,7 +198,6 @@ const translations = {
       membership: "Keanggotaan",
       partnerships: "Kemitraan",
       about: "Tentang",
-      events: "Acara",
     },
     common: {
       wallet: "Dompet",
@@ -381,12 +377,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
       href: "/airdrop",
     },
     {
-      id: "events",
-      labelKey: "events",
-      icon: Calendar,
-      action: () => setShowEventsModal(true),
-    },
-    {
       id: "fistaking",
       labelKey: "fistaking",
       icon: TrendingUp,
@@ -429,11 +419,25 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden flex items-center justify-center">
-      {/* Top Navigation - Wallet Left, Language Right */}
+      {/* Top Navigation */}
       <div className="absolute top-0 left-0 right-0 z-50 p-6">
         <div className="flex items-center justify-between">
-          {/* Left Side - Wallet Controls */}
+          {/* Left Side - Events Icon */}
           <div className="flex items-center space-x-3">
+            {/* Events Icon */}
+            <button onClick={() => setShowEventsModal(true)} className="relative group">
+              <div className="px-3 py-2 bg-black/20 backdrop-blur-md border border-orange-400/30 rounded-full flex items-center space-x-2 hover:bg-orange-500/10 transition-all duration-300">
+                <div className="absolute inset-0 bg-gradient-to-r from-orange-400/10 to-red-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <Calendar className="w-4 h-4 text-orange-300 relative z-10" />
+                <span className="text-orange-300 text-sm font-medium relative z-10">Evento</span>
+                {/* Live Indicator */}
+                <div className="flex items-center space-x-1">
+                  <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                  <span className="text-red-400 text-xs font-bold">LIVE</span>
+                </div>
+              </div>
+            </button>
+
             {/* Wallet Button (when wallet is connected but hidden) */}
             {isAuthenticated && !showMiniWallet && (
               <button onClick={handleShowWallet} className="relative group">
@@ -809,12 +813,8 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                       className="group p-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg hover:bg-white/10 transition-all duration-300"
                     >
                       <div className="flex flex-col items-center space-y-1">
-                        <div
-                          className={`w-6 h-6 ${item.id === "events" ? "bg-gradient-to-r from-yellow-400/30 to-orange-400/30" : "bg-gradient-to-r from-cyan-400/20 to-blue-400/20"} rounded-full flex items-center justify-center group-hover:from-cyan-400/30 group-hover:to-blue-400/30 transition-all duration-300`}
-                        >
-                          <item.icon
-                            className={`w-3 h-3 ${item.id === "events" ? "text-yellow-400" : "text-cyan-400"} group-hover:text-white transition-colors`}
-                          />
+                        <div className="w-6 h-6 bg-gradient-to-r from-cyan-400/20 to-blue-400/20 rounded-full flex items-center justify-center group-hover:from-cyan-400/30 group-hover:to-blue-400/30 transition-all duration-300">
+                          <item.icon className="w-3 h-3 text-cyan-400 group-hover:text-white transition-colors" />
                         </div>
                         <span className="text-white/80 group-hover:text-white font-medium text-xs tracking-wide">
                           {t.navigation?.[item.labelKey] || item.labelKey}
