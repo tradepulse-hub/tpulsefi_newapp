@@ -426,6 +426,49 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     }
   }
 
+  // Safe number formatting function
+  const safeFormatNumber = (value: any): string => {
+    try {
+      // Handle null, undefined, empty string
+      if (value === null || value === undefined || value === "") {
+        return "0"
+      }
+
+      // Convert to string first
+      const stringValue = String(value).trim()
+
+      // Handle empty string after trim
+      if (stringValue === "") {
+        return "0"
+      }
+
+      // Try to parse as number
+      const numValue = Number.parseFloat(stringValue)
+
+      // Check if it's a valid number
+      if (isNaN(numValue) || !isFinite(numValue)) {
+        console.warn("⚠️ Invalid number value:", value)
+        return "0"
+      }
+
+      // If it's a very large number (likely wei), convert from wei
+      if (numValue > 1000000000000000000) {
+        try {
+          return ethers.formatUnits(stringValue, 18)
+        } catch (error) {
+          console.warn("⚠️ Error formatting from wei:", error)
+          return (numValue / 1e18).toFixed(6)
+        }
+      }
+
+      // Return formatted number
+      return numValue.toFixed(6)
+    } catch (error) {
+      console.error("❌ Error in safeFormatNumber:", error, "for value:", value)
+      return "0"
+    }
+  }
+
   // Get quote function for WLD to TPF swap only
   const getSwapQuote = useCallback(
     async (amountFrom: string) => {
@@ -452,7 +495,6 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         console.log("🔄 Getting swap quote for WLD to TPF:", { amountFrom })
 
         // Convert amount to wei using ethers v6 syntax
-        // O usuário insere valores normais (ex: 1 WLD), não em wei
         const amountInWei = ethers.parseUnits(amountFrom, 18)
         console.log("💰 Amount in wei:", amountInWei.toString())
 
@@ -487,55 +529,14 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
         setSwapQuote(quote)
 
-        // Format the output amount - DEBUGGING APPROACH
+        // Format the output amount using safe formatting
         let amountOutFormatted = "0"
         if (quote.addons?.outAmount) {
-          try {
-            const rawOutAmount = quote.addons.outAmount
-            console.log("🔍 DEBUG - Raw outAmount:", rawOutAmount)
-            console.log("🔍 DEBUG - Type:", typeof rawOutAmount)
-            console.log("🔍 DEBUG - String value:", String(rawOutAmount))
-
-            // Try different approaches based on the actual data type
-            if (typeof rawOutAmount === "string") {
-              // If it's a string, check if it looks like wei (very large number)
-              if (rawOutAmount.length > 10) {
-                // Probably wei, format it
-                console.log("🔍 Treating as wei string")
-                amountOutFormatted = ethers.formatUnits(rawOutAmount, 18)
-              } else {
-                // Probably already formatted
-                console.log("🔍 Treating as normal string")
-                amountOutFormatted = rawOutAmount
-              }
-            } else if (typeof rawOutAmount === "number") {
-              // If it's a number, check if it's very large (wei) or normal
-              if (rawOutAmount > 1000000000000000000) {
-                // Probably wei
-                console.log("🔍 Treating as wei number")
-                amountOutFormatted = ethers.formatUnits(rawOutAmount.toString(), 18)
-              } else {
-                // Probably already formatted
-                console.log("🔍 Treating as normal number")
-                amountOutFormatted = rawOutAmount.toString()
-              }
-            } else {
-              // Try to convert to string and format
-              console.log("🔍 Unknown type, converting to string")
-              const stringValue = String(rawOutAmount)
-              if (stringValue.length > 10) {
-                amountOutFormatted = ethers.formatUnits(stringValue, 18)
-              } else {
-                amountOutFormatted = stringValue
-              }
-            }
-
-            console.log("💱 Final formatted output amount:", amountOutFormatted)
-          } catch (formatError) {
-            console.error("❌ Error formatting outAmount:", formatError)
-            // Ultimate fallback
-            amountOutFormatted = "Error formatting"
-          }
+          console.log("🔍 Processing outAmount:", quote.addons.outAmount)
+          amountOutFormatted = safeFormatNumber(quote.addons.outAmount)
+          console.log("💱 Final formatted output amount:", amountOutFormatted)
+        } else {
+          console.warn("⚠️ No outAmount in quote.addons")
         }
 
         setSwapForm((prev) => ({
@@ -578,7 +579,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       console.log("🚀 Starting swap transaction:", swapForm)
 
       // Convert amount to wei using ethers v6 syntax
-      const amountInWei = ethers.parseUnits(swapForm.amountFrom, 18) // Converter diretamente
+      const amountInWei = ethers.parseUnits(swapForm.amountFrom, 18)
       console.log("💰 Swap amount in wei:", amountInWei.toString())
 
       const result = await doSwap({
