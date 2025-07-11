@@ -21,6 +21,7 @@ import {
   Clock,
   DollarSign,
   AlertTriangle,
+  ArrowLeft,
 } from "lucide-react"
 import { useMiniKit } from "../../hooks/use-minikit"
 import MiniWallet from "../../components/mini-wallet"
@@ -94,6 +95,7 @@ const translations = {
       loading: "Loading...",
       language: "Language",
       close: "Close",
+      back: "Back",
     },
     partnerships: {
       visitApp: "Visit App",
@@ -110,6 +112,7 @@ const translations = {
       eventDates: "July 11, 2025 - August 11, 2025",
       participateNow: "Participate Now",
       termsConditions: "Terms & Conditions",
+      eventButton: "Event",
     },
   },
   pt: {
@@ -131,6 +134,7 @@ const translations = {
       loading: "Carregando...",
       language: "Idioma",
       close: "Fechar",
+      back: "Voltar",
     },
     partnerships: {
       visitApp: "Visitar App",
@@ -146,6 +150,7 @@ const translations = {
       eventDates: "11 de Julho, 2025 - 11 de Agosto, 2025",
       participateNow: "Participar Agora",
       termsConditions: "Termos e Condições",
+      eventButton: "Evento",
     },
   },
   es: {
@@ -167,6 +172,7 @@ const translations = {
       loading: "Cargando...",
       language: "Idioma",
       close: "Cerrar",
+      back: "Atrás",
     },
     partnerships: {
       visitApp: "Visitar App",
@@ -183,6 +189,7 @@ const translations = {
       eventDates: "11 de Julio, 2025 - 11 de Agosto, 2025",
       participateNow: "Participar Ahora",
       termsConditions: "Términos y Condiciones",
+      eventButton: "Evento",
     },
   },
   id: {
@@ -204,6 +211,7 @@ const translations = {
       loading: "Memuat...",
       language: "Bahasa",
       close: "Tutup",
+      back: "Kembali",
     },
     partnerships: {
       visitApp: "Kunjungi App",
@@ -220,6 +228,7 @@ const translations = {
       eventDates: "11 Juli, 2025 - 11 Agustus, 2025",
       participateNow: "Berpartisipasi Sekarang",
       termsConditions: "Syarat & Ketentuan",
+      eventButton: "Acara",
     },
   },
 }
@@ -429,7 +438,9 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
               <div className="px-3 py-2 bg-black/20 backdrop-blur-md border border-orange-400/30 rounded-full flex items-center space-x-2 hover:bg-orange-500/10 transition-all duration-300">
                 <div className="absolute inset-0 bg-gradient-to-r from-orange-400/10 to-red-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <Calendar className="w-4 h-4 text-orange-300 relative z-10" />
-                <span className="text-orange-300 text-sm font-medium relative z-10">Evento</span>
+                <span className="text-orange-300 text-sm font-medium relative z-10">
+                  {t.events?.eventButton || "Evento"}
+                </span>
                 {/* Live Indicator */}
                 <div className="flex items-center space-x-1">
                   <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
@@ -543,7 +554,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.8, opacity: 0, y: 50 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="relative bg-black/90 backdrop-blur-xl border border-white/20 rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl"
+              className="relative bg-black/90 backdrop-blur-xl border border-white/20 rounded-2xl p-4 max-w-sm w-full mx-4 shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Close Button */}
@@ -556,6 +567,14 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
 
               {/* Modal Header with TPF Logo */}
               <div className="text-center mb-6">
+                {/* Back Button */}
+                <button
+                  onClick={() => setShowEventsModal(false)}
+                  className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors mb-4"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  <span className="text-sm">{t.common?.back || "Back"}</span>
+                </button>
                 {/* Animated TPF Logo */}
                 <div className="relative mb-4 flex justify-center">
                   {/* Glow Effects */}
@@ -585,16 +604,16 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                   </span>
                 </div>
 
-                <h2 className="text-xl font-bold text-white mb-2">{t.events?.title || "Live Events"}</h2>
+                <h2 className="text-lg font-bold text-white mb-2">{t.events?.title || "Live Events"}</h2>
               </div>
 
               {/* Event Content */}
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {/* Event Title */}
-                <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 rounded-lg p-4">
+                <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 rounded-lg p-3">
                   <div className="flex items-center space-x-2 mb-2">
                     <Star className="w-5 h-5 text-yellow-400" />
-                    <h3 className="text-lg font-semibold text-white">
+                    <h3 className="text-base font-semibold text-white">
                       {t.events?.eventTitle || "Earn 10% TPF on your TPF purchase"}
                     </h3>
                   </div>
@@ -612,7 +631,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                 </div>
 
                 {/* Warning */}
-                <div className="bg-gradient-to-r from-red-500/20 to-pink-500/20 border border-red-500/30 rounded-lg p-4">
+                <div className="bg-gradient-to-r from-red-500/20 to-pink-500/20 border border-red-500/30 rounded-lg p-3">
                   <div className="flex items-start space-x-2">
                     <AlertTriangle className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0" />
                     <p className="text-red-300 text-sm">
@@ -623,7 +642,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                 </div>
 
                 {/* Event Period */}
-                <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 rounded-lg p-4">
+                <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 rounded-lg p-3">
                   <div className="flex items-center space-x-2 mb-2">
                     <Clock className="w-4 h-4 text-blue-400" />
                     <h4 className="text-white font-medium">{t.events?.eventPeriod || "Event Period"}</h4>
