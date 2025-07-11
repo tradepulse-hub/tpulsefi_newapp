@@ -23,7 +23,7 @@ import {
 } from "lucide-react"
 import Image from "next/image"
 import { walletService } from "@/services/wallet-service"
-import { doSwap, testSwapHelper, getRealQuote } from "@/services/swap-service"
+import { doSwap, testSwapHelper, debugHoldstationSDK, getRealQuote } from "@/services/swap-service"
 import { ethers } from "ethers"
 import { DebugConsole } from "@/components/debug-console"
 
@@ -425,7 +425,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     }
   }
 
-  // Get REAL quote from Holdstation SDK
+  // Get REAL quote from Holdstation SDK com parâmetros corretos
   const getSwapQuote = useCallback(
     async (amountFrom: string) => {
       if (!amountFrom || Number.parseFloat(amountFrom) <= 0 || isNaN(Number.parseFloat(amountFrom))) {
@@ -441,13 +441,21 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       try {
         console.log("🔄 Getting REAL quote from Holdstation SDK for:", amountFrom, "WLD")
 
-        // Use the new getRealQuote function
+        // First, debug the SDK structure
+        console.log("🔍 Debugging SDK before quote...")
+        await debugHoldstationSDK()
+
+        // Use the corrected getRealQuote function
         const { quote, outputAmount, rawOutputAmount } = await getRealQuote(amountFrom)
 
         console.log("✅ REAL quote received:", {
+          quote,
           outputAmount,
           rawOutputAmount,
-          hasQuoteData: !!quote.data,
+          hasData: !!quote.data,
+          hasTo: !!quote.to,
+          hasValue: !!quote.value,
+          hasAddons: !!quote.addons,
         })
 
         setSwapQuote(quote)
@@ -459,6 +467,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         console.log("💱 Updated swap form with real amount:", outputAmount, "TPF")
       } catch (error) {
         console.error("❌ Error getting REAL quote:", error)
+        console.error("❌ Error stack:", error.stack)
         setQuoteError(`${t.quoteError}: ${error?.message || "Unknown error"}`)
         setSwapQuote(null)
         setSwapForm((prev) => ({ ...prev, amountTo: "" }))
@@ -487,7 +496,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     try {
       console.log("🚀 Starting REAL swap transaction:", swapForm)
 
-      // Convert amount to wei using ethers v6 syntax
+      // Convert amount to wei for the swap function
       const amountInWei = ethers.parseUnits(swapForm.amountFrom, 18)
       console.log("💰 Swap amount in wei:", amountInWei.toString())
 
@@ -1049,14 +1058,13 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">{t.yourWalletAddress}:</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">{t.yourWalletAddress}</label>
                   <div className="bg-gray-800/50 border border-white/20 rounded-lg p-3">
                     <div className="flex items-center justify-between">
                       <span className="text-white font-mono text-sm break-all">{walletAddress}</span>
                       <button
                         onClick={copyAddress}
                         className="ml-2 p-2 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-white/10 flex-shrink-0"
-                        title={t.copyAddress}
                       >
                         {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
                       </button>
@@ -1089,7 +1097,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                   <History className="w-5 h-5 mr-2 text-purple-400" />
                   {t.transactionHistory}
                 </h3>
-                <div className="w-16">{/* Spacer for centering */}</div>
+                <div className="w-16" /> {/* Spacer for centering */}
               </div>
 
               <div className="space-y-3 max-h-80 overflow-y-auto">
@@ -1111,7 +1119,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.05 }}
-                        className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-lg p-3 hover:bg-white/5 transition-all duration-200"
+                        className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl p-3 hover:bg-white/5 transition-all duration-200"
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-3">
@@ -1127,36 +1135,40 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                               )}
                             </div>
                             <div>
-                              <p className="text-white font-medium text-sm">
-                                {tx.type === "sent" ? t.sent : t.received} {tx.token}
-                              </p>
+                              <div className="flex items-center space-x-2">
+                                <p className="text-white font-medium text-sm">
+                                  {tx.type === "sent" ? t.sent : t.received} {tx.token}
+                                </p>
+                                <span className={`text-xs px-2 py-0.5 rounded-full ${getStatusColor(tx.status)}`}>
+                                  {tx.status === "confirmed"
+                                    ? t.confirmed
+                                    : tx.status === "pending"
+                                      ? t.pending
+                                      : t.failed}
+                                </span>
+                              </div>
                               <p className="text-gray-400 text-xs">{formatAddress(tx.address)}</p>
+                              <p className="text-gray-500 text-xs">{formatTimestamp(tx.timestamp)}</p>
                             </div>
                           </div>
                           <div className="text-right">
-                            <p className="text-white font-medium text-sm">
+                            <p
+                              className={`font-medium text-sm ${
+                                tx.type === "sent" ? "text-red-400" : "text-green-400"
+                              }`}
+                            >
                               {tx.type === "sent" ? "-" : "+"}
-                              {formatBalance(tx.amount)} {tx.token}
+                              {formatBalance(tx.amount)}
                             </p>
-                            <div className="flex items-center space-x-2">
-                              <span className={`text-xs ${getStatusColor(tx.status)}`}>
-                                {tx.status === "confirmed"
-                                  ? t.confirmed
-                                  : tx.status === "pending"
-                                    ? t.pending
-                                    : t.failed}
-                              </span>
-                              <button
-                                onClick={() => openTransactionInExplorer(tx.hash)}
-                                className="text-gray-400 hover:text-white transition-colors"
-                                title={t.viewOnExplorer}
-                              >
-                                <ExternalLink className="w-3 h-3" />
-                              </button>
-                            </div>
+                            <button
+                              onClick={() => openTransactionInExplorer(tx.hash)}
+                              className="text-gray-400 hover:text-white transition-colors"
+                              title={t.viewOnExplorer}
+                            >
+                              <ExternalLink className="w-3 h-3" />
+                            </button>
                           </div>
                         </div>
-                        <div className="mt-2 text-xs text-gray-500">{formatTimestamp(tx.timestamp)}</div>
                       </motion.div>
                     ))}
 
@@ -1165,15 +1177,15 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                       <button
                         onClick={loadMoreTransactions}
                         disabled={loadingMore}
-                        className="w-full py-2 text-sm text-gray-400 hover:text-white transition-colors border border-white/10 rounded-lg hover:bg-white/5 disabled:opacity-50"
+                        className="w-full py-2 text-gray-400 hover:text-white transition-colors text-sm flex items-center justify-center space-x-2"
                       >
                         {loadingMore ? (
-                          <div className="flex items-center justify-center space-x-2">
+                          <>
                             <RefreshCw className="w-4 h-4 animate-spin" />
                             <span>{t.loading}</span>
-                          </div>
+                          </>
                         ) : (
-                          t.loadMore
+                          <span>{t.loadMore}</span>
                         )}
                       </button>
                     )}
