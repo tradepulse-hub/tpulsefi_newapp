@@ -34,16 +34,29 @@ const tpfToken = TOKENS.find((t) => t.symbol === "TPF")!
 
 // --- Provider and SDK setup ---
 const RPC_URL = "https://worldchain-mainnet.g.alchemy.com/public"
+console.log("🔄 Initializing swap service with RPC:", RPC_URL)
+
 const provider = new ethers.JsonRpcProvider(RPC_URL, { chainId: 480, name: "worldchain" }, { staticNetwork: true })
+console.log("✅ Provider created")
+
 const client = new Client(provider)
+console.log("✅ Client created")
+
 config.client = client
 config.multicall3 = new Multicall3(provider)
+console.log("✅ Config set")
+
 const swapHelper = new SwapHelper(client, { tokenStorage: inmemoryTokenStorage })
+console.log("✅ SwapHelper created")
+
 const tokenProvider = new TokenProvider({ client, multicall3: config.multicall3 })
 const zeroX = new ZeroX(tokenProvider, inmemoryTokenStorage)
 const worldSwap = new HoldSo(tokenProvider, inmemoryTokenStorage)
+
+console.log("✅ Loading routers into swapHelper...")
 swapHelper.load(zeroX)
 swapHelper.load(worldSwap)
+console.log("✅ SwapHelper fully initialized with routers")
 
 // --- Mocked helper functions (replace with real implementations as needed) ---
 async function updateUserData(address: string) {
@@ -109,5 +122,26 @@ export async function doSwap({
   }
 }
 
-// Export tokens, helper and provider for use in components
+// Test function to verify swapHelper is working
+export async function testSwapHelper() {
+  try {
+    console.log("🧪 Testing swapHelper...")
+    console.log("SwapHelper methods:", Object.keys(swapHelper))
+    console.log("SwapHelper estimate:", !!swapHelper.estimate)
+    console.log("SwapHelper estimate.quote:", typeof swapHelper.estimate?.quote)
+
+    if (swapHelper.estimate?.quote) {
+      console.log("✅ swapHelper.estimate.quote is available")
+      return true
+    } else {
+      console.error("❌ swapHelper.estimate.quote is not available")
+      return false
+    }
+  } catch (error) {
+    console.error("❌ Error testing swapHelper:", error)
+    return false
+  }
+}
+
+// Export tokens, helper, provider and test function for use in components
 export { TOKENS, swapHelper, provider }
