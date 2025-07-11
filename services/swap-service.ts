@@ -103,7 +103,7 @@ export async function doSwap({
       await provider.getBlockNumber()
       await updateUserData(walletAddress)
       await loadTokenBalances(walletAddress)
-      await loadAniBalance(walletAddress)
+      await loadTpfBalance(walletAddress)
       console.log("Swap successful!")
     } else {
       console.error("Swap failed: ", result)
