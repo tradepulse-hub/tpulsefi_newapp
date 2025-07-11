@@ -24,7 +24,7 @@ import {
 } from "lucide-react"
 import Image from "next/image"
 import { walletService } from "@/services/wallet-service"
-import { doSwap, swapHelper } from "@/services/swap-service"
+import { doSwap, swapHelper, testSwapHelper } from "@/services/swap-service"
 import { ethers } from "ethers"
 import { DebugConsole } from "@/components/debug-console"
 
@@ -429,6 +429,15 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
   // Get quote function for WLD to TPF swap only
   const getSwapQuote = useCallback(
     async (amountFrom: string) => {
+      // Check if swapHelper is available
+      if (!swapHelper) {
+        console.error("❌ swapHelper not available")
+        setQuoteError("Swap service not available")
+        return
+      }
+
+      console.log("✅ swapHelper available:", !!swapHelper.estimate?.quote)
+
       if (!amountFrom || Number.parseFloat(amountFrom) <= 0) {
         setSwapQuote(null)
         setSwapForm((prev) => ({ ...prev, amountTo: "" }))
@@ -446,13 +455,30 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         const amountInWei = ethers.parseUnits(amountFrom, 18) // WLD has 18 decimals
         console.log("💰 Amount in wei:", amountInWei.toString())
 
-        // Use the swapHelper to get quote
+        // Use the swapHelper to get quote with proper error handling
+        console.log("🔄 Calling swapHelper.estimate.quote with params:", {
+          tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003",
+          tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45",
+          amountIn: amountInWei.toString(),
+          preferRouters: ["0x", "holdso"],
+          timeout: 30000,
+        })
+
         const quote = await swapHelper.estimate.quote({
           tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
           tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
           amountIn: amountInWei.toString(),
           preferRouters: ["0x", "holdso"],
           timeout: 30000, // 30 seconds timeout
+        })
+
+        console.log("✅ Quote response structure:", {
+          hasData: !!quote.data,
+          hasTo: !!quote.to,
+          hasValue: !!quote.value,
+          hasAddons: !!quote.addons,
+          outAmount: quote.addons?.outAmount,
+          fullQuote: quote,
         })
 
         console.log("✅ Quote received:", quote)
@@ -467,7 +493,12 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         }))
       } catch (error) {
         console.error("❌ Error getting quote:", error)
-        setQuoteError(t.quoteError)
+        console.error("❌ Error details:", {
+          message: error?.message,
+          stack: error?.stack,
+          name: error?.name,
+        })
+        setQuoteError(`${t.quoteError}: ${error?.message || "Unknown error"}`)
         setSwapQuote(null)
         setSwapForm((prev) => ({ ...prev, amountTo: "" }))
       } finally {
@@ -569,6 +600,22 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       loadTransactionHistory(true)
     }
   }, [walletAddress])
+
+  // Test swapHelper on component mount
+  useEffect(() => {
+    const testSwap = async () => {
+      console.log("🧪 Testing swapHelper on component mount...")
+      const isWorking = await testSwapHelper()
+      if (!isWorking) {
+        console.error("❌ swapHelper is not working properly")
+        setQuoteError("Swap service initialization failed")
+      } else {
+        console.log("✅ swapHelper is working correctly")
+      }
+    }
+
+    testSwap()
+  }, [])
 
   const formatBalance = (balance: string): string => {
     const num = Number.parseFloat(balance)
