@@ -495,10 +495,39 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     setSwapping(true)
     try {
       console.log("🚀 Starting REAL swap transaction:", swapForm)
+      console.log("📋 Swap quote details:", {
+        hasData: !!swapQuote.data,
+        hasTo: !!swapQuote.to,
+        hasValue: !!swapQuote.value,
+        hasAddons: !!swapQuote.addons,
+        dataLength: swapQuote.data?.length,
+        to: swapQuote.to,
+        value: swapQuote.value,
+      })
+
+      // Verificar se temos WLD suficiente
+      const wldBalance = balances.find((t) => t.symbol === "WLD")
+      if (!wldBalance || Number.parseFloat(wldBalance.balance) < Number.parseFloat(swapForm.amountFrom)) {
+        throw new Error(
+          `Insufficient WLD balance. Available: ${wldBalance?.balance || "0"}, Required: ${swapForm.amountFrom}`,
+        )
+      }
 
       // Convert amount to wei for the swap function
       const amountInWei = ethers.parseUnits(swapForm.amountFrom, 18)
+      console.log("💰 Swap amount:", swapForm.amountFrom, "WLD")
       console.log("💰 Swap amount in wei:", amountInWei.toString())
+
+      // Verificar se o quote é válido
+      if (!swapQuote.data || !swapQuote.to) {
+        throw new Error("Invalid swap quote: missing transaction data")
+      }
+
+      console.log("📤 Calling doSwap with:")
+      console.log("  - walletAddress:", walletAddress)
+      console.log("  - amountIn (wei):", amountInWei.toString())
+      console.log("  - quote.data length:", swapQuote.data.length)
+      console.log("  - quote.to:", swapQuote.to)
 
       const result = await doSwap({
         walletAddress,
@@ -507,15 +536,40 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       })
 
       console.log("✅ REAL swap completed:", result)
-      alert(`✅ ${t.swapSuccess} ${swapForm.amountFrom} WLD for ${swapForm.amountTo} TPF!`)
-      setViewMode("main")
-      setSwapForm({ tokenFrom: "WLD", tokenTo: "TPF", amountFrom: "", amountTo: "" })
-      setSwapQuote(null)
-      await refreshBalances()
-      await loadTransactionHistory(true)
+
+      if (result.success) {
+        alert(`✅ ${t.swapSuccess} ${swapForm.amountFrom} WLD for ${swapForm.amountTo} TPF!`)
+        if (result.transactionId) {
+          console.log("🎯 Transaction ID:", result.transactionId)
+        }
+
+        setViewMode("main")
+        setSwapForm({ tokenFrom: "WLD", tokenTo: "TPF", amountFrom: "", amountTo: "" })
+        setSwapQuote(null)
+        await refreshBalances()
+        await loadTransactionHistory(true)
+      } else {
+        throw new Error("Swap completed but returned success: false")
+      }
     } catch (error) {
       console.error("❌ REAL swap error:", error)
-      alert(`❌ ${t.swapFailed}. Please try again.`)
+      console.error("❌ Error details:", {
+        message: error?.message,
+        stack: error?.stack,
+        name: error?.name,
+      })
+
+      // Mostrar erro mais específico para o usuário
+      let errorMessage = t.swapFailed
+      if (error?.message?.includes("Insufficient")) {
+        errorMessage = `${t.swapFailed}: Saldo insuficiente`
+      } else if (error?.message?.includes("Invalid")) {
+        errorMessage = `${t.swapFailed}: Cotação inválida`
+      } else if (error?.message?.includes("simulation")) {
+        errorMessage = `${t.swapFailed}: Simulação da transação falhou`
+      }
+
+      alert(`❌ ${errorMessage}. Detalhes: ${error?.message}`)
     } finally {
       setSwapping(false)
     }
@@ -1004,7 +1058,18 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                 {/* Swap Button */}
                 <button
                   onClick={handleSwap}
-                  disabled={swapping || !swapQuote || !swapForm.amountFrom}
+                  disabled={
+                    swapping ||
+                    !swapQuote ||
+                    !swapForm.amountFrom ||
+                    (() => {
+                      const wldBalance = balances.find((t) => t.symbol === "WLD")
+                      return (
+                        !wldBalance ||
+                        Number.parseFloat(wldBalance.balance) < Number.parseFloat(swapForm.amountFrom || "0")
+                      )
+                    })()
+                  }
                   className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2"
                 >
                   {swapping ? (
@@ -1015,7 +1080,17 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                   ) : (
                     <>
                       <ArrowLeftRight className="w-4 h-4" />
-                      <span>{t.swap} WLD → TPF</span>
+                      <span>
+                        {(() => {
+                          const wldBalance = balances.find((t) => t.symbol === "WLD")
+                          const hasInsufficientBalance =
+                            !wldBalance ||
+                            Number.parseFloat(wldBalance.balance) < Number.parseFloat(swapForm.amountFrom || "0")
+                          return hasInsufficientBalance && swapForm.amountFrom
+                            ? "Saldo Insuficiente"
+                            : `${t.swap} WLD → TPF`
+                        })()}
+                      </span>
                     </>
                   )}
                 </button>
