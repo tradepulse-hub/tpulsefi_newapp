@@ -1,145 +1,170 @@
+// doSwap.ts
+// This file contains a standalone version of the doSwap function from the AniPage.
+// It is designed to be self-contained and ready to share with others for demonstration purposes.
+
 import { ethers } from "ethers"
+import {
+  config,
+  HoldSo,
+  SwapHelper,
+  TokenProvider,
+  ZeroX,
+  inmemoryTokenStorage,
+  type SwapParams,
+} from "@holdstation/worldchain-sdk"
+import { Client, Multicall3 } from "@holdstation/worldchain-ethers-v6"
 
-// Partner code updated to 24568
-const PARTNER_CODE = "24568"
-
-// Token configurations for Worldchain
+// --- Token definitions ---
 export const TOKENS = [
   {
-    symbol: "TPF",
-    name: "The People's Fund",
-    address: "0x4200000000000000000000000000000000000042",
-    decimals: 18,
-    icon: "/images/logo-tpf.png",
-  },
-  {
+    address: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003",
     symbol: "WLD",
     name: "Worldcoin",
-    address: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003",
     decimals: 18,
-    icon: "/images/worldcoin.jpeg",
+    logo: "/images/worldcoin.jpeg",
+    color: "#000000",
   },
   {
-    symbol: "USDC",
-    name: "USD Coin",
-    address: "0x79A02482A880bCE3F13e09Da970dC34db4CD24d1",
-    decimals: 6,
-    icon: "/placeholder.svg?height=32&width=32&text=USDC",
+    address: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45",
+    symbol: "TPF",
+    name: "TradePulse Finance",
+    decimals: 18,
+    logo: "/images/logo-tpf.png",
+    color: "#FFFFFF",
   },
   {
-    symbol: "WETH",
-    name: "Wrapped Ethereum",
-    address: "0x4200000000000000000000000000000000000006",
+    address: "0xEdE54d9c024ee80C85ec0a75eD2d8774c7Fbac9B",
+    symbol: "WDD",
+    name: "Drachma Token",
     decimals: 18,
-    icon: "/placeholder.svg?height=32&width=32&text=WETH",
+    logo: "/images/drachma-token.png",
+    color: "#FFD700",
+  },
+  {
+    address: "0x868D08798F91ba9D6AC126148fdE8bBdfb6354D5",
+    symbol: "TPT",
+    name: "TradePulse Token",
+    decimals: 18,
+    logo: "/images/roflex-token.png",
+    color: "#00FF00",
   },
 ]
 
-// Swap service configuration
-const SWAP_API_BASE_URL = "https://api.1inch.dev/swap/v6.0/480"
+// --- Provider and SDK setup ---
+const RPC_URL = "https://worldchain-mainnet.g.alchemy.com/public"
+const provider = new ethers.JsonRpcProvider(RPC_URL, { chainId: 480, name: "worldchain" }, { staticNetwork: true })
+const client = new Client(provider)
+config.client = client
+config.multicall3 = new Multicall3(provider)
+const swapHelper = new SwapHelper(client, { tokenStorage: inmemoryTokenStorage })
+const tokenProvider = new TokenProvider({ client, multicall3: config.multicall3 })
+const zeroX = new ZeroX(tokenProvider, inmemoryTokenStorage)
+const worldSwap = new HoldSo(tokenProvider, inmemoryTokenStorage)
+swapHelper.load(zeroX)
+swapHelper.load(worldSwap)
 
-interface SwapQuoteParams {
+// --- Mocked helper functions (replace with real implementations as needed) ---
+async function updateUserData(address: string) {
+  // Placeholder for updating user data after swap
+  console.log(`User data updated for address: ${address}`)
+}
+async function loadTokenBalances(address: string) {
+  // Placeholder for reloading token balances after swap
+  console.log(`Token balances loaded for address: ${address}`)
+}
+async function loadAniBalance(address: string) {
+  // Placeholder for reloading ANI balance after swap
+  console.log(`ANI balance loaded for address: ${address}`)
+}
+
+// --- Get Quote function ---
+export async function getSwapQuote({
+  tokenInAddress,
+  tokenOutAddress,
+  amountIn,
+}: {
   tokenInAddress: string
   tokenOutAddress: string
   amountIn: string
+}) {
+  try {
+    console.log("Getting swap quote:", { tokenInAddress, tokenOutAddress, amountIn })
+
+    const quote = await swapHelper.estimate.quote({
+      tokenIn: tokenInAddress,
+      tokenOut: tokenOutAddress,
+      amountIn,
+    })
+
+    console.log("Quote received:", quote)
+    return quote
+  } catch (error) {
+    console.error("Error getting quote:", error)
+    throw error
+  }
 }
 
-interface SwapParams {
+// --- The doSwap function ---
+/**
+ * Executes a token swap using the Worldchain SDK.
+ * @param walletAddress The user's wallet address
+ * @param quote The quote object returned from getSwapQuote
+ * @param amountIn The amount to swap (as a string)
+ * @param tokenInAddress The input token address
+ * @param tokenOutAddress The output token address
+ */
+export async function doSwap({
+  walletAddress,
+  quote,
+  amountIn,
+  tokenInAddress,
+  tokenOutAddress,
+}: {
   walletAddress: string
   quote: any
   amountIn: string
   tokenInAddress: string
   tokenOutAddress: string
-}
-
-export async function getSwapQuote({ tokenInAddress, tokenOutAddress, amountIn }: SwapQuoteParams) {
-  try {
-    console.log("🔄 Getting swap quote from 1inch API...")
-
-    const params = new URLSearchParams({
-      src: tokenInAddress,
-      dst: tokenOutAddress,
-      amount: amountIn,
-      includeTokensInfo: "true",
-      includeProtocols: "true",
-      includeGas: "true",
-      partner: PARTNER_CODE,
-    })
-
-    const response = await fetch(`${SWAP_API_BASE_URL}/quote?${params}`, {
-      headers: {
-        Authorization: `Bearer ${process.env.NEXT_PUBLIC_1INCH_API_KEY || ""}`,
-        accept: "application/json",
-      },
-    })
-
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error("❌ 1inch API error:", response.status, errorText)
-      throw new Error(`1inch API error: ${response.status} ${errorText}`)
-    }
-
-    const quote = await response.json()
-    console.log("✅ Quote received from 1inch:", quote)
-
-    return {
-      ...quote,
-      amountOut: quote.dstAmount || quote.toAmount,
-      estimatedGas: quote.estimatedGas || quote.gas,
-    }
-  } catch (error) {
-    console.error("❌ Error getting swap quote:", error)
-    throw error
+}) {
+  if (!walletAddress || !quote || !amountIn) {
+    return { success: false, error: "Missing required parameters" }
   }
-}
 
-export async function doSwap({ walletAddress, quote, amountIn, tokenInAddress, tokenOutAddress }: SwapParams) {
   try {
-    console.log("🚀 Executing swap with 1inch API...")
-
-    const params = new URLSearchParams({
-      src: tokenInAddress,
-      dst: tokenOutAddress,
-      amount: amountIn,
-      from: walletAddress,
-      slippage: "1", // 1% slippage
-      disableEstimate: "true",
-      allowPartialFill: "false",
-      partner: PARTNER_CODE,
-    })
-
-    const response = await fetch(`${SWAP_API_BASE_URL}/swap?${params}`, {
-      headers: {
-        Authorization: `Bearer ${process.env.NEXT_PUBLIC_1INCH_API_KEY || ""}`,
-        accept: "application/json",
+    const swapParams: SwapParams["input"] = {
+      tokenIn: tokenInAddress,
+      tokenOut: tokenOutAddress,
+      amountIn,
+      tx: {
+        data: quote.data,
+        to: quote.to,
+        value: quote.value,
       },
-    })
-
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error("❌ 1inch swap API error:", response.status, errorText)
-      throw new Error(`1inch swap API error: ${response.status} ${errorText}`)
+      partnerCode: "24568",
+      feeAmountOut: quote.addons?.feeAmountOut,
+      fee: "0.2",
+      feeReceiver: "0x4bb270ef6dcb052a083bd5cff518e2e019c0f4ee",
     }
 
-    const swapData = await response.json()
-    console.log("✅ Swap data received from 1inch:", swapData)
+    console.log("Swapping with params:", swapParams)
+    const result = await swapHelper.swap(swapParams)
 
-    // Here you would typically execute the transaction using MiniKit or Web3
-    // For now, we'll simulate a successful swap
-    console.log("💱 Simulating swap execution...")
-
-    return {
-      success: true,
-      transactionHash: `0x${Math.random().toString(16).substr(2, 64)}`,
-      amountOut: swapData.dstAmount || swapData.toAmount,
-      data: swapData,
+    if (result.success) {
+      // Wait for transaction to be confirmed
+      await new Promise((res) => setTimeout(res, 2500))
+      await provider.getBlockNumber()
+      await updateUserData(walletAddress)
+      await loadTokenBalances(walletAddress)
+      await loadAniBalance(walletAddress)
+      console.log("Swap successful!")
+      return { success: true }
+    } else {
+      console.error("Swap failed: ", result)
+      return { success: false, error: result.error || "Swap failed" }
     }
   } catch (error) {
-    console.error("❌ Error executing swap:", error)
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error occurred",
-    }
+    console.error("Swap failed:", error)
+    return { success: false, error: error instanceof Error ? error.message : "Unknown error" }
   }
 }
 
@@ -165,3 +190,6 @@ export function formatTokenAmount(amount: string, decimals: number): string {
     return "0"
   }
 }
+
+// Example usage (uncomment and fill in real values to test):
+// doSwap({ walletAddress: "0x...", quote: { ... }, amountIn: "1.0", tokenInAddress: "0x...", tokenOutAddress: "0x..." })
