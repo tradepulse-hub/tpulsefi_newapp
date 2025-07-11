@@ -23,7 +23,7 @@ import {
 } from "lucide-react"
 import Image from "next/image"
 import { walletService } from "@/services/wallet-service"
-import { doSwap, testSwapHelper, debugHoldstationSDK, getRealQuote } from "@/services/swap-service"
+import { doSwap, testSwapHelper, debugHoldstationSDK, getRealQuote, validateContracts } from "@/services/swap-service"
 import { ethers } from "ethers"
 import { DebugConsole } from "@/components/debug-console"
 
@@ -441,6 +441,10 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       try {
         console.log("🔄 Getting REAL quote from Holdstation SDK for:", amountFrom, "WLD")
 
+        // First, validate contracts
+        console.log("🔍 Validating contracts before quote...")
+        await validateContracts()
+
         // First, debug the SDK structure
         console.log("🔍 Debugging SDK before quote...")
         await debugHoldstationSDK()
@@ -513,6 +517,10 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         )
       }
 
+      // Validar contratos antes do swap
+      console.log("🔍 Validating contracts before swap...")
+      await validateContracts()
+
       // Convert amount to wei for the swap function
       const amountInWei = ethers.parseUnits(swapForm.amountFrom, 18)
       console.log("💰 Swap amount:", swapForm.amountFrom, "WLD")
@@ -563,10 +571,12 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       let errorMessage = t.swapFailed
       if (error?.message?.includes("Insufficient")) {
         errorMessage = `${t.swapFailed}: Saldo insuficiente`
-      } else if (error?.message?.includes("Invalid")) {
-        errorMessage = `${t.swapFailed}: Cotação inválida`
+      } else if (error?.message?.includes("Invalid") || error?.message?.includes("invalid")) {
+        errorMessage = `${t.swapFailed}: Contrato inválido`
       } else if (error?.message?.includes("simulation")) {
         errorMessage = `${t.swapFailed}: Simulação da transação falhou`
+      } else if (error?.message?.includes("contract")) {
+        errorMessage = `${t.swapFailed}: Erro no contrato`
       }
 
       alert(`❌ ${errorMessage}. Detalhes: ${error?.message}`)
@@ -629,12 +639,22 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
   useEffect(() => {
     const testSDK = async () => {
       console.log("🧪 Testing Holdstation SDK on component mount...")
-      const isWorking = await testSwapHelper()
-      if (!isWorking) {
-        console.error("❌ Holdstation SDK is not working properly")
-        setQuoteError("Holdstation SDK initialization failed")
-      } else {
-        console.log("✅ Holdstation SDK is working correctly")
+
+      try {
+        // Primeiro validar contratos
+        await validateContracts()
+        console.log("✅ Contracts validated successfully")
+
+        const isWorking = await testSwapHelper()
+        if (!isWorking) {
+          console.error("❌ Holdstation SDK is not working properly")
+          setQuoteError("Holdstation SDK initialization failed")
+        } else {
+          console.log("✅ Holdstation SDK is working correctly")
+        }
+      } catch (error) {
+        console.error("❌ SDK validation failed:", error)
+        setQuoteError("Contract validation failed: " + error.message)
       }
     }
 
