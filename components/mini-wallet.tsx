@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   Wallet,
@@ -21,11 +21,11 @@ import {
   ExternalLink,
   ChevronDown,
   ArrowLeftRight,
-  TrendingUp,
 } from "lucide-react"
 import Image from "next/image"
 import { walletService } from "@/services/wallet-service"
-import { swapService } from "@/services/swap-service"
+import { doSwap, TOKENS, getSwapQuote } from "@/services/swap-service"
+import { ethers } from "ethers"
 
 interface TokenBalance {
   symbol: string
@@ -107,6 +107,8 @@ const translations = {
     priceImpact: "Price Impact",
     swapRate: "Swap Rate",
     selectToken: "Select Token",
+    enterAmount: "Enter amount to see quote",
+    quoteError: "Failed to get quote",
   },
   pt: {
     connected: "Conectado",
@@ -155,6 +157,8 @@ const translations = {
     priceImpact: "Impacto no Preço",
     swapRate: "Taxa de Troca",
     selectToken: "Selecionar Token",
+    enterAmount: "Digite o valor para ver a cotação",
+    quoteError: "Falha ao obter cotação",
   },
   es: {
     connected: "Conectado",
@@ -203,6 +207,8 @@ const translations = {
     priceImpact: "Impacto en el Precio",
     swapRate: "Tasa de Intercambio",
     selectToken: "Seleccionar Token",
+    enterAmount: "Ingresa cantidad para ver cotización",
+    quoteError: "Error al obtener cotización",
   },
   id: {
     connected: "Terhubung",
@@ -251,6 +257,8 @@ const translations = {
     priceImpact: "Dampak Harga",
     swapRate: "Tingkat Tukar",
     selectToken: "Pilih Token",
+    enterAmount: "Masukkan jumlah untuk melihat kutipan",
+    quoteError: "Gagal mendapatkan kutipan",
   },
 }
 
@@ -286,6 +294,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
   const [swapping, setSwapping] = useState(false)
   const [gettingQuote, setGettingQuote] = useState(false)
   const [swapQuote, setSwapQuote] = useState<any>(null)
+  const [quoteError, setQuoteError] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isMinimized, setIsMinimized] = useState(false)
 
@@ -409,54 +418,90 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     }
   }
 
-  const handleGetQuote = async () => {
-    if (!swapForm.amountFrom || swapForm.tokenFrom === swapForm.tokenTo) return
-
-    setGettingQuote(true)
-    try {
-      const tokenFromData = balances.find((t) => t.symbol === swapForm.tokenFrom)
-      const tokenToData = balances.find((t) => t.symbol === swapForm.tokenTo)
-
-      if (!tokenFromData || !tokenToData) {
-        throw new Error("Token not found")
+  // Debounced function to get quote automatically
+  const debouncedGetQuote = useCallback(
+    async (tokenFrom: string, tokenTo: string, amountFrom: string) => {
+      if (!amountFrom || tokenFrom === tokenTo || Number.parseFloat(amountFrom) <= 0) {
+        setSwapQuote(null)
+        setSwapForm((prev) => ({ ...prev, amountTo: "" }))
+        setQuoteError(null)
+        return
       }
 
-      const quote = await swapService.getSwapQuote(tokenFromData.address, tokenToData.address, swapForm.amountFrom)
+      setGettingQuote(true)
+      setQuoteError(null)
 
-      setSwapQuote(quote)
-      setSwapForm((prev) => ({
-        ...prev,
-        amountTo: quote.amountOutFormatted,
-      }))
-    } catch (error) {
-      console.error("Error getting quote:", error)
-      alert("Failed to get quote. Please try again.")
-    } finally {
-      setGettingQuote(false)
-    }
-  }
+      try {
+        const tokenFromData = TOKENS.find((t) => t.symbol === tokenFrom)
+        const tokenToData = TOKENS.find((t) => t.symbol === tokenTo)
+
+        if (!tokenFromData || !tokenToData) {
+          throw new Error("Token not found")
+        }
+
+        // Convert amount to wei
+        const amountInWei = ethers.parseUnits(amountFrom, tokenFromData.decimals)
+
+        // Use the getSwapQuote function
+        const quote = await getSwapQuote({
+          tokenInAddress: tokenFromData.address,
+          tokenOutAddress: tokenToData.address,
+          amountIn: amountInWei.toString(),
+        })
+
+        setSwapQuote(quote)
+
+        // Format the output amount
+        const amountOutFormatted = ethers.formatUnits(quote.amountOut || "0", tokenToData.decimals)
+        setSwapForm((prev) => ({
+          ...prev,
+          amountTo: amountOutFormatted,
+        }))
+      } catch (error) {
+        console.error("Error getting quote:", error)
+        setQuoteError(t.quoteError)
+        setSwapQuote(null)
+        setSwapForm((prev) => ({ ...prev, amountTo: "" }))
+      } finally {
+        setGettingQuote(false)
+      }
+    },
+    [t.quoteError],
+  )
+
+  // Auto-quote effect with debounce
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      debouncedGetQuote(swapForm.tokenFrom, swapForm.tokenTo, swapForm.amountFrom)
+    }, 1000) // 1 second debounce
+
+    return () => clearTimeout(timeoutId)
+  }, [swapForm.tokenFrom, swapForm.tokenTo, swapForm.amountFrom, debouncedGetQuote])
 
   const handleSwap = async () => {
     if (!swapQuote || !swapForm.amountFrom) return
 
     setSwapping(true)
     try {
-      const tokenFromData = balances.find((t) => t.symbol === swapForm.tokenFrom)
-      const tokenToData = balances.find((t) => t.symbol === swapForm.tokenTo)
+      const tokenFromData = TOKENS.find((t) => t.symbol === swapForm.tokenFrom)
+      const tokenToData = TOKENS.find((t) => t.symbol === swapForm.tokenTo)
 
       if (!tokenFromData || !tokenToData) {
         throw new Error("Token not found")
       }
 
-      const result = await swapService.executeSwap({
+      // Convert amount to wei
+      const amountInWei = ethers.parseUnits(swapForm.amountFrom, tokenFromData.decimals)
+
+      const result = await doSwap({
         walletAddress,
+        quote: swapQuote,
+        amountIn: amountInWei.toString(),
         tokenInAddress: tokenFromData.address,
         tokenOutAddress: tokenToData.address,
-        amountIn: swapForm.amountFrom,
-        quote: swapQuote,
       })
 
-      if (result.success) {
+      if (result?.success) {
         alert(
           `✅ ${t.swapSuccess} ${swapForm.amountFrom} ${swapForm.tokenFrom} for ${swapForm.amountTo} ${swapForm.tokenTo}!`,
         )
@@ -466,7 +511,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         await refreshBalances()
         await loadTransactionHistory(true)
       } else {
-        alert(`❌ ${t.swapFailed}: ${result.error}`)
+        alert(`❌ ${t.swapFailed}: ${result?.error}`)
       }
     } catch (error) {
       console.error("Swap error:", error)
@@ -481,6 +526,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     setSendForm({ token: "TPF", amount: "", recipient: "" })
     setSwapForm({ tokenFrom: "TPF", tokenTo: "WLD", amountFrom: "", amountTo: "" })
     setSwapQuote(null)
+    setQuoteError(null)
   }
 
   const openTransactionInExplorer = (hash: string) => {
@@ -869,7 +915,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                     onChange={(e) => setSwapForm({ ...swapForm, tokenFrom: e.target.value })}
                     className="w-full bg-gray-800/50 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-orange-500"
                   >
-                    {balances.map((token) => (
+                    {TOKENS.map((token) => (
                       <option key={token.symbol} value={token.symbol}>
                         {token.symbol}
                       </option>
@@ -907,68 +953,70 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                     onChange={(e) => setSwapForm({ ...swapForm, tokenTo: e.target.value })}
                     className="w-full bg-gray-800/50 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-orange-500"
                   >
-                    {balances.map((token) => (
+                    {TOKENS.map((token) => (
                       <option key={token.symbol} value={token.symbol}>
                         {token.symbol}
                       </option>
                     ))}
                   </select>
-                  <input
-                    type="number"
-                    value={swapForm.amountTo}
-                    readOnly
-                    placeholder="0.00"
-                    className="w-full bg-gray-700/50 border border-white/10 rounded-lg px-3 py-2 text-gray-300 cursor-not-allowed"
-                  />
-                  {swapQuote && (
+                  <div className="relative">
+                    <input
+                      type="number"
+                      value={swapForm.amountTo}
+                      readOnly
+                      placeholder="0.00"
+                      className="w-full bg-gray-700/50 border border-white/10 rounded-lg px-3 py-2 text-gray-300 cursor-not-allowed pr-8"
+                    />
+                    {gettingQuote && (
+                      <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                        <RefreshCw className="w-4 h-4 text-orange-400 animate-spin" />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Quote Status Messages */}
+                  {!swapForm.amountFrom && <div className="text-xs text-gray-500">{t.enterAmount}</div>}
+
+                  {gettingQuote && swapForm.amountFrom && (
+                    <div className="text-xs text-orange-400 flex items-center">
+                      <RefreshCw className="w-3 h-3 animate-spin mr-1" />
+                      {t.gettingQuote}
+                    </div>
+                  )}
+
+                  {swapQuote && swapForm.amountTo && (
                     <div className="text-xs text-green-400">
                       {t.youWillReceive}: {swapForm.amountTo} {swapForm.tokenTo}
+                    </div>
+                  )}
+
+                  {quoteError && (
+                    <div className="text-xs text-red-400 flex items-center">
+                      <AlertCircle className="w-3 h-3 mr-1" />
+                      {quoteError}
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* Get Quote Button */}
-              {!swapQuote && (
-                <button
-                  onClick={handleGetQuote}
-                  disabled={gettingQuote || !swapForm.amountFrom || swapForm.tokenFrom === swapForm.tokenTo}
-                  className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2"
-                >
-                  {gettingQuote ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-t-white border-r-transparent border-l-transparent border-b-white rounded-full animate-spin" />
-                      <span>{t.gettingQuote}</span>
-                    </>
-                  ) : (
-                    <>
-                      <TrendingUp className="w-4 h-4" />
-                      <span>{t.getQuote}</span>
-                    </>
-                  )}
-                </button>
-              )}
-
               {/* Swap Button */}
-              {swapQuote && (
-                <button
-                  onClick={handleSwap}
-                  disabled={swapping}
-                  className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2"
-                >
-                  {swapping ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-t-white border-r-transparent border-l-transparent border-b-white rounded-full animate-spin" />
-                      <span>{t.swapping}</span>
-                    </>
-                  ) : (
-                    <>
-                      <ArrowLeftRight className="w-4 h-4" />
-                      <span>{t.swap}</span>
-                    </>
-                  )}
-                </button>
-              )}
+              <button
+                onClick={handleSwap}
+                disabled={swapping || !swapQuote || !swapForm.amountFrom || gettingQuote}
+                className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2"
+              >
+                {swapping ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-t-white border-r-transparent border-l-transparent border-b-white rounded-full animate-spin" />
+                    <span>{t.swapping}</span>
+                  </>
+                ) : (
+                  <>
+                    <ArrowLeftRight className="w-4 h-4" />
+                    <span>{t.swap}</span>
+                  </>
+                )}
+              </button>
             </div>
           </motion.div>
         )}
