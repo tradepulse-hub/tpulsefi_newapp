@@ -426,24 +426,46 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     }
   }
 
-  // Safe number formatting function
+  // Safe number formatting function with better wei detection
   const safeFormatNumber = (value: any): string => {
     try {
+      console.log("🔍 safeFormatNumber input:", { value, type: typeof value, string: String(value) })
+
       // Handle null, undefined, empty string
       if (value === null || value === undefined || value === "") {
+        console.log("📝 Returning 0 for null/undefined/empty")
         return "0"
       }
 
       // Convert to string first
       const stringValue = String(value).trim()
+      console.log("📝 String value:", stringValue)
 
       // Handle empty string after trim
       if (stringValue === "") {
+        console.log("📝 Returning 0 for empty string")
         return "0"
+      }
+
+      // Check if it's a very large number string (likely wei)
+      // Wei values are typically 18+ digits
+      if (stringValue.length >= 15 && /^\d+$/.test(stringValue)) {
+        console.log("🔍 Detected large number string (likely wei):", stringValue)
+        try {
+          const weiFormatted = ethers.formatUnits(stringValue, 18)
+          console.log("💱 Converted from wei:", weiFormatted)
+          return Number.parseFloat(weiFormatted).toFixed(6)
+        } catch (error) {
+          console.warn("⚠️ Error formatting from wei:", error)
+          // Fallback: divide by 1e18
+          const numValue = Number.parseFloat(stringValue)
+          return (numValue / 1e18).toFixed(6)
+        }
       }
 
       // Try to parse as number
       const numValue = Number.parseFloat(stringValue)
+      console.log("📝 Parsed number:", numValue)
 
       // Check if it's a valid number
       if (isNaN(numValue) || !isFinite(numValue)) {
@@ -451,17 +473,22 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         return "0"
       }
 
-      // If it's a very large number (likely wei), convert from wei
-      if (numValue > 1000000000000000000) {
+      // If it's a very large number (likely wei in number format)
+      if (numValue > 1000000000000000) {
+        // Lower threshold for better detection
+        console.log("🔍 Detected large number (likely wei):", numValue)
         try {
-          return ethers.formatUnits(stringValue, 18)
+          const weiFormatted = ethers.formatUnits(stringValue, 18)
+          console.log("💱 Converted large number from wei:", weiFormatted)
+          return Number.parseFloat(weiFormatted).toFixed(6)
         } catch (error) {
-          console.warn("⚠️ Error formatting from wei:", error)
+          console.warn("⚠️ Error formatting large number from wei:", error)
           return (numValue / 1e18).toFixed(6)
         }
       }
 
-      // Return formatted number
+      // Return formatted number (already in correct format)
+      console.log("📝 Returning formatted number:", numValue.toFixed(6))
       return numValue.toFixed(6)
     } catch (error) {
       console.error("❌ Error in safeFormatNumber:", error, "for value:", value)
