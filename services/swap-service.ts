@@ -42,94 +42,58 @@ swapHelper.load(worldswap)
 // Token functions
 export async function getTokenDetail() {
   console.log("Fetching multiple token details...")
-  try {
-    const tokens = await tokenProvider.details(
-      "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
-      "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
-    )
+  const tokens = await tokenProvider.details(
+    "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
+    "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
+  )
 
-    console.log("Token Details:", tokens)
-    return tokens
-  } catch (error) {
-    console.error("❌ Error fetching token details:", error)
-    throw error
-  }
+  console.log("Token Details:", tokens)
+  return tokens
 }
 
 export async function getTokenInfo() {
   console.log("Fetching single token info...")
-  try {
-    const tokenInfo = await tokenProvider.details("0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45") // TPF
+  const tokenInfo = await tokenProvider.details("0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45") // TPF
 
-    console.log("Token Info:", tokenInfo)
-    return tokenInfo
-  } catch (error) {
-    console.error("❌ Error fetching token info:", error)
-    throw error
-  }
+  console.log("Token Info:", tokenInfo)
+  return tokenInfo
 }
 
 // Quote functions
 export async function getRealQuote(amountFromWLD: string) {
-  console.log("🔍 Getting real quote for amount:", amountFromWLD)
+  console.log("Getting real quote...")
+  const params: SwapParams["quoteInput"] = {
+    tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
+    tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
+    amountIn: amountFromWLD,
+    slippage: "0.3",
+    fee: "0.2",
+  }
 
-  try {
-    // Validate amount
-    if (!amountFromWLD || amountFromWLD === "0") {
-      throw new Error("Invalid amount")
-    }
+  const result = await swapHelper.estimate.quote(params)
+  console.log("Quote result:", result)
 
-    // Convert to Wei if needed (assuming input is in ETH units)
-    const amountInWei = ethers.parseEther(amountFromWLD).toString()
-    console.log("📊 Amount in Wei:", amountInWei)
-
-    const params: SwapParams["quoteInput"] = {
-      tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
-      tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
-      amountIn: amountInWei,
-      slippage: "0.3",
-      fee: "0.2",
-    }
-
-    console.log("📋 Quote params:", params)
-
-    const result = await swapHelper.estimate.quote(params)
-    console.log("✅ Quote result:", result)
-
-    if (!result || !result.data || !result.to) {
-      throw new Error("Invalid quote response")
-    }
-
-    return {
-      quote: result,
-      outputAmount: result.addons?.outAmount || "0",
-      rawOutputAmount: result.addons?.outAmount || "0",
-    }
-  } catch (error) {
-    console.error("❌ Error getting quote:", error)
-    throw error
+  return {
+    quote: result,
+    outputAmount: result.addons?.outAmount || "0",
+    rawOutputAmount: result.addons?.outAmount || "0",
   }
 }
 
 // Swap functions
 export async function estimateSwap() {
   console.log("Estimating swap...")
-  try {
-    const params: SwapParams["quoteInput"] = {
-      tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
-      tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
-      amountIn: ethers.parseEther("2").toString(),
-      slippage: "0.3",
-      fee: "0.2",
-    }
-
-    const result = await swapHelper.estimate.quote(params)
-    console.log("Swap estimate result:", result)
-    return result
-  } catch (error) {
-    console.error("❌ Error estimating swap:", error)
-    throw error
+  const params: SwapParams["quoteInput"] = {
+    tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
+    tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
+    amountIn: "2",
+    slippage: "0.3",
+    fee: "0.2",
   }
+
+  const result = await swapHelper.estimate.quote(params)
+  console.log("Swap estimate result:", result)
+  return result
 }
 
 export async function doSwap({
@@ -141,101 +105,72 @@ export async function doSwap({
   quote: any
   amountIn: string
 }) {
-  console.log("🔄 Executing swap...")
-  console.log("📊 Wallet:", walletAddress)
-  console.log("📊 Amount:", amountIn)
+  console.log("Executing swap...")
+  const params: SwapParams["quoteInput"] = {
+    tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
+    tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
+    amountIn: amountIn,
+    slippage: "0.3",
+    fee: "0.2",
+  }
 
-  try {
-    // Convert to Wei
-    const amountInWei = ethers.parseEther(amountIn).toString()
-    console.log("📊 Amount in Wei:", amountInWei)
+  const quoteResponse = await swapHelper.estimate.quote(params)
+  const swapParams: SwapParams["input"] = {
+    tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
+    tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
+    amountIn: amountIn,
+    tx: {
+      data: quoteResponse.data,
+      to: quoteResponse.to,
+      value: quoteResponse.value,
+    },
+    partnerCode: "24568", // Replace with your partner code, contact to holdstation team to get one
+    feeAmountOut: quoteResponse.addons?.feeAmountOut,
+    fee: "0.2",
+    feeReceiver: ethers.ZeroAddress, // ZERO_ADDRESS or your fee receiver address
+  }
+  const result = await swapHelper.swap(swapParams)
+  console.log("Swap result:", result)
 
-    const params: SwapParams["quoteInput"] = {
-      tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
-      tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
-      amountIn: amountInWei,
-      slippage: "0.3",
-      fee: "0.2",
+  if (result.success) {
+    return {
+      success: true,
+      result,
+      transactionId: result.transactionId,
     }
-
-    console.log("📋 Getting fresh quote for swap...")
-    const quoteResponse = await swapHelper.estimate.quote(params)
-    console.log("📋 Fresh quote response:", quoteResponse)
-
-    if (!quoteResponse || !quoteResponse.data || !quoteResponse.to) {
-      throw new Error("Invalid quote response for swap")
-    }
-
-    const swapParams: SwapParams["input"] = {
-      tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
-      tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
-      amountIn: amountInWei,
-      tx: {
-        data: quoteResponse.data,
-        to: quoteResponse.to,
-        value: quoteResponse.value,
-      },
-      partnerCode: "24568",
-      feeAmountOut: quoteResponse.addons?.feeAmountOut,
-      fee: "0.2",
-      feeReceiver: ethers.ZeroAddress,
-    }
-
-    console.log("📋 Swap params:", swapParams)
-
-    const result = await swapHelper.swap(swapParams)
-    console.log("✅ Swap result:", result)
-
-    if (result.success) {
-      return {
-        success: true,
-        result,
-        transactionId: result.transactionId,
-      }
-    } else {
-      throw new Error(`Swap failed: ${result.errorCode || "Unknown error"}`)
-    }
-  } catch (error) {
-    console.error("❌ Error executing swap:", error)
-    throw error
+  } else {
+    throw new Error(`Swap failed: ${result.errorCode || "Unknown error"}`)
   }
 }
 
 export async function swap() {
   console.log("Executing swap...")
-  try {
-    const amountInWei = ethers.parseEther("2").toString()
-
-    const params: SwapParams["quoteInput"] = {
-      tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
-      tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
-      amountIn: amountInWei,
-      slippage: "0.3",
-      fee: "0.2",
-    }
-
-    const quoteResponse = await swapHelper.estimate.quote(params)
-    const swapParams: SwapParams["input"] = {
-      tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
-      tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
-      amountIn: amountInWei,
-      tx: {
-        data: quoteResponse.data,
-        to: quoteResponse.to,
-        value: quoteResponse.value,
-      },
-      partnerCode: "24568",
-      feeAmountOut: quoteResponse.addons?.feeAmountOut,
-      fee: "0.2",
-      feeReceiver: ethers.ZeroAddress,
-    }
-    const result = await swapHelper.swap(swapParams)
-    console.log("Swap result:", result)
-    return result
-  } catch (error) {
-    console.error("❌ Error in swap:", error)
-    throw error
+  const params: SwapParams["quoteInput"] = {
+    tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
+    tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
+    amountIn: "2",
+    slippage: "0.3",
+    fee: "0.2",
   }
+
+  const quoteResponse = await swapHelper.estimate.quote(params)
+  const swapParams: SwapParams["input"] = {
+    tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
+    tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
+    amountIn: "2",
+    tx: {
+      data: quoteResponse.data,
+      to: quoteResponse.to,
+      value: quoteResponse.value,
+    },
+    partnerCode: "24568", // Replace with your partner code, contact to holdstation team to get one
+    feeAmountOut: quoteResponse.addons?.feeAmountOut,
+    fee: "0.2",
+    feeReceiver: ethers.ZeroAddress, // ZERO_ADDRESS or your fee receiver address
+  }
+  const result = await swapHelper.swap(swapParams)
+  console.log("Swap result:", result)
+  return result
 }
 
 // Additional helper functions for compatibility
@@ -276,7 +211,7 @@ export async function testSwapHelper() {
     const testParams: SwapParams["quoteInput"] = {
       tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
       tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
-      amountIn: ethers.parseEther("0.001").toString(),
+      amountIn: "0.001",
       slippage: "0.3",
       fee: "0.2",
     }
