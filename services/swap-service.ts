@@ -10,7 +10,7 @@ import {
 } from "@holdstation/worldchain-sdk"
 import { ethers } from "ethers"
 
-// Holdstation contract address from dev portal
+// Holdstation contract address
 const HOLDSTATION_CONTRACT = "0x43222f934ea5c593a060a6d46772fdbdc2e2cff0"
 
 // Setup
@@ -44,29 +44,30 @@ swapHelper.load(worldswap)
 
 // Token functions
 export async function getTokenDetail() {
-  console.log("Fetching multiple token details...")
+  console.log("🔍 Fetching multiple token details...")
+  console.log(`📋 Using Holdstation contract: ${HOLDSTATION_CONTRACT}`)
   const tokens = await tokenProvider.details(
     "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
     "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
   )
 
-  console.log("Token Details:", tokens)
+  console.log("✅ Token Details:", tokens)
   return tokens
 }
 
 export async function getTokenInfo() {
-  console.log("Fetching single token info...")
+  console.log("🔍 Fetching single token info...")
+  console.log(`📋 Using Holdstation contract: ${HOLDSTATION_CONTRACT}`)
   const tokenInfo = await tokenProvider.details("0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45") // TPF
 
-  console.log("Token Info:", tokenInfo)
+  console.log("✅ Token Info:", tokenInfo)
   return tokenInfo
 }
 
 // Quote functions
 export async function getRealQuote(amountFromWLD: string) {
-  console.log("Getting real quote...")
-  console.log("🔗 Using Holdstation contract:", HOLDSTATION_CONTRACT)
-
+  console.log("💱 Getting real quote...")
+  console.log(`📋 Using Holdstation contract: ${HOLDSTATION_CONTRACT}`)
   const params: SwapParams["quoteInput"] = {
     tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
     tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
@@ -76,7 +77,7 @@ export async function getRealQuote(amountFromWLD: string) {
   }
 
   const result = await swapHelper.estimate.quote(params)
-  console.log("Quote result:", result)
+  console.log("✅ Quote result:", result)
 
   return {
     quote: result,
@@ -87,9 +88,8 @@ export async function getRealQuote(amountFromWLD: string) {
 
 // Swap functions
 export async function estimateSwap() {
-  console.log("Estimating swap...")
-  console.log("🔗 Using Holdstation contract:", HOLDSTATION_CONTRACT)
-
+  console.log("🧪 Estimating swap...")
+  console.log(`📋 Using Holdstation contract: ${HOLDSTATION_CONTRACT}`)
   const params: SwapParams["quoteInput"] = {
     tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
     tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
@@ -99,7 +99,7 @@ export async function estimateSwap() {
   }
 
   const result = await swapHelper.estimate.quote(params)
-  console.log("Swap estimate result:", result)
+  console.log("✅ Swap estimate result:", result)
   return result
 }
 
@@ -112,8 +112,10 @@ export async function doSwap({
   quote: any
   amountIn: string
 }) {
-  console.log("Executing swap...")
-  console.log("🔗 Using Holdstation contract:", HOLDSTATION_CONTRACT)
+  console.log("🚀 Executing swap...")
+  console.log(`📋 Using Holdstation contract: ${HOLDSTATION_CONTRACT}`)
+  console.log(`💰 Wallet address: ${walletAddress}`)
+  console.log(`💰 Amount in: ${amountIn}`)
 
   const params: SwapParams["quoteInput"] = {
     tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
@@ -139,7 +141,7 @@ export async function doSwap({
     feeReceiver: ethers.ZeroAddress, // ZERO_ADDRESS or your fee receiver address
   }
   const result = await swapHelper.swap(swapParams)
-  console.log("Swap result:", result)
+  console.log("✅ Swap result:", result)
 
   if (result.success) {
     return {
@@ -153,9 +155,8 @@ export async function doSwap({
 }
 
 export async function swap() {
-  console.log("Executing swap...")
-  console.log("🔗 Using Holdstation contract:", HOLDSTATION_CONTRACT)
-
+  console.log("🚀 Executing swap...")
+  console.log(`📋 Using Holdstation contract: ${HOLDSTATION_CONTRACT}`)
   const params: SwapParams["quoteInput"] = {
     tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
     tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
@@ -180,7 +181,7 @@ export async function swap() {
     feeReceiver: ethers.ZeroAddress, // ZERO_ADDRESS or your fee receiver address
   }
   const result = await swapHelper.swap(swapParams)
-  console.log("Swap result:", result)
+  console.log("✅ Swap result:", result)
   return result
 }
 
@@ -188,7 +189,7 @@ export async function swap() {
 export async function validateContracts() {
   try {
     console.log("🔍 Validating contracts...")
-    console.log("🔗 Holdstation contract:", HOLDSTATION_CONTRACT)
+    console.log(`📋 Using Holdstation contract: ${HOLDSTATION_CONTRACT}`)
 
     const wldCode = await provider.getCode("0x2cFc85d8E48F8EAB294be644d9E25C3030863003")
     const tpfCode = await provider.getCode("0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45")
@@ -221,7 +222,7 @@ export async function validateContracts() {
 export async function testSwapHelper() {
   try {
     console.log("🧪 Testing SwapHelper...")
-    console.log("🔗 Using Holdstation contract:", HOLDSTATION_CONTRACT)
+    console.log(`📋 Using Holdstation contract: ${HOLDSTATION_CONTRACT}`)
 
     if (!swapHelper?.estimate?.quote) {
       throw new Error("SwapHelper not available")
@@ -253,7 +254,7 @@ export async function testSwapHelper() {
 export async function debugHoldstationSDK() {
   try {
     console.log("🔍 DEBUGGING HOLDSTATION SDK")
-    console.log("🔗 Holdstation contract:", HOLDSTATION_CONTRACT)
+    console.log(`📋 Using Holdstation contract: ${HOLDSTATION_CONTRACT}`)
 
     const blockNumber = await provider.getBlockNumber()
     console.log("📋 Provider connected, block:", blockNumber)
@@ -288,10 +289,5 @@ export const TOKENS = [
     color: "#00D4FF",
   },
 ]
-
-export const TOKEN_ADDRESSES = {
-  WLD: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003",
-  TPF: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45",
-}
 
 export { provider, swapHelper, HOLDSTATION_CONTRACT }
