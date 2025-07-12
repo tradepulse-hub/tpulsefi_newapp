@@ -1,277 +1,327 @@
-import { Client, Multicall3 } from "@holdstation/worldchain-ethers-v6"
-import {
-  config,
-  HoldSo,
-  inmemoryTokenStorage,
-  SwapHelper,
-  type SwapParams,
-  TokenProvider,
-  ZeroX,
-  setPartnerCode,
-} from "@holdstation/worldchain-sdk"
 import { ethers } from "ethers"
 
-// Set partner code at initialization
-setPartnerCode("24568")
-
-// Setup
-const RPC_URL = "https://worldchain-mainnet.g.alchemy.com/public"
-const provider = new ethers.JsonRpcProvider(
-  RPC_URL,
-  {
-    chainId: 480,
-    name: "worldchain",
-  },
-  {
-    staticNetwork: true,
-  },
-)
-
-const client = new Client(provider)
-config.client = client
-config.multicall3 = new Multicall3(provider)
-
-const swapHelper = new SwapHelper(client, {
-  tokenStorage: inmemoryTokenStorage,
-})
-
-const tokenProvider = new TokenProvider({ client, multicall3: config.multicall3 })
-
-const zeroX = new ZeroX(tokenProvider, inmemoryTokenStorage)
-const worldswap = new HoldSo(tokenProvider, inmemoryTokenStorage)
-
-swapHelper.load(zeroX)
-swapHelper.load(worldswap)
-
-// Token functions
-export async function getTokenDetail() {
-  console.log("Fetching multiple token details...")
-  const tokens = await tokenProvider.details(
-    "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
-    "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
-  )
-
-  console.log("Token Details:", tokens)
-  return tokens
+// Holdstation SDK configuration
+const HOLDSTATION_CONFIG = {
+  baseURL: "https://api.holdstation.exchange",
+  partnerCode: "24568", // TPulseFi partner code
+  chainId: 480, // Worldchain
+  timeout: 30000,
 }
 
-export async function getTokenInfo() {
-  console.log("Fetching single token info...")
-  const tokenInfo = await tokenProvider.details("0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45") // TPF
-
-  console.log("Token Info:", tokenInfo)
-  return tokenInfo
+// Token addresses on Worldchain
+const TOKEN_ADDRESSES = {
+  WLD: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // Worldcoin on Worldchain
+  TPF: "0x02DcdD04e3F455D838cd1249292C58f3B79e3C3C", // TPulseFi token
+  WETH: "0x4200000000000000000000000000000000000006", // Wrapped ETH on Worldchain
 }
 
-// Quote functions
-export async function getRealQuote(amountFromWLD: string) {
-  console.log("Getting real quote for amount:", amountFromWLD, "WLD")
-  const params: SwapParams["quoteInput"] = {
-    tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
-    tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
-    amountIn: amountFromWLD, // Pass human-readable amount (e.g., "1" for 1 WLD)
-    slippage: "0.3",
-    fee: "0.2",
-  }
-
-  const result = await swapHelper.estimate.quote(params)
-  console.log("Quote result:", result)
-
-  return {
-    quote: result,
-    outputAmount: result.addons?.outAmount || "0",
-    rawOutputAmount: result.addons?.outAmount || "0",
-  }
+// Holdstation API endpoints
+const ENDPOINTS = {
+  quote: "/api/v1/quote",
+  swap: "/api/v1/swap",
+  allowance: "/api/v1/allowance",
+  approve: "/api/v1/approve",
 }
 
-// Swap functions
-export async function estimateSwap() {
-  console.log("Estimating swap...")
-  const params: SwapParams["quoteInput"] = {
-    tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
-    tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
-    amountIn: "2", // Human-readable amount
-    slippage: "0.3",
-    fee: "0.2",
-  }
-
-  const result = await swapHelper.estimate.quote(params)
-  console.log("Swap estimate result:", result)
-  return result
+interface SwapQuote {
+  data: string
+  to: string
+  value: string
+  gasPrice: string
+  gasLimit: string
+  outputAmount: string
+  priceImpact: string
+  route: any[]
 }
 
-export async function doSwap({
-  walletAddress,
-  quote,
-  amountIn,
-}: {
+interface SwapParams {
   walletAddress: string
-  quote: any
+  quote: SwapQuote
   amountIn: string
-}) {
-  console.log("Executing swap...")
-  console.log("📊 Wallet:", walletAddress)
-  console.log("📊 Amount:", amountIn, "WLD (human-readable)")
-
-  const params: SwapParams["quoteInput"] = {
-    tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
-    tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
-    amountIn: amountIn, // Pass human-readable amount (e.g., "1" for 1 WLD)
-    slippage: "0.3",
-    fee: "0.2",
-  }
-
-  const quoteResponse = await swapHelper.estimate.quote(params)
-  const swapParams: SwapParams["input"] = {
-    tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
-    tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
-    amountIn: amountIn, // Pass human-readable amount (e.g., "1" for 1 WLD)
-    tx: {
-      data: quoteResponse.data,
-      to: quoteResponse.to,
-      value: quoteResponse.value,
-    },
-    feeAmountOut: quoteResponse.addons?.feeAmountOut,
-    fee: "0.2",
-    feeReceiver: ethers.ZeroAddress,
-  }
-  const result = await swapHelper.swap(swapParams)
-  console.log("Swap result:", result)
-
-  if (result.success) {
-    return {
-      success: true,
-      result,
-      transactionId: result.transactionId,
-    }
-  } else {
-    throw new Error(`Swap failed: ${result.errorCode || "Unknown error"}`)
-  }
 }
 
-export async function swap() {
-  console.log("Executing swap...")
-  const params: SwapParams["quoteInput"] = {
-    tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
-    tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
-    amountIn: "2", // Human-readable amount
-    slippage: "0.3",
-    fee: "0.2",
-  }
-
-  const quoteResponse = await swapHelper.estimate.quote(params)
-  const swapParams: SwapParams["input"] = {
-    tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
-    tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
-    amountIn: "2", // Human-readable amount
-    tx: {
-      data: quoteResponse.data,
-      to: quoteResponse.to,
-      value: quoteResponse.value,
-    },
-    feeAmountOut: quoteResponse.addons?.feeAmountOut,
-    fee: "0.2",
-    feeReceiver: ethers.ZeroAddress,
-  }
-  const result = await swapHelper.swap(swapParams)
-  console.log("Swap result:", result)
-  return result
+interface SwapResult {
+  success: boolean
+  transactionId?: string
+  error?: string
 }
 
-// Additional helper functions for compatibility
-export async function validateContracts() {
+// Validate contract addresses
+export async function validateContracts(): Promise<void> {
+  console.log("🔗 Validating contract addresses...")
+
   try {
-    console.log("🔍 Validating contracts...")
-
-    const wldCode = await provider.getCode("0x2cFc85d8E48F8EAB294be644d9E25C3030863003")
-    const tpfCode = await provider.getCode("0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45")
-
-    console.log("📋 Contract validation:")
-    console.log("  - WLD contract exists:", wldCode !== "0x")
-    console.log("  - TPF contract exists:", tpfCode !== "0x")
-
-    if (wldCode === "0x") {
-      throw new Error("WLD contract not found")
+    // Check if addresses are valid
+    for (const [symbol, address] of Object.entries(TOKEN_ADDRESSES)) {
+      if (!ethers.isAddress(address)) {
+        throw new Error(`Invalid address for ${symbol}: ${address}`)
+      }
     }
 
-    if (tpfCode === "0x") {
-      throw new Error("TPF contract not found")
-    }
-
-    return true
+    console.log("✅ All contract addresses are valid")
   } catch (error) {
     console.error("❌ Contract validation failed:", error)
     throw error
   }
 }
 
-export async function testSwapHelper() {
+// Test Holdstation SDK helper
+export async function testSwapHelper(): Promise<boolean> {
+  console.log("🧪 Testing Holdstation SDK...")
+
   try {
-    console.log("🧪 Testing SwapHelper...")
-
-    if (!swapHelper?.estimate?.quote) {
-      throw new Error("SwapHelper not available")
-    }
-
-    const testParams: SwapParams["quoteInput"] = {
-      tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
-      tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
-      amountIn: "0.001", // Human-readable amount
-      slippage: "0.3",
-      fee: "0.2",
-    }
-
-    const testQuote = await swapHelper.estimate.quote(testParams)
-
-    console.log("✅ Test quote successful:", {
-      hasData: !!testQuote.data,
-      hasTo: !!testQuote.to,
-      outAmount: testQuote.addons?.outAmount,
+    const response = await fetch(`${HOLDSTATION_CONFIG.baseURL}/api/v1/health`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      signal: AbortSignal.timeout(5000),
     })
 
-    return true
+    if (response.ok) {
+      console.log("✅ Holdstation API is accessible")
+      return true
+    } else {
+      console.error("❌ Holdstation API returned error:", response.status)
+      return false
+    }
   } catch (error) {
-    console.error("❌ Test failed:", error)
+    console.error("❌ Holdstation SDK test failed:", error)
     return false
   }
 }
 
-export async function debugHoldstationSDK() {
+// Get real quote from Holdstation
+export async function getRealQuote(amountIn: string): Promise<{ quote: SwapQuote; outputAmount: string }> {
+  console.log("🔄 Getting quote from Holdstation for:", amountIn, "WLD")
+
   try {
-    console.log("🔍 DEBUGGING HOLDSTATION SDK")
+    // Convert amount to wei
+    const amountInWei = ethers.parseUnits(amountIn, 18)
+    console.log("💰 Amount in wei:", amountInWei.toString())
 
-    const blockNumber = await provider.getBlockNumber()
-    console.log("📋 Provider connected, block:", blockNumber)
+    const quoteParams = {
+      tokenIn: TOKEN_ADDRESSES.WLD,
+      tokenOut: TOKEN_ADDRESSES.TPF,
+      amountIn: amountInWei.toString(),
+      slippage: "0.5", // 0.5% slippage
+      partnerCode: HOLDSTATION_CONFIG.partnerCode,
+      chainId: HOLDSTATION_CONFIG.chainId,
+    }
 
-    console.log("📋 SwapHelper available:", !!swapHelper)
-    console.log("📋 TokenProvider available:", !!tokenProvider)
+    console.log("🔄 Quote request params:", quoteParams)
 
-    // Test token details
-    const tokenDetails = await tokenProvider.details("0x2cFc85d8E48F8EAB294be644d9E25C3030863003")
-    console.log("📋 Token details:", tokenDetails)
+    const response = await fetch(`${HOLDSTATION_CONFIG.baseURL}${ENDPOINTS.quote}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(quoteParams),
+      signal: AbortSignal.timeout(HOLDSTATION_CONFIG.timeout),
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error("❌ Quote API error:", response.status, errorText)
+      throw new Error(`Quote API error: ${response.status} - ${errorText}`)
+    }
+
+    const quoteData = await response.json()
+    console.log("✅ Quote response received:", quoteData)
+
+    if (!quoteData.data || !quoteData.to) {
+      console.error("❌ Invalid quote data:", quoteData)
+      throw new Error("Invalid quote data received")
+    }
+
+    // Format output amount
+    const outputAmountWei = quoteData.outputAmount || "0"
+    const outputAmount = ethers.formatUnits(outputAmountWei, 18)
+
+    console.log("💱 Quote details:", {
+      inputAmount: amountIn,
+      outputAmount: outputAmount,
+      priceImpact: quoteData.priceImpact,
+      gasEstimate: quoteData.gasLimit,
+    })
+
+    return {
+      quote: quoteData as SwapQuote,
+      outputAmount: outputAmount,
+    }
   } catch (error) {
-    console.error("❌ Debug failed:", error)
+    console.error("❌ Error getting quote:", error)
+    throw error
   }
 }
 
-// Export for compatibility
-export const TOKENS = [
-  {
-    address: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003",
-    symbol: "WLD",
-    name: "Worldcoin",
-    decimals: 18,
-    logo: "/images/worldcoin.jpeg",
-    color: "#000000",
-  },
-  {
-    address: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45",
-    symbol: "TPF",
-    name: "TPulseFi",
-    decimals: 18,
-    logo: "/images/logo-tpf.png",
-    color: "#00D4FF",
-  },
-]
+// Execute swap using Holdstation
+export async function doSwap(params: SwapParams): Promise<SwapResult> {
+  console.log("🚀 Starting swap execution...")
+  console.log("🔄 Swap params:", {
+    walletAddress: params.walletAddress,
+    amountIn: params.amountIn,
+    hasQuoteData: !!params.quote.data,
+    quoteTo: params.quote.to,
+  })
 
-export { provider, swapHelper }
+  try {
+    // Validate inputs
+    if (!params.walletAddress || !ethers.isAddress(params.walletAddress)) {
+      throw new Error("Invalid wallet address")
+    }
+
+    if (!params.quote.data || !params.quote.to) {
+      throw new Error("Invalid quote data")
+    }
+
+    if (!params.amountIn || params.amountIn === "0") {
+      throw new Error("Invalid amount")
+    }
+
+    console.log("✅ Input validation passed")
+
+    // Prepare swap transaction
+    const swapParams = {
+      walletAddress: params.walletAddress,
+      tokenIn: TOKEN_ADDRESSES.WLD,
+      tokenOut: TOKEN_ADDRESSES.TPF,
+      amountIn: params.amountIn,
+      data: params.quote.data,
+      to: params.quote.to,
+      value: params.quote.value || "0",
+      gasPrice: params.quote.gasPrice,
+      gasLimit: params.quote.gasLimit,
+      partnerCode: HOLDSTATION_CONFIG.partnerCode,
+      chainId: HOLDSTATION_CONFIG.chainId,
+    }
+
+    console.log("🔄 Executing swap with params:", swapParams)
+
+    const response = await fetch(`${HOLDSTATION_CONFIG.baseURL}${ENDPOINTS.swap}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(swapParams),
+      signal: AbortSignal.timeout(HOLDSTATION_CONFIG.timeout),
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error("❌ Swap API error:", response.status, errorText)
+      throw new Error(`Swap API error: ${response.status} - ${errorText}`)
+    }
+
+    const swapResult = await response.json()
+    console.log("✅ Swap response received:", swapResult)
+
+    if (swapResult.success && swapResult.transactionHash) {
+      console.log("🎯 Swap completed successfully!")
+      console.log("🔗 Transaction hash:", swapResult.transactionHash)
+
+      return {
+        success: true,
+        transactionId: swapResult.transactionHash,
+      }
+    } else {
+      console.error("❌ Swap failed:", swapResult)
+      throw new Error(swapResult.error || "Swap execution failed")
+    }
+  } catch (error) {
+    console.error("❌ Swap execution error:", error)
+    return {
+      success: false,
+      error: error.message || "Unknown swap error",
+    }
+  }
+}
+
+// Get token allowance
+export async function getTokenAllowance(
+  walletAddress: string,
+  tokenAddress: string,
+  spenderAddress: string,
+): Promise<string> {
+  console.log("🔄 Checking token allowance...")
+
+  try {
+    const response = await fetch(`${HOLDSTATION_CONFIG.baseURL}${ENDPOINTS.allowance}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        walletAddress,
+        tokenAddress,
+        spenderAddress,
+        chainId: HOLDSTATION_CONFIG.chainId,
+      }),
+      signal: AbortSignal.timeout(10000),
+    })
+
+    if (!response.ok) {
+      throw new Error(`Allowance check failed: ${response.status}`)
+    }
+
+    const result = await response.json()
+    console.log("✅ Allowance checked:", result.allowance)
+
+    return result.allowance || "0"
+  } catch (error) {
+    console.error("❌ Error checking allowance:", error)
+    return "0"
+  }
+}
+
+// Approve token spending
+export async function approveToken(
+  walletAddress: string,
+  tokenAddress: string,
+  spenderAddress: string,
+  amount: string,
+): Promise<SwapResult> {
+  console.log("🔄 Approving token spending...")
+
+  try {
+    const response = await fetch(`${HOLDSTATION_CONFIG.baseURL}${ENDPOINTS.approve}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        walletAddress,
+        tokenAddress,
+        spenderAddress,
+        amount,
+        chainId: HOLDSTATION_CONFIG.chainId,
+        partnerCode: HOLDSTATION_CONFIG.partnerCode,
+      }),
+      signal: AbortSignal.timeout(HOLDSTATION_CONFIG.timeout),
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      throw new Error(`Approval failed: ${response.status} - ${errorText}`)
+    }
+
+    const result = await response.json()
+    console.log("✅ Token approval completed:", result)
+
+    return {
+      success: true,
+      transactionId: result.transactionHash,
+    }
+  } catch (error) {
+    console.error("❌ Token approval error:", error)
+    return {
+      success: false,
+      error: error.message || "Approval failed",
+    }
+  }
+}
+
+// Export token addresses for use in other components
+export { TOKEN_ADDRESSES }
