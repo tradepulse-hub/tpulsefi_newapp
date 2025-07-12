@@ -53,7 +53,7 @@ export async function getTokenDetail() {
 
 export async function getTokenInfo() {
   console.log("Fetching single token info...");
-  const tokenInfo = await tokenProvider.details("0x79A02482A880bCE3F13e09Da970dC34db4CD24d1");
+  const tokenInfo = await tokenProvider.details("0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45");
 
   console.log("Token Info:", tokenInfo);
   return tokenInfo;
