@@ -43,9 +43,8 @@ swapHelper.load(worldswap);
 export async function getTokenDetail() {
   console.log("Fetching multiple token details...");
   const tokens = await tokenProvider.details(
-    "0x79A02482A880bCE3F13e09Da970dC34db4CD24d1",
-    "0xEd10C200aFc35AF91A45E8BE53cd5a299F93F32F",
-    "0xdCe053d9ba0Fa2c5f772416b64F191158Cbcc32E",
+    "0x2cFc85d8E48F8EAB294be644d9E25C3030863003",
+    "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45",
   );
 
   console.log("Token Details:", tokens);
@@ -66,8 +65,8 @@ export async function getTokenInfo() {
 export async function estimateSwap() {
   console.log("Estimating swap...");
   const params: SwapParams["quoteInput"] = {
-    tokenIn: "0x79A02482A880bCE3F13e09Da970dC34db4CD24d1",
-    tokenOut: "0x4200000000000000000000000000000000000006",
+    tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003",
+    tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45",
     amountIn: "2",
     slippage: "0.3",
     fee: "0.2",
