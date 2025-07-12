@@ -10,28 +10,6 @@ import {
 } from "@holdstation/worldchain-sdk"
 import { ethers } from "ethers"
 
-const TOKENS = [
-  {
-    address: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003",
-    symbol: "WLD",
-    name: "Worldcoin",
-    decimals: 18,
-    logo: "/images/worldcoin.jpeg",
-    color: "#000000",
-  },
-  {
-    address: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45",
-    symbol: "TPF",
-    name: "TPulseFi",
-    decimals: 18,
-    logo: "/images/logo-tpf.png",
-    color: "#00D4FF",
-  },
-]
-
-const wldToken = TOKENS.find((t) => t.symbol === "WLD")!
-const tpfToken = TOKENS.find((t) => t.symbol === "TPF")!
-
 // Setup
 const RPC_URL = "https://worldchain-mainnet.g.alchemy.com/public"
 const provider = new ethers.JsonRpcProvider(
@@ -64,7 +42,10 @@ swapHelper.load(worldswap)
 // Token functions
 export async function getTokenDetail() {
   console.log("Fetching multiple token details...")
-  const tokens = await tokenProvider.details(wldToken.address, tpfToken.address)
+  const tokens = await tokenProvider.details(
+    "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
+    "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
+  )
 
   console.log("Token Details:", tokens)
   return tokens
@@ -72,7 +53,7 @@ export async function getTokenDetail() {
 
 export async function getTokenInfo() {
   console.log("Fetching single token info...")
-  const tokenInfo = await tokenProvider.details(wldToken.address)
+  const tokenInfo = await tokenProvider.details("0x2cFc85d8E48F8EAB294be644d9E25C3030863003") // WLD
 
   console.log("Token Info:", tokenInfo)
   return tokenInfo
@@ -82,8 +63,8 @@ export async function getTokenInfo() {
 export async function getRealQuote(amountFromWLD: string) {
   console.log("Getting real quote...")
   const params: SwapParams["quoteInput"] = {
-    tokenIn: wldToken.address,
-    tokenOut: tpfToken.address,
+    tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
+    tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
     amountIn: amountFromWLD,
     slippage: "0.3",
     fee: "0.2",
@@ -103,8 +84,8 @@ export async function getRealQuote(amountFromWLD: string) {
 export async function estimateSwap() {
   console.log("Estimating swap...")
   const params: SwapParams["quoteInput"] = {
-    tokenIn: wldToken.address,
-    tokenOut: tpfToken.address,
+    tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
+    tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
     amountIn: "2",
     slippage: "0.3",
     fee: "0.2",
@@ -126,27 +107,27 @@ export async function doSwap({
 }) {
   console.log("Executing swap...")
   const params: SwapParams["quoteInput"] = {
-    tokenIn: wldToken.address,
-    tokenOut: tpfToken.address,
-    amountIn: amountIn,
+    tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
+    tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
+    amountIn: "2",
     slippage: "0.3",
     fee: "0.2",
   }
 
   const quoteResponse = await swapHelper.estimate.quote(params)
   const swapParams: SwapParams["input"] = {
-    tokenIn: wldToken.address,
-    tokenOut: tpfToken.address,
-    amountIn: amountIn,
+    tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
+    tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
+    amountIn: "2",
     tx: {
       data: quoteResponse.data,
       to: quoteResponse.to,
       value: quoteResponse.value,
     },
-    partnerCode: "24568", // Partner code as requested
+    partnerCode: "24568", // Replace with your partner code, contact to holdstation team to get one
     feeAmountOut: quoteResponse.addons?.feeAmountOut,
     fee: "0.2",
-    feeReceiver: "0x4bb270ef6dcb052a083bd5cff518e2e019c0f4ee", // Your fee receiver address
+    feeReceiver: "0x4bb270ef6dcb052a083bd5cff518e2e019c0f4ee", // ZERO_ADDRESS or your fee receiver address
   }
   const result = await swapHelper.swap(swapParams)
   console.log("Swap result:", result)
@@ -162,13 +143,43 @@ export async function doSwap({
   }
 }
 
-// Validation functions
+export async function swap() {
+  console.log("Executing swap...")
+  const params: SwapParams["quoteInput"] = {
+    tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
+    tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
+    amountIn: "2",
+    slippage: "0.3",
+    fee: "0.2",
+  }
+
+  const quoteResponse = await swapHelper.estimate.quote(params)
+  const swapParams: SwapParams["input"] = {
+    tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
+    tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
+    amountIn: "2",
+    tx: {
+      data: quoteResponse.data,
+      to: quoteResponse.to,
+      value: quoteResponse.value,
+    },
+    partnerCode: "24568", // Replace with your partner code, contact to holdstation team to get one
+    feeAmountOut: quoteResponse.addons?.feeAmountOut,
+    fee: "0.2",
+    feeReceiver: "0x4bb270ef6dcb052a083bd5cff518e2e019c0f4ee", // ZERO_ADDRESS or your fee receiver address
+  }
+  const result = await swapHelper.swap(swapParams)
+  console.log("Swap result:", result)
+  return result
+}
+
+// Additional helper functions for compatibility
 export async function validateContracts() {
   try {
     console.log("🔍 Validating contracts...")
 
-    const wldCode = await provider.getCode(wldToken.address)
-    const tpfCode = await provider.getCode(tpfToken.address)
+    const wldCode = await provider.getCode("0x2cFc85d8E48F8EAB294be644d9E25C3030863003")
+    const tpfCode = await provider.getCode("0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45")
 
     console.log("📋 Contract validation:")
     console.log("  - WLD contract exists:", wldCode !== "0x")
@@ -189,7 +200,6 @@ export async function validateContracts() {
   }
 }
 
-// Test functions
 export async function testSwapHelper() {
   try {
     console.log("🧪 Testing SwapHelper...")
@@ -199,8 +209,8 @@ export async function testSwapHelper() {
     }
 
     const testParams: SwapParams["quoteInput"] = {
-      tokenIn: wldToken.address,
-      tokenOut: tpfToken.address,
+      tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
+      tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
       amountIn: "0.001",
       slippage: "0.3",
       fee: "0.2",
@@ -232,12 +242,31 @@ export async function debugHoldstationSDK() {
     console.log("📋 TokenProvider available:", !!tokenProvider)
 
     // Test token details
-    const tokenDetails = await tokenProvider.details(wldToken.address)
+    const tokenDetails = await tokenProvider.details("0x2cFc85d8E48F8EAB294be644d9E25C3030863003")
     console.log("📋 Token details:", tokenDetails)
   } catch (error) {
     console.error("❌ Debug failed:", error)
   }
 }
 
-// Export tokens and provider
-export { TOKENS, provider, swapHelper }
+// Export for compatibility
+export const TOKENS = [
+  {
+    address: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003",
+    symbol: "WLD",
+    name: "Worldcoin",
+    decimals: 18,
+    logo: "/images/worldcoin.jpeg",
+    color: "#000000",
+  },
+  {
+    address: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45",
+    symbol: "TPF",
+    name: "TPulseFi",
+    decimals: 18,
+    logo: "/images/logo-tpf.png",
+    color: "#00D4FF",
+  },
+]
+
+export { provider, swapHelper }
