@@ -41,7 +41,7 @@ const provider = new ethers.JsonRpcProvider(
   RPC_URL,
   {
     chainId: 480,
-    name: "WorldChain",
+    name: "worldchain", // ✅ Corrigido: era "WorldChain"
   },
   {
     staticNetwork: true,
@@ -107,7 +107,7 @@ export async function doSwap({
     }
 
     // Parâmetros corretos baseados EXATAMENTE nos exemplos do Holdstation
-    // Usar apenas os campos obrigatórios primeiro
+    // ✅ Usar parâmetros corretos dos exemplos
     const swapParams: SwapParams["input"] = {
       tokenIn: wldToken.address,
       tokenOut: tpfToken.address,
@@ -117,9 +117,13 @@ export async function doSwap({
         to: quote.to,
         value: quote.value || "0",
       },
+      partnerCode: "24568", // ✅ Manter o partnerCode original
+      feeAmountOut: quote.addons?.feeAmountOut,
+      fee: "0.2",
+      feeReceiver: "0x4bb270ef6dcb052a083bd5cff518e2e019c0f4ee", // ✅ Manter o feeReceiver original
     }
 
-    console.log("📤 Executing swap with minimal params:")
+    console.log("📤 Executing swap with params:")
     console.log(JSON.stringify(swapParams, null, 2))
 
     // Usar o swapHelper.swap diretamente como nos exemplos
@@ -215,14 +219,14 @@ export async function getRealQuote(amountFromWLD: string) {
       throw new Error("SwapHelper not properly initialized")
     }
 
-    // Parâmetros corretos baseados na interface SwapParams["quoteInput"]
+    // ✅ Parâmetros corretos baseados nos exemplos e documentação
     const quoteParams: SwapParams["quoteInput"] = {
       tokenIn: wldToken.address, // WLD
       tokenOut: tpfToken.address, // TPF
       amountIn: amountFromWLD, // Valor em formato decimal (não wei)
-      slippage: "0.5", // Aumentar slippage para 0.5%
+      slippage: "0.3", // 0.3% slippage
       fee: "0.2", // 0.2% fee
-      preferRouters: ["hold-so"], // Usar apenas hold-so primeiro
+      preferRouters: ["hold-so", "0x"], // ✅ Usar ambos os routers
       timeout: 30000,
     }
 
@@ -298,9 +302,9 @@ export async function testSwapHelper() {
           tokenIn: wldToken.address,
           tokenOut: tpfToken.address,
           amountIn: "0.001", // Valor decimal pequeno
-          slippage: "0.5",
+          slippage: "0.3",
           fee: "0.2",
-          preferRouters: ["hold-so"], // Apenas hold-so
+          preferRouters: ["hold-so", "0x"], // ✅ Usar ambos
           timeout: 10000,
         }
 
@@ -370,9 +374,9 @@ export async function debugHoldstationSDK() {
         tokenIn: wldToken.address,
         tokenOut: tpfToken.address,
         amountIn: "0.001",
-        slippage: "0.5",
+        slippage: "0.3",
         fee: "0.2",
-        preferRouters: ["hold-so"],
+        preferRouters: ["hold-so", "0x"],
         timeout: 10000,
       }
 
@@ -396,84 +400,6 @@ export async function debugHoldstationSDK() {
   } catch (error) {
     console.error("❌ Debug failed:", error)
   }
-}
-
-// Função para testar diferentes parâmetros
-export async function testQuoteParameters(amountWLD: string) {
-  console.log("🧪 TESTING DIFFERENT QUOTE PARAMETERS")
-
-  const testCases = [
-    // Apenas hold-so
-    {
-      name: "Hold-So Only",
-      params: {
-        tokenIn: wldToken.address,
-        tokenOut: tpfToken.address,
-        amountIn: amountWLD,
-        slippage: "0.5",
-        fee: "0.2",
-        preferRouters: ["hold-so"],
-        timeout: 30000,
-      } as SwapParams["quoteInput"],
-    },
-    // Apenas 0x
-    {
-      name: "0x Only",
-      params: {
-        tokenIn: wldToken.address,
-        tokenOut: tpfToken.address,
-        amountIn: amountWLD,
-        slippage: "0.5",
-        fee: "0.2",
-        preferRouters: ["0x"],
-        timeout: 30000,
-      } as SwapParams["quoteInput"],
-    },
-    // Sem preferência de router
-    {
-      name: "No Router Preference",
-      params: {
-        tokenIn: wldToken.address,
-        tokenOut: tpfToken.address,
-        amountIn: amountWLD,
-        slippage: "0.5",
-        fee: "0.2",
-        timeout: 30000,
-      } as SwapParams["quoteInput"],
-    },
-  ]
-
-  for (const testCase of testCases) {
-    try {
-      console.log(`🧪 Testing ${testCase.name} parameters:`, testCase.params)
-      const quote = await swapHelper.estimate.quote(testCase.params)
-
-      // Validar o contrato
-      let contractValid = false
-      if (quote.to) {
-        const contractCode = await provider.getCode(quote.to)
-        contractValid = contractCode !== "0x"
-      }
-
-      console.log(`✅ ${testCase.name} quote successful:`, {
-        hasData: !!quote.data,
-        hasTo: !!quote.to,
-        hasValue: !!quote.value,
-        hasAddons: !!quote.addons,
-        outAmount: quote.addons?.outAmount,
-        contractValid,
-        toAddress: quote.to,
-      })
-
-      if (contractValid) {
-        return quote // Return first valid quote
-      }
-    } catch (error) {
-      console.log(`❌ ${testCase.name} quote failed:`, error.message)
-    }
-  }
-
-  throw new Error("All quote parameter combinations failed")
 }
 
 // Export tokens, helper, provider and functions for use in components
