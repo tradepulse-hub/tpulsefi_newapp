@@ -23,7 +23,7 @@ import {
 } from "lucide-react"
 import Image from "next/image"
 import { walletService } from "@/services/wallet-service"
-import { doSwap, testSwapHelper, debugHoldstationSDK, getRealQuote, validateContracts } from "@/services/swap-service"
+import { doSwap, testSwapHelper, getRealQuote, validateContracts } from "@/services/swap-service"
 import { ethers } from "ethers"
 import { DebugConsole } from "@/components/debug-console"
 
@@ -109,6 +109,9 @@ const translations = {
     selectToken: "Select Token",
     enterAmount: "Enter amount to see quote",
     quoteError: "Failed to get quote",
+    insufficientBalance: "Insufficient balance",
+    networkError: "Network error",
+    tryAgain: "Try again",
   },
   pt: {
     connected: "Conectado",
@@ -159,6 +162,9 @@ const translations = {
     selectToken: "Selecionar Token",
     enterAmount: "Digite o valor para ver a cotação",
     quoteError: "Falha ao obter cotação",
+    insufficientBalance: "Saldo insuficiente",
+    networkError: "Erro de rede",
+    tryAgain: "Tente novamente",
   },
   es: {
     connected: "Conectado",
@@ -209,6 +215,9 @@ const translations = {
     selectToken: "Seleccionar Token",
     enterAmount: "Ingresa cantidad para ver cotización",
     quoteError: "Error al obtener cotización",
+    insufficientBalance: "Saldo insuficiente",
+    networkError: "Error de red",
+    tryAgain: "Intentar de nuevo",
   },
   id: {
     connected: "Terhubung",
@@ -259,6 +268,9 @@ const translations = {
     selectToken: "Pilih Token",
     enterAmount: "Masukkan jumlah untuk melihat kutipan",
     quoteError: "Gagal mendapatkan kutipan",
+    insufficientBalance: "Saldo tidak mencukupi",
+    networkError: "Kesalahan jaringan",
+    tryAgain: "Coba lagi",
   },
 }
 
@@ -348,14 +360,12 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       }
 
       console.log("🔄 Loading transaction history for:", walletAddress)
-      // Load more transactions than we need to check if there are more
       const limit = (currentPage + 1) * TRANSACTIONS_PER_PAGE + 5
       const history = await walletService.getTransactionHistory(walletAddress, limit)
       console.log("✅ Transaction history loaded:", history.length, "transactions")
 
       setAllTransactions(history)
 
-      // Calculate how many to display
       const newDisplayCount = (currentPage + 1) * TRANSACTIONS_PER_PAGE
       const newDisplayed = history.slice(0, newDisplayCount)
 
@@ -373,16 +383,13 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     const nextPage = currentPage + 1
     setCurrentPage(nextPage)
 
-    // Check if we already have enough transactions loaded
     const newDisplayCount = (nextPage + 1) * TRANSACTIONS_PER_PAGE
 
     if (allTransactions.length >= newDisplayCount) {
-      // We have enough transactions, just update displayed
       const newDisplayed = allTransactions.slice(0, newDisplayCount)
       setDisplayedTransactions(newDisplayed)
       setHasMoreTransactions(allTransactions.length > newDisplayCount)
     } else {
-      // Need to load more from the service
       await loadTransactionHistory(false)
     }
   }
@@ -412,20 +419,20 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         setViewMode("main")
         setSendForm({ token: "TPF", amount: "", recipient: "" })
         await refreshBalances()
-        await loadTransactionHistory(true) // Refresh history after sending
+        await loadTransactionHistory(true)
       } else {
         console.error("❌ Send failed:", result)
         alert(`❌ ${t.sendFailed}: ${result.error}`)
       }
     } catch (error) {
       console.error("❌ Send error:", error)
-      alert(`❌ ${t.sendFailed}. Please try again.`)
+      alert(`❌ ${t.sendFailed}. ${t.tryAgain}`)
     } finally {
       setSending(false)
     }
   }
 
-  // Get REAL quote from Holdstation SDK com parâmetros corretos
+  // Get REAL quote from Holdstation SDK com tratamento de erro melhorado
   const getSwapQuote = useCallback(
     async (amountFrom: string) => {
       if (!amountFrom || Number.parseFloat(amountFrom) <= 0 || isNaN(Number.parseFloat(amountFrom))) {
@@ -439,27 +446,14 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       setQuoteError(null)
 
       try {
-        console.log("🔄 Getting REAL quote from Holdstation SDK for:", amountFrom, "WLD")
+        console.log("🔄 Getting quote for:", amountFrom, "WLD")
 
-        // First, validate contracts
-        console.log("🔍 Validating contracts before quote...")
-        await validateContracts()
+        const { quote, outputAmount } = await getRealQuote(amountFrom)
 
-        // First, debug the SDK structure
-        console.log("🔍 Debugging SDK before quote...")
-        await debugHoldstationSDK()
-
-        // Use the corrected getRealQuote function
-        const { quote, outputAmount, rawOutputAmount } = await getRealQuote(amountFrom)
-
-        console.log("✅ REAL quote received:", {
-          quote,
+        console.log("✅ Quote received:", {
           outputAmount,
-          rawOutputAmount,
           hasData: !!quote.data,
           hasTo: !!quote.to,
-          hasValue: !!quote.value,
-          hasAddons: !!quote.addons,
         })
 
         setSwapQuote(quote)
@@ -468,18 +462,25 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
           amountTo: outputAmount,
         }))
 
-        console.log("💱 Updated swap form with real amount:", outputAmount, "TPF")
+        console.log("💱 Updated swap form with amount:", outputAmount, "TPF")
       } catch (error) {
-        console.error("❌ Error getting REAL quote:", error)
-        console.error("❌ Error stack:", error.stack)
-        setQuoteError(`${t.quoteError}: ${error?.message || "Unknown error"}`)
+        console.error("❌ Error getting quote:", error)
+
+        let errorMessage = t.quoteError
+        if (error.message?.includes("timeout")) {
+          errorMessage = `${t.networkError}. ${t.tryAgain}`
+        } else if (error.message?.includes("Network")) {
+          errorMessage = `${t.networkError}. ${t.tryAgain}`
+        }
+
+        setQuoteError(errorMessage)
         setSwapQuote(null)
         setSwapForm((prev) => ({ ...prev, amountTo: "" }))
       } finally {
         setGettingQuote(false)
       }
     },
-    [t.quoteError],
+    [t.quoteError, t.networkError, t.tryAgain],
   )
 
   // Auto-quote effect with debounce
@@ -488,7 +489,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       if (swapForm.tokenFrom === "WLD" && swapForm.tokenTo === "TPF") {
         getSwapQuote(swapForm.amountFrom)
       }
-    }, 1000) // 1 second debounce
+    }, 1000)
 
     return () => clearTimeout(timeoutId)
   }, [swapForm.amountFrom, getSwapQuote, swapForm.tokenFrom, swapForm.tokenTo])
@@ -498,44 +499,24 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
     setSwapping(true)
     try {
-      console.log("🚀 Starting REAL swap transaction:", swapForm)
-      console.log("📋 Swap quote details:", {
-        hasData: !!swapQuote.data,
-        hasTo: !!swapQuote.to,
-        hasValue: !!swapQuote.value,
-        hasAddons: !!swapQuote.addons,
-        dataLength: swapQuote.data?.length,
-        to: swapQuote.to,
-        value: swapQuote.value,
-      })
+      console.log("🚀 Starting swap transaction:", swapForm)
 
-      // Verificar se temos WLD suficiente
+      // Check WLD balance
       const wldBalance = balances.find((t) => t.symbol === "WLD")
       if (!wldBalance || Number.parseFloat(wldBalance.balance) < Number.parseFloat(swapForm.amountFrom)) {
         throw new Error(
-          `Insufficient WLD balance. Available: ${wldBalance?.balance || "0"}, Required: ${swapForm.amountFrom}`,
+          `${t.insufficientBalance}. Available: ${wldBalance?.balance || "0"}, Required: ${swapForm.amountFrom}`,
         )
       }
 
-      // Validar contratos antes do swap
-      console.log("🔍 Validating contracts before swap...")
-      await validateContracts()
-
-      // Convert amount to wei for the swap function
-      const amountInWei = ethers.parseUnits(swapForm.amountFrom, 18)
-      console.log("💰 Swap amount:", swapForm.amountFrom, "WLD")
-      console.log("💰 Swap amount in wei:", amountInWei.toString())
-
-      // Verificar se o quote é válido
+      // Validate quote
       if (!swapQuote.data || !swapQuote.to) {
-        throw new Error("Invalid swap quote: missing transaction data")
+        throw new Error("Invalid swap quote")
       }
 
-      console.log("📤 Calling doSwap with:")
-      console.log("  - walletAddress:", walletAddress)
-      console.log("  - amountIn (wei):", amountInWei.toString())
-      console.log("  - quote.data length:", swapQuote.data.length)
-      console.log("  - quote.to:", swapQuote.to)
+      // Convert amount to wei
+      const amountInWei = ethers.parseUnits(swapForm.amountFrom, 18)
+      console.log("💰 Swap amount in wei:", amountInWei.toString())
 
       const result = await doSwap({
         walletAddress,
@@ -543,7 +524,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         amountIn: amountInWei.toString(),
       })
 
-      console.log("✅ REAL swap completed:", result)
+      console.log("✅ Swap completed:", result)
 
       if (result.success) {
         alert(`✅ ${t.swapSuccess} ${swapForm.amountFrom} WLD for ${swapForm.amountTo} TPF!`)
@@ -560,26 +541,18 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         throw new Error("Swap completed but returned success: false")
       }
     } catch (error) {
-      console.error("❌ REAL swap error:", error)
-      console.error("❌ Error details:", {
-        message: error?.message,
-        stack: error?.stack,
-        name: error?.name,
-      })
+      console.error("❌ Swap error:", error)
 
-      // Mostrar erro mais específico para o usuário
       let errorMessage = t.swapFailed
-      if (error?.message?.includes("Insufficient")) {
-        errorMessage = `${t.swapFailed}: Saldo insuficiente`
-      } else if (error?.message?.includes("Invalid") || error?.message?.includes("invalid")) {
-        errorMessage = `${t.swapFailed}: Contrato inválido`
-      } else if (error?.message?.includes("simulation")) {
-        errorMessage = `${t.swapFailed}: Simulação da transação falhou`
-      } else if (error?.message?.includes("contract")) {
-        errorMessage = `${t.swapFailed}: Erro no contrato`
+      if (error.message?.includes("Insufficient") || error.message?.includes("insuficiente")) {
+        errorMessage = `${t.swapFailed}: ${t.insufficientBalance}`
+      } else if (error.message?.includes("timeout")) {
+        errorMessage = `${t.swapFailed}: ${t.networkError}. ${t.tryAgain}`
+      } else if (error.message?.includes("Network")) {
+        errorMessage = `${t.swapFailed}: ${t.networkError}. ${t.tryAgain}`
       }
 
-      alert(`❌ ${errorMessage}. Detalhes: ${error?.message}`)
+      alert(`❌ ${errorMessage}`)
     } finally {
       setSwapping(false)
     }
@@ -641,20 +614,19 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       console.log("🧪 Testing Holdstation SDK on component mount...")
 
       try {
-        // Primeiro validar contratos
         await validateContracts()
         console.log("✅ Contracts validated successfully")
 
         const isWorking = await testSwapHelper()
         if (!isWorking) {
           console.error("❌ Holdstation SDK is not working properly")
-          setQuoteError("Holdstation SDK initialization failed")
+          setQuoteError("SDK initialization failed")
         } else {
           console.log("✅ Holdstation SDK is working correctly")
         }
       } catch (error) {
         console.error("❌ SDK validation failed:", error)
-        setQuoteError("Contract validation failed: " + error.message)
+        setQuoteError(`SDK error: ${error.message}`)
       }
     }
 
@@ -891,7 +863,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                   <Send className="w-5 h-5 mr-2 text-blue-400" />
                   {t.sendTokens}
                 </h3>
-                <div className="w-16" /> {/* Spacer for centering */}
+                <div className="w-16" />
               </div>
 
               {/* Warning Message for Send */}
@@ -997,7 +969,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                   <ArrowLeftRight className="w-5 h-5 mr-2 text-orange-400" />
                   {t.swapTokens}
                 </h3>
-                <div className="w-16" /> {/* Spacer for centering */}
+                <div className="w-16" />
               </div>
 
               <div className="space-y-4">
@@ -1103,12 +1075,13 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                       <span>
                         {(() => {
                           const wldBalance = balances.find((t) => t.symbol === "WLD")
-                          const hasInsufficientBalance =
+                          if (
                             !wldBalance ||
                             Number.parseFloat(wldBalance.balance) < Number.parseFloat(swapForm.amountFrom || "0")
-                          return hasInsufficientBalance && swapForm.amountFrom
-                            ? "Saldo Insuficiente"
-                            : `${t.swap} WLD → TPF`
+                          ) {
+                            return t.insufficientBalance
+                          }
+                          return t.swap
                         })()}
                       </span>
                     </>
@@ -1140,18 +1113,19 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                   <ArrowDownLeft className="w-5 h-5 mr-2 text-green-400" />
                   {t.receiveTokens}
                 </h3>
-                <div className="w-16" /> {/* Spacer for centering */}
+                <div className="w-16" />
               </div>
 
               {/* Warning Message */}
-              <div className="mb-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3">
+              <div className="mb-4 bg-orange-500/10 border border-orange-500/30 rounded-lg p-3">
                 <div className="flex items-start space-x-2">
-                  <AlertTriangle className="w-4 h-4 text-yellow-400 mt-0.5 flex-shrink-0" />
-                  <p className="text-yellow-300 text-xs leading-relaxed">{t.networkWarning}</p>
+                  <AlertTriangle className="w-4 h-4 text-orange-400 mt-0.5 flex-shrink-0" />
+                  <p className="text-orange-300 text-xs leading-relaxed">{t.networkWarning}</p>
                 </div>
               </div>
 
               <div className="space-y-4">
+                {/* Wallet Address Display */}
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">{t.yourWalletAddress}</label>
                   <div className="bg-gray-800/50 border border-white/20 rounded-lg p-3">
@@ -1163,6 +1137,18 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                       >
                         {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
                       </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* QR Code Placeholder */}
+                <div className="bg-gray-800/50 border border-white/20 rounded-lg p-6">
+                  <div className="w-full h-48 bg-white rounded-lg flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="w-32 h-32 bg-gray-200 rounded-lg mx-auto mb-2 flex items-center justify-center">
+                        <span className="text-gray-500 text-xs">QR Code</span>
+                      </div>
+                      <p className="text-gray-600 text-xs">Scan to send tokens</p>
                     </div>
                   </div>
                 </div>
@@ -1192,10 +1178,10 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                   <History className="w-5 h-5 mr-2 text-purple-400" />
                   {t.transactionHistory}
                 </h3>
-                <div className="w-16" /> {/* Spacer for centering */}
+                <div className="w-16" />
               </div>
 
-              <div className="space-y-3 max-h-80 overflow-y-auto">
+              <div className="space-y-3">
                 {loadingHistory ? (
                   <div className="flex items-center justify-center py-8">
                     <RefreshCw className="w-5 h-5 text-gray-400 animate-spin mr-2" />
@@ -1203,7 +1189,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                   </div>
                 ) : displayedTransactions.length === 0 ? (
                   <div className="text-center py-8">
-                    <History className="w-8 h-8 text-gray-500 mx-auto mb-2" />
+                    <History className="w-8 h-8 text-gray-400 mx-auto mb-2" />
                     <p className="text-gray-400 text-sm">{t.noTransactions}</p>
                   </div>
                 ) : (
@@ -1291,6 +1277,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
           )}
         </AnimatePresence>
       </motion.div>
+
       <DebugConsole />
     </>
   )
