@@ -23,7 +23,13 @@ import {
 } from "lucide-react"
 import Image from "next/image"
 import { walletService } from "@/services/wallet-service"
-import { doSwap, testSwapHelper, getRealQuote, validateContracts } from "@/services/swap-service"
+import {
+  doSwap,
+  testSwapHelper,
+  getRealQuote,
+  validateContracts,
+  debugContractInteraction,
+} from "@/services/swap-service"
 import { ethers } from "ethers"
 import { DebugConsole } from "@/components/debug-console"
 
@@ -608,12 +614,15 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     }
   }, [walletAddress])
 
-  // Test Holdstation SDK on component mount
+  // Test Holdstation SDK on component mount with contract debugging
   useEffect(() => {
     const testSDK = async () => {
       console.log("🧪 Testing Holdstation SDK on component mount...")
 
       try {
+        // Debug contract interaction first
+        await debugContractInteraction()
+
         await validateContracts()
         console.log("✅ Contracts validated successfully")
 
