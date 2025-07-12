@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Terminal, X, Minimize2, Maximize2, Trash2 } from "lucide-react"
+import { Terminal, X, Trash2, ChevronUp, ChevronDown } from "lucide-react"
 
 interface LogEntry {
   id: string
@@ -12,7 +12,7 @@ interface LogEntry {
 }
 
 export function DebugConsole() {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(true) // Start open by default
   const [isMinimized, setIsMinimized] = useState(false)
   const [logs, setLogs] = useState<LogEntry[]>([])
   const logsEndRef = useRef<HTMLDivElement>(null)
@@ -45,7 +45,7 @@ export function DebugConsole() {
       originalConsole.current?.log(...args)
       const message = args.join(" ")
 
-      // Only capture logs with specific emojis for wallet operations
+      // Capture ALL logs that contain wallet/swap related emojis
       if (
         message.includes("🔗") ||
         message.includes("🔄") ||
@@ -53,7 +53,12 @@ export function DebugConsole() {
         message.includes("❌") ||
         message.includes("💰") ||
         message.includes("💱") ||
-        message.includes("🚀")
+        message.includes("🚀") ||
+        message.includes("🧪") ||
+        message.includes("🎯") ||
+        message.includes("⚠️") ||
+        message.includes("🟡") ||
+        message.includes("🔴")
       ) {
         addLog(message, "info")
       }
@@ -62,18 +67,17 @@ export function DebugConsole() {
     console.warn = (...args: any[]) => {
       originalConsole.current?.warn(...args)
       const message = args.join(" ")
-      if (message.includes("⚠️") || message.includes("🟡")) {
-        addLog(message, "warn")
-      }
+      addLog(message, "warn")
     }
 
     console.error = (...args: any[]) => {
       originalConsole.current?.error(...args)
       const message = args.join(" ")
-      if (message.includes("❌") || message.includes("🔴")) {
-        addLog(message, "error")
-      }
+      addLog(message, "error")
     }
+
+    // Add initial log
+    addLog("🔗 Debug Console initialized", "success")
 
     // Cleanup on unmount
     return () => {
@@ -92,11 +96,12 @@ export function DebugConsole() {
       message,
       type,
     }
-    setLogs((prev) => [...prev.slice(-49), newLog]) // Keep last 50 logs
+    setLogs((prev) => [...prev.slice(-99), newLog]) // Keep last 100 logs
   }
 
   const clearLogs = () => {
     setLogs([])
+    addLog("🔗 Debug Console cleared", "info")
   }
 
   const formatTime = (date: Date) => {
@@ -123,6 +128,21 @@ export function DebugConsole() {
     }
   }
 
+  const getLogBg = (type: LogEntry["type"]) => {
+    switch (type) {
+      case "info":
+        return "bg-blue-500/10 border-blue-500/20"
+      case "warn":
+        return "bg-yellow-500/10 border-yellow-500/20"
+      case "error":
+        return "bg-red-500/10 border-red-500/20"
+      case "success":
+        return "bg-green-500/10 border-green-500/20"
+      default:
+        return "bg-gray-500/10 border-gray-500/20"
+    }
+  }
+
   if (!isOpen) {
     return (
       <motion.div
@@ -132,7 +152,7 @@ export function DebugConsole() {
       >
         <button
           onClick={() => setIsOpen(true)}
-          className="bg-gray-900/90 backdrop-blur-sm border border-gray-700 rounded-full p-3 shadow-lg hover:bg-gray-800/90 transition-colors relative"
+          className="bg-gray-900/90 backdrop-blur-sm border border-gray-700 rounded-full p-3 shadow-lg hover:bg-gray-800/90 transition-colors relative group"
         >
           <Terminal className="w-5 h-5 text-green-400" />
           {logs.length > 0 && (
@@ -140,6 +160,9 @@ export function DebugConsole() {
               {logs.length > 99 ? "99+" : logs.length}
             </span>
           )}
+          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-black text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+            Debug Console ({logs.length} logs)
+          </div>
         </button>
       </motion.div>
     )
@@ -151,11 +174,11 @@ export function DebugConsole() {
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 20, scale: 0.95 }}
       className={`fixed bottom-4 left-4 z-[9999] bg-gray-900/95 backdrop-blur-xl border border-gray-700 rounded-lg shadow-2xl ${
-        isMinimized ? "w-80 h-12" : "w-96 h-80"
-      } transition-all duration-300`}
+        isMinimized ? "w-80 h-12" : "w-96 h-96"
+      } transition-all duration-300 flex flex-col`}
     >
       {/* Header */}
-      <div className="flex items-center justify-between p-3 border-b border-gray-700">
+      <div className="flex items-center justify-between p-3 border-b border-gray-700 bg-gray-800/50 rounded-t-lg">
         <div className="flex items-center space-x-2">
           <Terminal className="w-4 h-4 text-green-400" />
           <span className="text-white text-sm font-medium">Debug Console</span>
@@ -176,7 +199,7 @@ export function DebugConsole() {
             className="p-1 text-gray-400 hover:text-white transition-colors rounded"
             title={isMinimized ? "Maximize" : "Minimize"}
           >
-            {isMinimized ? <Maximize2 className="w-3 h-3" /> : <Minimize2 className="w-3 h-3" />}
+            {isMinimized ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
           </button>
           <button
             onClick={() => setIsOpen(false)}
@@ -195,20 +218,26 @@ export function DebugConsole() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="flex-1 overflow-y-auto p-2 space-y-1 max-h-64"
+            className="flex-1 overflow-y-auto p-2 space-y-1 bg-black/20"
           >
             {logs.length === 0 ? (
-              <div className="text-gray-500 text-xs text-center py-4">No debug logs yet...</div>
+              <div className="text-gray-500 text-xs text-center py-8">
+                <Terminal className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                <p>Waiting for debug logs...</p>
+                <p className="text-xs mt-1 opacity-70">Wallet operations will appear here</p>
+              </div>
             ) : (
               logs.map((log) => (
                 <motion.div
                   key={log.id}
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="text-xs font-mono leading-relaxed"
+                  className={`text-xs font-mono leading-relaxed p-2 rounded border ${getLogBg(log.type)}`}
                 >
-                  <span className="text-gray-500">[{formatTime(log.timestamp)}]</span>{" "}
-                  <span className={getLogColor(log.type)}>{log.message}</span>
+                  <div className="flex items-start space-x-2">
+                    <span className="text-gray-500 text-xs flex-shrink-0">[{formatTime(log.timestamp)}]</span>
+                    <span className={`${getLogColor(log.type)} flex-1 break-words`}>{log.message}</span>
+                  </div>
                 </motion.div>
               ))
             )}
@@ -216,6 +245,16 @@ export function DebugConsole() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Status Bar */}
+      {!isMinimized && (
+        <div className="px-3 py-1 bg-gray-800/30 border-t border-gray-700 rounded-b-lg">
+          <div className="flex items-center justify-between text-xs text-gray-400">
+            <span>Ready for debugging</span>
+            <span>{logs.length} logs</span>
+          </div>
+        </div>
+      )}
     </motion.div>
   )
 }
