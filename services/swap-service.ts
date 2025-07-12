@@ -45,7 +45,7 @@ swapHelper.load(worldswap)
 // Token functions
 export async function getTokenDetail() {
   console.log("🔍 Fetching multiple token details...")
-  console.log(`📋 Using Holdstation contract: ${HOLDSTATION_CONTRACT}`)
+  console.log("📋 Using Holdstation contract:", HOLDSTATION_CONTRACT)
   const tokens = await tokenProvider.details(
     "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
     "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
@@ -57,7 +57,7 @@ export async function getTokenDetail() {
 
 export async function getTokenInfo() {
   console.log("🔍 Fetching single token info...")
-  console.log(`📋 Using Holdstation contract: ${HOLDSTATION_CONTRACT}`)
+  console.log("📋 Using Holdstation contract:", HOLDSTATION_CONTRACT)
   const tokenInfo = await tokenProvider.details("0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45") // TPF
 
   console.log("✅ Token Info:", tokenInfo)
@@ -66,8 +66,8 @@ export async function getTokenInfo() {
 
 // Quote functions
 export async function getRealQuote(amountFromWLD: string) {
-  console.log("💱 Getting real quote...")
-  console.log(`📋 Using Holdstation contract: ${HOLDSTATION_CONTRACT}`)
+  console.log("🔄 Getting real quote...")
+  console.log("📋 Using Holdstation contract:", HOLDSTATION_CONTRACT)
   const params: SwapParams["quoteInput"] = {
     tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
     tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
@@ -89,7 +89,7 @@ export async function getRealQuote(amountFromWLD: string) {
 // Swap functions
 export async function estimateSwap() {
   console.log("🧪 Estimating swap...")
-  console.log(`📋 Using Holdstation contract: ${HOLDSTATION_CONTRACT}`)
+  console.log("📋 Using Holdstation contract:", HOLDSTATION_CONTRACT)
   const params: SwapParams["quoteInput"] = {
     tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
     tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
@@ -113,10 +113,7 @@ export async function doSwap({
   amountIn: string
 }) {
   console.log("🚀 Executing swap...")
-  console.log(`📋 Using Holdstation contract: ${HOLDSTATION_CONTRACT}`)
-  console.log(`💰 Wallet address: ${walletAddress}`)
-  console.log(`💰 Amount in: ${amountIn}`)
-
+  console.log("📋 Using Holdstation contract:", HOLDSTATION_CONTRACT)
   const params: SwapParams["quoteInput"] = {
     tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
     tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
@@ -156,7 +153,7 @@ export async function doSwap({
 
 export async function swap() {
   console.log("🚀 Executing swap...")
-  console.log(`📋 Using Holdstation contract: ${HOLDSTATION_CONTRACT}`)
+  console.log("📋 Using Holdstation contract:", HOLDSTATION_CONTRACT)
   const params: SwapParams["quoteInput"] = {
     tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
     tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
@@ -189,7 +186,7 @@ export async function swap() {
 export async function validateContracts() {
   try {
     console.log("🔍 Validating contracts...")
-    console.log(`📋 Using Holdstation contract: ${HOLDSTATION_CONTRACT}`)
+    console.log("📋 Using Holdstation contract:", HOLDSTATION_CONTRACT)
 
     const wldCode = await provider.getCode("0x2cFc85d8E48F8EAB294be644d9E25C3030863003")
     const tpfCode = await provider.getCode("0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45")
@@ -222,7 +219,7 @@ export async function validateContracts() {
 export async function testSwapHelper() {
   try {
     console.log("🧪 Testing SwapHelper...")
-    console.log(`📋 Using Holdstation contract: ${HOLDSTATION_CONTRACT}`)
+    console.log("📋 Using Holdstation contract:", HOLDSTATION_CONTRACT)
 
     if (!swapHelper?.estimate?.quote) {
       throw new Error("SwapHelper not available")
@@ -254,7 +251,7 @@ export async function testSwapHelper() {
 export async function debugHoldstationSDK() {
   try {
     console.log("🔍 DEBUGGING HOLDSTATION SDK")
-    console.log(`📋 Using Holdstation contract: ${HOLDSTATION_CONTRACT}`)
+    console.log("📋 Using Holdstation contract:", HOLDSTATION_CONTRACT)
 
     const blockNumber = await provider.getBlockNumber()
     console.log("📋 Provider connected, block:", blockNumber)
@@ -267,6 +264,25 @@ export async function debugHoldstationSDK() {
     console.log("📋 Token details:", tokenDetails)
   } catch (error) {
     console.error("❌ Debug failed:", error)
+  }
+}
+
+export async function debugContractInteraction() {
+  try {
+    console.log("🔍 Debugging contract interaction...")
+    console.log("📋 Using Holdstation contract:", HOLDSTATION_CONTRACT)
+
+    const holdstationCode = await provider.getCode(HOLDSTATION_CONTRACT)
+    console.log("📋 Holdstation contract code length:", holdstationCode.length)
+    console.log("📋 Holdstation contract exists:", holdstationCode !== "0x")
+
+    if (holdstationCode === "0x") {
+      console.error("❌ Holdstation contract not found at:", HOLDSTATION_CONTRACT)
+    } else {
+      console.log("✅ Holdstation contract found at:", HOLDSTATION_CONTRACT)
+    }
+  } catch (error) {
+    console.error("❌ Contract interaction debug failed:", error)
   }
 }
 
