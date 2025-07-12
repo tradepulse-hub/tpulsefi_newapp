@@ -65,11 +65,11 @@ export async function getTokenInfo() {
 
 // Quote functions
 export async function getRealQuote(amountFromWLD: string) {
-  console.log("Getting real quote...")
+  console.log("Getting real quote for amount:", amountFromWLD, "WLD")
   const params: SwapParams["quoteInput"] = {
     tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
     tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
-    amountIn: amountFromWLD,
+    amountIn: amountFromWLD, // Pass human-readable amount (e.g., "1" for 1 WLD)
     slippage: "0.3",
     fee: "0.2",
   }
@@ -90,7 +90,7 @@ export async function estimateSwap() {
   const params: SwapParams["quoteInput"] = {
     tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
     tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
-    amountIn: "2",
+    amountIn: "2", // Human-readable amount
     slippage: "0.3",
     fee: "0.2",
   }
@@ -110,10 +110,13 @@ export async function doSwap({
   amountIn: string
 }) {
   console.log("Executing swap...")
+  console.log("📊 Wallet:", walletAddress)
+  console.log("📊 Amount:", amountIn, "WLD (human-readable)")
+
   const params: SwapParams["quoteInput"] = {
     tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
     tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
-    amountIn: amountIn,
+    amountIn: amountIn, // Pass human-readable amount (e.g., "1" for 1 WLD)
     slippage: "0.3",
     fee: "0.2",
   }
@@ -122,7 +125,7 @@ export async function doSwap({
   const swapParams: SwapParams["input"] = {
     tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
     tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
-    amountIn: amountIn,
+    amountIn: amountIn, // Pass human-readable amount (e.g., "1" for 1 WLD)
     tx: {
       data: quoteResponse.data,
       to: quoteResponse.to,
@@ -151,7 +154,7 @@ export async function swap() {
   const params: SwapParams["quoteInput"] = {
     tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
     tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
-    amountIn: "2",
+    amountIn: "2", // Human-readable amount
     slippage: "0.3",
     fee: "0.2",
   }
@@ -160,7 +163,7 @@ export async function swap() {
   const swapParams: SwapParams["input"] = {
     tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
     tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
-    amountIn: "2",
+    amountIn: "2", // Human-readable amount
     tx: {
       data: quoteResponse.data,
       to: quoteResponse.to,
@@ -213,7 +216,7 @@ export async function testSwapHelper() {
     const testParams: SwapParams["quoteInput"] = {
       tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
       tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
-      amountIn: "0.001",
+      amountIn: "0.001", // Human-readable amount
       slippage: "0.3",
       fee: "0.2",
     }
