@@ -7,8 +7,12 @@ import {
   type SwapParams,
   TokenProvider,
   ZeroX,
+  setPartnerCode,
 } from "@holdstation/worldchain-sdk"
 import { ethers } from "ethers"
+
+// Set partner code at initialization
+setPartnerCode("24568")
 
 // Setup
 const RPC_URL = "https://worldchain-mainnet.g.alchemy.com/public"
@@ -124,10 +128,9 @@ export async function doSwap({
       to: quoteResponse.to,
       value: quoteResponse.value,
     },
-    partnerCode: "24568", // Replace with your partner code, contact to holdstation team to get one
     feeAmountOut: quoteResponse.addons?.feeAmountOut,
     fee: "0.2",
-    feeReceiver: ethers.ZeroAddress, // ZERO_ADDRESS or your fee receiver address
+    feeReceiver: ethers.ZeroAddress,
   }
   const result = await swapHelper.swap(swapParams)
   console.log("Swap result:", result)
@@ -163,10 +166,9 @@ export async function swap() {
       to: quoteResponse.to,
       value: quoteResponse.value,
     },
-    partnerCode: "24568", // Replace with your partner code, contact to holdstation team to get one
     feeAmountOut: quoteResponse.addons?.feeAmountOut,
     fee: "0.2",
-    feeReceiver: ethers.ZeroAddress, // ZERO_ADDRESS or your fee receiver address
+    feeReceiver: ethers.ZeroAddress,
   }
   const result = await swapHelper.swap(swapParams)
   console.log("Swap result:", result)
