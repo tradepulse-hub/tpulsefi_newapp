@@ -480,7 +480,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         setGettingQuote(false)
       }
     },
-    [t.quoteError, t.networkError, t.tryAgain],
+    [t.quoteError, t.networkError, t.tryAgain]
   )
 
   // Auto-quote effect with debounce
@@ -505,7 +505,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       const wldBalance = balances.find((t) => t.symbol === "WLD")
       if (!wldBalance || Number.parseFloat(wldBalance.balance) < Number.parseFloat(swapForm.amountFrom)) {
         throw new Error(
-          `${t.insufficientBalance}. Available: ${wldBalance?.balance || "0"}, Required: ${swapForm.amountFrom}`,
+          `${t.insufficientBalance}. Available: ${wldBalance?.balance || "0"}, Required: ${swapForm.amountFrom}`
         )
       }
 
@@ -514,14 +514,10 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         throw new Error("Invalid swap quote")
       }
 
-      // Convert amount to wei
-      const amountInWei = ethers.parseUnits(swapForm.amountFrom, 18)
-      console.log("💰 Swap amount in wei:", amountInWei.toString())
-
       const result = await doSwap({
         walletAddress,
         quote: swapQuote,
-        amountIn: amountInWei.toString(),
+        amountIn: swapForm.amountFrom,
       })
 
       console.log("✅ Swap completed:", result)
@@ -896,10 +892,12 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                   <div className="flex items-center justify-between mb-2">
                     <label className="block text-sm font-medium text-gray-300">{t.amount}</label>
                     <span className="text-xs text-gray-400">
-                      {t.available}: {(() => {
+                      {t.available}:{" "}
+                      {(() => {
                         const selectedToken = balances.find((t) => t.symbol === sendForm.token)
                         return selectedToken ? formatBalance(selectedToken.balance) : "0"
-                      })()} {sendForm.token}
+                      })()}{" "}
+                      {sendForm.token}
                     </span>
                   </div>
                   <input
@@ -988,10 +986,12 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                       className="w-full bg-gray-800/50 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-orange-500"
                     />
                     <div className="text-xs text-gray-400">
-                      {t.available}: {(() => {
+                      {t.available}:{" "}
+                      {(() => {
                         const wldToken = balances.find((t) => t.symbol === "WLD")
                         return wldToken ? formatBalance(wldToken.balance) : "0"
-                      })()} WLD
+                      })()}{" "}
+                      WLD
                     </div>
                   </div>
                 </div>
@@ -1211,8 +1211,8 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                                   {tx.status === "confirmed"
                                     ? t.confirmed
                                     : tx.status === "pending"
-                                      ? t.pending
-                                      : t.failed}
+                                    ? t.pending
+                                    : t.failed}
                                 </span>
                               </div>
                               <p className="text-gray-400 text-xs">{formatAddress(tx.address)}</p>
