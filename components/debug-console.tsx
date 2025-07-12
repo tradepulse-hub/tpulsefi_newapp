@@ -1,10 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { Terminal, Minus, Trash2, Copy, Check } from "lucide-react"
 
 interface LogEntry {
@@ -132,66 +128,52 @@ export default function DebugConsole() {
   if (isMinimized) {
     return (
       <div className="fixed top-20 left-4 z-40">
-        <Button
+        <button
           onClick={() => setIsMinimized(false)}
-          variant="outline"
-          size="sm"
-          className="bg-black/80 text-white border-gray-600 hover:bg-black/90"
+          className="bg-black/80 text-white border border-gray-600 hover:bg-black/90 px-3 py-2 rounded-lg text-sm flex items-center gap-2"
         >
-          <Terminal className="w-4 h-4 mr-2" />
+          <Terminal className="w-4 h-4" />
           Debug ({logs.length})
-        </Button>
+        </button>
       </div>
     )
   }
 
   return (
     <div className="fixed top-20 left-4 z-40 w-96 max-h-96">
-      <Card className="bg-black/90 text-white border-gray-600">
-        <CardHeader className="pb-2">
+      <div className="bg-black/90 text-white border border-gray-600 rounded-lg">
+        <div className="p-3 border-b border-gray-600">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
+            <div className="text-sm font-medium flex items-center gap-2">
               <Terminal className="w-4 h-4" />
               Debug Console
-              <Badge variant="secondary" className="text-xs">
-                {logs.length}
-              </Badge>
-            </CardTitle>
+              <span className="bg-gray-700 text-gray-300 text-xs px-2 py-0.5 rounded-full">{logs.length}</span>
+            </div>
             <div className="flex gap-1">
-              <Button
-                variant="ghost"
-                size="sm"
+              <button
                 onClick={copyLogs}
                 disabled={logs.length === 0}
-                className="h-6 w-6 p-0 text-gray-400 hover:text-white"
+                className="h-6 w-6 p-0 text-gray-400 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Copy all logs"
               >
                 {copied ? <Check className="w-3 h-3 text-green-400" /> : <Copy className="w-3 h-3" />}
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={clearLogs}
-                className="h-6 w-6 p-0 text-gray-400 hover:text-white"
-                title="Clear logs"
-              >
+              </button>
+              <button onClick={clearLogs} className="h-6 w-6 p-0 text-gray-400 hover:text-white" title="Clear logs">
                 <Trash2 className="w-3 h-3" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
+              </button>
+              <button
                 onClick={() => setIsMinimized(true)}
                 className="h-6 w-6 p-0 text-gray-400 hover:text-white"
                 title="Minimize"
               >
                 <Minus className="w-3 h-3" />
-              </Button>
+              </button>
             </div>
           </div>
-        </CardHeader>
+        </div>
 
-        <CardContent className="p-2">
-          <ScrollArea className="h-64">
+        <div className="p-2">
+          <div className="h-64 overflow-y-auto">
             <div className="space-y-1">
               {logs.length === 0 ? (
                 <div className="text-gray-400 text-xs text-center py-4">
@@ -205,9 +187,11 @@ export default function DebugConsole() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           <span className="text-gray-400 text-xs">{log.timestamp}</span>
-                          <Badge variant="outline" className={`text-xs h-4 ${getTypeColor(log.type)} border-current`}>
+                          <span
+                            className={`text-xs px-1 py-0.5 rounded border ${getTypeColor(log.type)} border-current`}
+                          >
                             {log.type}
-                          </Badge>
+                          </span>
                         </div>
                         <div className="text-white break-words whitespace-pre-wrap">{log.message}</div>
                       </div>
@@ -216,9 +200,9 @@ export default function DebugConsole() {
                 ))
               )}
             </div>
-          </ScrollArea>
-        </CardContent>
-      </Card>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
