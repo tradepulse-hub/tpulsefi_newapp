@@ -104,6 +104,12 @@ const STAKING_CONTRACTS = {
     address: "0x6BAD88b93d67590656c83371d65DCB35d17deC87",
     image: "/images/eden-logo.png",
   },
+  KPP: {
+    name: "KeplerPay",
+    symbol: "KPP",
+    address: "0x2aaeC7df37AA5799a9E721A1B338aa2d591acd64",
+    image: "/images/keplerpay-logo.png",
+  },
 }
 
 // Updated ABI with the correct format provided by the user
