@@ -112,7 +112,7 @@ const STAKING_CONTRACTS = {
   },
 }
 
-// Full ABI for most contracts (WDD, TPT, RFX, EDEN, KPP)
+// Standard ABI for all contracts (including RCC)
 const STAKING_ABI = [
   {
     inputs: [
@@ -353,119 +353,6 @@ const STAKING_ABI = [
   },
 ] as const
 
-// Simplified ABI specifically for RCC contract
-const RCC_STAKING_ABI = [
-  {
-    inputs: [
-      { internalType: "address", name: "_tpfToken", type: "address" },
-      { internalType: "address", name: "_rewardToken", type: "address" },
-    ],
-    stateMutability: "nonpayable",
-    type: "constructor",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      { indexed: false, internalType: "uint256", name: "oldAPY", type: "uint256" },
-      { indexed: false, internalType: "uint256", name: "newAPY", type: "uint256" },
-    ],
-    name: "APYUpdated",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      { indexed: true, internalType: "address", name: "user", type: "address" },
-      { indexed: false, internalType: "uint256", name: "amount", type: "uint256" },
-      { indexed: false, internalType: "uint256", name: "tpfBalance", type: "uint256" },
-    ],
-    name: "RewardsClaimed",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      { indexed: true, internalType: "address", name: "owner", type: "address" },
-      { indexed: false, internalType: "uint256", name: "amount", type: "uint256" },
-    ],
-    name: "RewardsDeposited",
-    type: "event",
-  },
-  {
-    inputs: [],
-    name: "BASIS_POINTS",
-    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "SECONDS_PER_YEAR",
-    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "apyRate",
-    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [{ internalType: "address", name: "_user", type: "address" }],
-    name: "calculatePendingRewards",
-    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "claimRewards",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "owner",
-    outputs: [{ internalType: "address", name: "", type: "address" }],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "rewardToken",
-    outputs: [{ internalType: "contract IERC20", name: "", type: "address" }],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "totalRewardsClaimed",
-    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "tpfToken",
-    outputs: [{ internalType: "contract IERC20", name: "", type: "address" }],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [{ internalType: "address", name: "", type: "address" }],
-    name: "users",
-    outputs: [
-      { internalType: "uint256", name: "lastClaimTime", type: "uint256" },
-      { internalType: "uint256", name: "totalClaimed", type: "uint256" },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-] as const
-
 interface StakingInfo {
   pendingRewards: string
   canClaim: boolean
@@ -492,14 +379,6 @@ export default function FiStakingPage() {
   // Get translations for current language
   const t = translations[currentLang]
 
-  // Function to get the correct ABI for each contract
-  const getContractABI = (tokenKey: string) => {
-    if (tokenKey === "RCC") {
-      return RCC_STAKING_ABI
-    }
-    return STAKING_ABI
-  }
-
   const handleClaim = async (tokenKey: string) => {
     const contract = STAKING_CONTRACTS[tokenKey as keyof typeof STAKING_CONTRACTS]
     if (!contract.address || !user?.walletAddress) return
@@ -511,20 +390,16 @@ export default function FiStakingPage() {
       console.log(`🎁 Claiming ${contract.symbol} rewards...`)
       console.log(`Contract address: ${contract.address}`)
       console.log(`User wallet: ${user.walletAddress}`)
-      console.log(`Using ${tokenKey === "RCC" ? "RCC" : "standard"} ABI`)
 
       if (!MiniKit.isInstalled()) {
         throw new Error("MiniKit not available. Please use World App.")
       }
 
-      // Get the correct ABI for this contract
-      const contractABI = getContractABI(tokenKey)
-
       const { finalPayload } = await MiniKit.commandsAsync.sendTransaction({
         transaction: [
           {
             address: contract.address,
-            abi: contractABI,
+            abi: STAKING_ABI,
             functionName: "claimRewards",
             args: [],
           },
@@ -820,7 +695,6 @@ export default function FiStakingPage() {
                       <div>
                         <h3 className="text-white font-medium text-lg">{contract.symbol}</h3>
                         <p className="text-gray-400 text-sm">{contract.name}</p>
-                        {key === "RCC" && <p className="text-yellow-400 text-xs">APY: 0.01%</p>}
                       </div>
                     </div>
 
