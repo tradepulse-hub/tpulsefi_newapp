@@ -101,12 +101,12 @@ const STAKING_CONTRACTS = {
   EDEN: {
     name: "Project Eden Token",
     symbol: "EDEN",
-    address: "0x5B9EE20cef5540264Be906eDD4624F685292a6f1",
+    address: "0x6BAD88b93d67590656c83371d65DCB35d17deC87",
     image: "/images/eden-logo.png",
   },
 }
 
-// Staking contract ABI (updated with the provided ABI)
+// Updated ABI with the correct format provided by the user
 const STAKING_ABI = [
   {
     inputs: [
@@ -173,10 +173,114 @@ const STAKING_ABI = [
     type: "function",
   },
   {
+    inputs: [{ internalType: "address", name: "_user", type: "address" }],
+    name: "calculateRewardsPerDay",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "address", name: "_user", type: "address" }],
+    name: "calculateRewardsPerSecond",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "address", name: "_user", type: "address" }],
+    name: "canClaim",
+    outputs: [{ internalType: "bool", name: "", type: "bool" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [],
     name: "claimRewards",
     outputs: [],
     stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "uint256", name: "_amount", type: "uint256" }],
+    name: "depositRewards",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "emergencyWithdraw",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "address", name: "_user", type: "address" }],
+    name: "getCalculationDetails",
+    outputs: [
+      { internalType: "uint256", name: "tpfBalance", type: "uint256" },
+      { internalType: "uint256", name: "timeStaked", type: "uint256" },
+      { internalType: "uint256", name: "apyRateUsed", type: "uint256" },
+      { internalType: "uint256", name: "basisPoints", type: "uint256" },
+      { internalType: "uint256", name: "secondsPerYear", type: "uint256" },
+      { internalType: "uint256", name: "calculatedRewards", type: "uint256" },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getCurrentAPY",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getRewardBalance",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getStats",
+    outputs: [
+      { internalType: "uint256", name: "totalUsers", type: "uint256" },
+      { internalType: "uint256", name: "totalRewards", type: "uint256" },
+      { internalType: "uint256", name: "contractRewardBalance", type: "uint256" },
+      { internalType: "uint256", name: "currentAPY", type: "uint256" },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "address", name: "_user", type: "address" }],
+    name: "getTimeToNextClaim",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getTokenAddresses",
+    outputs: [
+      { internalType: "address", name: "tpfTokenAddress", type: "address" },
+      { internalType: "address", name: "rewardTokenAddress", type: "address" },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "address", name: "_user", type: "address" }],
+    name: "getUserInfo",
+    outputs: [
+      { internalType: "uint256", name: "tpfBalance", type: "uint256" },
+      { internalType: "uint256", name: "pendingRewards", type: "uint256" },
+      { internalType: "uint256", name: "lastClaimTime", type: "uint256" },
+      { internalType: "uint256", name: "totalClaimed", type: "uint256" },
+    ],
+    stateMutability: "view",
     type: "function",
   },
   {
@@ -194,6 +298,23 @@ const STAKING_ABI = [
     type: "function",
   },
   {
+    inputs: [{ internalType: "uint256", name: "_newAPY", type: "uint256" }],
+    name: "setAPY",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      { internalType: "address", name: "_user", type: "address" },
+      { internalType: "uint256", name: "_days", type: "uint256" },
+    ],
+    name: "simulateRewards",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [],
     name: "totalRewardsClaimed",
     outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
@@ -205,6 +326,13 @@ const STAKING_ABI = [
     name: "tpfToken",
     outputs: [{ internalType: "contract IERC20", name: "", type: "address" }],
     stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "address", name: "_newOwner", type: "address" }],
+    name: "transferOwnership",
+    outputs: [],
+    stateMutability: "nonpayable",
     type: "function",
   },
   {
@@ -254,6 +382,8 @@ export default function FiStakingPage() {
 
     try {
       console.log(`🎁 Claiming ${contract.symbol} rewards...`)
+      console.log(`Contract address: ${contract.address}`)
+      console.log(`User wallet: ${user.walletAddress}`)
 
       if (!MiniKit.isInstalled()) {
         throw new Error("MiniKit not available. Please use World App.")
@@ -297,6 +427,12 @@ export default function FiStakingPage() {
         errorMessage = "Transaction simulation failed. You may not have enough tokens or rewards to claim."
       } else if (errorMessage.includes("user_rejected")) {
         errorMessage = "Transaction was rejected by user."
+      } else if (errorMessage.includes("No TPF tokens")) {
+        errorMessage = "You need TPF tokens in your wallet to claim rewards."
+      } else if (errorMessage.includes("No rewards to claim")) {
+        errorMessage = "No rewards available to claim at this time."
+      } else if (errorMessage.includes("Insufficient reward balance")) {
+        errorMessage = "Contract has insufficient reward balance. Please try again later."
       }
 
       setClaimError(errorMessage)
