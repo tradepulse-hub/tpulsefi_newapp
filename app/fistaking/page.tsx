@@ -98,6 +98,12 @@ const STAKING_CONTRACTS = {
     address: "0xA8785DABbc9902173b819f488e5A6A0Dbc45A9dF",
     image: "/images/rosechana-coin.png",
   },
+  EDEN: {
+    name: "Project Eden Token",
+    symbol: "EDEN",
+    address: "0x5B9EE20cef5540264Be906eDD4624F685292a6f1",
+    image: "/images/eden-logo.png",
+  },
 }
 
 // Staking contract ABI (updated with the provided ABI)
