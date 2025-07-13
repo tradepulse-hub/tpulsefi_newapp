@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ArrowLeft, Gift, Loader2, CheckCircle, AlertCircle, Clock } from "lucide-react"
+import { ArrowLeft, TrendingUp, Gift, Loader2, CheckCircle, Clock } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { MiniKit } from "@worldcoin/minikit-js"
@@ -16,83 +16,59 @@ type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number]
 const translations = {
   en: {
     title: "FiStaking",
-    subtitle: "Stake your TPF tokens and earn rewards",
+    subtitle:
+      "Just for having TPulseFi you are entitled to passive earnings from other tokens, the more TPF you have, the more you earn!",
     back: "Back",
-    claimRewards: "Claim Rewards",
+    claim: "Claim",
     claiming: "Claiming...",
-    connectWalletFirst: "Connect Wallet First",
-    claimSuccess: "Rewards Claimed!",
+    soon: "Soon",
+    claimSuccess: "Claim Successful!",
     claimFailed: "Claim Failed",
+    connectWalletFirst: "Connect your wallet first",
+    pendingRewards: "Pending Rewards",
     dismiss: "Dismiss",
-    noRewards: "No rewards available",
-    stakingDescription: "Hold TPF tokens in your wallet to earn rewards from these staking contracts.",
-    totalClaimed: "Total Claimed",
-    currentAPY: "Current APY",
-    stakingDuration: "Staking Duration",
-    rewardCalculator: "Reward Calculator",
-    enterAmount: "Enter TPF amount",
-    estimatedRewards: "Estimated daily rewards",
-    calculate: "Calculate",
   },
   pt: {
     title: "FiStaking",
-    subtitle: "Faça stake dos seus tokens TPF e ganhe recompensas",
+    subtitle:
+      "Só por teres TPulseFi tens direito a ganhos passivos de outros tokens, quanto mais TPF tiveres, mais ganhas!",
     back: "Voltar",
-    claimRewards: "Reivindicar Recompensas",
-    claiming: "Reivindicando...",
-    connectWalletFirst: "Conectar Carteira Primeiro",
-    claimSuccess: "Recompensas Reivindicadas!",
-    claimFailed: "Falha na Reivindicação",
+    claim: "Reclamar",
+    claiming: "Reclamando...",
+    soon: "Em Breve",
+    claimSuccess: "Reclamação Bem-sucedida!",
+    claimFailed: "Reclamação Falhou",
+    connectWalletFirst: "Conecte sua carteira primeiro",
+    pendingRewards: "Recompensas Pendentes",
     dismiss: "Dispensar",
-    noRewards: "Sem recompensas disponíveis",
-    stakingDescription: "Mantenha tokens TPF na sua carteira para ganhar recompensas destes contratos de staking.",
-    totalClaimed: "Total Reivindicado",
-    currentAPY: "APY Atual",
-    stakingDuration: "Duração do Staking",
-    rewardCalculator: "Calculadora de Recompensas",
-    enterAmount: "Digite a quantidade de TPF",
-    estimatedRewards: "Recompensas diárias estimadas",
-    calculate: "Calcular",
   },
   es: {
     title: "FiStaking",
-    subtitle: "Haz stake de tus tokens TPF y gana recompensas",
+    subtitle:
+      "¡Solo por tener TPulseFi tienes derecho a ganancias pasivas de otros tokens, cuanto más TPF tengas, más ganas!",
     back: "Volver",
-    claimRewards: "Reclamar Recompensas",
+    claim: "Reclamar",
     claiming: "Reclamando...",
-    connectWalletFirst: "Conectar Billetera Primero",
-    claimSuccess: "¡Recompensas Reclamadas!",
-    claimFailed: "Reclamo Falló",
+    soon: "Pronto",
+    claimSuccess: "¡Reclamación Exitosa!",
+    claimFailed: "Reclamación Falló",
+    connectWalletFirst: "Conecta tu billetera primero",
+    pendingRewards: "Recompensas Pendientes",
     dismiss: "Descartar",
-    noRewards: "Sin recompensas disponibles",
-    stakingDescription: "Mantén tokens TPF en tu billetera para ganar recompensas de estos contratos de staking.",
-    totalClaimed: "Total Reclamado",
-    currentAPY: "APY Actual",
-    stakingDuration: "Duración del Staking",
-    rewardCalculator: "Calculadora de Recompensas",
-    enterAmount: "Ingresa cantidad de TPF",
-    estimatedRewards: "Recompensas diarias estimadas",
-    calculate: "Calcular",
   },
   id: {
     title: "FiStaking",
-    subtitle: "Stake token TPF Anda dan dapatkan hadiah",
+    subtitle:
+      "Hanya dengan memiliki TPulseFi Anda berhak mendapat penghasilan pasif dari token lain, semakin banyak TPF yang Anda miliki, semakin banyak yang Anda peroleh!",
     back: "Kembali",
-    claimRewards: "Klaim Hadiah",
+    claim: "Klaim",
     claiming: "Mengklaim...",
-    connectWalletFirst: "Hubungkan Dompet Terlebih Dahulu",
-    claimSuccess: "Hadiah Diklaim!",
+    soon: "Segera",
+    claimSuccess: "Klaim Berhasil!",
     claimFailed: "Klaim Gagal",
+    connectWalletFirst: "Hubungkan dompet Anda terlebih dahulu",
+    pendingRewards: "Hadiah Tertunda",
     dismiss: "Tutup",
-    noRewards: "Tidak ada hadiah tersedia",
-    stakingDescription: "Simpan token TPF di dompet Anda untuk mendapatkan hadiah dari kontrak staking ini.",
-    totalClaimed: "Total Diklaim",
-    currentAPY: "APY Saat Ini",
-    stakingDuration: "Durasi Staking",
-    rewardCalculator: "Kalkulator Hadiah",
-    enterAmount: "Masukkan jumlah TPF",
-    estimatedRewards: "Perkiraan hadiah harian",
-    calculate: "Hitung",
   },
 }
 
@@ -101,52 +77,31 @@ const STAKING_CONTRACTS = {
   WDD: {
     name: "Drachma",
     symbol: "WDD",
-    contractAddress: "0x123...", // Replace with actual contract address
-    rewardTokenAddress: "0xEdE54d9c024ee80C85ec0a75eD2d8774c7Fbac9B",
-    logo: "/images/drachma-token.png",
-    color: "#FFD700",
-    apy: "12.5%",
+    address: "0xc4F3ae925E647aa2623200901a43BF65e8542c23",
+    image: "/images/drachma-token.png",
   },
   TPT: {
     name: "TradePulse Token",
     symbol: "TPT",
-    contractAddress: "0x456...", // Replace with actual contract address
-    rewardTokenAddress: "0x868D08798F91ba9D6AC126148fdE8bBdfb6354D5",
-    logo: "/images/logo-tpf.png",
-    color: "#FF6B35",
-    apy: "15.2%",
+    address: "0x4c1f9CF3c5742c73a00864a32048988b87121e2f",
+    image: "/images/logo-tpf.png",
   },
   RFX: {
     name: "Roflex MemeToken",
     symbol: "RFX",
-    contractAddress: "0x789...", // Replace with actual contract address
-    rewardTokenAddress: "0xABC...", // Replace with actual token address
-    logo: "/images/roflex-token.png",
-    color: "#00FF00",
-    apy: "8.7%",
+    address: "0x9FA697Ece25F4e2A94d7dEb99418B2b0c4b96FE2",
+    image: "/images/roflex-token.png",
   },
   RCC: {
     name: "RoseChana Coin",
     symbol: "RCC",
-    contractAddress: "0xA8785DABbc9902173b819f488e5A6A0Dbc45A9dF",
-    rewardTokenAddress: "0xA8785DABbc9902173b819f488e5A6A0Dbc45A9dF",
-    logo: "/images/rosechana-coin.png",
-    color: "#FF69B4",
-    apy: "10.0%",
-  },
-  EDEN: {
-    name: "Project Eden Token",
-    symbol: "EDEN",
-    contractAddress: "0x5B9EE20cef5540264Be906eDD4624F685292a6f1",
-    rewardTokenAddress: "0x5B9EE20cef5540264Be906eDD4624F685292a6f1",
-    logo: "/images/eden-logo.png",
-    color: "#22C55E",
-    apy: "0.01%",
+    address: "0xA8785DABbc9902173b819f488e5A6A0Dbc45A9dF",
+    image: "/images/rosechana-coin.png",
   },
 }
 
-// Soft Staking ABI
-const SOFT_STAKING_ABI = [
+// Staking contract ABI (updated with the provided ABI)
+const STAKING_ABI = [
   {
     inputs: [
       { internalType: "address", name: "_tpfToken", type: "address" },
@@ -258,15 +213,20 @@ const SOFT_STAKING_ABI = [
   },
 ] as const
 
+interface StakingInfo {
+  pendingRewards: string
+  canClaim: boolean
+}
+
 export default function FiStakingPage() {
   const router = useRouter()
   const { user, isAuthenticated } = useMiniKit()
   const [currentLang, setCurrentLang] = useState<SupportedLanguage>("en")
-  const [claimingStates, setClaimingStates] = useState<Record<string, boolean>>({})
+  const [stakingData, setStakingData] = useState<Record<string, StakingInfo>>({})
+  const [loading, setLoading] = useState(true)
+  const [claiming, setClaiming] = useState<string | null>(null)
   const [claimSuccess, setClaimSuccess] = useState<string | null>(null)
   const [claimError, setClaimError] = useState<string | null>(null)
-  const [calculatorAmount, setCalculatorAmount] = useState("")
-  const [estimatedRewards, setEstimatedRewards] = useState<Record<string, string>>({})
 
   // Load saved language
   useEffect(() => {
@@ -279,81 +239,70 @@ export default function FiStakingPage() {
   // Get translations for current language
   const t = translations[currentLang]
 
-  const handleBack = () => {
-    try {
-      console.log("Attempting to navigate back...")
-      if (typeof window !== "undefined" && window.history.length > 1) {
-        router.back()
-      } else {
-        router.push("/")
-      }
-    } catch (error) {
-      console.error("Navigation error:", error)
-      router.push("/")
-    }
-  }
+  const handleClaim = async (tokenKey: string) => {
+    const contract = STAKING_CONTRACTS[tokenKey as keyof typeof STAKING_CONTRACTS]
+    if (!contract.address || !user?.walletAddress) return
 
-  const handleClaimRewards = async (contractKey: string) => {
-    if (!isAuthenticated || !user?.walletAddress) {
-      setClaimError(t.connectWalletFirst)
-      return
-    }
-
-    const contract = STAKING_CONTRACTS[contractKey as keyof typeof STAKING_CONTRACTS]
-    if (!contract) return
-
-    setClaimingStates((prev) => ({ ...prev, [contractKey]: true }))
+    setClaiming(tokenKey)
     setClaimError(null)
 
     try {
-      console.log(`🚀 Claiming rewards for ${contract.name}...`)
+      console.log(`🎁 Claiming ${contract.symbol} rewards...`)
 
-      const result = await MiniKit.commandsAsync.sendTransaction({
+      if (!MiniKit.isInstalled()) {
+        throw new Error("MiniKit not available. Please use World App.")
+      }
+
+      const { finalPayload } = await MiniKit.commandsAsync.sendTransaction({
         transaction: [
           {
-            address: contract.contractAddress,
-            abi: SOFT_STAKING_ABI,
+            address: contract.address,
+            abi: STAKING_ABI,
             functionName: "claimRewards",
             args: [],
           },
         ],
       })
 
-      if (result.finalTxHash) {
-        console.log(`✅ Claim successful for ${contract.name}:`, result.finalTxHash)
-        setClaimSuccess(`${contract.name} ${t.claimSuccess}`)
-        setTimeout(() => setClaimSuccess(null), 3000)
-      } else {
-        throw new Error("Transaction failed")
+      console.log("Final payload:", finalPayload)
+
+      if (finalPayload.status === "error") {
+        throw new Error(`Transaction failed: ${finalPayload.message || "Unknown error"}`)
+      }
+
+      if (finalPayload.status === "success") {
+        console.log(`✅ ${contract.symbol} rewards claimed successfully!`)
+        setClaimSuccess(tokenKey)
+
+        // Reset success message after 3 seconds
+        setTimeout(() => {
+          setClaimSuccess(null)
+        }, 3000)
       }
     } catch (error) {
-      console.error(`❌ Claim failed for ${contract.name}:`, error)
-      setClaimError(`${contract.name} ${t.claimFailed}`)
+      console.error(`❌ ${contract.symbol} claim failed:`, error)
+      let errorMessage = t.claimFailed
+
+      if (error instanceof Error) {
+        errorMessage = error.message
+      }
+
+      if (errorMessage.includes("simulation_failed")) {
+        errorMessage = "Transaction simulation failed. You may not have enough tokens or rewards to claim."
+      } else if (errorMessage.includes("user_rejected")) {
+        errorMessage = "Transaction was rejected by user."
+      }
+
+      setClaimError(errorMessage)
     } finally {
-      setClaimingStates((prev) => ({ ...prev, [contractKey]: false }))
+      setClaiming(null)
     }
-  }
-
-  const calculateRewards = () => {
-    if (!calculatorAmount || isNaN(Number(calculatorAmount))) return
-
-    const amount = Number(calculatorAmount)
-    const newEstimatedRewards: Record<string, string> = {}
-
-    Object.entries(STAKING_CONTRACTS).forEach(([key, contract]) => {
-      const apyPercent = Number.parseFloat(contract.apy.replace("%", ""))
-      const dailyReward = (amount * apyPercent) / 100 / 365
-      newEstimatedRewards[key] = dailyReward.toFixed(6)
-    })
-
-    setEstimatedRewards(newEstimatedRewards)
   }
 
   return (
     <main className="min-h-screen bg-black relative overflow-hidden flex flex-col items-center pt-6 pb-8">
-      {/* Same animated background as other pages */}
+      {/* Background Effects */}
       <div className="absolute inset-0">
-        {/* Horizontal Moving Lines */}
         {[...Array(12)].map((_, i) => (
           <div
             key={`h-line-${i}`}
@@ -367,8 +316,6 @@ export default function FiStakingPage() {
             }}
           />
         ))}
-
-        {/* Vertical Moving Lines */}
         {[...Array(10)].map((_, i) => (
           <div
             key={`v-line-${i}`}
@@ -382,8 +329,6 @@ export default function FiStakingPage() {
             }}
           />
         ))}
-
-        {/* Diagonal Moving Lines */}
         {[...Array(8)].map((_, i) => (
           <div
             key={`d-line-${i}`}
@@ -399,7 +344,6 @@ export default function FiStakingPage() {
         ))}
       </div>
 
-      {/* Static Grid for Reference */}
       <div
         className="absolute inset-0 opacity-10"
         style={{
@@ -411,7 +355,6 @@ export default function FiStakingPage() {
         }}
       />
 
-      {/* Central Glow Effect */}
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="w-96 h-96 bg-white/5 rounded-full blur-3xl animate-pulse" />
         <div
@@ -428,7 +371,6 @@ export default function FiStakingPage() {
         />
       </div>
 
-      {/* Rotating Rings */}
       <div className="absolute inset-0 flex items-center justify-center">
         <div
           className="w-72 h-72 border border-white/10 rounded-full animate-spin"
@@ -444,7 +386,6 @@ export default function FiStakingPage() {
         />
       </div>
 
-      {/* Enhanced Floating Particles */}
       {[...Array(25)].map((_, i) => (
         <div
           key={`particle-${i}`}
@@ -462,7 +403,6 @@ export default function FiStakingPage() {
         />
       ))}
 
-      {/* Energy Beams */}
       {[...Array(8)].map((_, i) => (
         <div
           key={`beam-${i}`}
@@ -481,37 +421,17 @@ export default function FiStakingPage() {
 
       <style jsx>{`
         @keyframes moveRight {
-          0% {
-            transform: translateX(-100%);
-            opacity: 0;
-          }
-          10% {
-            opacity: 1;
-          }
-          90% {
-            opacity: 1;
-          }
-          100% {
-            transform: translateX(100vw);
-            opacity: 0;
-          }
+          0% { transform: translateX(-100%); opacity: 0; }
+          10% { opacity: 1; }
+          90% { opacity: 1; }
+          100% { transform: translateX(100vw); opacity: 0; }
         }
-
+        
         @keyframes moveDown {
-          0% {
-            transform: translateY(-100%);
-            opacity: 0;
-          }
-          10% {
-            opacity: 1;
-          }
-          90% {
-            opacity: 1;
-          }
-          100% {
-            transform: translateY(100vh);
-            opacity: 0;
-          }
+          0% { transform: translateY(-100%); opacity: 0; }
+          10% { opacity: 1; }
+          90% { opacity: 1; }
+          100% { transform: translateY(100vh); opacity: 0; }
         }
       `}</style>
 
@@ -523,184 +443,150 @@ export default function FiStakingPage() {
         className="absolute top-6 left-4 z-20"
       >
         <button
-          onClick={handleBack}
-          className="flex items-center space-x-2 text-white/80 hover:text-white transition-colors"
+          onClick={() => router.back()}
+          className="flex items-center gap-2 px-3 py-2 text-gray-300 hover:text-white transition-colors"
         >
-          <div className="w-10 h-10 bg-black/20 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center hover:bg-white/10 transition-all duration-300">
-            <ArrowLeft className="w-5 h-5" />
-          </div>
-          <span className="text-sm font-medium">{t.back}</span>
+          <ArrowLeft className="w-4 h-4" />
+          <span className="text-sm">{t.back}</span>
         </button>
       </motion.div>
 
-      {/* Title */}
       <motion.div
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="text-center mb-8 relative z-10"
+        className="text-center mb-6 relative z-10"
       >
-        <h1 className="text-4xl font-bold tracking-tighter flex items-center justify-center mb-2">
-          <Gift className="w-8 h-8 mr-3 text-green-400" />
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-200 via-green-400 to-emerald-400">
+        <h1 className="text-3xl font-bold tracking-tighter flex items-center justify-center">
+          <TrendingUp className="w-6 h-6 mr-2 text-purple-400" />
+          <span className="bg-clip-text text-transparent bg-gradient-to-r from-gray-200 via-white to-gray-300">
             {t.title}
           </span>
         </h1>
-        <p className="text-gray-400 text-sm leading-relaxed px-4">{t.subtitle}</p>
+        <p className="text-gray-400 text-sm mt-1 leading-relaxed">{t.subtitle}</p>
       </motion.div>
 
-      {/* Main Content */}
       <div className="w-full max-w-md px-4 relative z-10 space-y-4">
-        {/* Description */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 backdrop-blur-xl border border-blue-500/30 rounded-xl p-4 shadow-2xl"
-        >
-          <p className="text-blue-200 text-sm leading-relaxed">{t.stakingDescription}</p>
-        </motion.div>
-
-        {/* Reward Calculator */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-xl border border-purple-500/30 rounded-xl p-4 shadow-2xl"
-        >
-          <h3 className="text-purple-300 font-semibold text-sm mb-3 flex items-center">
-            <Clock className="w-4 h-4 mr-2" />
-            {t.rewardCalculator}
-          </h3>
-          <div className="space-y-3">
-            <div>
-              <input
-                type="number"
-                placeholder={t.enterAmount}
-                value={calculatorAmount}
-                onChange={(e) => setCalculatorAmount(e.target.value)}
-                className="w-full bg-purple-900/30 border border-purple-500/40 rounded-lg px-3 py-2 text-white text-sm placeholder-purple-300/60 focus:outline-none focus:border-purple-400"
-              />
-            </div>
-            <button
-              onClick={calculateRewards}
-              className="w-full bg-purple-600/30 hover:bg-purple-600/40 border border-purple-500/40 rounded-lg px-4 py-2 text-purple-300 text-sm font-medium transition-colors"
-            >
-              {t.calculate}
-            </button>
-          </div>
-        </motion.div>
-
-        {/* Staking Contracts */}
-        <div className="space-y-3">
-          {Object.entries(STAKING_CONTRACTS).map(([key, contract], index) => (
+        {/* Success Message */}
+        <AnimatePresence>
+          {claimSuccess && (
             <motion.div
-              key={key}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 + index * 0.1 }}
-              className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-xl border border-white/10 rounded-xl p-4 shadow-2xl"
+              exit={{ opacity: 0, y: -20 }}
+              className="bg-green-500/10 border border-green-500/30 rounded-lg p-4"
             >
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-full overflow-hidden bg-white flex items-center justify-center">
-                    <Image
-                      src={contract.logo || "/placeholder.svg"}
-                      alt={contract.name}
-                      width={40}
-                      height={40}
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                  <div>
-                    <h3 className="text-white font-semibold text-sm">{contract.name}</h3>
-                    <p className="text-gray-400 text-xs">{contract.symbol}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-green-400 font-semibold text-sm">{contract.apy}</div>
-                  <div className="text-gray-400 text-xs">{t.currentAPY}</div>
+              <div className="flex items-start space-x-3">
+                <CheckCircle className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-green-400 text-sm font-medium mb-1">{t.claimSuccess}</p>
+                  <p className="text-green-300 text-xs">
+                    {STAKING_CONTRACTS[claimSuccess as keyof typeof STAKING_CONTRACTS]?.symbol} rewards claimed
+                    successfully
+                  </p>
                 </div>
               </div>
-
-              {estimatedRewards[key] && (
-                <div className="mb-3 p-2 bg-purple-500/20 rounded-lg">
-                  <div className="text-purple-300 text-xs">{t.estimatedRewards}</div>
-                  <div className="text-purple-200 font-semibold text-sm">
-                    {estimatedRewards[key]} {contract.symbol}
-                  </div>
-                </div>
-              )}
-
-              <button
-                onClick={() => handleClaimRewards(key)}
-                disabled={claimingStates[key] || !isAuthenticated}
-                className={`w-full rounded-lg px-4 py-2 text-sm font-medium transition-colors flex items-center justify-center space-x-2 ${
-                  !isAuthenticated
-                    ? "bg-gray-600/30 text-gray-400 cursor-not-allowed"
-                    : claimingStates[key]
-                      ? "bg-yellow-600/30 text-yellow-300 cursor-not-allowed"
-                      : "bg-green-600/30 hover:bg-green-600/40 text-green-300 border border-green-500/40"
-                }`}
-              >
-                {claimingStates[key] ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>{t.claiming}</span>
-                  </>
-                ) : !isAuthenticated ? (
-                  <span>{t.connectWalletFirst}</span>
-                ) : (
-                  <>
-                    <Gift className="w-4 h-4" />
-                    <span>{t.claimRewards}</span>
-                  </>
-                )}
-              </button>
             </motion.div>
-          ))}
-        </div>
+          )}
+        </AnimatePresence>
+
+        {/* Error Message */}
+        <AnimatePresence>
+          {claimError && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="bg-red-500/10 border border-red-500/30 rounded-lg p-4"
+            >
+              <div className="flex items-start space-x-3">
+                <div className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0">⚠️</div>
+                <div>
+                  <p className="text-red-400 text-sm font-medium mb-1">{t.claimFailed}</p>
+                  <p className="text-red-300 text-xs">{claimError}</p>
+                  <button onClick={() => setClaimError(null)} className="mt-2 text-red-400 text-xs hover:text-red-300">
+                    {t.dismiss}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {!isAuthenticated ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-6 text-center"
+          >
+            <p className="text-blue-400 text-sm">{t.connectWalletFirst}</p>
+          </motion.div>
+        ) : (
+          <>
+            {/* Staking Tokens */}
+            {Object.entries(STAKING_CONTRACTS).map(([key, contract], index) => {
+              const isClaimingThis = claiming === key
+              const isRCC = key === "RCC"
+
+              return (
+                <motion.div
+                  key={key}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.1 }}
+                  className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-lg p-4"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <Image
+                        src={contract.image || "/placeholder.svg"}
+                        alt={contract.name}
+                        width={40}
+                        height={40}
+                        className="w-10 h-10 rounded-full"
+                      />
+                      <div>
+                        <h3 className="text-white font-medium text-lg">{contract.symbol}</h3>
+                        <p className="text-gray-400 text-sm">{contract.name}</p>
+                      </div>
+                    </div>
+
+                    {/* Claim Button */}
+                    <button
+                      onClick={() => !isRCC && handleClaim(key)}
+                      disabled={isClaimingThis || isRCC}
+                      className={`py-2 px-6 rounded-lg font-medium text-sm transition-all duration-300 flex items-center justify-center space-x-2 ${
+                        isRCC
+                          ? "bg-gray-600/50 text-gray-400 cursor-not-allowed"
+                          : isClaimingThis
+                            ? "bg-gray-600/50 text-gray-400 cursor-not-allowed"
+                            : "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+                      }`}
+                    >
+                      {isRCC ? (
+                        <>
+                          <Clock className="w-4 h-4" />
+                          <span>{t.soon}</span>
+                        </>
+                      ) : isClaimingThis ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>{t.claiming}</span>
+                        </>
+                      ) : (
+                        <>
+                          <Gift className="w-4 h-4" />
+                          <span>{t.claim}</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </motion.div>
+              )
+            })}
+          </>
+        )}
       </div>
-
-      {/* Success/Error Messages */}
-      <AnimatePresence>
-        {claimSuccess && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8, y: 50 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.8, y: 50 }}
-            className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50"
-          >
-            <div className="bg-green-600/90 backdrop-blur-xl border border-green-500/50 rounded-xl p-4 shadow-2xl flex items-center space-x-3">
-              <CheckCircle className="w-5 h-5 text-green-300 flex-shrink-0" />
-              <span className="text-green-100 text-sm font-medium">{claimSuccess}</span>
-              <button
-                onClick={() => setClaimSuccess(null)}
-                className="text-green-300 hover:text-green-100 transition-colors"
-              >
-                <span className="text-xs">{t.dismiss}</span>
-              </button>
-            </div>
-          </motion.div>
-        )}
-
-        {claimError && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8, y: 50 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.8, y: 50 }}
-            className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50"
-          >
-            <div className="bg-red-600/90 backdrop-blur-xl border border-red-500/50 rounded-xl p-4 shadow-2xl flex items-center space-x-3">
-              <AlertCircle className="w-5 h-5 text-red-300 flex-shrink-0" />
-              <span className="text-red-100 text-sm font-medium">{claimError}</span>
-              <button onClick={() => setClaimError(null)} className="text-red-300 hover:text-red-100 transition-colors">
-                <span className="text-xs">{t.dismiss}</span>
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </main>
   )
 }
