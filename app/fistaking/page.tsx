@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ArrowLeft, TrendingUp, Gift, Loader2, CheckCircle, Clock } from "lucide-react"
+import { ArrowLeft, TrendingUp, Gift, Loader2, CheckCircle } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { MiniKit } from "@worldcoin/minikit-js"
@@ -674,7 +674,6 @@ export default function FiStakingPage() {
             {/* Staking Tokens */}
             {Object.entries(STAKING_CONTRACTS).map(([key, contract], index) => {
               const isClaimingThis = claiming === key
-              const isRCC = key === "RCC"
 
               return (
                 <motion.div
@@ -701,22 +700,15 @@ export default function FiStakingPage() {
 
                     {/* Claim Button */}
                     <button
-                      onClick={() => !isRCC && handleClaim(key)}
-                      disabled={isClaimingThis || isRCC}
+                      onClick={() => handleClaim(key)}
+                      disabled={isClaimingThis}
                       className={`py-2 px-6 rounded-lg font-medium text-sm transition-all duration-300 flex items-center justify-center space-x-2 ${
-                        isRCC
+                        isClaimingThis
                           ? "bg-gray-600/50 text-gray-400 cursor-not-allowed"
-                          : isClaimingThis
-                            ? "bg-gray-600/50 text-gray-400 cursor-not-allowed"
-                            : "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+                          : "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
                       }`}
                     >
-                      {isRCC ? (
-                        <>
-                          <Clock className="w-4 h-4" />
-                          <span>{t.soon}</span>
-                        </>
-                      ) : isClaimingThis ? (
+                      {isClaimingThis ? (
                         <>
                           <Loader2 className="w-4 h-4 animate-spin" />
                           <span>{t.claiming}</span>
