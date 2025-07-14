@@ -2,81 +2,34 @@
 
 import { getRealQuote, TOKENS } from "./swap-service"
 
-export interface PricePoint {
-  timestamp: number
-  price: number
-}
-
-export interface PriceData {
-  timestamp: number
-  price: number
-  volume?: number
-}
-
-export interface TokenPrice {
-  symbol: string
-  currentPrice: number
-  changeAmount24h: number
-  changePercent24h: number
-  priceHistory: Record<string, PricePoint[]>
-  lastUpdated: number
-}
-
-export interface TokenPriceInfo {
-  symbol: string
-  currentPrice: number
-  priceChange24h: number
-  priceChangePercentage24h: number
-  volume24h: number
-  marketCap: number
-  lastUpdated: number
-}
-
-// Price data cache with different intervals
-interface TokenPriceCache {
-  [tokenSymbol: string]: {
-    [interval: string]: PriceData[]
-  }
+// Mock price data for demonstration
+const MOCK_PRICES: Record<string, number> = {
+  WLD: 2.45,
+  TPF: 0.0012,
+  USDC: 1.0,
+  WDD: 0.85,
 }
 
 // Time intervals in milliseconds
 export const TIME_INTERVALS = {
-  "1m": 60 * 1000,
-  "5m": 5 * 60 * 1000,
-  "15m": 15 * 60 * 1000,
-  "1h": 60 * 60 * 1000,
-  "4h": 4 * 60 * 60 * 1000,
-  "8h": 8 * 60 * 60 * 1000,
-  "1d": 24 * 60 * 60 * 1000,
-}
+  "1M": 60 * 1000,
+  "5M": 5 * 60 * 1000,
+  "15M": 15 * 60 * 1000,
+  "1H": 60 * 60 * 1000,
+  "4H": 4 * 60 * 60 * 1000,
+  "8H": 8 * 60 * 60 * 1000,
+  "1D": 24 * 60 * 60 * 1000,
+} as const
 
-// Cache for storing price data
-let priceCache: TokenPriceCache = {}
+export type TimeInterval = keyof typeof TIME_INTERVALS
 
-// Load cache from localStorage
-function loadCacheFromStorage() {
-  try {
-    const stored = localStorage.getItem("tokenPriceCache")
-    if (stored) {
-      priceCache = JSON.parse(stored)
-    }
-  } catch (error) {
-    console.warn("Failed to load price cache from storage:", error)
-    priceCache = {}
-  }
-}
+// Cache for price data by token and interval
+const priceCache = new Map<string, Map<TimeInterval, Array<{ time: number; price: number }>>>()
 
-// Save cache to localStorage
-function saveCacheToStorage() {
-  try {
-    localStorage.setItem("tokenPriceCache", JSON.stringify(priceCache))
-  } catch (error) {
-    console.warn("Failed to save price cache to storage:", error)
-  }
-}
-
-// Initialize cache
-loadCacheFromStorage()
+// Initialize cache for each token
+TOKENS.forEach((token) => {
+  priceCache.set(token.symbol, new Map())
+})
 
 /**
  * Get real-time token price using Holdstation SDK
@@ -91,7 +44,7 @@ async function getRealTokenPrice(tokenSymbol: string): Promise<number> {
     const token = TOKENS.find((t) => t.symbol === tokenSymbol)
     if (!token) {
       console.warn(`Token ${tokenSymbol} not found in TOKENS list`)
-      return getBasePriceForToken(tokenSymbol)
+      return MOCK_PRICES[tokenSymbol] || 1
     }
 
     console.log(`🔄 Getting real price for ${tokenSymbol} via Holdstation SDK`)
@@ -101,32 +54,39 @@ async function getRealTokenPrice(tokenSymbol: string): Promise<number> {
     const price = Number.parseFloat(outputAmount)
 
     console.log(`✅ Real price for ${tokenSymbol}: $${price}`)
-    return price > 0 ? price : getBasePriceForToken(tokenSymbol)
+    return price > 0 ? price : MOCK_PRICES[tokenSymbol] || 1
   } catch (error) {
     console.error(`❌ Error getting real price for ${tokenSymbol}:`, error)
-    return getBasePriceForToken(tokenSymbol)
+    return MOCK_PRICES[tokenSymbol] || 1
   }
 }
 
 /**
- * Generate realistic price data for a token
+ * Generate realistic price data for a given interval
  */
-function generatePriceData(symbol: string, interval: string, count: number): PriceData[] {
-  const basePrice = getBasePriceForToken(symbol)
-  const intervalMs = TIME_INTERVALS[interval as keyof typeof TIME_INTERVALS]
+function generatePriceData(
+  symbol: string,
+  interval: TimeInterval,
+  points = 50,
+): Array<{ time: number; price: number }> {
+  const basePrice = MOCK_PRICES[symbol] || 1
   const now = Date.now()
-  const data: PriceData[] = []
+  const intervalMs = TIME_INTERVALS[interval]
+  const data: Array<{ time: number; price: number }> = []
 
-  for (let i = count - 1; i >= 0; i--) {
-    const timestamp = now - i * intervalMs
-    const volatility = getVolatilityForToken(symbol)
-    const randomChange = (Math.random() - 0.5) * volatility
-    const price = basePrice * (1 + randomChange + Math.sin(i * 0.1) * 0.02)
+  let currentPrice = basePrice
+
+  for (let i = points - 1; i >= 0; i--) {
+    const time = now - i * intervalMs
+
+    // Add some realistic price movement
+    const volatility = symbol === "USDC" ? 0.001 : 0.02 // USDC is more stable
+    const change = (Math.random() - 0.5) * volatility
+    currentPrice = Math.max(currentPrice * (1 + change), 0.0001)
 
     data.push({
-      timestamp,
-      price: Math.max(0.001, price), // Ensure price is never negative or zero
-      volume: Math.random() * 1000000 + 100000,
+      time,
+      price: Number(currentPrice.toFixed(symbol === "USDC" ? 4 : 6)),
     })
   }
 
@@ -134,145 +94,124 @@ function generatePriceData(symbol: string, interval: string, count: number): Pri
 }
 
 /**
- * Get base price for different tokens
+ * Get cached price data or generate new data
  */
-function getBasePriceForToken(symbol: string): number {
-  const basePrices: { [key: string]: number } = {
-    WLD: 2.45,
-    TPF: 0.0234,
-    USDC: 1.0,
-    WDD: 0.156,
-    TPT: 0.0089,
-  }
-  return basePrices[symbol] || 1.0
-}
+function getCachedPriceData(symbol: string, interval: TimeInterval): Array<{ time: number; price: number }> {
+  const tokenCache = priceCache.get(symbol)
+  if (!tokenCache) return []
 
-/**
- * Get volatility factor for different tokens
- */
-function getVolatilityForToken(symbol: string): number {
-  const volatilities: { [key: string]: number } = {
-    WLD: 0.05, // 5% volatility
-    TPF: 0.08, // 8% volatility
-    USDC: 0.001, // 0.1% volatility (stable coin)
-    WDD: 0.12, // 12% volatility
-    TPT: 0.15, // 15% volatility
-  }
-  return volatilities[symbol] || 0.05
-}
-
-/**
- * Get data points count for different intervals
- */
-function getDataPointsForInterval(interval: string): number {
-  const dataPoints: { [key: string]: number } = {
-    "1m": 60, // 1 hour of 1-minute data
-    "5m": 72, // 6 hours of 5-minute data
-    "15m": 96, // 24 hours of 15-minute data
-    "1h": 168, // 7 days of hourly data
-    "4h": 180, // 30 days of 4-hour data
-    "8h": 90, // 30 days of 8-hour data
-    "1d": 365, // 1 year of daily data
-  }
-  return dataPoints[interval] || 100
-}
-
-/**
- * Get or generate price data for a token and interval
- */
-export function getPriceData(symbol: string, interval = "1h"): PriceData[] {
-  // Initialize token cache if it doesn't exist
-  if (!priceCache[symbol]) {
-    priceCache[symbol] = {}
+  let intervalData = tokenCache.get(interval)
+  if (!intervalData || intervalData.length === 0) {
+    intervalData = generatePriceData(symbol, interval)
+    tokenCache.set(interval, intervalData)
   }
 
-  // Initialize interval cache if it doesn't exist
-  if (!priceCache[symbol][interval]) {
-    const dataPoints = getDataPointsForInterval(interval)
-    priceCache[symbol][interval] = generatePriceData(symbol, interval, dataPoints)
-    saveCacheToStorage()
-  }
-
-  return priceCache[symbol][interval]
+  return intervalData
 }
 
 /**
  * Add new price point to existing data
  */
-export function addPricePoint(symbol: string, interval: string, price: number) {
-  const data = getPriceData(symbol, interval)
+function addNewPricePoint(symbol: string, interval: TimeInterval): void {
+  const tokenCache = priceCache.get(symbol)
+  if (!tokenCache) return
+
+  const intervalData = tokenCache.get(interval) || []
+  if (intervalData.length === 0) return
+
+  const lastPrice = intervalData[intervalData.length - 1]?.price || MOCK_PRICES[symbol] || 1
   const now = Date.now()
-  const intervalMs = TIME_INTERVALS[interval as keyof typeof TIME_INTERVALS]
 
-  // Check if we need to add a new point based on interval
-  const lastPoint = data[data.length - 1]
-  if (!lastPoint || now - lastPoint.timestamp >= intervalMs) {
-    const newPoint: PriceData = {
-      timestamp: now,
-      price,
-      volume: Math.random() * 1000000 + 100000,
-    }
+  // Add some realistic price movement
+  const volatility = symbol === "USDC" ? 0.001 : 0.015
+  const change = (Math.random() - 0.5) * volatility
+  const newPrice = Math.max(lastPrice * (1 + change), 0.0001)
 
-    data.push(newPoint)
+  intervalData.push({
+    time: now,
+    price: Number(newPrice.toFixed(symbol === "USDC" ? 4 : 6)),
+  })
 
-    // Keep only the required number of data points
-    const maxPoints = getDataPointsForInterval(interval)
-    if (data.length > maxPoints) {
-      data.splice(0, data.length - maxPoints)
-    }
+  // Keep only last 100 points to prevent memory issues
+  if (intervalData.length > 100) {
+    intervalData.shift()
+  }
 
-    saveCacheToStorage()
+  tokenCache.set(interval, intervalData)
+}
+
+/**
+ * Get current token price
+ */
+export async function getTokenPrice(symbol: string): Promise<number> {
+  try {
+    // In a real app, this would fetch from an API
+    const basePrice = MOCK_PRICES[symbol] || 1
+
+    // Add small random variation to simulate real-time price changes
+    const variation = (Math.random() - 0.5) * 0.01
+    const currentPrice = basePrice * (1 + variation)
+
+    return Number(currentPrice.toFixed(symbol === "USDC" ? 4 : 6))
+  } catch (error) {
+    console.error(`Error fetching price for ${symbol}:`, error)
+    return MOCK_PRICES[symbol] || 1
   }
 }
 
 /**
- * Get current price for a token
+ * Get price history for a specific interval
  */
-export function getCurrentPrice(symbol: string): number {
-  const data = getPriceData(symbol, "1m")
-  return data[data.length - 1]?.price || getBasePriceForToken(symbol)
+export async function getPriceHistory(
+  symbol: string,
+  interval: TimeInterval = "1H",
+): Promise<Array<{ time: number; price: number }>> {
+  try {
+    console.log(`📊 Getting price history for ${symbol} (${interval})`)
+
+    // Get cached data or generate new data
+    let data = getCachedPriceData(symbol, interval)
+
+    // Add a new point if enough time has passed
+    const now = Date.now()
+    const lastPoint = data[data.length - 1]
+    const intervalMs = TIME_INTERVALS[interval]
+
+    if (!lastPoint || now - lastPoint.time >= intervalMs) {
+      addNewPricePoint(symbol, interval)
+      data = getCachedPriceData(symbol, interval)
+    }
+
+    console.log(`✅ Retrieved ${data.length} price points for ${symbol}`)
+    return data
+  } catch (error) {
+    console.error(`Error fetching price history for ${symbol}:`, error)
+    return []
+  }
 }
 
 /**
  * Get price change percentage for a specific interval
  */
-export function getPriceChange(symbol: string, interval = "1h"): number {
-  const data = getPriceData(symbol, interval)
-  if (data.length < 2) return 0
+export async function getPriceChange(symbol: string, interval: TimeInterval = "1H"): Promise<number> {
+  try {
+    const data = await getPriceHistory(symbol, interval)
 
-  const currentPrice = data[data.length - 1].price
-  const previousPrice = data[0].price
+    if (data.length < 2) return 0
 
-  return ((currentPrice - previousPrice) / previousPrice) * 100
+    const firstPrice = data[0].price
+    const lastPrice = data[data.length - 1].price
+
+    const changePercent = ((lastPrice - firstPrice) / firstPrice) * 100
+    return Number(changePercent.toFixed(2))
+  } catch (error) {
+    console.error(`Error calculating price change for ${symbol}:`, error)
+    return 0
+  }
 }
 
 /**
- * Update prices for all tokens (simulated real-time updates)
- */
-export function updateAllPrices() {
-  TOKENS.forEach((token) => {
-    const currentPrice = getCurrentPrice(token.symbol)
-    const volatility = getVolatilityForToken(token.symbol)
-    const change = (Math.random() - 0.5) * volatility * 0.1 // Smaller changes for updates
-    const newPrice = Math.max(0.001, currentPrice * (1 + change))
-
-    // Update 1-minute data (most frequent)
-    addPricePoint(token.symbol, "1m", newPrice)
-
-    // Occasionally update other intervals
-    if (Math.random() < 0.1) {
-      // 10% chance
-      addPricePoint(token.symbol, "5m", newPrice)
-    }
-    if (Math.random() < 0.05) {
-      // 5% chance
-      addPricePoint(token.symbol, "15m", newPrice)
-    }
-  })
-}
-
-/**
- * Format price based on token
+ * Format price based on token type
  */
 export function formatPrice(price: number, symbol: string): string {
   if (symbol === "USDC") {
@@ -281,82 +220,92 @@ export function formatPrice(price: number, symbol: string): string {
 
   if (price < 0.01) {
     return `$${price.toFixed(6)}`
-  } else if (price < 1) {
-    return `$${price.toFixed(4)}`
-  } else {
-    return `$${price.toFixed(2)}`
   }
+
+  if (price < 1) {
+    return `$${price.toFixed(4)}`
+  }
+
+  return `$${price.toFixed(2)}`
 }
 
 /**
- * Format timestamp based on interval
+ * Format time based on interval
  */
-export function formatTimestamp(timestamp: number, interval: string): string {
+export function formatTime(timestamp: number, interval: TimeInterval): string {
   const date = new Date(timestamp)
 
   switch (interval) {
-    case "1m":
-    case "5m":
-    case "15m":
+    case "1M":
+    case "5M":
+    case "15M":
       return date.toLocaleTimeString("en-US", {
         hour: "2-digit",
         minute: "2-digit",
-        hour12: false,
+        second: "2-digit",
       })
-    case "1h":
-    case "4h":
-    case "8h":
-      return date.toLocaleString("en-US", {
-        month: "short",
-        day: "numeric",
+    case "1H":
+    case "4H":
+      return date.toLocaleTimeString("en-US", {
         hour: "2-digit",
-        hour12: false,
+        minute: "2-digit",
       })
-    case "1d":
+    case "8H":
+    case "1D":
       return date.toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
+        hour: "2-digit",
       })
     default:
-      return date.toLocaleTimeString()
+      return date.toLocaleString("en-US")
   }
 }
 
 /**
- * Clear cache for a specific token or all tokens
+ * Clear cache for a specific token (useful for testing)
  */
-export function clearPriceCache(symbol?: string) {
+export function clearPriceCache(symbol?: string): void {
   if (symbol) {
-    delete priceCache[symbol]
+    const tokenCache = priceCache.get(symbol)
+    if (tokenCache) {
+      tokenCache.clear()
+    }
   } else {
-    priceCache = {}
+    priceCache.clear()
+    // Reinitialize cache
+    TOKENS.forEach((token) => {
+      priceCache.set(token.symbol, new Map())
+    })
   }
-  saveCacheToStorage()
 }
 
-/**
- * Start automatic price updates
- */
+// Auto-update prices for short intervals
 let updateInterval: NodeJS.Timeout | null = null
 
-export function startPriceUpdates() {
+export function startPriceUpdates(): void {
   if (updateInterval) return
 
-  // Update prices every 30 seconds
-  updateInterval = setInterval(updateAllPrices, 30000)
-
-  // Initial update
-  updateAllPrices()
+  updateInterval = setInterval(() => {
+    TOKENS.forEach((token) => {
+      // Update 1M and 5M intervals more frequently
+      addNewPricePoint(token.symbol, "1M")
+      if (Math.random() > 0.7) {
+        // 30% chance
+        addNewPricePoint(token.symbol, "5M")
+      }
+    })
+  }, 30000) // Update every 30 seconds
 }
 
-export function stopPriceUpdates() {
+export function stopPriceUpdates(): void {
   if (updateInterval) {
     clearInterval(updateInterval)
     updateInterval = null
   }
 }
 
-// Auto-start price updates
+// Start updates when module loads
 if (typeof window !== "undefined") {
   startPriceUpdates()
 }
