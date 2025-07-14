@@ -34,8 +34,8 @@ import {
   debugContractInteraction,
   TOKENS,
 } from "@/services/swap-service"
-import { getTokenPrice, formatPrice, formatPriceChange, type TokenPrice } from "@/services/token-price-service"
-import { PriceChart } from "@/components/price-chart"
+import { getTokenPrice, type TokenPrice } from "@/services/token-price-service"
+import { PriceChart as OldPriceChart } from "@/components/price-chart"
 import { ethers } from "ethers"
 import { DebugConsole } from "@/components/debug-console"
 
@@ -314,6 +314,15 @@ const translations = {
   },
 }
 
+interface Token {
+  symbol: string
+  name: string
+  address: string
+  decimals: number
+  logo: string
+  color: string
+}
+
 type ViewMode = "main" | "send" | "receive" | "history" | "swap" | "tokenDetail"
 
 export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: MiniWalletProps) {
@@ -351,7 +360,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
   const [isMinimized, setIsMinimized] = useState(false)
 
   // Token detail states
-  const [selectedToken, setSelectedToken] = useState<TokenBalance | null>(null)
+  const [selectedTokenState, setSelectedTokenState] = useState<TokenBalance | null>(null)
   const [tokenPrice, setTokenPrice] = useState<TokenPrice | null>(null)
   const [loadingPrice, setLoadingPrice] = useState(false)
 
@@ -634,19 +643,19 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     setSwapForm({ tokenFrom: "WLD", tokenTo: "TPF", amountFrom: "", amountTo: "" })
     setSwapQuote(null)
     setQuoteError(null)
-    setSelectedToken(null)
+    setSelectedTokenState(null)
     setTokenPrice(null)
   }
 
   const handleTokenClick = async (token: TokenBalance) => {
     console.log("🔄 Loading token details for:", token.symbol)
-    setSelectedToken(token)
+    setSelectedTokenState(token)
     setViewMode("tokenDetail")
     setLoadingPrice(true)
 
     try {
       console.log(`📊 Fetching real price data for ${token.symbol} via Holdstation SDK`)
-      const priceData = await getTokenPrice(token.symbol)
+      const priceData = await getTokenPrice(token.symbol, "1h")
       console.log(`✅ Price data loaded for ${token.symbol}:`, priceData)
       setTokenPrice(priceData)
     } catch (error) {
@@ -658,14 +667,14 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
   }
 
   const refreshTokenPrice = async () => {
-    if (!selectedToken) return
+    if (!selectedTokenState) return
 
     setLoadingPrice(true)
     try {
-      console.log(`🔄 Refreshing price for ${selectedToken.symbol}`)
-      const priceData = await getTokenPrice(selectedToken.symbol)
+      console.log(`🔄 Refreshing price for ${selectedTokenState.symbol}`)
+      const priceData = await getTokenPrice(selectedTokenState.symbol, "1h")
       setTokenPrice(priceData)
-      console.log(`✅ Price refreshed for ${selectedToken.symbol}`)
+      console.log(`✅ Price refreshed for ${selectedTokenState.symbol}`)
     } catch (error) {
       console.error("❌ Error refreshing token price:", error)
     } finally {
@@ -778,6 +787,132 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         </motion.div>
         <DebugConsole />
       </>
+    )
+  }
+
+  // Token detail view
+  if (viewMode === "tokenDetail" && selectedTokenState) {
+    const priceInfo = tokenPrice //tokenPrices[selectedToken.symbol]
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: -20, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: -20, scale: 0.95 }}
+        className="bg-black/40 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl min-w-[320px] max-w-[380px] overflow-hidden fixed top-20 right-4 z-40"
+      >
+        <AnimatePresence mode="wait">
+          <motion.div
+            key="tokenDetail"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            className="p-4"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4">
+              <button
+                onClick={handleBackToMain}
+                className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span className="text-sm font-medium">{t.back}</span>
+              </button>
+
+              <div className="flex items-center space-x-2">
+                <img
+                  src={getTokenIcon(selectedTokenState.symbol) || "/placeholder.svg"}
+                  alt={selectedTokenState.symbol}
+                  className="w-6 h-6 rounded-full"
+                  onError={(e) => {
+                    e.currentTarget.src = "/placeholder.svg?height=24&width=24"
+                  }}
+                />
+                <div className="text-center">
+                  <h3 className="font-semibold text-sm text-white">{selectedTokenState.symbol}</h3>
+                  <p className="text-xs text-gray-500">{selectedTokenState.name}</p>
+                </div>
+              </div>
+
+              <button
+                onClick={refreshTokenPrice}
+                disabled={loadingPrice}
+                className="p-1 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-white/10 disabled:opacity-50"
+                title={t.refreshPrice}
+              >
+                <RefreshCw className={`w-4 h-4 ${loadingPrice ? "animate-spin" : ""}`} />
+              </button>
+            </div>
+
+            {/* Price Info */}
+            {loadingPrice ? (
+              <div className="text-center mb-4">
+                <div className="text-2xl font-bold mb-1 text-gray-400">{t.loadingPrice}</div>
+              </div>
+            ) : priceInfo ? (
+              <div className="text-center mb-4">
+                <div className="text-2xl font-bold mb-1 text-white">${priceInfo.currentPrice.toFixed(6)}</div>
+                {(() => {
+                  const isPositive = priceInfo.changePercent24h > 0
+                  const isNegative = priceInfo.changePercent24h < 0
+
+                  return (
+                    <div
+                      className={`flex items-center space-x-1 ${
+                        isPositive ? "text-green-500" : isNegative ? "text-red-500" : "text-gray-500"
+                      }`}
+                    >
+                      {isPositive && <TrendingUp className="w-3 h-3" />}
+                      {isNegative && <TrendingDown className="w-3 h-3" />}
+                      <span className="text-xs font-medium">
+                        {isPositive ? "+" : ""}
+                        {priceInfo.changePercent24h.toFixed(2)}%
+                      </span>
+                    </div>
+                  )
+                })()}
+              </div>
+            ) : (
+              <div className="text-center mb-4">
+                <div className="text-2xl font-bold mb-1 text-gray-400">{t.priceUnavailable}</div>
+              </div>
+            )}
+
+            {/* Price Chart */}
+            <div className="mb-4">
+              <OldPriceChart
+                symbol={selectedTokenState.symbol}
+                color={getTokenColor(selectedTokenState.symbol)}
+                height={250}
+              />
+            </div>
+
+            {/* Action Buttons - Compact */}
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={() => {
+                  setSendForm((prev) => ({ ...prev, token: selectedTokenState.symbol }))
+                  setViewMode("send")
+                }}
+                className="flex items-center justify-center space-x-2 py-2 px-3 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 rounded-lg transition-all duration-200 text-blue-300 hover:text-blue-200"
+              >
+                <Send className="w-4 h-4" />
+                <span className="text-sm font-medium">{t.send}</span>
+              </button>
+              <button
+                onClick={() => {
+                  setSwapForm((prev) => ({ ...prev, tokenFrom: selectedTokenState.symbol }))
+                  setViewMode("swap")
+                }}
+                className="flex items-center justify-center space-x-2 py-2 px-3 bg-orange-600/20 hover:bg-orange-600/30 border border-orange-500/30 rounded-lg transition-all duration-200 text-orange-300 hover:text-orange-200"
+              >
+                <ArrowLeftRight className="w-4 h-4" />
+                <span className="text-sm font-medium">{t.swap}</span>
+              </button>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      </motion.div>
     )
   }
 
@@ -955,134 +1090,6 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                     <span className="text-xs font-medium">{t.history}</span>
                   </button>
                 </div>
-              </div>
-            </motion.div>
-          )}
-
-          {/* Token Detail View - Compact Version */}
-          {viewMode === "tokenDetail" && selectedToken && (
-            <motion.div
-              key="tokenDetail"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              className="p-4"
-            >
-              {/* Header with Back Button */}
-              <div className="flex items-center justify-between mb-4">
-                <button
-                  onClick={handleBackToMain}
-                  className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  <span className="text-sm font-medium">{t.back}</span>
-                </button>
-                <h3 className="text-lg font-bold text-white flex items-center">
-                  <BarChart3 className="w-5 h-5 mr-2 text-cyan-400" />
-                  {selectedToken.symbol}
-                </h3>
-                <div className="w-16" />
-              </div>
-
-              {/* Token Header - Compact */}
-              <div className="flex items-center space-x-3 mb-3">
-                <div className="w-10 h-10 rounded-full overflow-hidden bg-white flex items-center justify-center">
-                  <Image
-                    src={getTokenIcon(selectedToken.symbol) || "/placeholder.svg"}
-                    alt={selectedToken.symbol}
-                    width={40}
-                    height={40}
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-                <div>
-                  <h2 className="text-white text-lg font-bold">{selectedToken.symbol}</h2>
-                  <p className="text-gray-400 text-sm">{selectedToken.name}</p>
-                </div>
-              </div>
-
-              {/* Price Information - Compact */}
-              {loadingPrice ? (
-                <div className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl p-3 mb-3">
-                  <div className="flex items-center justify-center">
-                    <RefreshCw className="w-4 h-4 text-cyan-400 animate-spin mr-2" />
-                    <span className="text-gray-400 text-sm">{t.loadingPrice}</span>
-                  </div>
-                </div>
-              ) : tokenPrice && tokenPrice.currentPrice > 0 ? (
-                <div className="space-y-2 mb-3">
-                  {/* Current Price - Compact */}
-                  <div className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl p-3">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-gray-400 text-xs">{t.currentPrice}</span>
-                      <button
-                        onClick={refreshTokenPrice}
-                        className="p-1 text-gray-400 hover:text-white transition-colors rounded"
-                        title={t.refreshPrice}
-                      >
-                        <RefreshCw className={`w-3 h-3 ${loadingPrice ? "animate-spin" : ""}`} />
-                      </button>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-white font-bold text-lg">{formatPrice(tokenPrice.currentPrice)}</span>
-                      <div className="flex items-center space-x-1">
-                        {tokenPrice.changePercent24h >= 0 ? (
-                          <TrendingUp className="w-3 h-3 text-green-400" />
-                        ) : (
-                          <TrendingDown className="w-3 h-3 text-red-400" />
-                        )}
-                        <span
-                          className={`text-xs font-medium ${
-                            tokenPrice.changePercent24h >= 0 ? "text-green-400" : "text-red-400"
-                          }`}
-                        >
-                          {formatPriceChange(tokenPrice.changePercent24h, true)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Price Chart - Compact */}
-                  <div className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl p-3">
-                    <h3 className="text-white text-xs font-medium mb-2">{t.priceChart} (24h)</h3>
-                    <PriceChart
-                      data={tokenPrice.priceHistory}
-                      color={getTokenColor(selectedToken.symbol)}
-                      height={80}
-                    />
-                  </div>
-                </div>
-              ) : (
-                <div className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl p-3 mb-3">
-                  <div className="flex items-center justify-center text-gray-400">
-                    <AlertCircle className="w-4 h-4 mr-2" />
-                    <span className="text-sm">{t.priceUnavailable}</span>
-                  </div>
-                </div>
-              )}
-
-              {/* Action Buttons - Compact */}
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => {
-                    setSendForm((prev) => ({ ...prev, token: selectedToken.symbol }))
-                    setViewMode("send")
-                  }}
-                  className="flex items-center justify-center space-x-2 py-2 px-3 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 rounded-lg transition-all duration-200 text-blue-300 hover:text-blue-200"
-                >
-                  <Send className="w-4 h-4" />
-                  <span className="text-sm font-medium">{t.send}</span>
-                </button>
-                <button
-                  onClick={() => {
-                    setSwapForm((prev) => ({ ...prev, tokenFrom: selectedToken.symbol }))
-                    setViewMode("swap")
-                  }}
-                  className="flex items-center justify-center space-x-2 py-2 px-3 bg-orange-600/20 hover:bg-orange-600/30 border border-orange-500/30 rounded-lg transition-all duration-200 text-orange-300 hover:text-orange-200"
-                >
-                  <ArrowLeftRight className="w-4 h-4" />
-                  <span className="text-sm font-medium">{t.swap}</span>
-                </button>
               </div>
             </motion.div>
           )}
