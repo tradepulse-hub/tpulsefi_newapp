@@ -81,6 +81,7 @@ const translations = {
   en: {
     connected: "Connected",
     tokens: "Tokens",
+    totalBalance: "Total Balance",
     send: "Send",
     receive: "Receive",
     history: "History",
@@ -141,6 +142,7 @@ const translations = {
   pt: {
     connected: "Conectado",
     tokens: "Tokens",
+    totalBalance: "Saldo Total",
     send: "Enviar",
     receive: "Receber",
     history: "Histórico",
@@ -201,6 +203,7 @@ const translations = {
   es: {
     connected: "Conectado",
     tokens: "Tokens",
+    totalBalance: "Saldo Total",
     send: "Enviar",
     receive: "Recibir",
     history: "Historial",
@@ -261,6 +264,7 @@ const translations = {
   id: {
     connected: "Terhubung",
     tokens: "Token",
+    totalBalance: "Saldo Total",
     send: "Kirim",
     receive: "Terima",
     history: "Riwayat",
@@ -374,6 +378,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
   const [tokenPrices, setTokenPrices] = useState<Record<string, number>>({})
   const [priceChanges, setPriceChanges] = useState<Record<string, number>>({})
   const [loadingPrices, setLoadingPrices] = useState(true)
+  const [totalWalletValue, setTotalWalletValue] = useState(0)
 
   const TRANSACTIONS_PER_PAGE = 5
 
@@ -398,6 +403,39 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     setTimeout(() => setCopied(false), 2000)
   }
 
+  // Calculate total wallet value in USD
+  const calculateTotalWalletValue = useCallback(() => {
+    let total = 0
+
+    balances.forEach((token) => {
+      const tokenBalance = Number.parseFloat(token.balance)
+      const tokenPrice = tokenPrices[token.symbol] || 0
+
+      if (tokenBalance > 0 && tokenPrice > 0) {
+        // For USDC, price is always $1
+        const price = token.symbol === "USDC" ? 1 : tokenPrice
+        total += tokenBalance * price
+      }
+    })
+
+    setTotalWalletValue(total)
+    console.log(`💰 Total wallet value: $${total.toFixed(2)}`)
+  }, [balances, tokenPrices])
+
+  // Update total value when balances or prices change
+  useEffect(() => {
+    calculateTotalWalletValue()
+  }, [calculateTotalWalletValue])
+
+  // Format USD value
+  const formatUSDValue = (value: number): string => {
+    if (value === 0) return "$0.00"
+    if (value < 0.01) return "<$0.01"
+    if (value < 1000) return `$${value.toFixed(2)}`
+    if (value < 1000000) return `$${(value / 1000).toFixed(1)}K`
+    return `$${(value / 1000000).toFixed(1)}M`
+  }
+
   // Load real-time token prices for main view
   const loadTokenPrices = async () => {
     try {
@@ -410,6 +448,14 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       await Promise.all(
         TOKENS.map(async (token) => {
           try {
+            // USDC is always $1
+            if (token.symbol === "USDC") {
+              prices[token.symbol] = 1
+              changes[token.symbol] = 0
+              console.log(`✅ Price loaded for ${token.symbol}: $1.00 (stable)`)
+              return
+            }
+
             const [price, change] = await Promise.all([
               getCurrentTokenPrice(token.symbol),
               getPriceChange(token.symbol, "1H"),
@@ -1041,6 +1087,9 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                       {showBalances ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       <span className="text-sm font-medium">{t.tokens}</span>
                     </button>
+                    <div className="text-xs text-gray-400">
+                      {t.totalBalance}: {formatUSDValue(totalWalletValue)}
+                    </div>
                   </div>
                   <button
                     onClick={refreshBalances}
@@ -1075,72 +1124,76 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                           <span className="text-gray-400 text-sm">No tokens found</span>
                         </div>
                       ) : (
-                        balances.map((token, index) => {
-                          const price = tokenPrices[token.symbol] || 0
-                          const change = priceChanges[token.symbol] || 0
+                        balances
+                          .filter((token) => Number.parseFloat(token.balance) > 0)
+                          .map((token, index) => {
+                            const price = token.symbol === "USDC" ? 1 : tokenPrices[token.symbol] || 0
+                            const change = priceChanges[token.symbol] || 0
 
-                          return (
-                            <motion.button
-                              key={token.symbol}
-                              initial={{ opacity: 0, x: -20 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              transition={{ delay: index * 0.1 }}
-                              onClick={() => handleTokenClick(token)}
-                              className="w-full bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl p-3 hover:bg-white/5 transition-all duration-200 group"
-                            >
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center space-x-3">
-                                  <div className="w-8 h-8 rounded-full overflow-hidden bg-white flex items-center justify-center">
-                                    <Image
-                                      src={getTokenIcon(token.symbol) || "/placeholder.svg"}
-                                      alt={token.name}
-                                      width={32}
-                                      height={32}
-                                      className="w-full h-full object-contain"
-                                    />
-                                  </div>
-                                  <div>
-                                    <p className="text-white font-medium text-sm text-left">{token.symbol}</p>
-                                    <p className="text-gray-400 text-xs text-left">{token.name}</p>
-                                  </div>
-                                </div>
-                                <div className="text-right flex items-center space-x-2">
-                                  <div>
-                                    <p className="text-white font-medium text-sm">
-                                      {showBalances ? formatBalance(token.balance) : "••••"}
-                                    </p>
-                                    <div className="flex items-center space-x-1">
-                                      {loadingPrices ? (
-                                        <div className="animate-pulse bg-gray-600 h-3 w-12 rounded"></div>
-                                      ) : price > 0 ? (
-                                        <>
-                                          <span className="text-gray-400 text-xs">
-                                            {formatPrice(price, token.symbol)}
-                                          </span>
-                                          <div
-                                            className={`flex items-center space-x-1 ${
-                                              change >= 0 ? "text-green-500" : "text-red-500"
-                                            }`}
-                                          >
-                                            {change >= 0 ? (
-                                              <TrendingUp className="w-2 h-2" />
-                                            ) : (
-                                              <TrendingDown className="w-2 h-2" />
-                                            )}
-                                            <span className="text-xs">{Math.abs(change).toFixed(1)}%</span>
-                                          </div>
-                                        </>
-                                      ) : (
-                                        <span className="text-gray-500 text-xs">Price N/A</span>
-                                      )}
+                            return (
+                              <motion.button
+                                key={token.symbol}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: index * 0.1 }}
+                                onClick={() => handleTokenClick(token)}
+                                className="w-full bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl p-3 hover:bg-white/5 transition-all duration-200 group"
+                              >
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center space-x-3">
+                                    <div className="w-8 h-8 rounded-full overflow-hidden bg-white flex items-center justify-center">
+                                      <Image
+                                        src={getTokenIcon(token.symbol) || "/placeholder.svg"}
+                                        alt={token.name}
+                                        width={32}
+                                        height={32}
+                                        className="w-full h-full object-contain"
+                                      />
+                                    </div>
+                                    <div>
+                                      <p className="text-white font-medium text-sm text-left">{token.symbol}</p>
+                                      <p className="text-gray-400 text-xs text-left">{token.name}</p>
                                     </div>
                                   </div>
-                                  <BarChart3 className="w-4 h-4 text-gray-400 group-hover:text-cyan-400 transition-colors" />
+                                  <div className="text-right flex items-center space-x-2">
+                                    <div>
+                                      <p className="text-white font-medium text-sm">
+                                        {showBalances ? formatBalance(token.balance) : "••••"}
+                                      </p>
+                                      <div className="flex items-center space-x-1">
+                                        {loadingPrices ? (
+                                          <div className="animate-pulse bg-gray-600 h-3 w-12 rounded"></div>
+                                        ) : price > 0 ? (
+                                          <>
+                                            <span className="text-gray-400 text-xs">
+                                              {token.symbol === "USDC" ? "$1.00" : formatPrice(price, token.symbol)}
+                                            </span>
+                                            {token.symbol !== "USDC" && (
+                                              <div
+                                                className={`flex items-center space-x-1 ${
+                                                  change >= 0 ? "text-green-500" : "text-red-500"
+                                                }`}
+                                              >
+                                                {change >= 0 ? (
+                                                  <TrendingUp className="w-2 h-2" />
+                                                ) : (
+                                                  <TrendingDown className="w-2 h-2" />
+                                                )}
+                                                <span className="text-xs">{Math.abs(change).toFixed(1)}%</span>
+                                              </div>
+                                            )}
+                                          </>
+                                        ) : (
+                                          <span className="text-gray-500 text-xs">Price N/A</span>
+                                        )}
+                                      </div>
+                                    </div>
+                                    <BarChart3 className="w-4 h-4 text-gray-400 group-hover:text-cyan-400 transition-colors" />
+                                  </div>
                                 </div>
-                              </div>
-                            </motion.button>
-                          )
-                        })
+                              </motion.button>
+                            )
+                          })
                       )}
                     </motion.div>
                   )}
@@ -1213,11 +1266,13 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                     onChange={(e) => setSendForm((prev) => ({ ...prev, token: e.target.value }))}
                     className="w-full bg-black/30 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-400"
                   >
-                    {balances.map((token) => (
-                      <option key={token.symbol} value={token.symbol} className="bg-black">
-                        {token.symbol} - {t.available}: {formatBalance(token.balance)}
-                      </option>
-                    ))}
+                    {balances
+                      .filter((token) => Number.parseFloat(token.balance) > 0)
+                      .map((token) => (
+                        <option key={token.symbol} value={token.symbol} className="bg-black">
+                          {token.symbol} - {t.available}: {formatBalance(token.balance)}
+                        </option>
+                      ))}
                   </select>
                 </div>
 
