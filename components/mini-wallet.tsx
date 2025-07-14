@@ -20,6 +20,9 @@ import {
   History,
   ExternalLink,
   ArrowLeftRight,
+  TrendingUp,
+  TrendingDown,
+  BarChart3,
 } from "lucide-react"
 import Image from "next/image"
 import { walletService } from "@/services/wallet-service"
@@ -31,6 +34,8 @@ import {
   debugContractInteraction,
   TOKENS,
 } from "@/services/swap-service"
+import { getTokenPrice, formatPrice, formatPriceChange, type TokenPrice } from "@/services/token-price-service"
+import { PriceChart } from "@/components/price-chart"
 import { ethers } from "ethers"
 import { DebugConsole } from "@/components/debug-console"
 
@@ -79,11 +84,16 @@ const translations = {
     receiveTokens: "Receive Tokens",
     swapTokens: "Swap Tokens",
     transactionHistory: "Transaction History",
+    tokenDetails: "Token Details",
+    currentPrice: "Current Price",
+    priceChange24h: "24h Change",
+    priceChart: "Price Chart",
     token: "Token",
     amount: "Amount",
     recipientAddress: "Recipient Address",
     sending: "Sending...",
     swapping: "Swapping...",
+    loadingPrice: "Loading price...",
     yourWalletAddress: "Your Wallet Address:",
     networkWarning: "Only send Worldchain network supported tokens to this address.",
     sendWarning:
@@ -119,6 +129,8 @@ const translations = {
     insufficientBalance: "Insufficient balance",
     networkError: "Network error",
     tryAgain: "Try again",
+    priceUnavailable: "Price data unavailable",
+    refreshPrice: "Refresh Price",
   },
   pt: {
     connected: "Conectado",
@@ -132,11 +144,16 @@ const translations = {
     receiveTokens: "Receber Tokens",
     swapTokens: "Trocar Tokens",
     transactionHistory: "Histórico de Transações",
+    tokenDetails: "Detalhes do Token",
+    currentPrice: "Preço Atual",
+    priceChange24h: "Mudança 24h",
+    priceChart: "Gráfico de Preço",
     token: "Token",
     amount: "Quantidade",
     recipientAddress: "Endereço do Destinatário",
     sending: "Enviando...",
     swapping: "Trocando...",
+    loadingPrice: "Carregando preço...",
     yourWalletAddress: "Seu Endereço da Carteira:",
     networkWarning: "Apenas envie para o seu endereço tokens suportados da rede Worldchain.",
     sendWarning:
@@ -172,6 +189,8 @@ const translations = {
     insufficientBalance: "Saldo insuficiente",
     networkError: "Erro de rede",
     tryAgain: "Tente novamente",
+    priceUnavailable: "Dados de preço indisponíveis",
+    refreshPrice: "Atualizar Preço",
   },
   es: {
     connected: "Conectado",
@@ -185,11 +204,16 @@ const translations = {
     receiveTokens: "Recibir Tokens",
     swapTokens: "Intercambiar Tokens",
     transactionHistory: "Historial de Transacciones",
+    tokenDetails: "Detalles del Token",
+    currentPrice: "Precio Actual",
+    priceChange24h: "Cambio 24h",
+    priceChart: "Gráfico de Precio",
     token: "Token",
     amount: "Cantidad",
     recipientAddress: "Dirección del Destinatario",
     sending: "Enviando...",
     swapping: "Intercambiando...",
+    loadingPrice: "Cargando precio...",
     yourWalletAddress: "Tu Dirección de Billetera:",
     networkWarning: "Solo envía tokens soportados por la red Worldchain a esta dirección.",
     sendWarning:
@@ -225,6 +249,8 @@ const translations = {
     insufficientBalance: "Saldo insuficiente",
     networkError: "Error de red",
     tryAgain: "Intentar de nuevo",
+    priceUnavailable: "Datos de precio no disponibles",
+    refreshPrice: "Actualizar Precio",
   },
   id: {
     connected: "Terhubung",
@@ -238,11 +264,16 @@ const translations = {
     receiveTokens: "Terima Token",
     swapTokens: "Tukar Token",
     transactionHistory: "Riwayat Transaksi",
+    tokenDetails: "Detail Token",
+    currentPrice: "Harga Saat Ini",
+    priceChange24h: "Perubahan 24j",
+    priceChart: "Grafik Harga",
     token: "Token",
     amount: "Jumlah",
     recipientAddress: "Alamat Penerima",
     sending: "Mengirim...",
     swapping: "Menukar...",
+    loadingPrice: "Memuat harga...",
     yourWalletAddress: "Alamat Dompet Anda:",
     networkWarning: "Hanya kirim token yang didukung jaringan Worldchain ke alamat ini.",
     sendWarning:
@@ -278,10 +309,12 @@ const translations = {
     insufficientBalance: "Saldo tidak mencukupi",
     networkError: "Kesalahan jaringan",
     tryAgain: "Coba lagi",
+    priceUnavailable: "Data harga tidak tersedia",
+    refreshPrice: "Perbarui Harga",
   },
 }
 
-type ViewMode = "main" | "send" | "receive" | "history" | "swap"
+type ViewMode = "main" | "send" | "receive" | "history" | "swap" | "tokenDetail"
 
 export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: MiniWalletProps) {
   const [currentLang, setCurrentLang] = useState<SupportedLanguage>("en")
@@ -316,6 +349,11 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
   const [quoteError, setQuoteError] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isMinimized, setIsMinimized] = useState(false)
+
+  // Token detail states
+  const [selectedToken, setSelectedToken] = useState<TokenBalance | null>(null)
+  const [tokenPrice, setTokenPrice] = useState<TokenPrice | null>(null)
+  const [loadingPrice, setLoadingPrice] = useState(false)
 
   const TRANSACTIONS_PER_PAGE = 5
 
@@ -596,6 +634,43 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     setSwapForm({ tokenFrom: "WLD", tokenTo: "TPF", amountFrom: "", amountTo: "" })
     setSwapQuote(null)
     setQuoteError(null)
+    setSelectedToken(null)
+    setTokenPrice(null)
+  }
+
+  const handleTokenClick = async (token: TokenBalance) => {
+    console.log("🔄 Loading token details for:", token.symbol)
+    setSelectedToken(token)
+    setViewMode("tokenDetail")
+    setLoadingPrice(true)
+
+    try {
+      console.log(`📊 Fetching real price data for ${token.symbol} via Holdstation SDK`)
+      const priceData = await getTokenPrice(token.symbol)
+      console.log(`✅ Price data loaded for ${token.symbol}:`, priceData)
+      setTokenPrice(priceData)
+    } catch (error) {
+      console.error("❌ Error loading token price:", error)
+      setTokenPrice(null)
+    } finally {
+      setLoadingPrice(false)
+    }
+  }
+
+  const refreshTokenPrice = async () => {
+    if (!selectedToken) return
+
+    setLoadingPrice(true)
+    try {
+      console.log(`🔄 Refreshing price for ${selectedToken.symbol}`)
+      const priceData = await getTokenPrice(selectedToken.symbol)
+      setTokenPrice(priceData)
+      console.log(`✅ Price refreshed for ${selectedToken.symbol}`)
+    } catch (error) {
+      console.error("❌ Error refreshing token price:", error)
+    } finally {
+      setLoadingPrice(false)
+    }
   }
 
   const openTransactionInExplorer = (hash: string) => {
@@ -678,9 +753,14 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     return `${(num / 1000000).toFixed(1)}M`
   }
 
-  // Get available tokens for swap (excluding the currently selected token)
-  const getAvailableTokensForSwap = (excludeSymbol: string) => {
-    return TOKENS.filter((token) => token.symbol !== excludeSymbol)
+  const getTokenIcon = (symbol: string) => {
+    const token = TOKENS.find((t) => t.symbol === symbol)
+    return token?.logo || "/placeholder.svg?height=32&width=32"
+  }
+
+  const getTokenColor = (symbol: string) => {
+    const token = TOKENS.find((t) => t.symbol === symbol)
+    return token?.color || "#00D4FF"
   }
 
   if (isMinimized) {
@@ -801,43 +881,41 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                         </div>
                       ) : (
                         balances.map((token, index) => (
-                          <motion.div
+                          <motion.button
                             key={token.symbol}
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: index * 0.1 }}
-                            className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl p-3 hover:bg-white/5 transition-all duration-200"
+                            onClick={() => handleTokenClick(token)}
+                            className="w-full bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl p-3 hover:bg-white/5 transition-all duration-200 group"
                           >
                             <div className="flex items-center justify-between">
                               <div className="flex items-center space-x-3">
                                 <div className="w-8 h-8 rounded-full overflow-hidden bg-white flex items-center justify-center">
-                                  {token.icon ? (
-                                    <Image
-                                      src={token.icon || "/placeholder.svg"}
-                                      alt={token.name}
-                                      width={32}
-                                      height={32}
-                                      className="w-full h-full object-contain"
-                                    />
-                                  ) : (
-                                    <div className="w-full h-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
-                                      <span className="text-white text-xs font-bold">{token.symbol.charAt(0)}</span>
-                                    </div>
-                                  )}
+                                  <Image
+                                    src={getTokenIcon(token.symbol) || "/placeholder.svg"}
+                                    alt={token.name}
+                                    width={32}
+                                    height={32}
+                                    className="w-full h-full object-contain"
+                                  />
                                 </div>
                                 <div>
-                                  <p className="text-white font-medium text-sm">{token.symbol}</p>
-                                  <p className="text-gray-400 text-xs">{token.name}</p>
+                                  <p className="text-white font-medium text-sm text-left">{token.symbol}</p>
+                                  <p className="text-gray-400 text-xs text-left">{token.name}</p>
                                 </div>
                               </div>
-                              <div className="text-right">
-                                <p className="text-white font-medium text-sm">
-                                  {showBalances ? formatBalance(token.balance) : "••••"}
-                                </p>
-                                <p className="text-gray-400 text-xs">{token.symbol}</p>
+                              <div className="text-right flex items-center space-x-2">
+                                <div>
+                                  <p className="text-white font-medium text-sm">
+                                    {showBalances ? formatBalance(token.balance) : "••••"}
+                                  </p>
+                                  <p className="text-gray-400 text-xs">{token.symbol}</p>
+                                </div>
+                                <BarChart3 className="w-4 h-4 text-gray-400 group-hover:text-cyan-400 transition-colors" />
                               </div>
                             </div>
-                          </motion.div>
+                          </motion.button>
                         ))
                       )}
                     </motion.div>
@@ -877,6 +955,147 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                     <span className="text-xs font-medium">{t.history}</span>
                   </button>
                 </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Token Detail View */}
+          {viewMode === "tokenDetail" && selectedToken && (
+            <motion.div
+              key="tokenDetail"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              className="p-4"
+            >
+              {/* Header with Back Button */}
+              <div className="flex items-center justify-between mb-6">
+                <button
+                  onClick={handleBackToMain}
+                  className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  <span className="text-sm font-medium">{t.back}</span>
+                </button>
+                <h3 className="text-lg font-bold text-white flex items-center">
+                  <BarChart3 className="w-5 h-5 mr-2 text-cyan-400" />
+                  {t.tokenDetails}
+                </h3>
+                <div className="w-16" />
+              </div>
+
+              {/* Token Header */}
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="w-12 h-12 rounded-full overflow-hidden bg-white flex items-center justify-center">
+                  <Image
+                    src={getTokenIcon(selectedToken.symbol) || "/placeholder.svg"}
+                    alt={selectedToken.symbol}
+                    width={48}
+                    height={48}
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                <div>
+                  <h2 className="text-white text-xl font-bold">{selectedToken.symbol}</h2>
+                  <p className="text-gray-400 text-sm">{selectedToken.name}</p>
+                </div>
+              </div>
+
+              {/* Balance */}
+              <div className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl p-4 mb-4">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-white mb-1">{formatBalance(selectedToken.balance)}</div>
+                  <div className="text-gray-400 text-sm">
+                    {selectedToken.symbol} {t.available}
+                  </div>
+                </div>
+              </div>
+
+              {/* Price Information */}
+              {loadingPrice ? (
+                <div className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl p-4 mb-4">
+                  <div className="flex items-center justify-center">
+                    <RefreshCw className="w-4 h-4 text-cyan-400 animate-spin mr-2" />
+                    <span className="text-gray-400 text-sm">{t.loadingPrice}</span>
+                  </div>
+                </div>
+              ) : tokenPrice && tokenPrice.currentPrice > 0 ? (
+                <div className="space-y-3 mb-4">
+                  {/* Current Price */}
+                  <div className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-gray-400 text-sm">{t.currentPrice}</span>
+                      <button
+                        onClick={refreshTokenPrice}
+                        className="p-1 text-gray-400 hover:text-white transition-colors rounded"
+                        title={t.refreshPrice}
+                      >
+                        <RefreshCw className={`w-3 h-3 ${loadingPrice ? "animate-spin" : ""}`} />
+                      </button>
+                    </div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-white font-bold text-xl">{formatPrice(tokenPrice.currentPrice)}</span>
+                      <div className="flex items-center space-x-1">
+                        {tokenPrice.changePercent24h >= 0 ? (
+                          <TrendingUp className="w-4 h-4 text-green-400" />
+                        ) : (
+                          <TrendingDown className="w-4 h-4 text-red-400" />
+                        )}
+                        <span
+                          className={`text-sm font-medium ${
+                            tokenPrice.changePercent24h >= 0 ? "text-green-400" : "text-red-400"
+                          }`}
+                        >
+                          {formatPriceChange(tokenPrice.changePercent24h, true)}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="text-gray-400 text-xs">
+                      {t.priceChange24h}: {formatPriceChange(tokenPrice.changeAmount24h)}
+                    </div>
+                  </div>
+
+                  {/* Price Chart */}
+                  <div className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl p-4">
+                    <h3 className="text-white text-sm font-medium mb-3">{t.priceChart} (24h)</h3>
+                    <PriceChart
+                      data={tokenPrice.priceHistory}
+                      color={getTokenColor(selectedToken.symbol)}
+                      height={120}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl p-4 mb-4">
+                  <div className="flex items-center justify-center text-gray-400">
+                    <AlertCircle className="w-4 h-4 mr-2" />
+                    <span className="text-sm">{t.priceUnavailable}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => {
+                    setSendForm((prev) => ({ ...prev, token: selectedToken.symbol }))
+                    setViewMode("send")
+                  }}
+                  className="flex items-center justify-center space-x-2 py-3 px-4 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 rounded-lg transition-all duration-200 text-blue-300 hover:text-blue-200"
+                >
+                  <Send className="w-4 h-4" />
+                  <span className="text-sm font-medium">{t.send}</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setSwapForm((prev) => ({ ...prev, tokenFrom: selectedToken.symbol }))
+                    setViewMode("swap")
+                  }}
+                  className="flex items-center justify-center space-x-2 py-3 px-4 bg-orange-600/20 hover:bg-orange-600/30 border border-orange-500/30 rounded-lg transition-all duration-200 text-orange-300 hover:text-orange-200"
+                >
+                  <ArrowLeftRight className="w-4 h-4" />
+                  <span className="text-sm font-medium">{t.swap}</span>
+                </button>
               </div>
             </motion.div>
           )}
