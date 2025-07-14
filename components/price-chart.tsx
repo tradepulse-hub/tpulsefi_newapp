@@ -1,159 +1,130 @@
 "use client"
 
-import { useMemo } from "react"
-import type { PriceData } from "@/services/token-price-service"
+import { useEffect, useRef } from "react"
+import type { PricePoint } from "@/services/token-price-service"
 
 interface PriceChartProps {
-  data: PriceData[]
+  data: PricePoint[]
   color?: string
   height?: number
 }
 
-export function PriceChart({ data, color = "#00D4FF", height = 120 }: PriceChartProps) {
-  const chartData = useMemo(() => {
-    if (!data || data.length === 0) return null
+export function PriceChart({ data, color = "#00D4FF", height = 100 }: PriceChartProps) {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
 
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas || !data || data.length === 0) return
+
+    const ctx = canvas.getContext("2d")
+    if (!ctx) return
+
+    // Set canvas size
+    const rect = canvas.getBoundingClientRect()
+    canvas.width = rect.width * window.devicePixelRatio
+    canvas.height = height * window.devicePixelRatio
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio)
+
+    // Clear canvas
+    ctx.clearRect(0, 0, rect.width, height)
+
+    // Calculate bounds
     const prices = data.map((d) => d.price)
     const minPrice = Math.min(...prices)
     const maxPrice = Math.max(...prices)
     const priceRange = maxPrice - minPrice || 1
 
-    const width = 300
-    const padding = 20
+    // Padding
+    const padding = 10
+    const chartWidth = rect.width - padding * 2
+    const chartHeight = height - padding * 2
 
-    // Create SVG path
-    const points = data.map((point, index) => {
-      const x = padding + (index / (data.length - 1)) * (width - 2 * padding)
-      const y = height - padding - ((point.price - minPrice) / priceRange) * (height - 2 * padding)
-      return `${x},${y}`
+    // Draw grid lines
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.1)"
+    ctx.lineWidth = 1
+
+    // Horizontal grid lines
+    for (let i = 0; i <= 4; i++) {
+      const y = padding + (chartHeight / 4) * i
+      ctx.beginPath()
+      ctx.moveTo(padding, y)
+      ctx.lineTo(rect.width - padding, y)
+      ctx.stroke()
+    }
+
+    // Vertical grid lines
+    for (let i = 0; i <= 6; i++) {
+      const x = padding + (chartWidth / 6) * i
+      ctx.beginPath()
+      ctx.moveTo(x, padding)
+      ctx.lineTo(x, height - padding)
+      ctx.stroke()
+    }
+
+    // Draw price line
+    ctx.strokeStyle = color
+    ctx.lineWidth = 2
+    ctx.beginPath()
+
+    data.forEach((point, index) => {
+      const x = padding + (index / (data.length - 1)) * chartWidth
+      const y = padding + (1 - (point.price - minPrice) / priceRange) * chartHeight
+
+      if (index === 0) {
+        ctx.moveTo(x, y)
+      } else {
+        ctx.lineTo(x, y)
+      }
     })
 
-    const pathData = `M ${points.join(" L ")}`
+    ctx.stroke()
 
-    // Create area fill path
-    const areaPoints = [
-      `${padding},${height - padding}`, // Start at bottom left
-      ...points,
-      `${width - padding},${height - padding}`, // End at bottom right
-    ]
-    const areaPath = `M ${areaPoints.join(" L ")} Z`
+    // Draw gradient fill
+    const gradient = ctx.createLinearGradient(0, padding, 0, height - padding)
+    gradient.addColorStop(0, `${color}20`)
+    gradient.addColorStop(1, `${color}00`)
 
-    return {
-      linePath: pathData,
-      areaPath: areaPath,
-      width,
-      height,
-      minPrice,
-      maxPrice,
-      points: data.map((point, index) => ({
-        x: padding + (index / (data.length - 1)) * (width - 2 * padding),
-        y: height - padding - ((point.price - minPrice) / priceRange) * (height - 2 * padding),
-        price: point.price,
-        timestamp: point.timestamp,
-      })),
+    ctx.fillStyle = gradient
+    ctx.beginPath()
+
+    data.forEach((point, index) => {
+      const x = padding + (index / (data.length - 1)) * chartWidth
+      const y = padding + (1 - (point.price - minPrice) / priceRange) * chartHeight
+
+      if (index === 0) {
+        ctx.moveTo(x, y)
+      } else {
+        ctx.lineTo(x, y)
+      }
+    })
+
+    ctx.lineTo(rect.width - padding, height - padding)
+    ctx.lineTo(padding, height - padding)
+    ctx.closePath()
+    ctx.fill()
+
+    // Draw current price point
+    if (data.length > 0) {
+      const lastPoint = data[data.length - 1]
+      const x = padding + chartWidth
+      const y = padding + (1 - (lastPoint.price - minPrice) / priceRange) * chartHeight
+
+      ctx.fillStyle = color
+      ctx.beginPath()
+      ctx.arc(x, y, 3, 0, 2 * Math.PI)
+      ctx.fill()
+
+      // Pulsing effect
+      ctx.fillStyle = `${color}40`
+      ctx.beginPath()
+      ctx.arc(x, y, 6, 0, 2 * Math.PI)
+      ctx.fill()
     }
-  }, [data, height])
-
-  if (!chartData) {
-    return (
-      <div className="flex items-center justify-center" style={{ height }}>
-        <span className="text-gray-400 text-sm">No chart data available</span>
-      </div>
-    )
-  }
-
-  const formatTime = (timestamp: number) => {
-    const date = new Date(timestamp)
-    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-  }
-
-  const formatPrice = (price: number) => {
-    if (price < 0.01) return `$${price.toFixed(6)}`
-    if (price < 1) return `$${price.toFixed(4)}`
-    return `$${price.toFixed(2)}`
-  }
+  }, [data, color, height])
 
   return (
-    <div className="w-full relative">
-      <svg
-        width="100%"
-        height={height}
-        viewBox={`0 0 ${chartData.width} ${chartData.height}`}
-        className="overflow-visible"
-      >
-        {/* Gradient definition */}
-        <defs>
-          <linearGradient id={`gradient-${color.replace("#", "")}`} x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor={color} stopOpacity="0.3" />
-            <stop offset="100%" stopColor={color} stopOpacity="0.05" />
-          </linearGradient>
-        </defs>
-
-        {/* Grid lines */}
-        <defs>
-          <pattern id="grid" width="40" height="20" patternUnits="userSpaceOnUse">
-            <path d="M 40 0 L 0 0 0 20" fill="none" stroke="#374151" strokeWidth="0.5" opacity="0.3" />
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#grid)" />
-
-        {/* Area fill */}
-        <path d={chartData.areaPath} fill={`url(#gradient-${color.replace("#", "")})`} stroke="none" />
-
-        {/* Price line */}
-        <path
-          d={chartData.linePath}
-          fill="none"
-          stroke={color}
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-
-        {/* Data points with hover effects */}
-        {chartData.points.map((point, index) => (
-          <g key={index}>
-            <circle
-              cx={point.x}
-              cy={point.y}
-              r="3"
-              fill={color}
-              stroke="white"
-              strokeWidth="2"
-              className="opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
-            >
-              <title>{`${formatTime(point.timestamp)}: ${formatPrice(point.price)}`}</title>
-            </circle>
-          </g>
-        ))}
-
-        {/* Current price indicator (last point) */}
-        {chartData.points.length > 0 && (
-          <circle
-            cx={chartData.points[chartData.points.length - 1].x}
-            cy={chartData.points[chartData.points.length - 1].y}
-            r="4"
-            fill={color}
-            stroke="white"
-            strokeWidth="2"
-            className="animate-pulse"
-          />
-        )}
-      </svg>
-
-      {/* Price range indicators */}
-      <div className="absolute top-2 left-2 text-xs text-gray-400">{formatPrice(chartData.maxPrice)}</div>
-      <div className="absolute bottom-2 left-2 text-xs text-gray-400">{formatPrice(chartData.minPrice)}</div>
-
-      {/* Time indicators */}
-      {data.length > 0 && (
-        <>
-          <div className="absolute bottom-2 left-6 text-xs text-gray-400">{formatTime(data[0].timestamp)}</div>
-          <div className="absolute bottom-2 right-6 text-xs text-gray-400">
-            {formatTime(data[data.length - 1].timestamp)}
-          </div>
-        </>
-      )}
+    <div className="relative">
+      <canvas ref={canvasRef} className="w-full" style={{ height: `${height}px` }} />
     </div>
   )
 }
