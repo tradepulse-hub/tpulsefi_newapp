@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Terminal, X, Minimize2, Maximize2, Trash2, Copy, Check } from "lucide-react"
+import { Terminal, X, Minimize2, Maximize2, Trash2 } from "lucide-react"
 
 interface LogEntry {
   id: string
@@ -15,7 +15,6 @@ export function DebugConsole() {
   const [isOpen, setIsOpen] = useState(false)
   const [isMinimized, setIsMinimized] = useState(false)
   const [logs, setLogs] = useState<LogEntry[]>([])
-  const [copied, setCopied] = useState(false)
   const logsEndRef = useRef<HTMLDivElement>(null)
   const originalConsole = useRef<{
     log: typeof console.log
@@ -54,13 +53,7 @@ export function DebugConsole() {
         message.includes("❌") ||
         message.includes("💰") ||
         message.includes("💱") ||
-        message.includes("🚀") ||
-        message.includes("🔍") ||
-        message.includes("📋") ||
-        message.includes("🧪") ||
-        message.includes("⚠️") ||
-        message.includes("🟡") ||
-        message.includes("🔴")
+        message.includes("🚀")
       ) {
         addLog(message, "info")
       }
@@ -106,18 +99,6 @@ export function DebugConsole() {
     setLogs([])
   }
 
-  const copyLogs = async () => {
-    const logText = logs.map((log) => `[${formatTime(log.timestamp)}] ${log.message}`).join("\n")
-
-    try {
-      await navigator.clipboard.writeText(logText)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch (error) {
-      console.error("Failed to copy logs:", error)
-    }
-  }
-
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString("en-US", {
       hour12: false,
@@ -147,7 +128,7 @@ export function DebugConsole() {
       <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="fixed left-4 top-1/2 -translate-y-1/2 z-[9999]"
+        className="fixed bottom-4 left-4 z-[9999]"
       >
         <button
           onClick={() => setIsOpen(true)}
@@ -166,10 +147,10 @@ export function DebugConsole() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: -20, scale: 0.95 }}
-      animate={{ opacity: 1, x: 0, scale: 1 }}
-      exit={{ opacity: 0, x: -20, scale: 0.95 }}
-      className={`fixed left-4 top-1/2 -translate-y-1/2 z-[9999] bg-gray-900/95 backdrop-blur-xl border border-gray-700 rounded-lg shadow-2xl ${
+      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: 20, scale: 0.95 }}
+      className={`fixed bottom-4 left-4 z-[9999] bg-gray-900/95 backdrop-blur-xl border border-gray-700 rounded-lg shadow-2xl ${
         isMinimized ? "w-80 h-12" : "w-96 h-80"
       } transition-all duration-300`}
     >
@@ -183,13 +164,6 @@ export function DebugConsole() {
           )}
         </div>
         <div className="flex items-center space-x-1">
-          <button
-            onClick={copyLogs}
-            className="p-1 text-gray-400 hover:text-white transition-colors rounded"
-            title="Copy logs"
-          >
-            {copied ? <Check className="w-3 h-3 text-green-400" /> : <Copy className="w-3 h-3" />}
-          </button>
           <button
             onClick={clearLogs}
             className="p-1 text-gray-400 hover:text-white transition-colors rounded"
