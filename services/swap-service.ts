@@ -39,6 +39,42 @@ const worldswap = new HoldSo(tokenProvider, inmemoryTokenStorage)
 swapHelper.load(zeroX)
 swapHelper.load(worldswap)
 
+// Export tokens - TPT token removed to fix errors
+export const TOKENS = [
+  {
+    address: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003",
+    symbol: "WLD",
+    name: "Worldcoin",
+    decimals: 18,
+    logo: "/images/worldcoin.jpeg",
+    color: "#2563EB", // Blue color for WLD chart lines
+  },
+  {
+    address: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45",
+    symbol: "TPF",
+    name: "TPulseFi",
+    decimals: 18,
+    logo: "/images/logo-tpf.png",
+    color: "#00D4FF",
+  },
+  {
+    address: "0x79A02482A880bCE3F13e09Da970dC34db4CD24d1",
+    symbol: "USDC",
+    name: "USDC",
+    decimals: 6,
+    logo: "/placeholder.svg?height=32&width=32&text=USDC",
+    color: "#2775CA",
+  },
+  {
+    address: "0x4200000000000000000000000000000000000006",
+    symbol: "WDD",
+    name: "World Drachma",
+    decimals: 18,
+    logo: "/images/drachma-token.png",
+    color: "#FFD700",
+  },
+]
+
 // Token functions
 export async function getTokenDetail() {
   console.log("🔄 Fetching multiple token details...")
@@ -58,6 +94,12 @@ export async function getTokenInfo() {
 
   console.log("✅ Token Info:", tokenInfo)
   return tokenInfo
+}
+
+// Helper function to get token symbol from address
+function getTokenSymbol(address: string): string {
+  const token = TOKENS.find((t) => t.address.toLowerCase() === address.toLowerCase())
+  return token?.symbol || "UNKNOWN"
 }
 
 // Quote functions - now supports all token pairs
@@ -82,12 +124,6 @@ export async function getRealQuote(amountIn: string, tokenInAddress: string, tok
     outputAmount: result.addons?.outAmount || "0",
     rawOutputAmount: result.addons?.outAmount || "0",
   }
-}
-
-// Helper function to get token symbol from address
-function getTokenSymbol(address: string): string {
-  const token = TOKENS.find((t) => t.address.toLowerCase() === address.toLowerCase())
-  return token?.symbol || "UNKNOWN"
 }
 
 // Swap functions - now supports all token pairs
@@ -284,49 +320,5 @@ export async function debugContractInteraction() {
     return false
   }
 }
-
-// Export tokens with corrected TPT logo
-export const TOKENS = [
-  {
-    address: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003",
-    symbol: "WLD",
-    name: "Worldcoin",
-    decimals: 18,
-    logo: "/images/worldcoin.jpeg",
-    color: "#2563EB", // Blue color for WLD chart lines
-  },
-  {
-    address: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45",
-    symbol: "TPF",
-    name: "TPulseFi",
-    decimals: 18,
-    logo: "/images/logo-tpf.png",
-    color: "#00D4FF",
-  },
-  {
-    address: "0x79A02482A880bCE3F13e09Da970dC34db4CD24d1",
-    symbol: "USDC",
-    name: "USDC",
-    decimals: 6,
-    logo: "/placeholder.svg?height=32&width=32&text=USDC",
-    color: "#2775CA",
-  },
-  {
-    address: "0x4200000000000000000000000000000000000006",
-    symbol: "WDD",
-    name: "World Drachma",
-    decimals: 18,
-    logo: "/images/drachma-token.png",
-    color: "#FFD700",
-  },
-  {
-    address: "0x1234567890123456789012345678901234567890",
-    symbol: "TPT",
-    name: "TPT Token",
-    decimals: 18,
-    logo: "/images/logo-tpf.png", // Now using logo-tpf.png as requested
-    color: "#FF6B35",
-  },
-]
 
 export { provider, swapHelper }
