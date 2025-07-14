@@ -1,130 +1,168 @@
 "use client"
 
-import { useEffect, useRef } from "react"
-import type { PricePoint } from "@/services/token-price-service"
+import { useEffect, useState } from "react"
+import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts"
+import { TrendingUp, TrendingDown, Clock } from "lucide-react"
+import { getPriceData, getPriceChange, formatPrice, formatTimestamp } from "../services/token-price-service"
 
 interface PriceChartProps {
-  data: PricePoint[]
-  color?: string
-  height?: number
+  symbol: string
+  color: string
 }
 
-export function PriceChart({ data, color = "#00D4FF", height = 100 }: PriceChartProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
+interface ChartData {
+  timestamp: number
+  price: number
+  formattedTime: string
+}
 
+const INTERVAL_BUTTONS = [
+  { key: "1m", label: "1M" },
+  { key: "5m", label: "5M" },
+  { key: "15m", label: "15M" },
+  { key: "1h", label: "1H" },
+  { key: "4h", label: "4H" },
+  { key: "8h", label: "8H" },
+  { key: "1d", label: "1D" },
+]
+
+export default function PriceChart({ symbol, color }: PriceChartProps) {
+  const [selectedInterval, setSelectedInterval] = useState("1h")
+  const [chartData, setChartData] = useState<ChartData[]>([])
+  const [priceChange, setPriceChange] = useState(0)
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Update chart data when symbol or interval changes
   useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas || !data || data.length === 0) return
+    setIsLoading(true)
 
-    const ctx = canvas.getContext("2d")
-    if (!ctx) return
+    const updateChart = () => {
+      const rawData = getPriceData(symbol, selectedInterval)
+      const formattedData = rawData.map((point) => ({
+        timestamp: point.timestamp,
+        price: point.price,
+        formattedTime: formatTimestamp(point.timestamp, selectedInterval),
+      }))
 
-    // Set canvas size
-    const rect = canvas.getBoundingClientRect()
-    canvas.width = rect.width * window.devicePixelRatio
-    canvas.height = height * window.devicePixelRatio
-    ctx.scale(window.devicePixelRatio, window.devicePixelRatio)
-
-    // Clear canvas
-    ctx.clearRect(0, 0, rect.width, height)
-
-    // Calculate bounds
-    const prices = data.map((d) => d.price)
-    const minPrice = Math.min(...prices)
-    const maxPrice = Math.max(...prices)
-    const priceRange = maxPrice - minPrice || 1
-
-    // Padding
-    const padding = 10
-    const chartWidth = rect.width - padding * 2
-    const chartHeight = height - padding * 2
-
-    // Draw grid lines
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.1)"
-    ctx.lineWidth = 1
-
-    // Horizontal grid lines
-    for (let i = 0; i <= 4; i++) {
-      const y = padding + (chartHeight / 4) * i
-      ctx.beginPath()
-      ctx.moveTo(padding, y)
-      ctx.lineTo(rect.width - padding, y)
-      ctx.stroke()
+      setChartData(formattedData)
+      setPriceChange(getPriceChange(symbol, selectedInterval))
+      setIsLoading(false)
     }
 
-    // Vertical grid lines
-    for (let i = 0; i <= 6; i++) {
-      const x = padding + (chartWidth / 6) * i
-      ctx.beginPath()
-      ctx.moveTo(x, padding)
-      ctx.lineTo(x, height - padding)
-      ctx.stroke()
+    updateChart()
+
+    // Set up auto-refresh for short intervals
+    let refreshInterval: NodeJS.Timeout | null = null
+    if (selectedInterval === "1m" || selectedInterval === "5m") {
+      refreshInterval = setInterval(updateChart, 30000) // Refresh every 30 seconds
     }
 
-    // Draw price line
-    ctx.strokeStyle = color
-    ctx.lineWidth = 2
-    ctx.beginPath()
-
-    data.forEach((point, index) => {
-      const x = padding + (index / (data.length - 1)) * chartWidth
-      const y = padding + (1 - (point.price - minPrice) / priceRange) * chartHeight
-
-      if (index === 0) {
-        ctx.moveTo(x, y)
-      } else {
-        ctx.lineTo(x, y)
+    return () => {
+      if (refreshInterval) {
+        clearInterval(refreshInterval)
       }
-    })
-
-    ctx.stroke()
-
-    // Draw gradient fill
-    const gradient = ctx.createLinearGradient(0, padding, 0, height - padding)
-    gradient.addColorStop(0, `${color}20`)
-    gradient.addColorStop(1, `${color}00`)
-
-    ctx.fillStyle = gradient
-    ctx.beginPath()
-
-    data.forEach((point, index) => {
-      const x = padding + (index / (data.length - 1)) * chartWidth
-      const y = padding + (1 - (point.price - minPrice) / priceRange) * chartHeight
-
-      if (index === 0) {
-        ctx.moveTo(x, y)
-      } else {
-        ctx.lineTo(x, y)
-      }
-    })
-
-    ctx.lineTo(rect.width - padding, height - padding)
-    ctx.lineTo(padding, height - padding)
-    ctx.closePath()
-    ctx.fill()
-
-    // Draw current price point
-    if (data.length > 0) {
-      const lastPoint = data[data.length - 1]
-      const x = padding + chartWidth
-      const y = padding + (1 - (lastPoint.price - minPrice) / priceRange) * chartHeight
-
-      ctx.fillStyle = color
-      ctx.beginPath()
-      ctx.arc(x, y, 3, 0, 2 * Math.PI)
-      ctx.fill()
-
-      // Pulsing effect
-      ctx.fillStyle = `${color}40`
-      ctx.beginPath()
-      ctx.arc(x, y, 6, 0, 2 * Math.PI)
-      ctx.fill()
     }
-  }, [data, color, height])
+  }, [symbol, selectedInterval])
+
+  // Custom tooltip component
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload
+      return (
+        <div className="bg-gray-900 text-white p-3 rounded-lg shadow-lg border border-gray-700">
+          <p className="text-sm text-gray-300">{data.formattedTime}</p>
+          <p className="text-lg font-semibold" style={{ color }}>
+            {formatPrice(data.price, symbol)}
+          </p>
+        </div>
+      )
+    }
+    return null
+  }
+
+  const isPositive = priceChange >= 0
+  const currentPrice = chartData[chartData.length - 1]?.price || 0
 
   return (
-    <div className="relative">
-      <canvas ref={canvasRef} className="w-full" style={{ height: `${height}px` }} />
+    <div className="w-full h-64 bg-gray-50 rounded-lg p-4">
+      {/* Header with price and change */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center space-x-3">
+          <div className="text-2xl font-bold text-gray-900">{formatPrice(currentPrice, symbol)}</div>
+          <div className={`flex items-center space-x-1 ${isPositive ? "text-green-600" : "text-red-600"}`}>
+            {isPositive ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+            <span className="text-sm font-medium">
+              {isPositive ? "+" : ""}
+              {priceChange.toFixed(2)}%
+            </span>
+          </div>
+        </div>
+
+        {/* Loading indicator */}
+        {isLoading && (
+          <div className="flex items-center space-x-2 text-gray-500">
+            <Clock className="w-4 h-4 animate-spin" />
+            <span className="text-sm">Loading...</span>
+          </div>
+        )}
+      </div>
+
+      {/* Interval selection buttons */}
+      <div className="flex space-x-1 mb-4">
+        {INTERVAL_BUTTONS.map((interval) => (
+          <button
+            key={interval.key}
+            onClick={() => setSelectedInterval(interval.key)}
+            className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
+              selectedInterval === interval.key
+                ? "bg-blue-500 text-white"
+                : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+            }`}
+          >
+            {interval.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Chart */}
+      <div className="h-40">
+        {chartData.length > 0 ? (
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={chartData}>
+              <XAxis
+                dataKey="formattedTime"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fontSize: 10, fill: "#6B7280" }}
+                interval="preserveStartEnd"
+              />
+              <YAxis
+                domain={["dataMin - dataMin * 0.01", "dataMax + dataMax * 0.01"]}
+                axisLine={false}
+                tickLine={false}
+                tick={{ fontSize: 10, fill: "#6B7280" }}
+                tickFormatter={(value) => formatPrice(value, symbol)}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Line
+                type="monotone"
+                dataKey="price"
+                stroke={color}
+                strokeWidth={2}
+                dot={false}
+                activeDot={{ r: 4, fill: color }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className="flex items-center justify-center h-full text-gray-500">
+            <div className="text-center">
+              <Clock className="w-8 h-8 mx-auto mb-2 animate-pulse" />
+              <p className="text-sm">Loading chart data...</p>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
