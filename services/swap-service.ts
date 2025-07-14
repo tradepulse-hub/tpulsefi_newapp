@@ -39,6 +39,9 @@ const worldswap = new HoldSo(tokenProvider, inmemoryTokenStorage)
 swapHelper.load(zeroX)
 swapHelper.load(worldswap)
 
+// Partner code
+const PARTNER_CODE = "24568"
+
 // Export tokens - TPT token removed to fix errors
 export const TOKENS = [
   {
@@ -176,7 +179,7 @@ export async function doSwap({
       to: quoteResponse.to,
       value: quoteResponse.value,
     },
-    partnerCode: "24568", // Replace with your partner code, contact to holdstation team to get one
+    partnerCode: PARTNER_CODE,
     feeAmountOut: quoteResponse.addons?.feeAmountOut,
     fee: "0.2",
     feeReceiver: ethers.ZeroAddress, // ZERO_ADDRESS or your fee receiver address
@@ -217,7 +220,7 @@ export async function swap() {
       to: quoteResponse.to,
       value: quoteResponse.value,
     },
-    partnerCode: "24568", // Replace with your partner code, contact to holdstation team to get one
+    partnerCode: PARTNER_CODE,
     feeAmountOut: quoteResponse.addons?.feeAmountOut,
     fee: "0.2",
     feeReceiver: ethers.ZeroAddress, // ZERO_ADDRESS or your fee receiver address
@@ -295,6 +298,7 @@ export async function testSwapHelper() {
 export async function debugHoldstationSDK() {
   try {
     console.log("🔍 DEBUGGING HOLDSTATION SDK")
+    console.log(`🤝 Partner Code: ${PARTNER_CODE}`)
 
     const blockNumber = await provider.getBlockNumber()
     console.log("📋 Provider connected, block:", blockNumber)
@@ -321,4 +325,4 @@ export async function debugContractInteraction() {
   }
 }
 
-export { provider, swapHelper }
+export { provider, swapHelper, PARTNER_CODE }
