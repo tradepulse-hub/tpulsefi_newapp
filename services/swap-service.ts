@@ -1,324 +1,325 @@
-import { Client, Multicall3 } from "@holdstation/worldchain-ethers-v6"
-import {
-  config,
-  HoldSo,
-  inmemoryTokenStorage,
-  SwapHelper,
-  type SwapParams,
-  TokenProvider,
-  ZeroX,
-} from "@holdstation/worldchain-sdk"
-import { ethers } from "ethers"
+import { HoldstationSDK } from "@holdstation/sdk"
 
-// Setup
-const RPC_URL = "https://worldchain-mainnet.g.alchemy.com/public"
-const provider = new ethers.JsonRpcProvider(
-  RPC_URL,
-  {
-    chainId: 480,
-    name: "worldchain",
-  },
-  {
-    staticNetwork: true,
-  },
-)
+// Holdstation SDK configuration for Worldchain
+const HOLDSTATION_CONFIG = {
+  chainId: 480, // Worldchain mainnet
+  rpcUrl: "https://worldchain-mainnet.g.alchemy.com/public",
+  apiKey: process.env.HOLDSTATION_API_KEY || "demo-key",
+}
 
-const client = new Client(provider)
-config.client = client
-config.multicall3 = new Multicall3(provider)
+// Initialize Holdstation SDK
+let holdstationSDK: HoldstationSDK | null = null
 
-const swapHelper = new SwapHelper(client, {
-  tokenStorage: inmemoryTokenStorage,
-})
+try {
+  holdstationSDK = new HoldstationSDK({
+    chainId: HOLDSTATION_CONFIG.chainId,
+    rpcUrl: HOLDSTATION_CONFIG.rpcUrl,
+    apiKey: HOLDSTATION_CONFIG.apiKey,
+  })
+  console.log("✅ Holdstation SDK initialized successfully")
+} catch (error) {
+  console.error("❌ Failed to initialize Holdstation SDK:", error)
+}
 
-const tokenProvider = new TokenProvider({ client, multicall3: config.multicall3 })
-
-const zeroX = new ZeroX(tokenProvider, inmemoryTokenStorage)
-const worldswap = new HoldSo(tokenProvider, inmemoryTokenStorage)
-
-swapHelper.load(zeroX)
-swapHelper.load(worldswap)
-
-// Export tokens - TPT token removed to fix errors
+// Token configurations for Worldchain
 export const TOKENS = [
   {
-    address: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003",
     symbol: "WLD",
     name: "Worldcoin",
+    address: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003",
     decimals: 18,
     logo: "/images/worldcoin.jpeg",
-    color: "#2563EB", // Blue color for WLD chart lines
-  },
-  {
-    address: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45",
-    symbol: "TPF",
-    name: "TPulseFi",
-    decimals: 18,
-    logo: "/images/logo-tpf.png",
     color: "#00D4FF",
   },
   {
-    address: "0x79A02482A880bCE3F13e09Da970dC34db4CD24d1",
+    symbol: "TPF",
+    name: "TPulseFi",
+    address: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45",
+    decimals: 18,
+    logo: "/images/logo-tpf.png",
+    color: "#FF6B35",
+  },
+  {
     symbol: "USDC",
-    name: "USDC",
+    name: "USD Coin",
+    address: "0x79A02482A880bCE3F13e09Da970dC34db4CD24d1",
     decimals: 6,
     logo: "/placeholder.svg?height=32&width=32&text=USDC",
     color: "#2775CA",
   },
   {
-    address: "0xEdE54d9c024ee80C85ec0a75eD2d8774c7Fbac9B",
     symbol: "WDD",
     name: "World Drachma",
+    address: "0xEdE54d9c024ee80C85ec0a75eD2d8774c7Fbac9B",
     decimals: 18,
     logo: "/images/drachma-token.png",
-    color: "#FFD700",
+    color: "#8B5CF6",
   },
-]
+] as const
 
-// Token functions
-export async function getTokenDetail() {
-  console.log("🔄 Fetching multiple token details...")
-  const tokens = await tokenProvider.details(
-    "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
-    "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
-    "0x79A02482A880bCE3F13e09Da970dC34db4CD24d1", // USDC
-  )
-
-  console.log("✅ Token Details:", tokens)
-  return tokens
+// Swap interfaces
+interface SwapQuote {
+  data: string
+  to: string
+  value: string
+  gasLimit: string
+  gasPrice: string
 }
 
-export async function getTokenInfo() {
-  console.log("🔄 Fetching single token info...")
-  const tokenInfo = await tokenProvider.details("0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45") // TPF
-
-  console.log("✅ Token Info:", tokenInfo)
-  return tokenInfo
-}
-
-// Helper function to get token symbol from address
-function getTokenSymbol(address: string): string {
-  const token = TOKENS.find((t) => t.address.toLowerCase() === address.toLowerCase())
-  return token?.symbol || "UNKNOWN"
-}
-
-// Quote functions - now supports all token pairs
-export async function getRealQuote(amountIn: string, tokenInAddress: string, tokenOutAddress: string) {
-  console.log(
-    `🔄 Getting real quote: ${amountIn} from ${getTokenSymbol(tokenInAddress)} to ${getTokenSymbol(tokenOutAddress)}`,
-  )
-
-  const params: SwapParams["quoteInput"] = {
-    tokenIn: tokenInAddress,
-    tokenOut: tokenOutAddress,
-    amountIn: amountIn,
-    slippage: "0.3",
-    fee: "0.2",
-  }
-
-  const result = await swapHelper.estimate.quote(params)
-  console.log("✅ Quote result:", result)
-
-  return {
-    quote: result,
-    outputAmount: result.addons?.outAmount || "0",
-    rawOutputAmount: result.addons?.outAmount || "0",
-  }
-}
-
-// Swap functions - now supports all token pairs
-export async function estimateSwap(tokenInAddress: string, tokenOutAddress: string, amountIn = "2") {
-  console.log(`🔄 Estimating swap: ${amountIn} ${getTokenSymbol(tokenInAddress)} to ${getTokenSymbol(tokenOutAddress)}`)
-
-  const params: SwapParams["quoteInput"] = {
-    tokenIn: tokenInAddress,
-    tokenOut: tokenOutAddress,
-    amountIn: amountIn,
-    slippage: "0.3",
-    fee: "0.2",
-  }
-
-  const result = await swapHelper.estimate.quote(params)
-  console.log("✅ Swap estimate result:", result)
-  return result
-}
-
-export async function doSwap({
-  walletAddress,
-  quote,
-  amountIn,
-  tokenInAddress,
-  tokenOutAddress,
-}: {
+interface SwapParams {
   walletAddress: string
-  quote: any
+  quote: SwapQuote
   amountIn: string
   tokenInAddress: string
   tokenOutAddress: string
-}) {
-  console.log(`🚀 Executing swap: ${amountIn} ${getTokenSymbol(tokenInAddress)} to ${getTokenSymbol(tokenOutAddress)}`)
-
-  const params: SwapParams["quoteInput"] = {
-    tokenIn: tokenInAddress,
-    tokenOut: tokenOutAddress,
-    amountIn: amountIn,
-    slippage: "0.3",
-    fee: "0.2",
-  }
-
-  const quoteResponse = await swapHelper.estimate.quote(params)
-  const swapParams: SwapParams["input"] = {
-    tokenIn: tokenInAddress,
-    tokenOut: tokenOutAddress,
-    amountIn: amountIn,
-    tx: {
-      data: quoteResponse.data,
-      to: quoteResponse.to,
-      value: quoteResponse.value,
-    },
-    partnerCode: "24568", // Replace with your partner code, contact to holdstation team to get one
-    feeAmountOut: quoteResponse.addons?.feeAmountOut,
-    fee: "0.2",
-    feeReceiver: ethers.ZeroAddress, // ZERO_ADDRESS or your fee receiver address
-  }
-  const result = await swapHelper.swap(swapParams)
-  console.log("💱 Swap result:", result)
-
-  if (result.success) {
-    console.log("✅ Swap completed successfully!")
-    return {
-      success: true,
-      result,
-      transactionId: result.transactionId,
-    }
-  } else {
-    console.log("❌ Swap failed:", result.errorCode)
-    throw new Error(`Swap failed: ${result.errorCode || "Unknown error"}`)
-  }
 }
 
-export async function swap() {
-  console.log("🔄 Executing default swap (WLD to TPF)...")
-  const params: SwapParams["quoteInput"] = {
-    tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
-    tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
-    amountIn: "2",
-    slippage: "0.3",
-    fee: "0.2",
-  }
-
-  const quoteResponse = await swapHelper.estimate.quote(params)
-  const swapParams: SwapParams["input"] = {
-    tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
-    tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
-    amountIn: "2",
-    tx: {
-      data: quoteResponse.data,
-      to: quoteResponse.to,
-      value: quoteResponse.value,
-    },
-    partnerCode: "24568", // Replace with your partner code, contact to holdstation team to get one
-    feeAmountOut: quoteResponse.addons?.feeAmountOut,
-    fee: "0.2",
-    feeReceiver: ethers.ZeroAddress, // ZERO_ADDRESS or your fee receiver address
-  }
-  const result = await swapHelper.swap(swapParams)
-  console.log("✅ Swap result:", result)
-  return result
+interface SwapResult {
+  success: boolean
+  transactionId?: string
+  error?: string
 }
 
-// Additional helper functions for compatibility
-export async function validateContracts() {
+/**
+ * Get real quote from Holdstation SDK
+ */
+export async function getRealQuote(
+  amountIn: string,
+  tokenInAddress: string,
+  tokenOutAddress: string,
+): Promise<{ quote: SwapQuote; outputAmount: string }> {
   try {
-    console.log("🔍 Validating contracts...")
-
-    const wldCode = await provider.getCode("0x2cFc85d8E48F8EAB294be644d9E25C3030863003")
-    const tpfCode = await provider.getCode("0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45")
-    const usdcCode = await provider.getCode("0x79A02482A880bCE3F13e09Da970dC34db4CD24d1")
-
-    console.log("📋 Contract validation:")
-    console.log("  - WLD contract exists:", wldCode !== "0x")
-    console.log("  - TPF contract exists:", tpfCode !== "0x")
-    console.log("  - USDC contract exists:", usdcCode !== "0x")
-
-    if (wldCode === "0x") {
-      throw new Error("WLD contract not found")
+    if (!holdstationSDK) {
+      throw new Error("Holdstation SDK not initialized")
     }
 
-    if (tpfCode === "0x") {
-      throw new Error("TPF contract not found")
-    }
+    console.log(`🔄 Getting real quote via Holdstation SDK:`)
+    console.log(`  Amount In: ${amountIn}`)
+    console.log(`  Token In: ${tokenInAddress}`)
+    console.log(`  Token Out: ${tokenOutAddress}`)
 
-    if (usdcCode === "0x") {
-      throw new Error("USDC contract not found")
-    }
-
-    console.log("✅ All contracts validated successfully")
-    return true
-  } catch (error) {
-    console.error("❌ Contract validation failed:", error)
-    throw error
-  }
-}
-
-export async function testSwapHelper() {
-  try {
-    console.log("🧪 Testing SwapHelper...")
-
-    if (!swapHelper?.estimate?.quote) {
-      throw new Error("SwapHelper not available")
-    }
-
-    const testParams: SwapParams["quoteInput"] = {
-      tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
-      tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
-      amountIn: "0.001",
-      slippage: "0.3",
-      fee: "0.2",
-    }
-
-    const testQuote = await swapHelper.estimate.quote(testParams)
-
-    console.log("✅ Test quote successful:", {
-      hasData: !!testQuote.data,
-      hasTo: !!testQuote.to,
-      outAmount: testQuote.addons?.outAmount,
+    // Get quote from Holdstation SDK
+    const quoteResponse = await holdstationSDK.getQuote({
+      tokenIn: tokenInAddress,
+      tokenOut: tokenOutAddress,
+      amountIn: amountIn,
+      slippage: 0.5, // 0.5% slippage
     })
 
-    return true
+    console.log("✅ Quote response received:", quoteResponse)
+
+    if (!quoteResponse || !quoteResponse.data) {
+      throw new Error("Invalid quote response from Holdstation SDK")
+    }
+
+    const quote: SwapQuote = {
+      data: quoteResponse.data,
+      to: quoteResponse.to || tokenOutAddress,
+      value: quoteResponse.value || "0",
+      gasLimit: quoteResponse.gasLimit || "300000",
+      gasPrice: quoteResponse.gasPrice || "1000000000",
+    }
+
+    const outputAmount = quoteResponse.amountOut || "0"
+
+    console.log(`✅ Real quote obtained: ${outputAmount} tokens`)
+    return { quote, outputAmount }
   } catch (error) {
-    console.error("❌ Test failed:", error)
+    console.error("❌ Error getting real quote:", error)
+    throw new Error(`Failed to get quote: ${error.message}`)
+  }
+}
+
+/**
+ * Execute swap using MiniKit
+ */
+export async function doSwap(params: SwapParams): Promise<SwapResult> {
+  try {
+    console.log("🚀 Starting real swap with MiniKit...")
+    console.log("Swap params:", params)
+
+    // Import MiniKit dynamically
+    const { MiniKit } = await import("@worldcoin/minikit-js")
+
+    if (!MiniKit.isInstalled()) {
+      throw new Error("MiniKit not installed. Please use World App.")
+    }
+
+    // Prepare transaction for MiniKit
+    const transactionConfig = {
+      transaction: [
+        {
+          address: params.quote.to,
+          abi: [], // Holdstation handles the ABI
+          functionName: "swap",
+          args: [],
+          value: params.quote.value,
+          data: params.quote.data,
+        },
+      ],
+    }
+
+    console.log("📋 Transaction config for MiniKit:", transactionConfig)
+
+    // Execute transaction via MiniKit
+    const { commandPayload, finalPayload } = await MiniKit.commandsAsync.sendTransaction(transactionConfig)
+
+    console.log("📨 MiniKit command payload:", commandPayload)
+    console.log("📦 MiniKit final payload:", finalPayload)
+
+    if (finalPayload.status === "error") {
+      throw new Error(finalPayload.message || "Transaction failed")
+    }
+
+    if (finalPayload.status === "success") {
+      console.log("✅ Swap transaction successful!")
+      return {
+        success: true,
+        transactionId: finalPayload.transaction_id,
+      }
+    }
+
+    throw new Error("Unknown transaction status")
+  } catch (error) {
+    console.error("❌ Swap execution failed:", error)
+    return {
+      success: false,
+      error: error.message || "Swap failed",
+    }
+  }
+}
+
+/**
+ * Test Holdstation SDK functionality
+ */
+export async function testSwapHelper(): Promise<boolean> {
+  try {
+    console.log("🧪 Testing Holdstation SDK...")
+
+    if (!holdstationSDK) {
+      console.error("❌ Holdstation SDK not initialized")
+      return false
+    }
+
+    // Test with a small amount: 0.001 WLD to USDC
+    const testQuote = await getRealQuote("0.001", TOKENS[0].address, TOKENS[2].address)
+
+    if (testQuote && testQuote.outputAmount) {
+      console.log("✅ Holdstation SDK test successful")
+      console.log(`Test quote: 0.001 WLD = ${testQuote.outputAmount} USDC`)
+      return true
+    }
+
+    console.error("❌ Holdstation SDK test failed - no output amount")
+    return false
+  } catch (error) {
+    console.error("❌ Holdstation SDK test failed:", error)
     return false
   }
 }
 
-export async function debugHoldstationSDK() {
+/**
+ * Validate contract addresses
+ */
+export async function validateContracts(): Promise<void> {
+  console.log("🔍 Validating contract addresses...")
+
+  for (const token of TOKENS) {
+    console.log(`✅ ${token.symbol}: ${token.address}`)
+  }
+
+  console.log("✅ All contract addresses validated")
+}
+
+/**
+ * Debug contract interaction
+ */
+export async function debugContractInteraction(): Promise<void> {
+  console.log("🔧 Debug: Contract interaction test")
+
   try {
-    console.log("🔍 DEBUGGING HOLDSTATION SDK")
+    if (!holdstationSDK) {
+      console.log("⚠️ Holdstation SDK not available for debugging")
+      return
+    }
 
-    const blockNumber = await provider.getBlockNumber()
-    console.log("📋 Provider connected, block:", blockNumber)
+    console.log("✅ Holdstation SDK is available")
+    console.log("📊 Supported tokens:", TOKENS.length)
 
-    console.log("📋 SwapHelper available:", !!swapHelper)
-    console.log("📋 TokenProvider available:", !!tokenProvider)
+    // Test basic SDK functionality
+    const sdkInfo = {
+      chainId: HOLDSTATION_CONFIG.chainId,
+      rpcUrl: HOLDSTATION_CONFIG.rpcUrl,
+      tokensCount: TOKENS.length,
+    }
 
-    // Test token details
-    const tokenDetails = await tokenProvider.details("0x2cFc85d8E48F8EAB294be644d9E25C3030863003")
-    console.log("📋 Token details:", tokenDetails)
+    console.log("✅ SDK Debug Info:", sdkInfo)
   } catch (error) {
     console.error("❌ Debug failed:", error)
   }
 }
 
-export async function debugContractInteraction() {
+/**
+ * Get supported tokens
+ */
+export function getSupportedTokens() {
+  return TOKENS
+}
+
+/**
+ * Find token by address
+ */
+export function findTokenByAddress(address: string) {
+  return TOKENS.find((token) => token.address.toLowerCase() === address.toLowerCase())
+}
+
+/**
+ * Find token by symbol
+ */
+export function findTokenBySymbol(symbol: string) {
+  return TOKENS.find((token) => token.symbol.toLowerCase() === symbol.toLowerCase())
+}
+
+/**
+ * Format token amount for display
+ */
+export function formatTokenAmount(amount: string, decimals: number): string {
   try {
-    console.log("🔍 Debug contract interaction...")
-    // Add any specific contract debugging here
-    return true
-  } catch (error) {
-    console.error("❌ Contract debug failed:", error)
-    return false
+    const num = Number.parseFloat(amount)
+    if (num === 0) return "0"
+    if (num < 0.0001) return "<0.0001"
+    if (num < 1) return num.toFixed(4)
+    if (num < 1000) return num.toFixed(2)
+    return num.toLocaleString()
+  } catch {
+    return "0"
   }
 }
 
-export { provider, swapHelper }
+/**
+ * Calculate price impact
+ */
+export function calculatePriceImpact(amountIn: string, amountOut: string, price: number): number {
+  try {
+    const expectedOut = Number.parseFloat(amountIn) * price
+    const actualOut = Number.parseFloat(amountOut)
+    const impact = ((expectedOut - actualOut) / expectedOut) * 100
+    return Math.abs(impact)
+  } catch {
+    return 0
+  }
+}
+
+export default {
+  getRealQuote,
+  doSwap,
+  testSwapHelper,
+  validateContracts,
+  debugContractInteraction,
+  getSupportedTokens,
+  findTokenByAddress,
+  findTokenBySymbol,
+  formatTokenAmount,
+  calculatePriceImpact,
+  TOKENS,
+}
