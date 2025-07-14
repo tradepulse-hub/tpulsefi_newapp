@@ -401,31 +401,31 @@ export function DebugConsole() {
                     key={log.id}
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className={`group text-xs font-mono leading-relaxed border-l-2 ${getBorderColor(log.type)} ${
+                    className={`text-xs font-mono leading-relaxed border-l-2 ${getBorderColor(log.type)} ${
                       isSwapRelated ? "bg-red-900/20" : "bg-gray-800/30"
                     } rounded-r p-2`}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-2 mb-1">
-                            <span className="text-gray-500">[{formatTime(log.timestamp)}]</span>
-                            {log.type === "error" && <AlertTriangle className="w-3 h-3 text-red-400" />}
-                            {isSwapRelated && (
-                              <span className="bg-red-600 text-white text-xs px-1 py-0.5 rounded">SWAP ERROR</span>
-                            )}
-                          </div>
-                          <button
-                            onClick={() => copyLogToClipboard(log)}
-                            className="p-1 text-gray-400 hover:text-white transition-colors rounded opacity-0 group-hover:opacity-100"
-                            title="Copy log details"
-                          >
-                            {copiedLogs.has(log.id) ? (
-                              <Check className="w-3 h-3 text-green-400" />
-                            ) : (
-                              <Copy className="w-3 h-3" />
-                            )}
-                          </button>
+                        <div className="flex items-center space-x-2 mb-1">
+                          <span className="text-gray-500">[{formatTime(log.timestamp)}]</span>
+                          {log.type === "error" && <AlertTriangle className="w-3 h-3 text-red-400" />}
+                          {log.type === "error" && (
+                            <button
+                              onClick={() => copyLogToClipboard(log)}
+                              className="p-0.5 text-gray-400 hover:text-white transition-colors rounded"
+                              title="Copy error details"
+                            >
+                              {copiedLogs.has(log.id) ? (
+                                <Check className="w-3 h-3 text-green-400" />
+                              ) : (
+                                <Copy className="w-3 h-3" />
+                              )}
+                            </button>
+                          )}
+                          {isSwapRelated && (
+                            <span className="bg-red-600 text-white text-xs px-1 py-0.5 rounded">SWAP ERROR</span>
+                          )}
                         </div>
                         <div className={`${getLogColor(log.type)} break-words`}>{log.message}</div>
 
