@@ -80,12 +80,12 @@ const TOKENS_INFO = {
     logo: "/images/drachma-token.png",
     decimals: 18,
   },
-  USDC: {
-    symbol: "USDC",
-    name: "USD Coin",
-    address: "0x79A02482A880bCE3F13e09Da970dC34db4CD24d1",
-    logo: "/placeholder.svg?height=32&width=32&text=USDC",
-    decimals: 6,
+  TPT: {
+    symbol: "TPT",
+    name: "TradePulse Token",
+    address: "0x868D08798F91ba9D6AC126148fdE8bBdfb6354D5", // Real contract address
+    logo: "/images/logo-tpf.png",
+    decimals: 18,
   },
 }
 
