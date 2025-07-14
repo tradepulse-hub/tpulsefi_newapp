@@ -85,6 +85,7 @@ export async function getTokenDetail() {
     "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
     "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
     "0x79A02482A880bCE3F13e09Da970dC34db4CD24d1", // USDC
+    "0xEdE54d9c024ee80C85ec0a75eD2d8774c7Fbac9B", // WDD
   )
 
   console.log("✅ Token Details:", tokens)
@@ -140,6 +141,7 @@ export async function estimateSwap(tokenInAddress: string, tokenOutAddress: stri
   return result
 }
 
+// --- The doSwap function following exact logic from your file ---
 export async function doSwap({
   walletAddress,
   quote,
@@ -154,9 +156,6 @@ export async function doSwap({
   tokenOutAddress: string
 }) {
   if (!walletAddress || !quote || !amountIn) return
-
-  console.log(`🚀 Executing swap: ${amountIn} ${getTokenSymbol(tokenInAddress)} to ${getTokenSymbol(tokenOutAddress)}`)
-
   try {
     const swapParams: SwapParams["input"] = {
       tokenIn: tokenInAddress,
@@ -172,17 +171,15 @@ export async function doSwap({
       fee: "0.2",
       feeReceiver: ethers.ZeroAddress,
     }
-
     console.log("Swapping with params:", swapParams)
     const result = await swapHelper.swap(swapParams)
-
     if (result.success) {
       // Wait for transaction to be confirmed
       await new Promise((res) => setTimeout(res, 2500))
       await provider.getBlockNumber()
       await updateUserData(walletAddress)
       await loadTokenBalances(walletAddress)
-      console.log("✅ Swap completed successfully!")
+      console.log("Swap successful!")
       return {
         success: true,
         result,
@@ -201,6 +198,7 @@ export async function doSwap({
 export async function swap() {
   console.log("🔄 Executing default swap (WLD to TPF)...")
 
+  // First get the quote
   const params: SwapParams["quoteInput"] = {
     tokenIn: wldToken.address,
     tokenOut: tpfToken.address,
@@ -211,34 +209,39 @@ export async function swap() {
 
   const quote = await swapHelper.estimate.quote(params)
 
-  const swapParams: SwapParams["input"] = {
-    tokenIn: wldToken.address,
-    tokenOut: tpfToken.address,
-    amountIn: "2",
-    tx: {
-      data: quote.data,
-      to: quote.to,
-      value: quote.value,
-    },
-    partnerCode: "24568",
-    feeAmountOut: quote.addons?.feeAmountOut,
-    fee: "0.2",
-    feeReceiver: ethers.ZeroAddress,
+  // Then execute swap using the same logic as doSwap
+  if (!quote) return
+
+  try {
+    const swapParams: SwapParams["input"] = {
+      tokenIn: wldToken.address,
+      tokenOut: tpfToken.address,
+      amountIn: "2",
+      tx: {
+        data: quote.data,
+        to: quote.to,
+        value: quote.value,
+      },
+      partnerCode: "24568",
+      feeAmountOut: quote.addons?.feeAmountOut,
+      fee: "0.2",
+      feeReceiver: ethers.ZeroAddress,
+    }
+    console.log("Swapping with params:", swapParams)
+    const result = await swapHelper.swap(swapParams)
+    if (result.success) {
+      // Wait for transaction to be confirmed
+      await new Promise((res) => setTimeout(res, 2500))
+      await provider.getBlockNumber()
+      console.log("Swap successful!")
+    } else {
+      console.error("Swap failed: ", result)
+    }
+    return result
+  } catch (error) {
+    console.error("Swap failed:", error)
+    throw error
   }
-
-  console.log("Swapping with params:", swapParams)
-  const result = await swapHelper.swap(swapParams)
-
-  if (result.success) {
-    // Wait for transaction to be confirmed
-    await new Promise((res) => setTimeout(res, 2500))
-    await provider.getBlockNumber()
-    console.log("✅ Default swap completed successfully!")
-  } else {
-    console.error("Default swap failed: ", result)
-  }
-
-  return result
 }
 
 // Additional helper functions for compatibility
