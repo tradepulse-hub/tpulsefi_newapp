@@ -48,9 +48,18 @@ export const TOKENS = [
 
 // Rate limiting configuration
 const RATE_LIMIT_CONFIG = {
-  maxRequestsPerMinute: 30,
-  retryDelays: [1000, 2000, 5000], // 1s, 2s, 5s
+  maxRequestsPerMinute: 20, // Reduced from 30 to be more conservative
+  retryDelays: [2000, 5000, 10000], // Increased delays: 2s, 5s, 10s
   maxRetries: 3,
+}
+
+// Swap configuration for better success rates
+const SWAP_CONFIG = {
+  defaultSlippage: "1.0", // Increased to 1% for better success rate
+  maxSlippage: "3.0", // Maximum allowed slippage
+  minAmountThreshold: "0.001", // Minimum amount for swaps
+  gasMultiplier: 1.2, // Gas estimation multiplier
+  simulationRetries: 2, // Number of simulation retries
 }
 
 // Rate limiting tracker
@@ -81,6 +90,12 @@ class RateLimiter {
     const waitTime = this.windowMs - (Date.now() - oldestRequest)
     return Math.max(0, waitTime)
   }
+
+  getRemainingRequests(): number {
+    const now = Date.now()
+    this.requests = this.requests.filter((time) => now - time < this.windowMs)
+    return Math.max(0, RATE_LIMIT_CONFIG.maxRequestsPerMinute - this.requests.length)
+  }
 }
 
 const rateLimiter = new RateLimiter()
@@ -89,7 +104,7 @@ const rateLimiter = new RateLimiter()
 const HOLDSTATION_CONFIG = {
   baseURL: "https://api.holdstation.exchange",
   chainId: 480,
-  timeout: 30000,
+  timeout: 45000, // Increased timeout
 }
 
 // Setup
@@ -133,12 +148,23 @@ function handleSwapError(error: any, operation: string, context?: any): never {
     },
     context,
     timestamp: new Date().toISOString(),
+    rateLimiterStatus: {
+      remainingRequests: rateLimiter.getRemainingRequests(),
+      canMakeRequest: rateLimiter.canMakeRequest(),
+      waitTime: rateLimiter.getWaitTime(),
+    },
   })
 
   // Enhanced error messages based on error type
   if (error.message?.includes("429") || error.status === 429) {
     throw new Error(
       `Rate limit exceeded. Too many requests to Holdstation API. Please wait ${Math.ceil(rateLimiter.getWaitTime() / 1000)} seconds before trying again.`,
+    )
+  }
+
+  if (error.message?.includes("simulation_failed") || error.message?.includes("simulation failed")) {
+    throw new Error(
+      `Swap simulation failed. This could be due to insufficient liquidity, high slippage, or network congestion. Try reducing the swap amount or increasing slippage tolerance.`,
     )
   }
 
@@ -156,6 +182,10 @@ function handleSwapError(error: any, operation: string, context?: any): never {
 
   if (error.message?.includes("slippage")) {
     throw new Error(`Slippage tolerance exceeded. Try increasing slippage or reducing swap amount.`)
+  }
+
+  if (error.message?.includes("liquidity")) {
+    throw new Error(`Insufficient liquidity for this token pair. Try a smaller amount or different tokens.`)
   }
 
   // Generic error with more context
@@ -192,13 +222,15 @@ async function retryWithBackoff<T>(operation: () => Promise<T>, operationName: s
         error: error.message,
         attempt: attempt + 1,
         maxAttempts: RATE_LIMIT_CONFIG.maxRetries + 1,
+        context,
       })
 
       // Don't retry on certain errors
       if (
         error.message?.includes("insufficient") ||
         error.message?.includes("Invalid token") ||
-        error.message?.includes("slippage")
+        error.message?.includes("slippage") ||
+        error.message?.includes("liquidity")
       ) {
         console.error(`🚫 SWAP NON-RETRYABLE ERROR [${operationName.toUpperCase()}]:`, error.message)
         break
@@ -259,6 +291,20 @@ export const debugContractInteraction = async (): Promise<boolean> => {
     const blockNumber = await provider.getBlockNumber()
     console.log(`📋 BLOCKCHAIN: Connected to block ${blockNumber}`)
 
+    // Test token balances for common addresses
+    const testAddress = "0x0000000000000000000000000000000000000001"
+    try {
+      const wldContract = new ethers.Contract(
+        "0x2cFc85d8E48F8EAB294be644d9E25C3030863003",
+        ["function balanceOf(address) view returns (uint256)"],
+        provider,
+      )
+      const balance = await wldContract.balanceOf(testAddress)
+      console.log(`📋 BLOCKCHAIN: WLD contract responsive, test balance: ${balance.toString()}`)
+    } catch (error) {
+      console.warn(`⚠️ BLOCKCHAIN: WLD contract test failed:`, error.message)
+    }
+
     return true
   } catch (error) {
     console.error("❌ BLOCKCHAIN: Contract debug failed:", error)
@@ -288,6 +334,54 @@ export const debugHoldstationSDK = async (): Promise<void> => {
   }
 }
 
+// Validate swap parameters before execution
+function validateSwapParams(params: {
+  tokenInAddress: string
+  tokenOutAddress: string
+  amountIn: string
+  walletAddress?: string
+}): void {
+  const { tokenInAddress, tokenOutAddress, amountIn, walletAddress } = params
+
+  if (!ethers.isAddress(tokenInAddress)) {
+    throw new Error(`Invalid token input address: ${tokenInAddress}`)
+  }
+
+  if (!ethers.isAddress(tokenOutAddress)) {
+    throw new Error(`Invalid token output address: ${tokenOutAddress}`)
+  }
+
+  if (tokenInAddress.toLowerCase() === tokenOutAddress.toLowerCase()) {
+    throw new Error("Cannot swap token with itself")
+  }
+
+  const amount = Number.parseFloat(amountIn)
+  if (isNaN(amount) || amount <= 0) {
+    throw new Error(`Invalid amount: ${amountIn}`)
+  }
+
+  if (amount < Number.parseFloat(SWAP_CONFIG.minAmountThreshold)) {
+    throw new Error(`Amount too small. Minimum: ${SWAP_CONFIG.minAmountThreshold}`)
+  }
+
+  if (walletAddress && !ethers.isAddress(walletAddress)) {
+    throw new Error(`Invalid wallet address: ${walletAddress}`)
+  }
+
+  const tokenIn = TOKENS.find((t) => t.address.toLowerCase() === tokenInAddress.toLowerCase())
+  const tokenOut = TOKENS.find((t) => t.address.toLowerCase() === tokenOutAddress.toLowerCase())
+
+  if (!tokenIn) {
+    throw new Error(`Unsupported input token: ${tokenInAddress}`)
+  }
+
+  if (!tokenOut) {
+    throw new Error(`Unsupported output token: ${tokenOutAddress}`)
+  }
+
+  console.log(`✅ VALIDATION: Swap parameters valid - ${amount} ${tokenIn.symbol} → ${tokenOut.symbol}`)
+}
+
 // Test Holdstation SDK helper with rate limiting
 export const testSwapHelper = async (): Promise<boolean> => {
   try {
@@ -301,9 +395,16 @@ export const testSwapHelper = async (): Promise<boolean> => {
       tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
       tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
       amountIn: "0.001",
-      slippage: "0.5", // Increased slippage
+      slippage: SWAP_CONFIG.defaultSlippage,
       fee: "0.2",
     }
+
+    // Validate before testing
+    validateSwapParams({
+      tokenInAddress: testParams.tokenIn,
+      tokenOutAddress: testParams.tokenOut,
+      amountIn: testParams.amountIn,
+    })
 
     const testQuote = await retryWithBackoff(
       async () => {
@@ -317,6 +418,7 @@ export const testSwapHelper = async (): Promise<boolean> => {
       hasData: !!testQuote.data,
       hasTo: !!testQuote.to,
       outAmount: testQuote.addons?.outAmount,
+      gasEstimate: testQuote.addons?.gasEstimate,
     })
 
     return true
@@ -332,45 +434,43 @@ function getTokenSymbol(address: string): string {
   return token?.symbol || "UNKNOWN"
 }
 
-// Enhanced quote function with rate limiting and validation
+// Enhanced quote function with validation and better parameters
 export async function getRealQuote(amountIn: string, tokenInAddress: string, tokenOutAddress: string) {
   console.log(
     `🔄 HOLDSTATION: Getting quote ${amountIn} ${getTokenSymbol(tokenInAddress)} → ${getTokenSymbol(tokenOutAddress)}`,
   )
 
-  // Validate inputs
-  if (!amountIn || Number.parseFloat(amountIn) <= 0) {
-    throw new Error("Invalid amount: must be greater than 0")
-  }
-
-  const tokenIn = TOKENS.find((t) => t.address.toLowerCase() === tokenInAddress.toLowerCase())
-  const tokenOut = TOKENS.find((t) => t.address.toLowerCase() === tokenOutAddress.toLowerCase())
-
-  if (!tokenIn || !tokenOut) {
-    throw new Error(`Invalid token addresses: ${tokenInAddress} or ${tokenOutAddress}`)
-  }
-
-  if (tokenInAddress.toLowerCase() === tokenOutAddress.toLowerCase()) {
-    throw new Error("Cannot swap token with itself")
-  }
+  // Validate inputs first
+  validateSwapParams({ tokenInAddress, tokenOutAddress, amountIn })
 
   const params: SwapParams["quoteInput"] = {
     tokenIn: tokenInAddress,
     tokenOut: tokenOutAddress,
     amountIn: amountIn,
-    slippage: "0.5", // 0.5% slippage
+    slippage: SWAP_CONFIG.defaultSlippage, // Use 1% slippage
     fee: "0.2",
   }
 
   console.log("📤 HOLDSTATION: Quote request:", {
     ...params,
-    tokenInSymbol: tokenIn.symbol,
-    tokenOutSymbol: tokenOut.symbol,
+    tokenInSymbol: getTokenSymbol(tokenInAddress),
+    tokenOutSymbol: getTokenSymbol(tokenOutAddress),
   })
 
   const result = await retryWithBackoff(
     async () => {
-      return await swapHelper.estimate.quote(params)
+      const quote = await swapHelper.estimate.quote(params)
+
+      // Validate quote response
+      if (!quote.data || !quote.to) {
+        throw new Error("Invalid quote response - missing transaction data")
+      }
+
+      if (!quote.addons?.outAmount || quote.addons.outAmount === "0") {
+        throw new Error("Invalid quote response - no output amount")
+      }
+
+      return quote
     },
     "get-quote",
     params,
@@ -381,6 +481,7 @@ export async function getRealQuote(amountIn: string, tokenInAddress: string, tok
     hasData: !!result.data,
     hasTo: !!result.to,
     gasEstimate: result.addons?.gasEstimate,
+    value: result.value,
   })
 
   return {
@@ -396,11 +497,13 @@ export async function estimateSwap(tokenInAddress: string, tokenOutAddress: stri
     `🔄 HOLDSTATION: Estimating swap ${amountIn} ${getTokenSymbol(tokenInAddress)} → ${getTokenSymbol(tokenOutAddress)}`,
   )
 
+  validateSwapParams({ tokenInAddress, tokenOutAddress, amountIn })
+
   const params: SwapParams["quoteInput"] = {
     tokenIn: tokenInAddress,
     tokenOut: tokenOutAddress,
     amountIn: amountIn,
-    slippage: "0.5",
+    slippage: SWAP_CONFIG.defaultSlippage,
     fee: "0.2",
   }
 
@@ -416,7 +519,7 @@ export async function estimateSwap(tokenInAddress: string, tokenOutAddress: stri
   return result
 }
 
-// Enhanced swap execution with comprehensive error handling
+// Enhanced swap execution with comprehensive validation and simulation
 export async function doSwap({
   walletAddress,
   quote,
@@ -436,35 +539,50 @@ export async function doSwap({
     )
     console.log("👤 HOLDSTATION: Wallet:", walletAddress)
 
-    // Validate inputs
-    if (!ethers.isAddress(walletAddress)) {
-      throw new Error("Invalid wallet address")
+    // Comprehensive validation
+    validateSwapParams({ tokenInAddress, tokenOutAddress, amountIn, walletAddress })
+
+    if (!quote || !quote.data || !quote.to) {
+      throw new Error("Invalid quote data - missing transaction information")
     }
 
-    if (!ethers.isAddress(tokenInAddress) || !ethers.isAddress(tokenOutAddress)) {
-      throw new Error("Invalid token addresses")
-    }
-
-    if (!quote.data || !quote.to) {
-      throw new Error("Invalid quote data - missing transaction data")
-    }
-
+    // Get fresh quote for execution to avoid stale data
+    console.log("🔄 HOLDSTATION: Getting fresh quote for execution...")
     const params: SwapParams["quoteInput"] = {
       tokenIn: tokenInAddress,
       tokenOut: tokenOutAddress,
       amountIn: amountIn,
-      slippage: "0.5",
+      slippage: SWAP_CONFIG.defaultSlippage,
       fee: "0.2",
     }
 
     const quoteResponse = await retryWithBackoff(
       async () => {
-        return await swapHelper.estimate.quote(params)
+        const freshQuote = await swapHelper.estimate.quote(params)
+
+        // Validate fresh quote
+        if (!freshQuote.data || !freshQuote.to) {
+          throw new Error("Fresh quote validation failed - missing transaction data")
+        }
+
+        if (!freshQuote.addons?.outAmount || freshQuote.addons.outAmount === "0") {
+          throw new Error("Fresh quote validation failed - no output amount")
+        }
+
+        console.log("✅ HOLDSTATION: Fresh quote validated:", {
+          hasData: !!freshQuote.data,
+          hasTo: !!freshQuote.to,
+          outAmount: freshQuote.addons?.outAmount,
+          gasEstimate: freshQuote.addons?.gasEstimate,
+        })
+
+        return freshQuote
       },
       "swap-quote",
       params,
     )
 
+    // Prepare swap parameters with validated data
     const swapParams: SwapParams["input"] = {
       tokenIn: tokenInAddress,
       tokenOut: tokenOutAddress,
@@ -472,7 +590,7 @@ export async function doSwap({
       tx: {
         data: quoteResponse.data,
         to: quoteResponse.to,
-        value: quoteResponse.value,
+        value: quoteResponse.value || "0",
       },
       partnerCode: "24568", // Replace with your partner code, contact to holdstation team to get one
       feeAmountOut: quoteResponse.addons?.feeAmountOut,
@@ -480,21 +598,56 @@ export async function doSwap({
       feeReceiver: ethers.ZeroAddress, // ZERO_ADDRESS or your fee receiver address
     }
 
-    console.log("📋 HOLDSTATION: Swap parameters:", {
-      ...swapParams,
+    console.log("📋 HOLDSTATION: Swap parameters prepared:", {
       tokenInSymbol: getTokenSymbol(tokenInAddress),
       tokenOutSymbol: getTokenSymbol(tokenOutAddress),
+      amountIn: swapParams.amountIn,
+      expectedOut: quoteResponse.addons?.outAmount,
+      hasTransactionData: !!swapParams.tx.data,
+      transactionTo: swapParams.tx.to,
+      transactionValue: swapParams.tx.value,
     })
+
+    // Execute swap with simulation retries
+    let simulationAttempts = 0
+    const maxSimulationAttempts = SWAP_CONFIG.simulationRetries
 
     const result = await retryWithBackoff(
       async () => {
-        return await swapHelper.swap(swapParams)
+        simulationAttempts++
+        console.log(`🎯 HOLDSTATION: Swap execution attempt ${simulationAttempts}/${maxSimulationAttempts + 1}`)
+
+        const swapResult = await swapHelper.swap(swapParams)
+
+        console.log("📊 HOLDSTATION: Raw swap result:", {
+          success: swapResult.success,
+          errorCode: swapResult.errorCode,
+          transactionId: swapResult.transactionId,
+          hasTransactionId: !!swapResult.transactionId,
+        })
+
+        // Enhanced result validation
+        if (!swapResult.success) {
+          if (swapResult.errorCode === "simulation_failed") {
+            throw new Error(
+              `Swap simulation failed (attempt ${simulationAttempts}). This may be due to insufficient liquidity, high price impact, or network congestion.`,
+            )
+          }
+          throw new Error(`Swap failed with error: ${swapResult.errorCode || "Unknown error"}`)
+        }
+
+        // Validate successful result
+        if (!swapResult.transactionId) {
+          console.warn("⚠️ HOLDSTATION: Swap marked as successful but no transaction ID provided")
+        }
+
+        return swapResult
       },
       "execute-swap",
-      swapParams,
+      { ...swapParams, attempt: simulationAttempts },
     )
 
-    console.log("💱 HOLDSTATION: Swap result:", result)
+    console.log("💱 HOLDSTATION: Final swap result:", result)
 
     if (result.success) {
       console.log("✅ HOLDSTATION: Swap completed successfully!")
@@ -503,11 +656,19 @@ export async function doSwap({
         transactionId: result.transactionId,
       }
     } else {
-      console.log("❌ HOLDSTATION: Swap failed:", result.errorCode)
-      throw new Error(`Swap failed: ${result.errorCode || "Unknown error"}`)
+      console.error("❌ HOLDSTATION: Swap completed but marked as failed:", result.errorCode)
+      throw new Error(`Swap execution failed: ${result.errorCode || "Unknown error"}`)
     }
   } catch (error) {
-    console.error("❌ HOLDSTATION: Swap execution failed:", error)
+    console.error("❌ HOLDSTATION: Swap execution failed:", {
+      error: error.message,
+      stack: error.stack,
+      tokenIn: getTokenSymbol(tokenInAddress),
+      tokenOut: getTokenSymbol(tokenOutAddress),
+      amount: amountIn,
+      wallet: walletAddress,
+    })
+
     return {
       success: false,
       error: error.message,
@@ -515,7 +676,7 @@ export async function doSwap({
   }
 }
 
-// Default swap function with rate limiting
+// Default swap function with enhanced validation
 export async function swap() {
   console.log("🔄 HOLDSTATION: Executing default swap (WLD → TPF)...")
 
@@ -523,9 +684,15 @@ export async function swap() {
     tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
     tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
     amountIn: "2",
-    slippage: "0.5",
+    slippage: SWAP_CONFIG.defaultSlippage,
     fee: "0.2",
   }
+
+  validateSwapParams({
+    tokenInAddress: params.tokenIn,
+    tokenOutAddress: params.tokenOut,
+    amountIn: params.amountIn,
+  })
 
   const quoteResponse = await retryWithBackoff(
     async () => {
@@ -542,7 +709,7 @@ export async function swap() {
     tx: {
       data: quoteResponse.data,
       to: quoteResponse.to,
-      value: quoteResponse.value,
+      value: quoteResponse.value || "0",
     },
     partnerCode: "24568", // Replace with your partner code, contact to holdstation team to get one
     feeAmountOut: quoteResponse.addons?.feeAmountOut,
@@ -634,6 +801,7 @@ export const getRateLimiterStatus = () => {
     maxRequestsPerMinute: RATE_LIMIT_CONFIG.maxRequestsPerMinute,
     canMakeRequest: rateLimiter.canMakeRequest(),
     waitTime: rateLimiter.getWaitTime(),
+    remainingRequests: rateLimiter.getRemainingRequests(),
   }
 }
 
