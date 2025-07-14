@@ -11,7 +11,6 @@ import {
   AlertTriangle,
   ChevronDown,
   ChevronRight,
-  Copy,
   Check,
 } from "lucide-react"
 
@@ -248,9 +247,15 @@ export function DebugConsole() {
           newSet.delete(log.id)
           return newSet
         })
-      }, 2000)
+      }, 1500)
     } catch (err) {
       console.error("Failed to copy to clipboard:", err)
+    }
+  }
+
+  const handleErrorTriangleClick = async (log: LogEntry) => {
+    if (log.type === "error") {
+      await copyLogToClipboard(log)
     }
   }
 
@@ -334,27 +339,27 @@ export function DebugConsole() {
       animate={{ opacity: 1, x: 0, scale: 1 }}
       exit={{ opacity: 0, x: -20, scale: 0.95 }}
       className={`fixed left-4 top-1/2 -translate-y-1/2 z-[9999] bg-gray-900/95 backdrop-blur-xl border border-gray-700 rounded-lg shadow-2xl ${
-        isMinimized ? "w-96 h-12" : "w-[500px] h-[500px]"
+        isMinimized ? "w-80 h-10" : "w-[450px] h-[400px]"
       } transition-all duration-300 flex flex-col`}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between p-3 border-b border-gray-700 shrink-0">
-        <div className="flex items-center space-x-2">
-          <Terminal className="w-4 h-4 text-green-400" />
-          <span className="text-white text-sm font-medium">Debug Console</span>
+      {/* Header - More Compact */}
+      <div className="flex items-center justify-between px-2 py-1.5 border-b border-gray-700 shrink-0">
+        <div className="flex items-center space-x-1.5">
+          <Terminal className="w-3.5 h-3.5 text-green-400" />
+          <span className="text-white text-xs font-medium">Debug</span>
           {logs.length > 0 && (
             <div className="flex items-center space-x-1">
-              <span className="bg-gray-700 text-gray-300 text-xs px-2 py-0.5 rounded-full">{logs.length}</span>
+              <span className="bg-gray-700 text-gray-300 text-xs px-1.5 py-0.5 rounded-full">{logs.length}</span>
               {logs.filter((log) => log.type === "error").length > 0 && (
-                <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full flex items-center space-x-1">
-                  <AlertTriangle className="w-3 h-3" />
+                <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full flex items-center space-x-1">
+                  <AlertTriangle className="w-2.5 h-2.5" />
                   <span>{logs.filter((log) => log.type === "error").length}</span>
                 </span>
               )}
             </div>
           )}
         </div>
-        <div className="flex items-center space-x-1">
+        <div className="flex items-center space-x-0.5">
           <button
             onClick={clearLogs}
             className="p-1 text-gray-400 hover:text-white transition-colors rounded"
@@ -379,17 +384,17 @@ export function DebugConsole() {
         </div>
       </div>
 
-      {/* Logs */}
+      {/* Logs - More Compact */}
       <AnimatePresence>
         {!isMinimized && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="flex-1 overflow-y-auto p-2 space-y-2 min-h-0"
+            className="flex-1 overflow-y-auto p-1.5 space-y-1 min-h-0"
           >
             {logs.length === 0 ? (
-              <div className="text-gray-500 text-xs text-center py-8">No debug logs yet...</div>
+              <div className="text-gray-500 text-xs text-center py-6">No debug logs yet...</div>
             ) : (
               logs.map((log) => {
                 const isExpanded = expandedLogs.has(log.id)
@@ -401,105 +406,79 @@ export function DebugConsole() {
                     key={log.id}
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className={`text-xs font-mono leading-relaxed border-l-2 ${getBorderColor(log.type)} ${
+                    className={`text-xs font-mono leading-tight border-l-2 ${getBorderColor(log.type)} ${
                       isSwapRelated ? "bg-red-900/20" : "bg-gray-800/30"
-                    } rounded-r p-2`}
+                    } rounded-r p-1.5`}
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center space-x-2 mb-1">
-                          <span className="text-gray-500">[{formatTime(log.timestamp)}]</span>
-                          {log.type === "error" && <AlertTriangle className="w-3 h-3 text-red-400" />}
-                          {log.type === "error" && (
-                            <button
-                              onClick={() => copyLogToClipboard(log)}
-                              className="p-0.5 text-gray-400 hover:text-white transition-colors rounded"
-                              title="Copy error details"
-                            >
-                              {copiedLogs.has(log.id) ? (
-                                <Check className="w-3 h-3 text-green-400" />
-                              ) : (
-                                <Copy className="w-3 h-3" />
-                              )}
-                            </button>
-                          )}
-                          {isSwapRelated && (
-                            <span className="bg-red-600 text-white text-xs px-1 py-0.5 rounded">SWAP ERROR</span>
-                          )}
-                        </div>
-                        <div className={`${getLogColor(log.type)} break-words`}>{log.message}</div>
-
-                        {/* Error details for swap errors */}
-                        {log.details?.error && (
-                          <div className="mt-2 p-2 bg-red-900/40 rounded border border-red-700/50">
-                            <div className="text-red-300 font-semibold text-xs">Error Details:</div>
-                            <div className="text-red-200 text-xs mt-1 space-y-1">
-                              {log.details.error.name && (
-                                <div>
-                                  <strong>Type:</strong> {log.details.error.name}
-                                </div>
-                              )}
-                              {log.details.error.message && (
-                                <div>
-                                  <strong>Message:</strong> {log.details.error.message}
-                                </div>
-                              )}
-                              {log.details.error.code && (
-                                <div>
-                                  <strong>Code:</strong> {log.details.error.code}
-                                </div>
-                              )}
-                              {log.details.error.cause && (
-                                <div>
-                                  <strong>Cause:</strong> {JSON.stringify(log.details.error.cause)}
-                                </div>
-                              )}
-                            </div>
-                          </div>
+                    {/* Compact Header */}
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center space-x-1.5">
+                        <span className="text-gray-500 text-xs">{formatTime(log.timestamp).slice(0, 8)}</span>
+                        {log.type === "error" && (
+                          <button
+                            onClick={() => handleErrorTriangleClick(log)}
+                            className="p-0.5 text-red-400 hover:text-red-300 transition-colors rounded"
+                            title="Click to copy error details"
+                          >
+                            {copiedLogs.has(log.id) ? (
+                              <Check className="w-3 h-3 text-green-400" />
+                            ) : (
+                              <AlertTriangle className="w-3 h-3" />
+                            )}
+                          </button>
                         )}
+                        {isSwapRelated && (
+                          <span className="bg-red-600 text-white text-xs px-1 py-0.5 rounded">SWAP</span>
+                        )}
+                      </div>
+                      {hasDetails && (
+                        <button
+                          onClick={() => toggleLogExpansion(log.id)}
+                          className="p-0.5 text-gray-400 hover:text-white transition-colors"
+                        >
+                          {isExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+                        </button>
+                      )}
+                    </div>
 
-                        {/* Context for swap operations */}
+                    {/* Compact Message */}
+                    <div className={`${getLogColor(log.type)} break-words text-xs leading-tight`}>
+                      {log.message.length > 100 ? `${log.message.slice(0, 100)}...` : log.message}
+                    </div>
+
+                    {/* Compact Error Details */}
+                    {log.details?.error && (
+                      <div className="mt-1 p-1.5 bg-red-900/40 rounded border border-red-700/50">
+                        <div className="text-red-300 font-semibold text-xs">Error:</div>
+                        <div className="text-red-200 text-xs mt-0.5">
+                          {log.details.error.name && <span className="font-medium">{log.details.error.name}: </span>}
+                          {log.details.error.message}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Expanded Details - Compact */}
+                    {isExpanded && (
+                      <div className="mt-1 space-y-1">
                         {log.details?.context && Object.keys(log.details.context).length > 0 && (
-                          <div className="mt-2 p-2 bg-blue-900/20 rounded border border-blue-700/50">
+                          <div className="p-1.5 bg-blue-900/20 rounded border border-blue-700/50">
                             <div className="text-blue-300 font-semibold text-xs">Context:</div>
-                            <pre className="text-blue-200 text-xs mt-1 overflow-x-auto">
+                            <pre className="text-blue-200 text-xs mt-0.5 overflow-x-auto max-h-20">
                               {JSON.stringify(log.details.context, null, 2)}
                             </pre>
                           </div>
                         )}
 
-                        {/* Expandable stack trace */}
-                        {hasDetails && (
-                          <button
-                            onClick={() => toggleLogExpansion(log.id)}
-                            className="mt-2 flex items-center space-x-1 text-gray-400 hover:text-white transition-colors"
-                          >
-                            {isExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
-                            <span className="text-xs">{isExpanded ? "Hide" : "Show"} technical details</span>
-                          </button>
-                        )}
-
-                        {/* Expanded details */}
-                        {isExpanded && log.details?.stack && (
-                          <div className="mt-2 p-2 bg-gray-800 rounded border border-gray-600">
-                            <div className="text-gray-300 font-semibold text-xs mb-1">Stack Trace:</div>
-                            <pre className="text-gray-400 text-xs overflow-x-auto whitespace-pre-wrap">
-                              {log.details.stack}
-                            </pre>
-                          </div>
-                        )}
-
-                        {/* Arguments for debugging */}
-                        {isExpanded && log.details?.args && log.details.args.length > 0 && (
-                          <div className="mt-2 p-2 bg-gray-800 rounded border border-gray-600">
-                            <div className="text-gray-300 font-semibold text-xs mb-1">Arguments:</div>
-                            <pre className="text-gray-400 text-xs overflow-x-auto">
-                              {JSON.stringify(log.details.args, null, 2)}
+                        {log.details?.stack && (
+                          <div className="p-1.5 bg-gray-800 rounded border border-gray-600">
+                            <div className="text-gray-300 font-semibold text-xs">Stack:</div>
+                            <pre className="text-gray-400 text-xs mt-0.5 overflow-x-auto whitespace-pre-wrap max-h-20">
+                              {log.details.stack.split("\n").slice(0, 5).join("\n")}
                             </pre>
                           </div>
                         )}
                       </div>
-                    </div>
+                    )}
                   </motion.div>
                 )
               })
