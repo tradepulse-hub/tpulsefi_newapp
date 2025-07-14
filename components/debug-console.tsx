@@ -128,7 +128,7 @@ export function DebugConsole() {
       <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="fixed bottom-4 left-4 z-[9999]"
+        className="fixed left-4 top-1/2 -translate-y-1/2 z-[9999]"
       >
         <button
           onClick={() => setIsOpen(true)}
@@ -147,10 +147,10 @@ export function DebugConsole() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: 20, scale: 0.95 }}
-      className={`fixed bottom-4 left-4 z-[9999] bg-gray-900/95 backdrop-blur-xl border border-gray-700 rounded-lg shadow-2xl ${
+      initial={{ opacity: 0, x: -20, scale: 0.95 }}
+      animate={{ opacity: 1, x: 0, scale: 1 }}
+      exit={{ opacity: 0, x: -20, scale: 0.95 }}
+      className={`fixed left-4 top-1/2 -translate-y-1/2 z-[9999] bg-gray-900/95 backdrop-blur-xl border border-gray-700 rounded-lg shadow-2xl ${
         isMinimized ? "w-80 h-12" : "w-96 h-80"
       } transition-all duration-300`}
     >
