@@ -66,7 +66,7 @@ export const TOKENS = [
     color: "#2775CA",
   },
   {
-    address: "0x4200000000000000000000000000000000000006",
+    address: "0xEdE54d9c024ee80C85ec0a75eD2d8774c7Fbac9B",
     symbol: "WDD",
     name: "World Drachma",
     decimals: 18,
