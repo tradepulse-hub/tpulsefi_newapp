@@ -53,10 +53,10 @@ const RATE_LIMIT_CONFIG = {
   maxRetries: 2, // Reduced retries to avoid hitting limits
 }
 
-// Enhanced swap configuration for better success rates
+// MAXIMUM SLIPPAGE FOR TESTING - Enhanced swap configuration
 const SWAP_CONFIG = {
-  defaultSlippage: "2.0", // Increased to 2% for better success rate
-  maxSlippage: "5.0", // Maximum allowed slippage
+  defaultSlippage: "15.0", // MAXIMUM SLIPPAGE FOR TESTING - 15%
+  maxSlippage: "20.0", // Even higher maximum
   minAmountThreshold: "0.01", // Increased minimum amount
   gasMultiplier: 1.5, // Higher gas estimation multiplier
   simulationRetries: 1, // Reduced simulation retries
@@ -149,6 +149,7 @@ function handleSwapError(error: any, operation: string, context?: any): never {
     },
     context,
     timestamp: new Date().toISOString(),
+    slippageUsed: SWAP_CONFIG.defaultSlippage + "%",
     rateLimiterStatus: {
       remainingRequests: rateLimiter.getRemainingRequests(),
       canMakeRequest: rateLimiter.canMakeRequest(),
@@ -165,7 +166,7 @@ function handleSwapError(error: any, operation: string, context?: any): never {
 
   if (error.message?.includes("simulation_failed") || error.message?.includes("simulation failed")) {
     throw new Error(
-      `Swap simulation failed. Try: 1) Reducing swap amount, 2) Increasing slippage to 3-5%, 3) Waiting for better market conditions, or 4) Using a different token pair.`,
+      `🧪 SLIPPAGE TEST: Swap simulation failed even with ${SWAP_CONFIG.defaultSlippage}% slippage! This suggests the issue is NOT slippage-related. Possible causes: 1) Insufficient liquidity, 2) Network congestion, 3) Invalid token pair, 4) API issues.`,
     )
   }
 
@@ -182,7 +183,9 @@ function handleSwapError(error: any, operation: string, context?: any): never {
   }
 
   if (error.message?.includes("slippage")) {
-    throw new Error(`Price changed too much during swap. Try increasing slippage tolerance to 3-5%.`)
+    throw new Error(
+      `🧪 SLIPPAGE TEST: Price changed more than ${SWAP_CONFIG.defaultSlippage}%! This is extreme volatility.`,
+    )
   }
 
   if (error.message?.includes("liquidity")) {
@@ -190,12 +193,14 @@ function handleSwapError(error: any, operation: string, context?: any): never {
   }
 
   if (error.message?.includes("price impact")) {
-    throw new Error(`Price impact too high. Try reducing the swap amount or increasing slippage tolerance.`)
+    throw new Error(
+      `Price impact too high even with ${SWAP_CONFIG.defaultSlippage}% slippage. Try reducing the swap amount significantly.`,
+    )
   }
 
   // Generic error with more context
   throw new Error(
-    `Swap ${operation} failed: ${error.message || "Unknown error"}. Please try again with different parameters.`,
+    `🧪 SLIPPAGE TEST: Swap ${operation} failed with ${SWAP_CONFIG.defaultSlippage}% slippage: ${error.message || "Unknown error"}. If this fails, slippage is NOT the issue.`,
   )
 }
 
@@ -212,13 +217,17 @@ async function retryWithBackoff<T>(operation: () => Promise<T>, operationName: s
         await new Promise((resolve) => setTimeout(resolve, waitTime))
       }
 
-      console.log(`🔄 SWAP ATTEMPT ${attempt + 1}/${RATE_LIMIT_CONFIG.maxRetries + 1} [${operationName.toUpperCase()}]`)
+      console.log(
+        `🔄 SWAP ATTEMPT ${attempt + 1}/${RATE_LIMIT_CONFIG.maxRetries + 1} [${operationName.toUpperCase()}] - SLIPPAGE: ${SWAP_CONFIG.defaultSlippage}%`,
+      )
 
       rateLimiter.recordRequest()
       const result = await operation()
 
       if (attempt > 0) {
-        console.log(`✅ SWAP SUCCESS after ${attempt + 1} attempts [${operationName.toUpperCase()}]`)
+        console.log(
+          `✅ SWAP SUCCESS after ${attempt + 1} attempts [${operationName.toUpperCase()}] with ${SWAP_CONFIG.defaultSlippage}% slippage`,
+        )
       }
 
       return result
@@ -229,6 +238,7 @@ async function retryWithBackoff<T>(operation: () => Promise<T>, operationName: s
         error: error.message,
         attempt: attempt + 1,
         maxAttempts: RATE_LIMIT_CONFIG.maxRetries + 1,
+        slippageUsed: SWAP_CONFIG.defaultSlippage + "%",
         context,
       })
 
@@ -388,13 +398,15 @@ function validateSwapParams(params: {
     throw new Error(`Unsupported output token: ${tokenOutAddress}`)
   }
 
-  console.log(`✅ VALIDATION: Swap parameters valid - ${amount} ${tokenIn.symbol} → ${tokenOut.symbol}`)
+  console.log(
+    `✅ VALIDATION: Swap parameters valid - ${amount} ${tokenIn.symbol} → ${tokenOut.symbol} (SLIPPAGE: ${SWAP_CONFIG.defaultSlippage}%)`,
+  )
 }
 
 // Test Holdstation SDK helper with enhanced validation
 export const testSwapHelper = async (): Promise<boolean> => {
   try {
-    console.log("🧪 HOLDSTATION: Testing SwapHelper...")
+    console.log(`🧪 HOLDSTATION: Testing SwapHelper with MAXIMUM SLIPPAGE (${SWAP_CONFIG.defaultSlippage}%)...`)
 
     if (!swapHelper?.estimate?.quote) {
       throw new Error("SwapHelper not available")
@@ -404,7 +416,7 @@ export const testSwapHelper = async (): Promise<boolean> => {
       tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
       tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
       amountIn: "0.01", // Increased test amount
-      slippage: SWAP_CONFIG.defaultSlippage,
+      slippage: SWAP_CONFIG.defaultSlippage, // MAXIMUM SLIPPAGE
       fee: "0.2",
     }
 
@@ -423,7 +435,7 @@ export const testSwapHelper = async (): Promise<boolean> => {
       testParams,
     )
 
-    console.log("✅ HOLDSTATION: Test quote successful:", {
+    console.log(`✅ HOLDSTATION: Test quote successful with ${SWAP_CONFIG.defaultSlippage}% slippage:`, {
       hasData: !!testQuote.data,
       hasTo: !!testQuote.to,
       outAmount: testQuote.addons?.outAmount,
@@ -432,7 +444,7 @@ export const testSwapHelper = async (): Promise<boolean> => {
 
     return true
   } catch (error) {
-    console.error("❌ HOLDSTATION: Test failed:", error)
+    console.error(`❌ HOLDSTATION: Test failed even with ${SWAP_CONFIG.defaultSlippage}% slippage:`, error)
     return false
   }
 }
@@ -443,10 +455,10 @@ function getTokenSymbol(address: string): string {
   return token?.symbol || "UNKNOWN"
 }
 
-// Enhanced quote function with better error handling
+// Enhanced quote function with MAXIMUM slippage
 export async function getRealQuote(amountIn: string, tokenInAddress: string, tokenOutAddress: string) {
   console.log(
-    `🔄 HOLDSTATION: Getting quote ${amountIn} ${getTokenSymbol(tokenInAddress)} → ${getTokenSymbol(tokenOutAddress)}`,
+    `🔄 HOLDSTATION: Getting quote ${amountIn} ${getTokenSymbol(tokenInAddress)} → ${getTokenSymbol(tokenOutAddress)} (SLIPPAGE: ${SWAP_CONFIG.defaultSlippage}%)`,
   )
 
   // Validate inputs first
@@ -456,14 +468,15 @@ export async function getRealQuote(amountIn: string, tokenInAddress: string, tok
     tokenIn: tokenInAddress,
     tokenOut: tokenOutAddress,
     amountIn: amountIn,
-    slippage: SWAP_CONFIG.defaultSlippage, // Use 2% slippage
+    slippage: SWAP_CONFIG.defaultSlippage, // MAXIMUM SLIPPAGE FOR TESTING
     fee: "0.2",
   }
 
-  console.log("📤 HOLDSTATION: Quote request:", {
+  console.log("📤 HOLDSTATION: Quote request with MAXIMUM SLIPPAGE:", {
     ...params,
     tokenInSymbol: getTokenSymbol(tokenInAddress),
     tokenOutSymbol: getTokenSymbol(tokenOutAddress),
+    slippagePercent: SWAP_CONFIG.defaultSlippage + "%",
   })
 
   const result = await retryWithBackoff(
@@ -481,7 +494,9 @@ export async function getRealQuote(amountIn: string, tokenInAddress: string, tok
 
       // Check if quote is too old (for future use)
       const quoteTimestamp = Date.now()
-      console.log(`📋 HOLDSTATION: Quote generated at ${new Date(quoteTimestamp).toISOString()}`)
+      console.log(
+        `📋 HOLDSTATION: Quote generated at ${new Date(quoteTimestamp).toISOString()} with ${SWAP_CONFIG.defaultSlippage}% slippage`,
+      )
 
       return quote
     },
@@ -489,7 +504,7 @@ export async function getRealQuote(amountIn: string, tokenInAddress: string, tok
     params,
   )
 
-  console.log("✅ HOLDSTATION: Quote received:", {
+  console.log(`✅ HOLDSTATION: Quote received with ${SWAP_CONFIG.defaultSlippage}% slippage:`, {
     outputAmount: result.addons?.outAmount,
     hasData: !!result.data,
     hasTo: !!result.to,
@@ -507,7 +522,7 @@ export async function getRealQuote(amountIn: string, tokenInAddress: string, tok
 // Enhanced swap estimation
 export async function estimateSwap(tokenInAddress: string, tokenOutAddress: string, amountIn = "2") {
   console.log(
-    `🔄 HOLDSTATION: Estimating swap ${amountIn} ${getTokenSymbol(tokenInAddress)} → ${getTokenSymbol(tokenOutAddress)}`,
+    `🔄 HOLDSTATION: Estimating swap ${amountIn} ${getTokenSymbol(tokenInAddress)} → ${getTokenSymbol(tokenOutAddress)} (SLIPPAGE: ${SWAP_CONFIG.defaultSlippage}%)`,
   )
 
   validateSwapParams({ tokenInAddress, tokenOutAddress, amountIn })
@@ -516,7 +531,7 @@ export async function estimateSwap(tokenInAddress: string, tokenOutAddress: stri
     tokenIn: tokenInAddress,
     tokenOut: tokenOutAddress,
     amountIn: amountIn,
-    slippage: SWAP_CONFIG.defaultSlippage,
+    slippage: SWAP_CONFIG.defaultSlippage, // MAXIMUM SLIPPAGE
     fee: "0.2",
   }
 
@@ -528,11 +543,11 @@ export async function estimateSwap(tokenInAddress: string, tokenOutAddress: stri
     params,
   )
 
-  console.log("✅ HOLDSTATION: Swap estimate result:", result)
+  console.log(`✅ HOLDSTATION: Swap estimate result with ${SWAP_CONFIG.defaultSlippage}% slippage:`, result)
   return result
 }
 
-// Completely rewritten swap execution with better error handling
+// Completely rewritten swap execution with MAXIMUM slippage
 export async function doSwap({
   walletAddress,
   quote,
@@ -548,7 +563,7 @@ export async function doSwap({
 }): Promise<{ success: boolean; transactionId?: string; error?: string }> {
   try {
     console.log(
-      `🚀 HOLDSTATION: Executing swap ${amountIn} ${getTokenSymbol(tokenInAddress)} → ${getTokenSymbol(tokenOutAddress)}`,
+      `🚀 HOLDSTATION: Executing swap ${amountIn} ${getTokenSymbol(tokenInAddress)} → ${getTokenSymbol(tokenOutAddress)} (SLIPPAGE: ${SWAP_CONFIG.defaultSlippage}%)`,
     )
     console.log("👤 HOLDSTATION: Wallet:", walletAddress)
 
@@ -556,12 +571,12 @@ export async function doSwap({
     validateSwapParams({ tokenInAddress, tokenOutAddress, amountIn, walletAddress })
 
     // Always get a fresh quote for execution to avoid stale data issues
-    console.log("🔄 HOLDSTATION: Getting fresh quote for execution...")
+    console.log(`🔄 HOLDSTATION: Getting fresh quote for execution with ${SWAP_CONFIG.defaultSlippage}% slippage...`)
     const params: SwapParams["quoteInput"] = {
       tokenIn: tokenInAddress,
       tokenOut: tokenOutAddress,
       amountIn: amountIn,
-      slippage: SWAP_CONFIG.defaultSlippage, // Use higher slippage for execution
+      slippage: SWAP_CONFIG.defaultSlippage, // MAXIMUM SLIPPAGE FOR TESTING
       fee: "0.2",
     }
 
@@ -583,7 +598,7 @@ export async function doSwap({
           throw new Error("Fresh quote validation failed - invalid transaction data")
         }
 
-        console.log("✅ HOLDSTATION: Fresh quote validated:", {
+        console.log(`✅ HOLDSTATION: Fresh quote validated with ${SWAP_CONFIG.defaultSlippage}% slippage:`, {
           hasData: !!freshQuote.data,
           hasTo: !!freshQuote.to,
           outAmount: freshQuote.addons?.outAmount,
@@ -613,7 +628,7 @@ export async function doSwap({
       feeReceiver: ethers.ZeroAddress, // ZERO_ADDRESS or your fee receiver address
     }
 
-    console.log("📋 HOLDSTATION: Swap parameters prepared:", {
+    console.log(`📋 HOLDSTATION: Swap parameters prepared with MAXIMUM SLIPPAGE:`, {
       tokenInSymbol: getTokenSymbol(tokenInAddress),
       tokenOutSymbol: getTokenSymbol(tokenOutAddress),
       amountIn: swapParams.amountIn,
@@ -621,17 +636,17 @@ export async function doSwap({
       hasTransactionData: !!swapParams.tx.data,
       transactionTo: swapParams.tx.to,
       transactionValue: swapParams.tx.value,
-      slippage: SWAP_CONFIG.defaultSlippage,
+      slippage: SWAP_CONFIG.defaultSlippage + "%",
     })
 
     // Execute swap with enhanced error handling
     const result = await retryWithBackoff(
       async () => {
-        console.log(`🎯 HOLDSTATION: Executing swap with ${SWAP_CONFIG.defaultSlippage}% slippage`)
+        console.log(`🎯 HOLDSTATION: Executing swap with MAXIMUM ${SWAP_CONFIG.defaultSlippage}% slippage`)
 
         const swapResult = await swapHelper.swap(swapParams)
 
-        console.log("📊 HOLDSTATION: Raw swap result:", {
+        console.log(`📊 HOLDSTATION: Raw swap result with ${SWAP_CONFIG.defaultSlippage}% slippage:`, {
           success: swapResult.success,
           errorCode: swapResult.errorCode,
           transactionId: swapResult.transactionId,
@@ -643,7 +658,7 @@ export async function doSwap({
         if (!swapResult.success) {
           if (swapResult.errorCode === "simulation_failed") {
             throw new Error(
-              `Swap simulation failed. This usually means: 1) Insufficient liquidity, 2) Price impact too high, 3) Slippage too low (try 3-5%), or 4) Network congestion. Please try with a smaller amount or higher slippage.`,
+              `🧪 SLIPPAGE TEST FAILED: Swap simulation failed even with MAXIMUM ${SWAP_CONFIG.defaultSlippage}% slippage! This proves the issue is NOT slippage-related. Possible causes: 1) Insufficient liquidity, 2) Network issues, 3) Invalid token pair, 4) API problems.`,
             )
           }
 
@@ -654,17 +669,21 @@ export async function doSwap({
           }
 
           if (swapResult.errorCode === "price_impact_too_high") {
-            throw new Error(`Price impact too high. Try reducing the swap amount or increasing slippage tolerance.`)
+            throw new Error(
+              `🧪 SLIPPAGE TEST: Price impact too high even with ${SWAP_CONFIG.defaultSlippage}% slippage! Try much smaller amounts.`,
+            )
           }
 
           throw new Error(
-            `Swap failed: ${swapResult.errorCode || "Unknown error"}. Please try again with different parameters.`,
+            `🧪 SLIPPAGE TEST: Swap failed with ${SWAP_CONFIG.defaultSlippage}% slippage: ${swapResult.errorCode || "Unknown error"}. This suggests slippage is NOT the main issue.`,
           )
         }
 
         // Additional validation for successful swaps
         if (swapResult.success && !swapResult.transactionId) {
-          console.warn("⚠️ HOLDSTATION: Swap marked as successful but no transaction ID provided")
+          console.warn(
+            `⚠️ HOLDSTATION: Swap marked as successful but no transaction ID provided (${SWAP_CONFIG.defaultSlippage}% slippage)`,
+          )
           // Don't throw error, just log warning
         }
 
@@ -674,27 +693,30 @@ export async function doSwap({
       { ...swapParams, slippage: SWAP_CONFIG.defaultSlippage },
     )
 
-    console.log("💱 HOLDSTATION: Final swap result:", result)
+    console.log(`💱 HOLDSTATION: Final swap result with ${SWAP_CONFIG.defaultSlippage}% slippage:`, result)
 
     if (result.success) {
-      console.log("✅ HOLDSTATION: Swap completed successfully!")
+      console.log(`✅ HOLDSTATION: Swap completed successfully with ${SWAP_CONFIG.defaultSlippage}% slippage!`)
       return {
         success: true,
         transactionId: result.transactionId || "pending",
       }
     } else {
-      console.error("❌ HOLDSTATION: Swap completed but marked as failed:", result.errorCode)
+      console.error(
+        `❌ HOLDSTATION: Swap completed but marked as failed (${SWAP_CONFIG.defaultSlippage}% slippage):`,
+        result.errorCode,
+      )
       throw new Error(`Swap execution failed: ${result.errorCode || "Unknown error"}`)
     }
   } catch (error) {
-    console.error("❌ HOLDSTATION: Swap execution failed:", {
+    console.error(`❌ HOLDSTATION: Swap execution failed with ${SWAP_CONFIG.defaultSlippage}% slippage:`, {
       error: error.message,
       stack: error.stack,
       tokenIn: getTokenSymbol(tokenInAddress),
       tokenOut: getTokenSymbol(tokenOutAddress),
       amount: amountIn,
       wallet: walletAddress,
-      slippage: SWAP_CONFIG.defaultSlippage,
+      slippage: SWAP_CONFIG.defaultSlippage + "%",
     })
 
     return {
@@ -704,15 +726,17 @@ export async function doSwap({
   }
 }
 
-// Default swap function with enhanced parameters
+// Default swap function with MAXIMUM slippage
 export async function swap() {
-  console.log("🔄 HOLDSTATION: Executing default swap (WLD → TPF)...")
+  console.log(
+    `🔄 HOLDSTATION: Executing default swap (WLD → TPF) with MAXIMUM ${SWAP_CONFIG.defaultSlippage}% slippage...`,
+  )
 
   const params: SwapParams["quoteInput"] = {
     tokenIn: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
     tokenOut: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
     amountIn: "1", // Reduced default amount
-    slippage: SWAP_CONFIG.defaultSlippage,
+    slippage: SWAP_CONFIG.defaultSlippage, // MAXIMUM SLIPPAGE
     fee: "0.2",
   }
 
@@ -753,7 +777,7 @@ export async function swap() {
     swapParams,
   )
 
-  console.log("✅ HOLDSTATION: Swap result:", result)
+  console.log(`✅ HOLDSTATION: Swap result with ${SWAP_CONFIG.defaultSlippage}% slippage:`, result)
   return result
 }
 
@@ -830,6 +854,7 @@ export const getRateLimiterStatus = () => {
     canMakeRequest: rateLimiter.canMakeRequest(),
     waitTime: rateLimiter.getWaitTime(),
     remainingRequests: rateLimiter.getRemainingRequests(),
+    currentSlippage: SWAP_CONFIG.defaultSlippage + "%",
   }
 }
 
