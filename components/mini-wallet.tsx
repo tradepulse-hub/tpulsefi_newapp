@@ -45,6 +45,13 @@ import { PriceChart } from "@/components/price-chart"
 import { ethers } from "ethers"
 import { DebugConsole } from "@/components/debug-console"
 
+const ERC20_ABI = [
+  "function balanceOf(address owner) view returns (uint256)",
+  "function symbol() view returns (string)",
+  "function name() view returns (string)",
+  "function decimals() view returns (uint8)",
+]
+
 interface TokenBalance {
   symbol: string
   name: string
@@ -53,6 +60,8 @@ interface TokenBalance {
   decimals: number
   icon?: string
   formattedBalance: string
+  logo: string
+  usdValue: number
 }
 
 interface Transaction {
@@ -70,6 +79,7 @@ interface MiniWalletProps {
   walletAddress: string
   onMinimize: () => void
   onDisconnect: () => void
+  address: string
 }
 
 // Supported languages
@@ -81,6 +91,7 @@ const translations = {
   en: {
     connected: "Connected",
     tokens: "Tokens",
+    totalBalance: "Total Balance",
     send: "Send",
     receive: "Receive",
     history: "History",
@@ -141,6 +152,7 @@ const translations = {
   pt: {
     connected: "Conectado",
     tokens: "Tokens",
+    totalBalance: "Saldo Total",
     send: "Enviar",
     receive: "Receber",
     history: "Histórico",
@@ -201,6 +213,7 @@ const translations = {
   es: {
     connected: "Conectado",
     tokens: "Tokens",
+    totalBalance: "Saldo Total",
     send: "Enviar",
     receive: "Recibir",
     history: "Historial",
@@ -261,6 +274,7 @@ const translations = {
   id: {
     connected: "Terhubung",
     tokens: "Token",
+    totalBalance: "Saldo Total",
     send: "Kirim",
     receive: "Terima",
     history: "Riwayat",
@@ -320,15 +334,6 @@ const translations = {
   },
 }
 
-interface Token {
-  symbol: string
-  name: string
-  address: string
-  decimals: number
-  logo: string
-  color: string
-}
-
 type ViewMode = "main" | "send" | "receive" | "history" | "swap" | "tokenDetail"
 
 export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: MiniWalletProps) {
@@ -336,6 +341,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
   const [viewMode, setViewMode] = useState<ViewMode>("main")
   const [copied, setCopied] = useState(false)
   const [balances, setBalances] = useState<TokenBalance[]>([])
+  const [enrichedBalances, setEnrichedBalances] = useState<TokenBalance[]>([])
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [allTransactions, setAllTransactions] = useState<Transaction[]>([])
   const [displayedTransactions, setDisplayedTransactions] = useState<Transaction[]>([])
@@ -374,6 +380,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
   const [tokenPrices, setTokenPrices] = useState<Record<string, number>>({})
   const [priceChanges, setPriceChanges] = useState<Record<string, number>>({})
   const [loadingPrices, setLoadingPrices] = useState(true)
+  const [totalWalletValue, setTotalWalletValue] = useState(0)
 
   const TRANSACTIONS_PER_PAGE = 5
 
@@ -398,6 +405,27 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     setTimeout(() => setCopied(false), 2000)
   }
 
+  // Calculate total wallet value in USD
+  const calculateTotalWalletValue = useCallback(() => {
+    const total = enrichedBalances.reduce((acc, token) => acc + token.usdValue, 0)
+    setTotalWalletValue(total)
+    console.log(`💰 Total wallet value: $${total.toFixed(2)}`)
+  }, [enrichedBalances])
+
+  // Update total value when balances or prices change
+  useEffect(() => {
+    calculateTotalWalletValue()
+  }, [calculateTotalWalletValue])
+
+  // Format USD value
+  const formatUSDValue = (value: number): string => {
+    if (value === 0) return "$0.00"
+    if (value < 0.01) return "<$0.01"
+    if (value < 1000) return `$${value.toFixed(2)}`
+    if (value < 1000000) return `$${(value / 1000).toFixed(1)}K`
+    return `$${(value / 1000000).toFixed(1)}M`
+  }
+
   // Load real-time token prices for main view
   const loadTokenPrices = async () => {
     try {
@@ -410,6 +438,14 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       await Promise.all(
         TOKENS.map(async (token) => {
           try {
+            // USDC is always $1
+            if (token.symbol === "USDC") {
+              prices[token.symbol] = 1
+              changes[token.symbol] = 0
+              console.log(`✅ Price loaded for ${token.symbol}: $1.00 (stable)`)
+              return
+            }
+
             const [price, change] = await Promise.all([
               getCurrentTokenPrice(token.symbol),
               getPriceChange(token.symbol, "1H"),
@@ -442,7 +478,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       console.log("🔄 Loading token balances for:", walletAddress)
       const tokenBalances = await walletService.getTokenBalances(walletAddress)
       console.log("✅ Token balances loaded:", tokenBalances)
-      setBalances(tokenBalances)
+      setBalances(tokenBalances.map((b) => ({ ...b, usdValue: 0 }))) // Initialize with usdValue
     } catch (error) {
       console.error("❌ Error loading balances:", error)
       setError("Failed to load balances")
@@ -450,6 +486,20 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       setLoading(false)
     }
   }
+
+  // Enrich balances with USD value when prices are loaded
+  useEffect(() => {
+    if (balances.length > 0 && Object.keys(tokenPrices).length > 0) {
+      const updatedBalances = balances.map((token) => {
+        const price = token.symbol === "USDC" ? 1 : tokenPrices[token.symbol] || 0
+        const usdValue = Number.parseFloat(token.balance) * price
+        return { ...token, usdValue }
+      })
+      setEnrichedBalances(updatedBalances)
+    } else {
+      setEnrichedBalances(balances) // Use initial balances if prices not ready
+    }
+  }, [balances, tokenPrices])
 
   const loadTransactionHistory = async (reset = false) => {
     try {
@@ -638,7 +688,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       }
 
       // Convert amount to wei using the correct decimals for the FROM token
-      const amountInWei = ethers.parseUnits(swapForm.amountFrom, tokenFrom.decimals)
+      const amountInWei = ethers.utils.parseUnits(swapForm.amountFrom, tokenFrom.decimals)
       console.log("💰 Swap amount in wei:", amountInWei.toString())
 
       const result = await doSwap({
@@ -703,7 +753,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
     try {
       console.log(`📊 Fetching real price data for ${token.symbol} via Holdstation SDK`)
-      const priceData = await getTokenPrice(token.symbol, "1h")
+      const priceData = await getTokenPrice(token.symbol, "1H")
       console.log(`✅ Price data loaded for ${token.symbol}:`, priceData)
       setTokenPrice(priceData)
     } catch (error) {
@@ -720,7 +770,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     setLoadingPrice(true)
     try {
       console.log(`🔄 Refreshing price for ${selectedTokenState.symbol}`)
-      const priceData = await getTokenPrice(selectedTokenState.symbol, "1h")
+      const priceData = await getTokenPrice(selectedTokenState.symbol, "1H")
       setTokenPrice(priceData)
       console.log(`✅ Price refreshed for ${selectedTokenState.symbol}`)
     } catch (error) {
@@ -1039,7 +1089,9 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                       className="flex items-center space-x-2 text-white hover:text-gray-300 transition-colors"
                     >
                       {showBalances ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      <span className="text-sm font-medium">{t.tokens}</span>
+                      <span className="text-sm font-medium">
+                        {t.tokens} - {formatUSDValue(totalWalletValue)}
+                      </span>
                     </button>
                   </div>
                   <button
@@ -1070,77 +1122,81 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                           <AlertCircle className="w-4 h-4 text-red-400 mr-2" />
                           <span className="text-red-400 text-sm">{error}</span>
                         </div>
-                      ) : balances.length === 0 ? (
+                      ) : enrichedBalances.length === 0 ? (
                         <div className="text-center py-4">
                           <span className="text-gray-400 text-sm">No tokens found</span>
                         </div>
                       ) : (
-                        balances.map((token, index) => {
-                          const price = tokenPrices[token.symbol] || 0
-                          const change = priceChanges[token.symbol] || 0
+                        enrichedBalances
+                          .filter((token) => Number.parseFloat(token.balance) > 0)
+                          .map((token, index) => {
+                            const price = token.symbol === "USDC" ? 1 : tokenPrices[token.symbol] || 0
+                            const change = priceChanges[token.symbol] || 0
 
-                          return (
-                            <motion.button
-                              key={token.symbol}
-                              initial={{ opacity: 0, x: -20 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              transition={{ delay: index * 0.1 }}
-                              onClick={() => handleTokenClick(token)}
-                              className="w-full bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl p-3 hover:bg-white/5 transition-all duration-200 group"
-                            >
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center space-x-3">
-                                  <div className="w-8 h-8 rounded-full overflow-hidden bg-white flex items-center justify-center">
-                                    <Image
-                                      src={getTokenIcon(token.symbol) || "/placeholder.svg"}
-                                      alt={token.name}
-                                      width={32}
-                                      height={32}
-                                      className="w-full h-full object-contain"
-                                    />
-                                  </div>
-                                  <div>
-                                    <p className="text-white font-medium text-sm text-left">{token.symbol}</p>
-                                    <p className="text-gray-400 text-xs text-left">{token.name}</p>
-                                  </div>
-                                </div>
-                                <div className="text-right flex items-center space-x-2">
-                                  <div>
-                                    <p className="text-white font-medium text-sm">
-                                      {showBalances ? formatBalance(token.balance) : "••••"}
-                                    </p>
-                                    <div className="flex items-center space-x-1">
-                                      {loadingPrices ? (
-                                        <div className="animate-pulse bg-gray-600 h-3 w-12 rounded"></div>
-                                      ) : price > 0 ? (
-                                        <>
-                                          <span className="text-gray-400 text-xs">
-                                            {formatPrice(price, token.symbol)}
-                                          </span>
-                                          <div
-                                            className={`flex items-center space-x-1 ${
-                                              change >= 0 ? "text-green-500" : "text-red-500"
-                                            }`}
-                                          >
-                                            {change >= 0 ? (
-                                              <TrendingUp className="w-2 h-2" />
-                                            ) : (
-                                              <TrendingDown className="w-2 h-2" />
-                                            )}
-                                            <span className="text-xs">{Math.abs(change).toFixed(1)}%</span>
-                                          </div>
-                                        </>
-                                      ) : (
-                                        <span className="text-gray-500 text-xs">Price N/A</span>
-                                      )}
+                            return (
+                              <motion.button
+                                key={token.symbol}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: index * 0.1 }}
+                                onClick={() => handleTokenClick(token)}
+                                className="w-full bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl p-3 hover:bg-white/5 transition-all duration-200 group"
+                              >
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center space-x-3">
+                                    <div className="w-8 h-8 rounded-full overflow-hidden bg-white flex items-center justify-center">
+                                      <Image
+                                        src={getTokenIcon(token.symbol) || "/placeholder.svg"}
+                                        alt={token.name}
+                                        width={32}
+                                        height={32}
+                                        className="w-full h-full object-contain"
+                                      />
+                                    </div>
+                                    <div>
+                                      <p className="text-white font-medium text-sm text-left">{token.symbol}</p>
+                                      <p className="text-gray-400 text-xs text-left">{token.name}</p>
                                     </div>
                                   </div>
-                                  <BarChart3 className="w-4 h-4 text-gray-400 group-hover:text-cyan-400 transition-colors" />
+                                  <div className="text-right flex items-center space-x-2">
+                                    <div>
+                                      <p className="text-white font-medium text-sm">
+                                        {showBalances ? formatBalance(token.balance) : "••••"}
+                                      </p>
+                                      <div className="flex items-center space-x-1">
+                                        {loadingPrices ? (
+                                          <div className="animate-pulse bg-gray-600 h-3 w-12 rounded"></div>
+                                        ) : price > 0 ? (
+                                          <>
+                                            <span className="text-gray-400 text-xs">
+                                              {token.symbol === "USDC" ? "$1.00" : formatPrice(price, token.symbol)}
+                                            </span>
+                                            {token.symbol !== "USDC" && (
+                                              <div
+                                                className={`flex items-center space-x-1 ${
+                                                  change >= 0 ? "text-green-500" : "text-red-500"
+                                                }`}
+                                              >
+                                                {change >= 0 ? (
+                                                  <TrendingUp className="w-2 h-2" />
+                                                ) : (
+                                                  <TrendingDown className="w-2 h-2" />
+                                                )}
+                                                <span className="text-xs">{Math.abs(change).toFixed(1)}%</span>
+                                              </div>
+                                            )}
+                                          </>
+                                        ) : (
+                                          <span className="text-gray-500 text-xs">Price N/A</span>
+                                        )}
+                                      </div>
+                                    </div>
+                                    <BarChart3 className="w-4 h-4 text-gray-400 group-hover:text-cyan-400 transition-colors" />
+                                  </div>
                                 </div>
-                              </div>
-                            </motion.button>
-                          )
-                        })
+                              </motion.button>
+                            )
+                          })
                       )}
                     </motion.div>
                   )}
@@ -1213,11 +1269,13 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                     onChange={(e) => setSendForm((prev) => ({ ...prev, token: e.target.value }))}
                     className="w-full bg-black/30 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-400"
                   >
-                    {balances.map((token) => (
-                      <option key={token.symbol} value={token.symbol} className="bg-black">
-                        {token.symbol} - {t.available}: {formatBalance(token.balance)}
-                      </option>
-                    ))}
+                    {balances
+                      .filter((token) => Number.parseFloat(token.balance) > 0)
+                      .map((token) => (
+                        <option key={token.symbol} value={token.symbol} className="bg-black">
+                          {token.symbol} - {t.available}: {formatBalance(token.balance)}
+                        </option>
+                      ))}
                   </select>
                 </div>
 
