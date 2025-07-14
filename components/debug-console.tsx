@@ -2,7 +2,18 @@
 
 import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Terminal, X, Minimize2, Maximize2, Trash2, AlertTriangle, ChevronDown, ChevronRight } from "lucide-react"
+import {
+  Terminal,
+  X,
+  Minimize2,
+  Maximize2,
+  Trash2,
+  AlertTriangle,
+  ChevronDown,
+  ChevronRight,
+  Copy,
+  Check,
+} from "lucide-react"
 
 interface LogEntry {
   id: string
@@ -22,6 +33,7 @@ export function DebugConsole() {
   const [isMinimized, setIsMinimized] = useState(false)
   const [logs, setLogs] = useState<LogEntry[]>([])
   const [expandedLogs, setExpandedLogs] = useState<Set<string>>(new Set())
+  const [copiedLogs, setCopiedLogs] = useState<Set<string>>(new Set())
   const logsEndRef = useRef<HTMLDivElement>(null)
   const originalConsole = useRef<{
     log: typeof console.log
@@ -204,6 +216,44 @@ export function DebugConsole() {
     setExpandedLogs(newExpanded)
   }
 
+  const copyLogToClipboard = async (log: LogEntry) => {
+    let copyText = `[${formatTime(log.timestamp)}] ${log.type.toUpperCase()}: ${log.message}\n`
+
+    if (log.details?.error) {
+      copyText += `\nError Details:\n`
+      copyText += `Type: ${log.details.error.name || "Unknown"}\n`
+      copyText += `Message: ${log.details.error.message || "No message"}\n`
+      if (log.details.error.code) copyText += `Code: ${log.details.error.code}\n`
+      if (log.details.error.cause) copyText += `Cause: ${JSON.stringify(log.details.error.cause)}\n`
+    }
+
+    if (log.details?.context && Object.keys(log.details.context).length > 0) {
+      copyText += `\nContext:\n${JSON.stringify(log.details.context, null, 2)}\n`
+    }
+
+    if (log.details?.stack) {
+      copyText += `\nStack Trace:\n${log.details.stack}\n`
+    }
+
+    if (log.details?.args && log.details.args.length > 0) {
+      copyText += `\nArguments:\n${JSON.stringify(log.details.args, null, 2)}\n`
+    }
+
+    try {
+      await navigator.clipboard.writeText(copyText)
+      setCopiedLogs((prev) => new Set([...prev, log.id]))
+      setTimeout(() => {
+        setCopiedLogs((prev) => {
+          const newSet = new Set(prev)
+          newSet.delete(log.id)
+          return newSet
+        })
+      }, 2000)
+    } catch (err) {
+      console.error("Failed to copy to clipboard:", err)
+    }
+  }
+
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString("en-US", {
       hour12: false,
@@ -351,18 +401,31 @@ export function DebugConsole() {
                     key={log.id}
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className={`text-xs font-mono leading-relaxed border-l-2 ${getBorderColor(log.type)} ${
+                    className={`group text-xs font-mono leading-relaxed border-l-2 ${getBorderColor(log.type)} ${
                       isSwapRelated ? "bg-red-900/20" : "bg-gray-800/30"
                     } rounded-r p-2`}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center space-x-2 mb-1">
-                          <span className="text-gray-500">[{formatTime(log.timestamp)}]</span>
-                          {log.type === "error" && <AlertTriangle className="w-3 h-3 text-red-400" />}
-                          {isSwapRelated && (
-                            <span className="bg-red-600 text-white text-xs px-1 py-0.5 rounded">SWAP ERROR</span>
-                          )}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2 mb-1">
+                            <span className="text-gray-500">[{formatTime(log.timestamp)}]</span>
+                            {log.type === "error" && <AlertTriangle className="w-3 h-3 text-red-400" />}
+                            {isSwapRelated && (
+                              <span className="bg-red-600 text-white text-xs px-1 py-0.5 rounded">SWAP ERROR</span>
+                            )}
+                          </div>
+                          <button
+                            onClick={() => copyLogToClipboard(log)}
+                            className="p-1 text-gray-400 hover:text-white transition-colors rounded opacity-0 group-hover:opacity-100"
+                            title="Copy log details"
+                          >
+                            {copiedLogs.has(log.id) ? (
+                              <Check className="w-3 h-3 text-green-400" />
+                            ) : (
+                              <Copy className="w-3 h-3" />
+                            )}
+                          </button>
                         </div>
                         <div className={`${getLogColor(log.type)} break-words`}>{log.message}</div>
 
