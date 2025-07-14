@@ -73,6 +73,19 @@ async function loadTokenBalances(address: string) {
   console.log(`Token balances loaded for address: ${address}`)
 }
 
+// Additional balance loading functions for specific tokens
+async function loadTPFBalance(address: string) {
+  console.log(`TPF balance loaded for address: ${address}`)
+}
+
+async function loadUSDCBalance(address: string) {
+  console.log(`USDC balance loaded for address: ${address}`)
+}
+
+async function loadWDDBalance(address: string) {
+  console.log(`WDD balance loaded for address: ${address}`)
+}
+
 function getTokenSymbol(address: string): string {
   const token = TOKENS.find((t) => t.address.toLowerCase() === address.toLowerCase())
   return token?.symbol || "UNKNOWN"
@@ -141,7 +154,7 @@ export async function estimateSwap(tokenInAddress: string, tokenOutAddress: stri
   return result
 }
 
-// --- The doSwap function following exact logic from your file ---
+// --- The doSwap function following EXACT logic from your file ---
 export async function doSwap({
   walletAddress,
   quote,
@@ -169,7 +182,7 @@ export async function doSwap({
       partnerCode: "24568",
       feeAmountOut: quote.addons?.feeAmountOut,
       fee: "0.2",
-      feeReceiver: ethers.ZeroAddress,
+      feeReceiver: "0x4bb270ef6dcb052a083bd5cff518e2e019c0f4ee",
     }
     console.log("Swapping with params:", swapParams)
     const result = await swapHelper.swap(swapParams)
@@ -179,19 +192,23 @@ export async function doSwap({
       await provider.getBlockNumber()
       await updateUserData(walletAddress)
       await loadTokenBalances(walletAddress)
-      console.log("Swap successful!")
-      return {
-        success: true,
-        result,
-        transactionId: result.transactionId,
+
+      // Load specific token balance based on tokenOut
+      const tokenOutSymbol = getTokenSymbol(tokenOutAddress)
+      if (tokenOutSymbol === "TPF") {
+        await loadTPFBalance(walletAddress)
+      } else if (tokenOutSymbol === "USDC") {
+        await loadUSDCBalance(walletAddress)
+      } else if (tokenOutSymbol === "WDD") {
+        await loadWDDBalance(walletAddress)
       }
+
+      console.log("Swap successful!")
     } else {
       console.error("Swap failed: ", result)
-      throw new Error(`Swap failed: ${result.errorCode || "Unknown error"}`)
     }
   } catch (error) {
     console.error("Swap failed:", error)
-    throw error
   }
 }
 
@@ -225,7 +242,7 @@ export async function swap() {
       partnerCode: "24568",
       feeAmountOut: quote.addons?.feeAmountOut,
       fee: "0.2",
-      feeReceiver: ethers.ZeroAddress,
+      feeReceiver: "0x4bb270ef6dcb052a083bd5cff518e2e019c0f4ee",
     }
     console.log("Swapping with params:", swapParams)
     const result = await swapHelper.swap(swapParams)
@@ -233,6 +250,9 @@ export async function swap() {
       // Wait for transaction to be confirmed
       await new Promise((res) => setTimeout(res, 2500))
       await provider.getBlockNumber()
+      await updateUserData("default")
+      await loadTokenBalances("default")
+      await loadTPFBalance("default")
       console.log("Swap successful!")
     } else {
       console.error("Swap failed: ", result)
@@ -240,7 +260,6 @@ export async function swap() {
     return result
   } catch (error) {
     console.error("Swap failed:", error)
-    throw error
   }
 }
 
