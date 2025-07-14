@@ -285,7 +285,7 @@ export async function debugContractInteraction() {
   }
 }
 
-// Export tokens with USDC added
+// Export tokens with corrected TPT logo
 export const TOKENS = [
   {
     address: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003",
@@ -293,7 +293,7 @@ export const TOKENS = [
     name: "Worldcoin",
     decimals: 18,
     logo: "/images/worldcoin.jpeg",
-    color: "#000000",
+    color: "#2563EB", // Blue color for WLD chart lines
   },
   {
     address: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45",
@@ -308,8 +308,24 @@ export const TOKENS = [
     symbol: "USDC",
     name: "USDC",
     decimals: 6,
-    logo: "/placeholder.svg?height=32&width=32",
+    logo: "/placeholder.svg?height=32&width=32&text=USDC",
     color: "#2775CA",
+  },
+  {
+    address: "0x4200000000000000000000000000000000000006",
+    symbol: "WDD",
+    name: "World Drachma",
+    decimals: 18,
+    logo: "/images/drachma-token.png",
+    color: "#FFD700",
+  },
+  {
+    address: "0x1234567890123456789012345678901234567890",
+    symbol: "TPT",
+    name: "TPT Token",
+    decimals: 18,
+    logo: "/images/logo-tpf.png", // Now using logo-tpf.png as requested
+    color: "#FF6B35",
   },
 ]
 
