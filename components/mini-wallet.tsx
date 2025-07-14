@@ -29,6 +29,7 @@ import {
   getRealQuote,
   validateContracts,
   debugContractInteraction,
+  TOKENS,
 } from "@/services/swap-service"
 import { ethers } from "ethers"
 import { DebugConsole } from "@/components/debug-console"
@@ -438,9 +439,14 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     }
   }
 
-  // Get REAL quote from Holdstation SDK
+  // Get token info by symbol
+  const getTokenBySymbol = (symbol: string) => {
+    return TOKENS.find((token) => token.symbol === symbol)
+  }
+
+  // Get REAL quote from Holdstation SDK - now supports all token pairs
   const getSwapQuote = useCallback(
-    async (amountFrom: string) => {
+    async (amountFrom: string, tokenFromSymbol: string, tokenToSymbol: string) => {
       if (!amountFrom || Number.parseFloat(amountFrom) <= 0 || isNaN(Number.parseFloat(amountFrom))) {
         setSwapQuote(null)
         setSwapForm((prev) => ({ ...prev, amountTo: "" }))
@@ -448,13 +454,21 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         return
       }
 
+      const tokenFrom = getTokenBySymbol(tokenFromSymbol)
+      const tokenTo = getTokenBySymbol(tokenToSymbol)
+
+      if (!tokenFrom || !tokenTo) {
+        setQuoteError("Invalid token selection")
+        return
+      }
+
       setGettingQuote(true)
       setQuoteError(null)
 
       try {
-        console.log("🔄 Getting quote for:", amountFrom, "WLD")
+        console.log(`🔄 Getting quote for: ${amountFrom} ${tokenFromSymbol} to ${tokenToSymbol}`)
 
-        const { quote, outputAmount } = await getRealQuote(amountFrom)
+        const { quote, outputAmount } = await getRealQuote(amountFrom, tokenFrom.address, tokenTo.address)
 
         console.log("✅ Quote received:", {
           outputAmount,
@@ -468,7 +482,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
           amountTo: outputAmount,
         }))
 
-        console.log("💱 Updated swap form with amount:", outputAmount, "TPF")
+        console.log(`💱 Updated swap form with amount: ${outputAmount} ${tokenToSymbol}`)
       } catch (error) {
         console.error("❌ Error getting quote:", error)
 
@@ -489,29 +503,37 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     [t.quoteError, t.networkError, t.tryAgain],
   )
 
-  // Auto-quote effect with debounce
+  // Auto-quote effect with debounce - now works with any token pair
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      if (swapForm.tokenFrom === "WLD" && swapForm.tokenTo === "TPF") {
-        getSwapQuote(swapForm.amountFrom)
+      if (swapForm.tokenFrom && swapForm.tokenTo && swapForm.tokenFrom !== swapForm.tokenTo) {
+        getSwapQuote(swapForm.amountFrom, swapForm.tokenFrom, swapForm.tokenTo)
       }
     }, 1000)
 
     return () => clearTimeout(timeoutId)
-  }, [swapForm.amountFrom, getSwapQuote, swapForm.tokenFrom, swapForm.tokenTo])
+  }, [swapForm.amountFrom, swapForm.tokenFrom, swapForm.tokenTo, getSwapQuote])
 
   const handleSwap = async () => {
     if (!swapQuote || !swapForm.amountFrom) return
+
+    const tokenFrom = getTokenBySymbol(swapForm.tokenFrom)
+    const tokenTo = getTokenBySymbol(swapForm.tokenTo)
+
+    if (!tokenFrom || !tokenTo) {
+      alert("Invalid token selection")
+      return
+    }
 
     setSwapping(true)
     try {
       console.log("🚀 Starting swap transaction:", swapForm)
 
-      // Check WLD balance
-      const wldBalance = balances.find((t) => t.symbol === "WLD")
-      if (!wldBalance || Number.parseFloat(wldBalance.balance) < Number.parseFloat(swapForm.amountFrom)) {
+      // Check balance for the FROM token
+      const fromTokenBalance = balances.find((t) => t.symbol === swapForm.tokenFrom)
+      if (!fromTokenBalance || Number.parseFloat(fromTokenBalance.balance) < Number.parseFloat(swapForm.amountFrom)) {
         throw new Error(
-          `${t.insufficientBalance}. Available: ${wldBalance?.balance || "0"}, Required: ${swapForm.amountFrom}`,
+          `${t.insufficientBalance}. Available: ${fromTokenBalance?.balance || "0"}, Required: ${swapForm.amountFrom}`,
         )
       }
 
@@ -520,20 +542,24 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         throw new Error("Invalid swap quote")
       }
 
-      // Convert amount to wei
-      const amountInWei = ethers.parseUnits(swapForm.amountFrom, 18)
+      // Convert amount to wei using the correct decimals for the FROM token
+      const amountInWei = ethers.parseUnits(swapForm.amountFrom, tokenFrom.decimals)
       console.log("💰 Swap amount in wei:", amountInWei.toString())
 
       const result = await doSwap({
         walletAddress,
         quote: swapQuote,
         amountIn: amountInWei.toString(),
+        tokenInAddress: tokenFrom.address,
+        tokenOutAddress: tokenTo.address,
       })
 
       console.log("✅ Swap completed:", result)
 
       if (result.success) {
-        alert(`✅ ${t.swapSuccess} ${swapForm.amountFrom} WLD for ${swapForm.amountTo} TPF!`)
+        alert(
+          `✅ ${t.swapSuccess} ${swapForm.amountFrom} ${swapForm.tokenFrom} for ${swapForm.amountTo} ${swapForm.tokenTo}!`,
+        )
         if (result.transactionId) {
           console.log("🎯 Transaction ID:", result.transactionId)
         }
@@ -650,6 +676,11 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     if (num < 1000) return num.toFixed(2)
     if (num < 1000000) return `${(num / 1000).toFixed(1)}K`
     return `${(num / 1000000).toFixed(1)}M`
+  }
+
+  // Get available tokens for swap (excluding the currently selected token)
+  const getAvailableTokensForSwap = (excludeSymbol: string) => {
+    return TOKENS.filter((token) => token.symbol !== excludeSymbol)
   }
 
   if (isMinimized) {
@@ -956,7 +987,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
             </motion.div>
           )}
 
-          {/* Swap View - Fixed to only WLD to TPF */}
+          {/* Swap View - Now supports all token pairs */}
           {viewMode === "swap" && (
             <motion.div
               key="swap"
@@ -982,13 +1013,31 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
               </div>
 
               <div className="space-y-4">
-                {/* From Token - Fixed to WLD */}
+                {/* From Token */}
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">{t.from}</label>
                   <div className="space-y-2">
-                    <div className="w-full bg-gray-700/50 border border-white/10 rounded-lg px-3 py-2 text-gray-300">
-                      WLD (Worldcoin)
-                    </div>
+                    <select
+                      value={swapForm.tokenFrom}
+                      onChange={(e) => {
+                        const newTokenFrom = e.target.value
+                        setSwapForm((prev) => ({
+                          ...prev,
+                          tokenFrom: newTokenFrom,
+                          // If the new FROM token is the same as TO token, swap them
+                          tokenTo: newTokenFrom === prev.tokenTo ? prev.tokenFrom : prev.tokenTo,
+                          amountTo: "", // Reset amount
+                        }))
+                        setSwapQuote(null) // Reset quote
+                      }}
+                      className="w-full bg-gray-800/50 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-orange-500"
+                    >
+                      {TOKENS.map((token) => (
+                        <option key={token.symbol} value={token.symbol}>
+                          {token.symbol} ({token.name})
+                        </option>
+                      ))}
+                    </select>
                     <input
                       type="number"
                       value={swapForm.amountFrom}
@@ -998,27 +1047,57 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                     />
                     <div className="text-xs text-gray-400">
                       {t.available}: {(() => {
-                        const wldToken = balances.find((t) => t.symbol === "WLD")
-                        return wldToken ? formatBalance(wldToken.balance) : "0"
-                      })()} WLD
+                        const fromToken = balances.find((t) => t.symbol === swapForm.tokenFrom)
+                        return fromToken ? formatBalance(fromToken.balance) : "0"
+                      })()} {swapForm.tokenFrom}
                     </div>
                   </div>
                 </div>
 
-                {/* Swap Direction Indicator */}
+                {/* Swap Direction Indicator with Swap Button */}
                 <div className="flex justify-center">
-                  <div className="w-8 h-8 bg-orange-600/20 border border-orange-500/30 rounded-full flex items-center justify-center">
+                  <button
+                    onClick={() => {
+                      setSwapForm((prev) => ({
+                        ...prev,
+                        tokenFrom: prev.tokenTo,
+                        tokenTo: prev.tokenFrom,
+                        amountFrom: "",
+                        amountTo: "",
+                      }))
+                      setSwapQuote(null)
+                    }}
+                    className="w-8 h-8 bg-orange-600/20 border border-orange-500/30 rounded-full flex items-center justify-center hover:bg-orange-600/30 transition-colors"
+                  >
                     <ArrowLeftRight className="w-4 h-4 text-orange-400" />
-                  </div>
+                  </button>
                 </div>
 
-                {/* To Token - Fixed to TPF */}
+                {/* To Token */}
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">{t.to}</label>
                   <div className="space-y-2">
-                    <div className="w-full bg-gray-700/50 border border-white/10 rounded-lg px-3 py-2 text-gray-300">
-                      TPF (TPulseFi)
-                    </div>
+                    <select
+                      value={swapForm.tokenTo}
+                      onChange={(e) => {
+                        const newTokenTo = e.target.value
+                        setSwapForm((prev) => ({
+                          ...prev,
+                          tokenTo: newTokenTo,
+                          // If the new TO token is the same as FROM token, swap them
+                          tokenFrom: newTokenTo === prev.tokenFrom ? prev.tokenTo : prev.tokenFrom,
+                          amountTo: "", // Reset amount
+                        }))
+                        setSwapQuote(null) // Reset quote
+                      }}
+                      className="w-full bg-gray-800/50 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-orange-500"
+                    >
+                      {TOKENS.map((token) => (
+                        <option key={token.symbol} value={token.symbol}>
+                          {token.symbol} ({token.name})
+                        </option>
+                      ))}
+                    </select>
                     <div className="relative">
                       <input
                         type="number"
@@ -1036,6 +1115,12 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
                     {/* Quote Status Messages */}
                     {!swapForm.amountFrom && <div className="text-xs text-gray-400">{t.enterAmount}</div>}
+                    {swapForm.tokenFrom === swapForm.tokenTo && (
+                      <div className="text-xs text-red-400 flex items-center">
+                        <AlertCircle className="w-3 h-3 mr-1" />
+                        Please select different tokens
+                      </div>
+                    )}
                     {gettingQuote && (
                       <div className="text-xs text-orange-400 flex items-center">
                         <RefreshCw className="w-3 h-3 mr-1 animate-spin" />
@@ -1050,7 +1135,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                     )}
                     {swapQuote && swapForm.amountTo && (
                       <div className="text-xs text-green-400">
-                        {t.youWillReceive} ~{formatBalance(swapForm.amountTo)} TPF
+                        {t.youWillReceive} ~{formatBalance(swapForm.amountTo)} {swapForm.tokenTo}
                       </div>
                     )}
                   </div>
@@ -1063,11 +1148,12 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                     swapping ||
                     !swapQuote ||
                     !swapForm.amountFrom ||
+                    swapForm.tokenFrom === swapForm.tokenTo ||
                     (() => {
-                      const wldBalance = balances.find((t) => t.symbol === "WLD")
+                      const fromTokenBalance = balances.find((t) => t.symbol === swapForm.tokenFrom)
                       return (
-                        !wldBalance ||
-                        Number.parseFloat(wldBalance.balance) < Number.parseFloat(swapForm.amountFrom || "0")
+                        !fromTokenBalance ||
+                        Number.parseFloat(fromTokenBalance.balance) < Number.parseFloat(swapForm.amountFrom || "0")
                       )
                     })()
                   }
@@ -1083,14 +1169,17 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                       <ArrowLeftRight className="w-4 h-4" />
                       <span>
                         {(() => {
-                          const wldBalance = balances.find((t) => t.symbol === "WLD")
+                          if (swapForm.tokenFrom === swapForm.tokenTo) {
+                            return "Select different tokens"
+                          }
+                          const fromTokenBalance = balances.find((t) => t.symbol === swapForm.tokenFrom)
                           if (
-                            !wldBalance ||
-                            Number.parseFloat(wldBalance.balance) < Number.parseFloat(swapForm.amountFrom || "0")
+                            !fromTokenBalance ||
+                            Number.parseFloat(fromTokenBalance.balance) < Number.parseFloat(swapForm.amountFrom || "0")
                           ) {
                             return t.insufficientBalance
                           }
-                          return t.swap
+                          return `${t.swap} ${swapForm.tokenFrom} → ${swapForm.tokenTo}`
                         })()}
                       </span>
                     </>
