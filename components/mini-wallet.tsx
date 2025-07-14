@@ -1388,8 +1388,6 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                     <AlertTriangle className="w-4 h-4 text-yellow-400 mt-0.5 flex-shrink-0" />
                     <p className="text-yellow-300 text-xs text-left">{t.networkWarning}</p>
                   </div>
-                    <p className="text-yellow-300 text-xs text-left">{t.networkWarning}</p>
-                  </div>
                 </div>
               </div>
             </motion.div>
@@ -1644,6 +1642,6 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         </AnimatePresence>
       </motion.div>
       <DebugConsole />
-  </>
+    </>
   )
 }
