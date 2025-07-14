@@ -959,7 +959,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
             </motion.div>
           )}
 
-          {/* Token Detail View */}
+          {/* Token Detail View - Compact Version */}
           {viewMode === "tokenDetail" && selectedToken && (
             <motion.div
               key="tokenDetail"
@@ -969,7 +969,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
               className="p-4"
             >
               {/* Header with Back Button */}
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between mb-4">
                 <button
                   onClick={handleBackToMain}
                   className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors"
@@ -979,52 +979,42 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                 </button>
                 <h3 className="text-lg font-bold text-white flex items-center">
                   <BarChart3 className="w-5 h-5 mr-2 text-cyan-400" />
-                  {t.tokenDetails}
+                  {selectedToken.symbol}
                 </h3>
                 <div className="w-16" />
               </div>
 
-              {/* Token Header */}
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="w-12 h-12 rounded-full overflow-hidden bg-white flex items-center justify-center">
+              {/* Token Header - Compact */}
+              <div className="flex items-center space-x-3 mb-3">
+                <div className="w-10 h-10 rounded-full overflow-hidden bg-white flex items-center justify-center">
                   <Image
                     src={getTokenIcon(selectedToken.symbol) || "/placeholder.svg"}
                     alt={selectedToken.symbol}
-                    width={48}
-                    height={48}
+                    width={40}
+                    height={40}
                     className="w-full h-full object-contain"
                   />
                 </div>
                 <div>
-                  <h2 className="text-white text-xl font-bold">{selectedToken.symbol}</h2>
+                  <h2 className="text-white text-lg font-bold">{selectedToken.symbol}</h2>
                   <p className="text-gray-400 text-sm">{selectedToken.name}</p>
                 </div>
               </div>
 
-              {/* Balance */}
-              <div className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl p-4 mb-4">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-white mb-1">{formatBalance(selectedToken.balance)}</div>
-                  <div className="text-gray-400 text-sm">
-                    {selectedToken.symbol} {t.available}
-                  </div>
-                </div>
-              </div>
-
-              {/* Price Information */}
+              {/* Price Information - Compact */}
               {loadingPrice ? (
-                <div className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl p-4 mb-4">
+                <div className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl p-3 mb-3">
                   <div className="flex items-center justify-center">
                     <RefreshCw className="w-4 h-4 text-cyan-400 animate-spin mr-2" />
                     <span className="text-gray-400 text-sm">{t.loadingPrice}</span>
                   </div>
                 </div>
               ) : tokenPrice && tokenPrice.currentPrice > 0 ? (
-                <div className="space-y-3 mb-4">
-                  {/* Current Price */}
-                  <div className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-gray-400 text-sm">{t.currentPrice}</span>
+                <div className="space-y-2 mb-3">
+                  {/* Current Price - Compact */}
+                  <div className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-gray-400 text-xs">{t.currentPrice}</span>
                       <button
                         onClick={refreshTokenPrice}
                         className="p-1 text-gray-400 hover:text-white transition-colors rounded"
@@ -1033,16 +1023,16 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                         <RefreshCw className={`w-3 h-3 ${loadingPrice ? "animate-spin" : ""}`} />
                       </button>
                     </div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-white font-bold text-xl">{formatPrice(tokenPrice.currentPrice)}</span>
+                    <div className="flex items-center justify-between">
+                      <span className="text-white font-bold text-lg">{formatPrice(tokenPrice.currentPrice)}</span>
                       <div className="flex items-center space-x-1">
                         {tokenPrice.changePercent24h >= 0 ? (
-                          <TrendingUp className="w-4 h-4 text-green-400" />
+                          <TrendingUp className="w-3 h-3 text-green-400" />
                         ) : (
-                          <TrendingDown className="w-4 h-4 text-red-400" />
+                          <TrendingDown className="w-3 h-3 text-red-400" />
                         )}
                         <span
-                          className={`text-sm font-medium ${
+                          className={`text-xs font-medium ${
                             tokenPrice.changePercent24h >= 0 ? "text-green-400" : "text-red-400"
                           }`}
                         >
@@ -1050,23 +1040,20 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                         </span>
                       </div>
                     </div>
-                    <div className="text-gray-400 text-xs">
-                      {t.priceChange24h}: {formatPriceChange(tokenPrice.changeAmount24h)}
-                    </div>
                   </div>
 
-                  {/* Price Chart */}
-                  <div className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl p-4">
-                    <h3 className="text-white text-sm font-medium mb-3">{t.priceChart} (24h)</h3>
+                  {/* Price Chart - Compact */}
+                  <div className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl p-3">
+                    <h3 className="text-white text-xs font-medium mb-2">{t.priceChart} (24h)</h3>
                     <PriceChart
                       data={tokenPrice.priceHistory}
                       color={getTokenColor(selectedToken.symbol)}
-                      height={120}
+                      height={80}
                     />
                   </div>
                 </div>
               ) : (
-                <div className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl p-4 mb-4">
+                <div className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl p-3 mb-3">
                   <div className="flex items-center justify-center text-gray-400">
                     <AlertCircle className="w-4 h-4 mr-2" />
                     <span className="text-sm">{t.priceUnavailable}</span>
@@ -1074,14 +1061,14 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                 </div>
               )}
 
-              {/* Action Buttons */}
-              <div className="grid grid-cols-2 gap-3">
+              {/* Action Buttons - Compact */}
+              <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={() => {
                     setSendForm((prev) => ({ ...prev, token: selectedToken.symbol }))
                     setViewMode("send")
                   }}
-                  className="flex items-center justify-center space-x-2 py-3 px-4 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 rounded-lg transition-all duration-200 text-blue-300 hover:text-blue-200"
+                  className="flex items-center justify-center space-x-2 py-2 px-3 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 rounded-lg transition-all duration-200 text-blue-300 hover:text-blue-200"
                 >
                   <Send className="w-4 h-4" />
                   <span className="text-sm font-medium">{t.send}</span>
@@ -1091,7 +1078,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                     setSwapForm((prev) => ({ ...prev, tokenFrom: selectedToken.symbol }))
                     setViewMode("swap")
                   }}
-                  className="flex items-center justify-center space-x-2 py-3 px-4 bg-orange-600/20 hover:bg-orange-600/30 border border-orange-500/30 rounded-lg transition-all duration-200 text-orange-300 hover:text-orange-200"
+                  className="flex items-center justify-center space-x-2 py-2 px-3 bg-orange-600/20 hover:bg-orange-600/30 border border-orange-500/30 rounded-lg transition-all duration-200 text-orange-300 hover:text-orange-200"
                 >
                   <ArrowLeftRight className="w-4 h-4" />
                   <span className="text-sm font-medium">{t.swap}</span>
