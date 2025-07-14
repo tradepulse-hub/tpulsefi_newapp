@@ -426,6 +426,13 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     return `$${(value / 1000000).toFixed(1)}M`
   }
 
+  // Format USD value with full decimals (no abbreviation)
+  const formatFullUSDValue = (value: number): string => {
+    if (value === 0) return "$0.00"
+    if (value < 0.01) return "<$0.01"
+    return `$${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+  }
+
   // Load real-time token prices for main view
   const loadTokenPrices = async () => {
     try {
@@ -1090,7 +1097,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                     >
                       {showBalances ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       <span className="text-sm font-medium">
-                        {t.tokens} - {formatUSDValue(totalWalletValue)}
+                        {t.tokens} - {formatFullUSDValue(totalWalletValue)}
                       </span>
                     </button>
                   </div>
@@ -1381,6 +1388,8 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                     <AlertTriangle className="w-4 h-4 text-yellow-400 mt-0.5 flex-shrink-0" />
                     <p className="text-yellow-300 text-xs text-left">{t.networkWarning}</p>
                   </div>
+                    <p className="text-yellow-300 text-xs text-left">{t.networkWarning}</p>
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -1635,6 +1644,6 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         </AnimatePresence>
       </motion.div>
       <DebugConsole />
-    </>
+  </>
   )
 }
