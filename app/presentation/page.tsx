@@ -21,6 +21,7 @@ import {
   Clock,
   AlertTriangle,
   ArrowLeft,
+  Gamepad2,
 } from "lucide-react"
 import { useMiniKit } from "../../hooks/use-minikit"
 import MiniWallet from "../../components/mini-wallet"
@@ -85,6 +86,7 @@ const translations = {
       news: "News",
       airdrop: "Airdrop",
       fistaking: "Fi Staking",
+      figames: "Fi Games",
       membership: "Membership",
       partnerships: "Partnerships",
       about: "About",
@@ -123,6 +125,7 @@ const translations = {
       news: "Notícias",
       airdrop: "Airdrop",
       fistaking: "Fi Staking",
+      figames: "Fi Games",
       membership: "Membros",
       partnerships: "Parcerias",
       about: "Sobre",
@@ -161,6 +164,7 @@ const translations = {
       news: "Noticias",
       airdrop: "Airdrop",
       fistaking: "Fi Staking",
+      figames: "Fi Games",
       membership: "Membresía",
       partnerships: "Asociaciones",
       about: "Acerca de",
@@ -200,6 +204,7 @@ const translations = {
       news: "Berita",
       airdrop: "Airdrop",
       fistaking: "Fi Staking",
+      figames: "Fi Games",
       membership: "Keanggotaan",
       partnerships: "Kemitraan",
       about: "Tentang",
@@ -387,6 +392,12 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
       labelKey: "fistaking",
       icon: TrendingUp,
       href: "/fistaking",
+    },
+    {
+      id: "figames",
+      labelKey: "figames",
+      icon: Gamepad2,
+      href: "/figames",
     },
     {
       id: "membership",
