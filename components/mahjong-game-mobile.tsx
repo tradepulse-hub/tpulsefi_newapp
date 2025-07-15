@@ -4,47 +4,85 @@ import { useState, useEffect, useCallback } from "react"
 import { motion } from "framer-motion"
 import { ArrowLeft, RotateCcw, Lightbulb, Shuffle } from "lucide-react"
 
-// Tipos de peças Mahjong com símbolos Unicode
+// Tipos de peças Mahjong com símbolos Unicode e cores
 const TILE_TYPES = [
-  "🀇",
-  "🀈",
-  "🀉",
-  "🀊",
-  "🀋",
-  "🀌",
-  "🀍",
-  "🀎",
-  "🀏", // Caracteres
-  "🀐",
-  "🀑",
-  "🀒",
-  "🀓",
-  "🀔",
-  "🀕",
-  "🀖",
-  "🀗",
-  "🀘", // Bamboos
-  "🀙",
-  "🀚",
-  "🀛",
-  "🀜",
-  "🀝",
-  "🀞",
-  "🀟",
-  "🀠",
-  "🀡", // Círculos
-  "🀀",
-  "🀁",
-  "🀂",
-  "🀃", // Ventos
-  "🀄",
-  "🀅",
-  "🀆", // Dragões
+  { symbol: "🀇", color: "#000000", bg: "#f5f5f5" }, // Caracteres
+  { symbol: "🀈", color: "#000000", bg: "#f5f5f5" },
+  { symbol: "🀉", color: "#000000", bg: "#f5f5f5" },
+  { symbol: "🀊", color: "#000000", bg: "#f5f5f5" },
+  { symbol: "🀋", color: "#000000", bg: "#f5f5f5" },
+  { symbol: "🀌", color: "#000000", bg: "#f5f5f5" },
+  { symbol: "🀍", color: "#000000", bg: "#f5f5f5" },
+  { symbol: "🀎", color: "#000000", bg: "#f5f5f5" },
+  { symbol: "🀏", color: "#000000", bg: "#f5f5f5" },
+  { symbol: "🀐", color: "#2d5016", bg: "#f0f8e8" }, // Bamboos - verde
+  { symbol: "🀑", color: "#2d5016", bg: "#f0f8e8" },
+  { symbol: "🀒", color: "#2d5016", bg: "#f0f8e8" },
+  { symbol: "🀓", color: "#2d5016", bg: "#f0f8e8" },
+  { symbol: "🀔", color: "#2d5016", bg: "#f0f8e8" },
+  { symbol: "🀕", color: "#2d5016", bg: "#f0f8e8" },
+  { symbol: "🀖", color: "#2d5016", bg: "#f0f8e8" },
+  { symbol: "🀗", color: "#2d5016", bg: "#f0f8e8" },
+  { symbol: "🀘", color: "#2d5016", bg: "#f0f8e8" },
+  { symbol: "🀙", color: "#1e40af", bg: "#eff6ff" }, // Círculos - azul
+  { symbol: "🀚", color: "#1e40af", bg: "#eff6ff" },
+  { symbol: "🀛", color: "#1e40af", bg: "#eff6ff" },
+  { symbol: "🀜", color: "#1e40af", bg: "#eff6ff" },
+  { symbol: "🀝", color: "#1e40af", bg: "#eff6ff" },
+  { symbol: "🀞", color: "#1e40af", bg: "#eff6ff" },
+  { symbol: "🀟", color: "#1e40af", bg: "#eff6ff" },
+  { symbol: "🀠", color: "#1e40af", bg: "#eff6ff" },
+  { symbol: "🀡", color: "#1e40af", bg: "#eff6ff" },
+  { symbol: "🀀", color: "#7c2d12", bg: "#fef7ed" }, // Ventos - marrom
+  { symbol: "🀁", color: "#7c2d12", bg: "#fef7ed" },
+  { symbol: "🀂", color: "#7c2d12", bg: "#fef7ed" },
+  { symbol: "🀃", color: "#7c2d12", bg: "#fef7ed" },
+  { symbol: "🀄", color: "#dc2626", bg: "#fef2f2" }, // Dragões - vermelho
+  { symbol: "🀅", color: "#2d5016", bg: "#f0f8e8" }, // Verde
+  { symbol: "🀆", color: "#1e40af", bg: "#eff6ff" }, // Azul
+]
+
+// Fallback symbols para casos onde Unicode não funciona
+const FALLBACK_SYMBOLS = [
+  "1万",
+  "2万",
+  "3万",
+  "4万",
+  "5万",
+  "6万",
+  "7万",
+  "8万",
+  "9万", // Caracteres
+  "1筒",
+  "2筒",
+  "3筒",
+  "4筒",
+  "5筒",
+  "6筒",
+  "7筒",
+  "8筒",
+  "9筒", // Círculos
+  "1索",
+  "2索",
+  "3索",
+  "4索",
+  "5索",
+  "6索",
+  "7索",
+  "8索",
+  "9索", // Bamboos
+  "東",
+  "南",
+  "西",
+  "北", // Ventos
+  "中",
+  "發",
+  "白", // Dragões
 ]
 
 interface Tile {
   id: string
-  type: string
+  type: { symbol: string; color: string; bg: string }
   x: number
   y: number
   layer: number
@@ -223,7 +261,7 @@ export default function MahjongGameMobile({ onClose }: MahjongGameMobileProps) {
         // Desselecionar
         setSelectedTiles([])
         setTiles((prev) => prev.map((t) => ({ ...t, isSelected: false })))
-      } else if (selectedTiles[0].type === tile.type) {
+      } else if (selectedTiles[0].type.symbol === tile.type.symbol) {
         // Par encontrado!
         const newTiles = tiles.map((t) => {
           if (t.id === selectedTiles[0].id || t.id === tile.id) {
@@ -266,7 +304,7 @@ export default function MahjongGameMobile({ onClose }: MahjongGameMobileProps) {
 
     for (let i = 0; i < availableTiles.length; i++) {
       for (let j = i + 1; j < availableTiles.length; j++) {
-        if (availableTiles[i].type === availableTiles[j].type) {
+        if (availableTiles[i].type.symbol === availableTiles[j].type.symbol) {
           setHint([availableTiles[i].id, availableTiles[j].id])
           return
         }
@@ -386,19 +424,29 @@ export default function MahjongGameMobile({ onClose }: MahjongGameMobileProps) {
                   onClick={() => selectTile(tile)}
                   disabled={tile.isBlocked || tile.isMatched}
                   className={`
-                    absolute w-8 h-10 text-lg border-2 rounded-md shadow-lg transition-all duration-200
+                    absolute w-8 h-10 text-base font-bold border-2 rounded-md shadow-lg transition-all duration-200 flex items-center justify-center
                     ${tile.isMatched ? "opacity-0 pointer-events-none" : ""}
-                    ${tile.isBlocked ? "opacity-50 cursor-not-allowed bg-gray-600 border-gray-500" : "bg-gray-100 hover:bg-yellow-100 border-gray-400"}
-                    ${tile.isSelected ? "border-red-400 bg-red-200 scale-110 shadow-red-400/50" : ""}
-                    ${hint.includes(tile.id) ? "animate-pulse border-green-400 bg-green-200" : ""}
+                    ${tile.isBlocked ? "opacity-50 cursor-not-allowed border-gray-500" : "border-gray-400 hover:border-yellow-400"}
+                    ${tile.isSelected ? "border-red-400 scale-110 shadow-red-400/50 ring-2 ring-red-400/30" : ""}
+                    ${hint.includes(tile.id) ? "animate-pulse border-green-400 ring-2 ring-green-400/50" : ""}
                   `}
                   style={{
                     left: `${tile.x * 32 + tile.layer * 2}px`,
                     top: `${tile.y * 32 + tile.layer * 2}px`,
                     zIndex: tile.layer + 1,
+                    backgroundColor: tile.isBlocked ? "#4b5563" : tile.type.bg,
+                    color: tile.isBlocked ? "#9ca3af" : tile.type.color,
                   }}
                 >
-                  {tile.type}
+                  <span
+                    className="text-lg leading-none select-none"
+                    style={{
+                      textShadow: "0 0 2px rgba(0,0,0,0.3)",
+                      fontFamily: "system-ui, -apple-system, sans-serif",
+                    }}
+                  >
+                    {tile.type.symbol}
+                  </span>
                 </button>
               ))}
             </div>
