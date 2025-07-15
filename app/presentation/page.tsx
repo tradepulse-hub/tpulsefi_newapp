@@ -19,7 +19,6 @@ import {
   Calendar,
   Star,
   Clock,
-  DollarSign,
   AlertTriangle,
   ArrowLeft,
 } from "lucide-react"
@@ -103,13 +102,12 @@ const translations = {
     events: {
       title: "Live Events",
       liveEvent: "LIVE EVENT",
-      eventTitle: "Earn 10% TPF on your TPF purchase",
-      eventDescription: "$50 minimum TPF purchase required!",
-      eventDetails: "The 10% bonus applies only to the amount purchased during the event",
-      eventWarning:
-        "You must hold these assets without selling until the end of the event, otherwise you will be disqualified!",
+      eventTitle: "FiStaking Boost Event",
+      eventDescription: "Until the 20th of next month two FiStaking tokens increased the % gain, take advantage.",
+      eventDetails: "The more TPF you have, the more you earn.",
+      eventWarning: "Don't miss this limited time opportunity to maximize your FiStaking rewards!",
       eventPeriod: "Event Period",
-      eventDates: "July 11, 2025 - August 11, 2025",
+      eventDates: "July 15, 2025 - August 15, 2025",
       participateNow: "Participate Now",
       termsConditions: "Terms & Conditions",
       eventButton: "Event",
@@ -142,12 +140,12 @@ const translations = {
     events: {
       title: "Eventos Ao Vivo",
       liveEvent: "EVENTO AO VIVO",
-      eventTitle: "Ganha 10% TPF na tua compra de TPF",
-      eventDescription: "$50 de TPF que compres, valor mínimo!",
-      eventDetails: "Os 10% incidem apenas sobre o valor comprado durante o evento",
-      eventWarning: "Até ao fim do evento deves manter esses ativos sem venda, caso contrário és desqualificado!",
+      eventTitle: "Evento de Aumento FiStaking",
+      eventDescription: "Até ao dia 20 do próximo mês dois tokens do FiStaking aumentaram a % de ganho, aproveita.",
+      eventDetails: "Quanto mais TPF tiveres, mais ganhas.",
+      eventWarning: "Não percas esta oportunidade de tempo limitado para maximizar as tuas recompensas FiStaking!",
       eventPeriod: "Período do Evento",
-      eventDates: "11 de Julho, 2025 - 11 de Agosto, 2025",
+      eventDates: "15 de Julho, 2025 - 15 de Agosto, 2025",
       participateNow: "Participar Agora",
       termsConditions: "Termos e Condições",
       eventButton: "Evento",
@@ -180,13 +178,13 @@ const translations = {
     events: {
       title: "Eventos En Vivo",
       liveEvent: "EVENTO EN VIVO",
-      eventTitle: "Gana 10% TPF en tu compra de TPF",
-      eventDescription: "$50 mínimo de compra de TPF requerido!",
-      eventDetails: "El 10% de bonificación se aplica solo al monto comprado durante el evento",
-      eventWarning:
-        "Debes mantener estos activos sin vender hasta el final del evento, ¡de lo contrario serás descalificado!",
+      eventTitle: "Evento de Impulso FiStaking",
+      eventDescription:
+        "Hasta el día 20 del próximo mes dos tokens de FiStaking aumentaron el % de ganancia, aprovecha.",
+      eventDetails: "Cuanto más TPF tengas, más ganas.",
+      eventWarning: "¡No te pierdas esta oportunidad de tiempo limitado para maximizar tus recompensas FiStaking!",
       eventPeriod: "Período del Evento",
-      eventDates: "11 de Julio, 2025 - 11 de Agosto, 2025",
+      eventDates: "15 de Julio, 2025 - 15 de Agosto, 2025",
       participateNow: "Participar Ahora",
       termsConditions: "Términos y Condiciones",
       eventButton: "Evento",
@@ -219,13 +217,12 @@ const translations = {
     events: {
       title: "Acara Langsung",
       liveEvent: "ACARA LANGSUNG",
-      eventTitle: "Dapatkan 10% TPF pada pembelian TPF Anda",
-      eventDescription: "Pembelian TPF minimum $50 diperlukan!",
-      eventDetails: "Bonus 10% hanya berlaku untuk jumlah yang dibeli selama acara",
-      eventWarning:
-        "Anda harus menyimpan aset ini tanpa menjual sampai akhir acara, jika tidak Anda akan didiskualifikasi!",
+      eventTitle: "Acara Peningkatan FiStaking",
+      eventDescription: "Sampai tanggal 20 bulan depan dua token FiStaking meningkatkan % keuntungan, manfaatkan.",
+      eventDetails: "Semakin banyak TPF yang Anda miliki, semakin banyak yang Anda peroleh.",
+      eventWarning: "Jangan lewatkan kesempatan terbatas ini untuk memaksimalkan hadiah FiStaking Anda!",
       eventPeriod: "Periode Acara",
-      eventDates: "11 Juli, 2025 - 11 Agustus, 2025",
+      eventDates: "15 Juli, 2025 - 15 Agustus, 2025",
       participateNow: "Berpartisipasi Sekarang",
       termsConditions: "Syarat & Ketentuan",
       eventButton: "Acara",
@@ -614,19 +611,20 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                   <div className="flex items-center space-x-2 mb-2">
                     <Star className="w-3 h-3 text-yellow-400" />
                     <h3 className="text-xs font-semibold text-white">
-                      {t.events?.eventTitle || "Earn 10% TPF on your TPF purchase"}
+                      {t.events?.eventTitle || "FiStaking Boost Event"}
                     </h3>
                   </div>
 
                   <div className="flex items-center space-x-2 mb-2">
-                    <DollarSign className="w-3 h-3 text-green-400" />
+                    <TrendingUp className="w-3 h-3 text-green-400" />
                     <p className="text-green-300 text-xs">
-                      {t.events?.eventDescription || "$50 minimum TPF purchase required!"}
+                      {t.events?.eventDescription ||
+                        "Until the 20th of next month two FiStaking tokens increased the % gain, take advantage."}
                     </p>
                   </div>
 
                   <p className="text-gray-300 text-xs">
-                    {t.events?.eventDetails || "The 10% bonus applies only to the amount purchased during the event"}
+                    {t.events?.eventDetails || "The more TPF you have, the more you earn."}
                   </p>
                 </div>
 
@@ -636,7 +634,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                     <AlertTriangle className="w-3 h-3 text-red-400 mt-0.5 flex-shrink-0" />
                     <p className="text-red-300 text-xs">
                       {t.events?.eventWarning ||
-                        "You must hold these assets without selling until the end of the event, otherwise you will be disqualified!"}
+                        "Don't miss this limited time opportunity to maximize your FiStaking rewards!"}
                     </p>
                   </div>
                 </div>
@@ -648,7 +646,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                     <h4 className="text-white text-xs">{t.events?.eventPeriod || "Event Period"}</h4>
                   </div>
                   <p className="text-blue-300 font-mono text-xs">
-                    {t.events?.eventDates || "July 11, 2025 - August 11, 2025"}
+                    {t.events?.eventDates || "July 15, 2025 - August 15, 2025"}
                   </p>
                 </div>
 
