@@ -1,7 +1,5 @@
 "use client"
 
-import type React from "react"
-
 import { useCallback, useEffect, useRef, useState } from "react"
 import { motion } from "framer-motion"
 import { ArrowLeft, Pause, Play, RotateCcw } from "lucide-react"
@@ -101,45 +99,69 @@ export default function SnakeGameMobile({ onClose }: SnakeGameMobileProps) {
   }, [])
 
   // Touch controls for swipe detection
-  const handleTouchStart = (e: React.TouchEvent) => {
-    const touch = e.touches[0]
-    touchStartRef.current = { x: touch.clientX, y: touch.clientY }
-  }
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
 
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (!touchStartRef.current || !gameState.gameStarted || gameState.gameOver || gameState.isPaused) return
+    const handleTouchStart = (e: TouchEvent) => {
+      e.preventDefault()
+      const touch = e.touches[0]
+      touchStartRef.current = { x: touch.clientX, y: touch.clientY }
+    }
 
-    const touch = e.changedTouches[0]
-    const deltaX = touch.clientX - touchStartRef.current.x
-    const deltaY = touch.clientY - touchStartRef.current.y
-    const minSwipeDistance = 30
+    const handleTouchEnd = (e: TouchEvent) => {
+      e.preventDefault()
+      if (!touchStartRef.current) return
 
-    if (Math.abs(deltaX) > Math.abs(deltaY)) {
-      // Horizontal swipe
-      if (Math.abs(deltaX) > minSwipeDistance) {
+      const touch = e.changedTouches[0]
+      const deltaX = touch.clientX - touchStartRef.current.x
+      const deltaY = touch.clientY - touchStartRef.current.y
+      const minSwipeDistance = 30
+
+      if (Math.abs(deltaX) < minSwipeDistance && Math.abs(deltaY) < minSwipeDistance) {
+        // Tap detected - start game or toggle pause
+        if (!gameState.gameStarted) {
+          startGame()
+        } else if (!gameState.gameOver) {
+          togglePause()
+        }
+        touchStartRef.current = null
+        return
+      }
+
+      // Only process swipes if game is running
+      if (!gameState.gameStarted || gameState.gameOver || gameState.isPaused) {
+        touchStartRef.current = null
+        return
+      }
+
+      if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        // Horizontal swipe
         if (deltaX > 0 && gameState.direction.x === 0) {
-          // Swipe right
           setGameState((prev) => ({ ...prev, direction: { x: 1, y: 0 } }))
         } else if (deltaX < 0 && gameState.direction.x === 0) {
-          // Swipe left
           setGameState((prev) => ({ ...prev, direction: { x: -1, y: 0 } }))
         }
-      }
-    } else {
-      // Vertical swipe
-      if (Math.abs(deltaY) > minSwipeDistance) {
+      } else {
+        // Vertical swipe
         if (deltaY > 0 && gameState.direction.y === 0) {
-          // Swipe down
           setGameState((prev) => ({ ...prev, direction: { x: 0, y: 1 } }))
         } else if (deltaY < 0 && gameState.direction.y === 0) {
-          // Swipe up
           setGameState((prev) => ({ ...prev, direction: { x: 0, y: -1 } }))
         }
       }
+
+      touchStartRef.current = null
     }
 
-    touchStartRef.current = null
-  }
+    canvas.addEventListener("touchstart", handleTouchStart, { passive: false })
+    canvas.addEventListener("touchend", handleTouchEnd, { passive: false })
+
+    return () => {
+      canvas.removeEventListener("touchstart", handleTouchStart)
+      canvas.removeEventListener("touchend", handleTouchEnd)
+    }
+  }, [gameState.gameStarted, gameState.gameOver, gameState.isPaused, startGame, togglePause])
 
   // Game loop
   useEffect(() => {
@@ -376,8 +398,6 @@ export default function SnakeGameMobile({ onClose }: SnakeGameMobileProps) {
             width={CANVAS_WIDTH}
             height={CANVAS_HEIGHT}
             className="border-2 border-gray-600 rounded-lg shadow-2xl"
-            onTouchStart={handleTouchStart}
-            onTouchEnd={handleTouchEnd}
             style={{ touchAction: "none" }}
           />
 
@@ -389,12 +409,15 @@ export default function SnakeGameMobile({ onClose }: SnakeGameMobileProps) {
                 <h2 className="text-2xl font-bold mb-4">Snake Game</h2>
                 <p className="text-sm mb-4 text-gray-300">Swipe to control the snake</p>
                 <p className="text-xs mb-6 text-gray-400">Collect red food to grow!</p>
-                <button
-                  onClick={startGame}
-                  className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-300"
-                >
-                  Start Game
-                </button>
+                <div className="space-y-3">
+                  <button
+                    onClick={startGame}
+                    className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-300 block mx-auto"
+                  >
+                    Start Game
+                  </button>
+                  <p className="text-green-400 text-sm animate-pulse">or tap anywhere on the screen</p>
+                </div>
               </div>
             </div>
           )}
