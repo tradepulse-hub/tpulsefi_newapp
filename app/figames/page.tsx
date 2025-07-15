@@ -22,11 +22,20 @@ import { useRouter } from "next/navigation"
 import Image from "next/image"
 import SnakeGameMobile from "@/components/snake-game-mobile"
 import MahjongGameMobile from "@/components/mahjong-game-mobile"
+import SpaceShooterMobile from "@/components/space-shooter-mobile"
 
-// Game categories with translations - Mahjong now playable
+// Game categories with translations - Space Shooter now playable in Action
 const gameCategories = {
   en: [
-    { id: "action", name: "Action", icon: Zap, gradient: "from-red-500 to-orange-500", emoji: "⚡", playable: false },
+    {
+      id: "action",
+      name: "Action",
+      icon: Zap,
+      gradient: "from-red-500 to-orange-500",
+      emoji: "⚡",
+      playable: true,
+      hasSpaceShooter: true,
+    },
     {
       id: "animals",
       name: "Animals",
@@ -82,7 +91,15 @@ const gameCategories = {
     { id: "logic", name: "Logic", icon: Brain, gradient: "from-teal-500 to-cyan-500", emoji: "🧠", playable: false },
   ],
   pt: [
-    { id: "action", name: "Acção", icon: Zap, gradient: "from-red-500 to-orange-500", emoji: "⚡", playable: false },
+    {
+      id: "action",
+      name: "Acção",
+      icon: Zap,
+      gradient: "from-red-500 to-orange-500",
+      emoji: "⚡",
+      playable: true,
+      hasSpaceShooter: true,
+    },
     {
       id: "animals",
       name: "Animais",
@@ -159,7 +176,15 @@ const gameCategories = {
     },
   ],
   es: [
-    { id: "action", name: "Acción", icon: Zap, gradient: "from-red-500 to-orange-500", emoji: "⚡", playable: false },
+    {
+      id: "action",
+      name: "Acción",
+      icon: Zap,
+      gradient: "from-red-500 to-orange-500",
+      emoji: "⚡",
+      playable: true,
+      hasSpaceShooter: true,
+    },
     {
       id: "animals",
       name: "Animales",
@@ -222,7 +247,15 @@ const gameCategories = {
     { id: "logic", name: "Lógica", icon: Brain, gradient: "from-teal-500 to-cyan-500", emoji: "🧠", playable: false },
   ],
   id: [
-    { id: "action", name: "Aksi", icon: Zap, gradient: "from-red-500 to-orange-500", emoji: "⚡", playable: false },
+    {
+      id: "action",
+      name: "Aksi",
+      icon: Zap,
+      gradient: "from-red-500 to-orange-500",
+      emoji: "⚡",
+      playable: true,
+      hasSpaceShooter: true,
+    },
     {
       id: "animals",
       name: "Hewan",
@@ -279,10 +312,24 @@ const gameCategories = {
   ],
 }
 
-// Featured games for slideshow - Added Mahjong
+// Featured games for slideshow - Added Space Shooter
 const featuredGames = [
   {
     id: 1,
+    title: "Super Space Shooter",
+    description: {
+      en: "Epic space battles await!",
+      pt: "Batalhas espaciais épicas te esperam!",
+      es: "¡Te esperan batallas espaciales épicas!",
+      id: "Pertempuran luar angkasa epik menanti!",
+    },
+    image: "/images/spaceshooter-logo.jpg",
+    gradient: "from-blue-600 to-purple-600",
+    category: "action",
+    playable: true,
+  },
+  {
+    id: 2,
     title: "Snake Game",
     description: {
       en: "Test your limits!",
@@ -296,7 +343,7 @@ const featuredGames = [
     playable: true,
   },
   {
-    id: 2,
+    id: 3,
     title: "Mahjong Solitaire",
     description: {
       en: "Classic tile matching puzzle!",
@@ -310,7 +357,7 @@ const featuredGames = [
     playable: true,
   },
   {
-    id: 3,
+    id: 4,
     title: "Racing Thunder",
     description: {
       en: "High-speed racing action with amazing graphics!",
@@ -324,7 +371,7 @@ const featuredGames = [
     playable: false,
   },
   {
-    id: 4,
+    id: 5,
     title: "Bubble Pop",
     description: {
       en: "Match and pop colorful bubbles in this fun puzzle!",
@@ -335,20 +382,6 @@ const featuredGames = [
     image: "/placeholder.svg?height=200&width=300",
     gradient: "from-cyan-600 to-teal-600",
     category: "bubbles",
-    playable: false,
-  },
-  {
-    id: 5,
-    title: "Animal Kingdom",
-    description: {
-      en: "Take care of cute animals in this simulation!",
-      pt: "Cuida de animais fofos nesta simulação!",
-      es: "¡Cuida de lindos animales en esta simulación!",
-      id: "Rawat hewan-hewan lucu dalam simulasi ini!",
-    },
-    image: "/placeholder.svg?height=200&width=300",
-    gradient: "from-green-600 to-emerald-600",
-    category: "animals",
     playable: false,
   },
 ]
@@ -366,6 +399,7 @@ const translations = {
     close: "Close",
     playNow: "Play Now",
     loading: "Loading Game...",
+    spaceShooterAvailable: "Space Shooter Available!",
     snakeAvailable: "Snake Game Available!",
     mahjongAvailable: "Mahjong Available!",
   },
@@ -380,6 +414,7 @@ const translations = {
     close: "Fechar",
     playNow: "Jogar Agora",
     loading: "Carregando Jogo...",
+    spaceShooterAvailable: "Space Shooter Disponível!",
     snakeAvailable: "Jogo da Cobra Disponível!",
     mahjongAvailable: "Mahjong Disponível!",
   },
@@ -394,6 +429,7 @@ const translations = {
     close: "Cerrar",
     playNow: "Jugar Ahora",
     loading: "Cargando Juego...",
+    spaceShooterAvailable: "¡Space Shooter Disponible!",
     snakeAvailable: "¡Juego de Serpiente Disponible!",
     mahjongAvailable: "¡Mahjong Disponible!",
   },
@@ -408,6 +444,7 @@ const translations = {
     close: "Tutup",
     playNow: "Main Sekarang",
     loading: "Memuat Game...",
+    spaceShooterAvailable: "Space Shooter Tersedia!",
     snakeAvailable: "Game Ular Tersedia!",
     mahjongAvailable: "Game Mahjong Tersedia!",
   },
@@ -421,6 +458,7 @@ export default function FiGamesPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("")
   const [showSnakeGame, setShowSnakeGame] = useState(false)
   const [showMahjongGame, setShowMahjongGame] = useState(false)
+  const [showSpaceShooterGame, setShowSpaceShooterGame] = useState(false)
   const [gameLoading, setGameLoading] = useState(false)
   const [loadingProgress, setLoadingProgress] = useState(0)
   const [loadingGame, setLoadingGame] = useState<string>("")
@@ -460,6 +498,8 @@ export default function FiGamesPage() {
         handlePlaySnake()
       } else if (category.hasMahjong) {
         handlePlayMahjong()
+      } else if (category.hasSpaceShooter) {
+        handlePlaySpaceShooter()
       }
     } else {
       setSelectedCategory(categoryId)
@@ -472,7 +512,6 @@ export default function FiGamesPage() {
     setGameLoading(true)
     setLoadingProgress(0)
 
-    // Simulate loading progress
     const interval = setInterval(() => {
       setLoadingProgress((prev) => {
         if (prev >= 100) {
@@ -491,7 +530,6 @@ export default function FiGamesPage() {
     setGameLoading(true)
     setLoadingProgress(0)
 
-    // Simulate loading progress
     const interval = setInterval(() => {
       setLoadingProgress((prev) => {
         if (prev >= 100) {
@@ -505,12 +543,32 @@ export default function FiGamesPage() {
     }, 100)
   }
 
+  const handlePlaySpaceShooter = () => {
+    setLoadingGame("spaceshooter")
+    setGameLoading(true)
+    setLoadingProgress(0)
+
+    const interval = setInterval(() => {
+      setLoadingProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(interval)
+          setGameLoading(false)
+          setShowSpaceShooterGame(true)
+          return 100
+        }
+        return prev + Math.random() * 15 + 5
+      })
+    }, 100)
+  }
+
   const handleFeaturedGameClick = (game: any) => {
     if (game.playable) {
       if (game.category === "skill") {
         handlePlaySnake()
       } else if (game.category === "mahjong") {
         handlePlayMahjong()
+      } else if (game.category === "action") {
+        handlePlaySpaceShooter()
       }
     }
   }
@@ -717,6 +775,7 @@ export default function FiGamesPage() {
                     <div className="text-xs text-green-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center space-x-1">
                       {category.hasSnake && <span>🐍</span>}
                       {category.hasMahjong && <span>🀄</span>}
+                      {category.hasSpaceShooter && <span>🚀</span>}
                       <Play className="w-3 h-3" />
                     </div>
                   )}
@@ -724,7 +783,7 @@ export default function FiGamesPage() {
 
                 {/* Hover Glow */}
                 <div
-                  className={`absolute inset-0 bg-gradient-to-r ${category.gradient} opacity-0 group-hover:opacity-1 rounded-xl blur-xl transition-opacity duration-300`}
+                  className={`absolute inset-0 bg-gradient-to-r ${category.gradient} opacity-0 group-hover:opacity-10 rounded-xl blur-xl transition-opacity duration-300`}
                 />
               </motion.button>
             ))}
@@ -810,7 +869,13 @@ export default function FiGamesPage() {
             >
               <div className="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden">
                 <Image
-                  src={loadingGame === "snake" ? "/images/snakegame-logo.jpg" : "/images/mahjonggame-logo.jpg"}
+                  src={
+                    loadingGame === "snake"
+                      ? "/images/snakegame-logo.jpg"
+                      : loadingGame === "mahjong"
+                        ? "/images/mahjonggame-logo.jpg"
+                        : "/images/spaceshooter-logo.jpg"
+                  }
                   alt={`${loadingGame} Game Logo`}
                   width={80}
                   height={80}
@@ -825,7 +890,9 @@ export default function FiGamesPage() {
                   className={`h-full rounded-full ${
                     loadingGame === "snake"
                       ? "bg-gradient-to-r from-green-500 to-emerald-500"
-                      : "bg-gradient-to-r from-red-500 to-orange-500"
+                      : loadingGame === "mahjong"
+                        ? "bg-gradient-to-r from-red-500 to-orange-500"
+                        : "bg-gradient-to-r from-blue-500 to-purple-500"
                   }`}
                   initial={{ width: "0%" }}
                   animate={{ width: `${loadingProgress}%` }}
@@ -833,7 +900,15 @@ export default function FiGamesPage() {
                 />
               </div>
 
-              <div className={`text-lg font-semibold ${loadingGame === "snake" ? "text-green-400" : "text-red-400"}`}>
+              <div
+                className={`text-lg font-semibold ${
+                  loadingGame === "snake"
+                    ? "text-green-400"
+                    : loadingGame === "mahjong"
+                      ? "text-red-400"
+                      : "text-blue-400"
+                }`}
+              >
                 {Math.round(loadingProgress)}%
               </div>
             </motion.div>
@@ -845,6 +920,9 @@ export default function FiGamesPage() {
       <AnimatePresence>{showSnakeGame && <SnakeGameMobile onClose={() => setShowSnakeGame(false)} />}</AnimatePresence>
       <AnimatePresence>
         {showMahjongGame && <MahjongGameMobile onClose={() => setShowMahjongGame(false)} />}
+      </AnimatePresence>
+      <AnimatePresence>
+        {showSpaceShooterGame && <SpaceShooterMobile onClose={() => setShowSpaceShooterGame(false)} />}
       </AnimatePresence>
     </div>
   )
