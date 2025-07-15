@@ -36,7 +36,6 @@ const tokenProvider = new TokenProvider({ client, multicall3: config.multicall3 
 const zeroX = new ZeroX(tokenProvider, inmemoryTokenStorage)
 const worldswap = new HoldSo(tokenProvider, inmemoryTokenStorage)
 
-swapHelper.load(zeroX)
 swapHelper.load(worldswap)
 
 // Export tokens - TPT token removed to fix errors
@@ -219,8 +218,6 @@ export async function swap() {
     },
     partnerCode: "24568", // Replace with your partner code, contact to holdstation team to get one
     feeAmountOut: quoteResponse.addons?.feeAmountOut,
-    fee: "0.2",
-    feeReceiver: ethers.ZeroAddress, // ZERO_ADDRESS or your fee receiver address
   }
   const result = await swapHelper.swap(swapParams)
   console.log("✅ Swap result:", result)
