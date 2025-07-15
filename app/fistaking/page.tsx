@@ -27,6 +27,7 @@ const translations = {
     connectWalletFirst: "Connect your wallet first",
     pendingRewards: "Pending Rewards",
     dismiss: "Dismiss",
+    powerActivated: "Power Activated",
   },
   pt: {
     title: "FiStaking",
@@ -41,6 +42,7 @@ const translations = {
     connectWalletFirst: "Conecte sua carteira primeiro",
     pendingRewards: "Recompensas Pendentes",
     dismiss: "Dispensar",
+    powerActivated: "Energia Ativada",
   },
   es: {
     title: "FiStaking",
@@ -55,6 +57,7 @@ const translations = {
     connectWalletFirst: "Conecta tu billetera primero",
     pendingRewards: "Recompensas Pendientes",
     dismiss: "Descartar",
+    powerActivated: "Energía Activada",
   },
   id: {
     title: "FiStaking",
@@ -69,6 +72,7 @@ const translations = {
     connectWalletFirst: "Hubungkan dompet Anda terlebih dahulu",
     pendingRewards: "Hadiah Tertunda",
     dismiss: "Tutup",
+    powerActivated: "Daya Diaktifkan",
   },
 }
 
@@ -358,6 +362,44 @@ interface StakingInfo {
   canClaim: boolean
 }
 
+// Battery Component
+function BatteryIndicator({ currentLang }: { currentLang: SupportedLanguage }) {
+  const [batteryLevel, setBatteryLevel] = useState(0)
+  const t = translations[currentLang]
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setBatteryLevel((prev) => {
+        if (prev >= 100) return 0
+        return prev + 2
+      })
+    }, 100)
+
+    return () => clearInterval(interval)
+  }, [])
+
+  return (
+    <div className="flex flex-col items-center">
+      {/* Battery */}
+      <div className="relative w-8 h-4 border border-green-400 rounded-sm bg-black/50">
+        {/* Battery tip */}
+        <div className="absolute -right-1 top-1 w-1 h-2 bg-green-400 rounded-r-sm"></div>
+        {/* Battery fill */}
+        <div
+          className="h-full bg-gradient-to-r from-green-500 to-green-300 rounded-sm transition-all duration-100"
+          style={{ width: `${batteryLevel}%` }}
+        ></div>
+        {/* Battery percentage text */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="text-[6px] font-bold text-white drop-shadow-sm">{batteryLevel}%</span>
+        </div>
+      </div>
+      {/* Power Activated text */}
+      <div className="text-green-400 text-[8px] font-medium mt-1 text-center">{t.powerActivated}</div>
+    </div>
+  )
+}
+
 export default function FiStakingPage() {
   const router = useRouter()
   const { user, isAuthenticated } = useMiniKit()
@@ -448,44 +490,31 @@ export default function FiStakingPage() {
   }
 
   return (
-    <main className="min-h-screen bg-black relative overflow-hidden flex flex-col items-center pt-6 pb-8">
-      {/* Background Effects */}
+    <main className="min-h-screen bg-black relative overflow-hidden flex flex-col items-center pt-4 pb-6">
+      {/* Background Effects - Reduced */}
       <div className="absolute inset-0">
-        {[...Array(12)].map((_, i) => (
+        {[...Array(8)].map((_, i) => (
           <div
             key={`h-line-${i}`}
-            className="absolute h-px bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent animate-pulse"
+            className="absolute h-px bg-gradient-to-r from-transparent via-cyan-400/40 to-transparent animate-pulse"
             style={{
-              top: `${8 + i * 8}%`,
+              top: `${10 + i * 10}%`,
               left: "-100%",
               width: "200%",
-              animation: `moveRight 4s linear infinite`,
-              animationDelay: `${i * 0.3}s`,
-            }}
-          />
-        ))}
-        {[...Array(10)].map((_, i) => (
-          <div
-            key={`v-line-${i}`}
-            className="absolute w-px bg-gradient-to-b from-transparent via-blue-400/50 to-transparent"
-            style={{
-              left: `${10 + i * 10}%`,
-              top: "-100%",
-              height: "200%",
-              animation: `moveDown 5s linear infinite`,
+              animation: `moveRight 5s linear infinite`,
               animationDelay: `${i * 0.4}s`,
             }}
           />
         ))}
-        {[...Array(8)].map((_, i) => (
+        {[...Array(6)].map((_, i) => (
           <div
-            key={`d-line-${i}`}
-            className="absolute h-px bg-gradient-to-r from-transparent via-white/30 to-transparent rotate-45"
+            key={`v-line-${i}`}
+            className="absolute w-px bg-gradient-to-b from-transparent via-blue-400/30 to-transparent"
             style={{
-              top: `${15 + i * 12}%`,
-              left: "-100%",
-              width: "200%",
-              animation: `moveRight 6s linear infinite`,
+              left: `${15 + i * 15}%`,
+              top: "-100%",
+              height: "200%",
+              animation: `moveDown 6s linear infinite`,
               animationDelay: `${i * 0.5}s`,
             }}
           />
@@ -493,76 +522,38 @@ export default function FiStakingPage() {
       </div>
 
       <div
-        className="absolute inset-0 opacity-10"
+        className="absolute inset-0 opacity-5"
         style={{
           backgroundImage: `
-            linear-gradient(rgba(34,211,238,0.3) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(34,211,238,0.3) 1px, transparent 1px)
+            linear-gradient(rgba(34,211,238,0.2) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(34,211,238,0.2) 1px, transparent 1px)
           `,
-          backgroundSize: "60px 60px",
+          backgroundSize: "80px 80px",
         }}
       />
 
+      {/* Reduced background effects */}
       <div className="absolute inset-0 flex items-center justify-center">
-        <div className="w-96 h-96 bg-white/5 rounded-full blur-3xl animate-pulse" />
+        <div className="w-64 h-64 bg-white/3 rounded-full blur-3xl animate-pulse" />
         <div
-          className="absolute w-80 h-80 bg-cyan-400/10 rounded-full blur-2xl animate-pulse"
+          className="absolute w-48 h-48 bg-cyan-400/5 rounded-full blur-2xl animate-pulse"
           style={{ animationDelay: "0.5s" }}
         />
-        <div
-          className="absolute w-64 h-64 bg-blue-400/15 rounded-full blur-xl animate-pulse"
-          style={{ animationDelay: "1s" }}
-        />
-        <div
-          className="absolute w-48 h-48 bg-white/20 rounded-full blur-lg animate-pulse"
-          style={{ animationDelay: "1.5s" }}
-        />
       </div>
 
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div
-          className="w-72 h-72 border border-white/10 rounded-full animate-spin"
-          style={{ animationDuration: "20s" }}
-        />
-        <div
-          className="absolute w-80 h-80 border border-cyan-400/15 rounded-full animate-spin"
-          style={{ animationDuration: "25s", animationDirection: "reverse" }}
-        />
-        <div
-          className="absolute w-64 h-64 border border-blue-400/20 rounded-full animate-spin"
-          style={{ animationDuration: "15s" }}
-        />
-      </div>
-
-      {[...Array(25)].map((_, i) => (
+      {[...Array(15)].map((_, i) => (
         <div
           key={`particle-${i}`}
           className="absolute rounded-full animate-ping"
           style={{
-            width: `${2 + Math.random() * 4}px`,
-            height: `${2 + Math.random() * 4}px`,
+            width: `${1 + Math.random() * 2}px`,
+            height: `${1 + Math.random() * 2}px`,
             backgroundColor:
-              i % 3 === 0 ? "rgba(255,255,255,0.8)" : i % 3 === 1 ? "rgba(34,211,238,0.6)" : "rgba(59,130,246,0.4)",
+              i % 3 === 0 ? "rgba(255,255,255,0.4)" : i % 3 === 1 ? "rgba(34,211,238,0.3)" : "rgba(59,130,246,0.2)",
             left: `${Math.random() * 100}%`,
             top: `${Math.random() * 100}%`,
             animationDelay: `${Math.random() * 4}s`,
-            animationDuration: `${1 + Math.random() * 3}s`,
-          }}
-        />
-      ))}
-
-      {[...Array(8)].map((_, i) => (
-        <div
-          key={`beam-${i}`}
-          className="absolute bg-gradient-to-r from-transparent via-white/20 to-transparent h-px animate-pulse"
-          style={{
-            top: "50%",
-            left: "50%",
-            width: "200px",
-            transformOrigin: "0 0",
-            transform: `rotate(${i * 45}deg)`,
-            animationDelay: `${i * 0.5}s`,
-            animationDuration: "2s",
+            animationDuration: `${2 + Math.random() * 3}s`,
           }}
         />
       ))}
@@ -583,19 +574,29 @@ export default function FiStakingPage() {
         }
       `}</style>
 
+      {/* Battery Indicator - Top Right */}
+      <motion.div
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.5 }}
+        className="absolute top-4 right-4 z-20"
+      >
+        <BatteryIndicator currentLang={currentLang} />
+      </motion.div>
+
       {/* Back Button */}
       <motion.div
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.5 }}
-        className="absolute top-6 left-4 z-20"
+        className="absolute top-4 left-4 z-20"
       >
         <button
           onClick={() => router.back()}
-          className="flex items-center gap-2 px-3 py-2 text-gray-300 hover:text-white transition-colors"
+          className="flex items-center gap-1 px-2 py-1 text-gray-300 hover:text-white transition-colors"
         >
-          <ArrowLeft className="w-4 h-4" />
-          <span className="text-sm">{t.back}</span>
+          <ArrowLeft className="w-3 h-3" />
+          <span className="text-xs">{t.back}</span>
         </button>
       </motion.div>
 
@@ -603,18 +604,18 @@ export default function FiStakingPage() {
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="text-center mb-6 relative z-10"
+        className="text-center mb-4 relative z-10"
       >
-        <h1 className="text-3xl font-bold tracking-tighter flex items-center justify-center">
-          <TrendingUp className="w-6 h-6 mr-2 text-purple-400" />
+        <h1 className="text-2xl font-bold tracking-tighter flex items-center justify-center">
+          <TrendingUp className="w-5 h-5 mr-2 text-purple-400" />
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-gray-200 via-white to-gray-300">
             {t.title}
           </span>
         </h1>
-        <p className="text-gray-400 text-sm mt-1 leading-relaxed">{t.subtitle}</p>
+        <p className="text-gray-400 text-xs mt-1 leading-relaxed px-4">{t.subtitle}</p>
       </motion.div>
 
-      <div className="w-full max-w-md px-4 relative z-10 space-y-4">
+      <div className="w-full max-w-sm px-4 relative z-10 space-y-3">
         {/* Success Message */}
         <AnimatePresence>
           {claimSuccess && (
@@ -622,13 +623,13 @@ export default function FiStakingPage() {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="bg-green-500/10 border border-green-500/30 rounded-lg p-4"
+              className="bg-green-500/10 border border-green-500/30 rounded-lg p-3"
             >
-              <div className="flex items-start space-x-3">
-                <CheckCircle className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
+              <div className="flex items-start space-x-2">
+                <CheckCircle className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="text-green-400 text-sm font-medium mb-1">{t.claimSuccess}</p>
-                  <p className="text-green-300 text-xs">
+                  <p className="text-green-400 text-xs font-medium mb-1">{t.claimSuccess}</p>
+                  <p className="text-green-300 text-[10px]">
                     {STAKING_CONTRACTS[claimSuccess as keyof typeof STAKING_CONTRACTS]?.symbol} rewards claimed
                     successfully
                   </p>
@@ -645,14 +646,17 @@ export default function FiStakingPage() {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="bg-red-500/10 border border-red-500/30 rounded-lg p-4"
+              className="bg-red-500/10 border border-red-500/30 rounded-lg p-3"
             >
-              <div className="flex items-start space-x-3">
-                <div className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0">⚠️</div>
+              <div className="flex items-start space-x-2">
+                <div className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0">⚠️</div>
                 <div>
-                  <p className="text-red-400 text-sm font-medium mb-1">{t.claimFailed}</p>
-                  <p className="text-red-300 text-xs">{claimError}</p>
-                  <button onClick={() => setClaimError(null)} className="mt-2 text-red-400 text-xs hover:text-red-300">
+                  <p className="text-red-400 text-xs font-medium mb-1">{t.claimFailed}</p>
+                  <p className="text-red-300 text-[10px]">{claimError}</p>
+                  <button
+                    onClick={() => setClaimError(null)}
+                    className="mt-1 text-red-400 text-[10px] hover:text-red-300"
+                  >
                     {t.dismiss}
                   </button>
                 </div>
@@ -665,13 +669,13 @@ export default function FiStakingPage() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-6 text-center"
+            className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 text-center"
           >
-            <p className="text-blue-400 text-sm">{t.connectWalletFirst}</p>
+            <p className="text-blue-400 text-xs">{t.connectWalletFirst}</p>
           </motion.div>
         ) : (
           <>
-            {/* Staking Tokens */}
+            {/* Staking Tokens - Compact */}
             {Object.entries(STAKING_CONTRACTS).map(([key, contract], index) => {
               const isClaimingThis = claiming === key
 
@@ -680,29 +684,29 @@ export default function FiStakingPage() {
                   key={key}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.1 }}
-                  className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-lg p-4"
+                  transition={{ duration: 0.3, delay: index * 0.05 }}
+                  className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-lg p-3"
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-2">
                       <Image
                         src={contract.image || "/placeholder.svg"}
                         alt={contract.name}
-                        width={40}
-                        height={40}
-                        className="w-10 h-10 rounded-full"
+                        width={32}
+                        height={32}
+                        className="w-8 h-8 rounded-full"
                       />
                       <div>
-                        <h3 className="text-white font-medium text-lg">{contract.symbol}</h3>
-                        <p className="text-gray-400 text-sm">{contract.name}</p>
+                        <h3 className="text-white font-medium text-sm">{contract.symbol}</h3>
+                        <p className="text-gray-400 text-[10px]">{contract.name}</p>
                       </div>
                     </div>
 
-                    {/* Claim Button */}
+                    {/* Claim Button - Compact */}
                     <button
                       onClick={() => handleClaim(key)}
                       disabled={isClaimingThis}
-                      className={`py-2 px-6 rounded-lg font-medium text-sm transition-all duration-300 flex items-center justify-center space-x-2 ${
+                      className={`py-1.5 px-4 rounded-md font-medium text-xs transition-all duration-300 flex items-center justify-center space-x-1 ${
                         isClaimingThis
                           ? "bg-gray-600/50 text-gray-400 cursor-not-allowed"
                           : "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
@@ -710,12 +714,12 @@ export default function FiStakingPage() {
                     >
                       {isClaimingThis ? (
                         <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <Loader2 className="w-3 h-3 animate-spin" />
                           <span>{t.claiming}</span>
                         </>
                       ) : (
                         <>
-                          <Gift className="w-4 h-4" />
+                          <Gift className="w-3 h-3" />
                           <span>{t.claim}</span>
                         </>
                       )}
