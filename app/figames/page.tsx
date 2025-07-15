@@ -2,60 +2,275 @@
 
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { ArrowLeft, ChevronLeft, ChevronRight, X, Gamepad2, Play } from "lucide-react"
+import {
+  ArrowLeft,
+  Zap,
+  Heart,
+  Target,
+  Sparkles,
+  Car,
+  Trophy,
+  Puzzle,
+  Brain,
+  ChevronLeft,
+  ChevronRight,
+  X,
+  Gamepad2,
+  Play,
+} from "lucide-react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import SnakeGameMobile from "@/components/snake-game-mobile"
 
-// Game categories with translations - Snake added as first category
+// Game categories with translations - original categories maintained
 const gameCategories = {
   en: [
-    { id: "snake", name: "Snake", icon: "🐍", gradient: "from-green-500 to-emerald-500", playable: true },
-    { id: "action", name: "Action", icon: "⚡", gradient: "from-red-500 to-orange-500", playable: false },
-    { id: "animals", name: "Animals", icon: "🐾", gradient: "from-green-500 to-emerald-500", playable: false },
-    { id: "adventure", name: "Adventure", icon: "🗺️", gradient: "from-purple-500 to-violet-500", playable: false },
-    { id: "bubbles", name: "Bubbles", icon: "🫧", gradient: "from-cyan-500 to-blue-500", playable: false },
-    { id: "racing", name: "Racing", icon: "🏎️", gradient: "from-yellow-500 to-orange-500", playable: false },
-    { id: "sports", name: "Sports", icon: "⚽", gradient: "from-blue-500 to-indigo-500", playable: false },
-    { id: "skill", name: "Skill", icon: "🎯", gradient: "from-pink-500 to-rose-500", playable: false },
-    { id: "mahjong", name: "Mahjong", icon: "🀄", gradient: "from-amber-500 to-yellow-500", playable: false },
-    { id: "logic", name: "Logic", icon: "🧠", gradient: "from-teal-500 to-cyan-500", playable: false },
+    { id: "action", name: "Action", icon: Zap, gradient: "from-red-500 to-orange-500", emoji: "⚡", playable: false },
+    {
+      id: "animals",
+      name: "Animals",
+      icon: Heart,
+      gradient: "from-green-500 to-emerald-500",
+      emoji: "🐾",
+      playable: false,
+    },
+    {
+      id: "adventure",
+      name: "Adventure",
+      icon: Target,
+      gradient: "from-purple-500 to-violet-500",
+      emoji: "🗺️",
+      playable: false,
+    },
+    {
+      id: "bubbles",
+      name: "Bubbles",
+      icon: Sparkles,
+      gradient: "from-cyan-500 to-blue-500",
+      emoji: "🫧",
+      playable: false,
+    },
+    { id: "racing", name: "Racing", icon: Car, gradient: "from-yellow-500 to-orange-500", emoji: "🏎️", playable: false },
+    {
+      id: "sports",
+      name: "Sports",
+      icon: Trophy,
+      gradient: "from-blue-500 to-indigo-500",
+      emoji: "⚽",
+      playable: false,
+    },
+    {
+      id: "skill",
+      name: "Skill",
+      icon: Target,
+      gradient: "from-pink-500 to-rose-500",
+      emoji: "🎯",
+      playable: true,
+      hasSnake: true,
+    },
+    {
+      id: "mahjong",
+      name: "Mahjong",
+      icon: Puzzle,
+      gradient: "from-amber-500 to-yellow-500",
+      emoji: "🀄",
+      playable: false,
+    },
+    { id: "girls", name: "Girls", icon: Heart, gradient: "from-pink-500 to-purple-500", emoji: "👧", playable: false },
+    { id: "logic", name: "Logic", icon: Brain, gradient: "from-teal-500 to-cyan-500", emoji: "🧠", playable: false },
   ],
   pt: [
-    { id: "snake", name: "Cobra", icon: "🐍", gradient: "from-green-500 to-emerald-500", playable: true },
-    { id: "action", name: "Acção", icon: "⚡", gradient: "from-red-500 to-orange-500", playable: false },
-    { id: "animals", name: "Animais", icon: "🐾", gradient: "from-green-500 to-emerald-500", playable: false },
-    { id: "adventure", name: "Aventura", icon: "🗺️", gradient: "from-purple-500 to-violet-500", playable: false },
-    { id: "bubbles", name: "Bubbles", icon: "🫧", gradient: "from-cyan-500 to-blue-500", playable: false },
-    { id: "racing", name: "Corridas", icon: "🏎️", gradient: "from-yellow-500 to-orange-500", playable: false },
-    { id: "sports", name: "Desporto", icon: "⚽", gradient: "from-blue-500 to-indigo-500", playable: false },
-    { id: "skill", name: "Habilidade", icon: "🎯", gradient: "from-pink-500 to-rose-500", playable: false },
-    { id: "mahjong", name: "Mahjong", icon: "🀄", gradient: "from-amber-500 to-yellow-500", playable: false },
-    { id: "logic", name: "Raciocínio", icon: "🧠", gradient: "from-teal-500 to-cyan-500", playable: false },
+    { id: "action", name: "Acção", icon: Zap, gradient: "from-red-500 to-orange-500", emoji: "⚡", playable: false },
+    {
+      id: "animals",
+      name: "Animais",
+      icon: Heart,
+      gradient: "from-green-500 to-emerald-500",
+      emoji: "🐾",
+      playable: false,
+    },
+    {
+      id: "adventure",
+      name: "Aventura",
+      icon: Target,
+      gradient: "from-purple-500 to-violet-500",
+      emoji: "🗺️",
+      playable: false,
+    },
+    {
+      id: "bubbles",
+      name: "Bubbles",
+      icon: Sparkles,
+      gradient: "from-cyan-500 to-blue-500",
+      emoji: "🫧",
+      playable: false,
+    },
+    {
+      id: "racing",
+      name: "Corridas",
+      icon: Car,
+      gradient: "from-yellow-500 to-orange-500",
+      emoji: "🏎️",
+      playable: false,
+    },
+    {
+      id: "sports",
+      name: "Desporto",
+      icon: Trophy,
+      gradient: "from-blue-500 to-indigo-500",
+      emoji: "⚽",
+      playable: false,
+    },
+    {
+      id: "skill",
+      name: "Habilidade",
+      icon: Target,
+      gradient: "from-pink-500 to-rose-500",
+      emoji: "🎯",
+      playable: true,
+      hasSnake: true,
+    },
+    {
+      id: "mahjong",
+      name: "Mahjong",
+      icon: Puzzle,
+      gradient: "from-amber-500 to-yellow-500",
+      emoji: "🀄",
+      playable: false,
+    },
+    {
+      id: "girls",
+      name: "Meninas",
+      icon: Heart,
+      gradient: "from-pink-500 to-purple-500",
+      emoji: "👧",
+      playable: false,
+    },
+    {
+      id: "logic",
+      name: "Raciocínio",
+      icon: Brain,
+      gradient: "from-teal-500 to-cyan-500",
+      emoji: "🧠",
+      playable: false,
+    },
   ],
   es: [
-    { id: "snake", name: "Serpiente", icon: "🐍", gradient: "from-green-500 to-emerald-500", playable: true },
-    { id: "action", name: "Acción", icon: "⚡", gradient: "from-red-500 to-orange-500", playable: false },
-    { id: "animals", name: "Animales", icon: "🐾", gradient: "from-green-500 to-emerald-500", playable: false },
-    { id: "adventure", name: "Aventura", icon: "🗺️", gradient: "from-purple-500 to-violet-500", playable: false },
-    { id: "bubbles", name: "Burbujas", icon: "🫧", gradient: "from-cyan-500 to-blue-500", playable: false },
-    { id: "racing", name: "Carreras", icon: "🏎️", gradient: "from-yellow-500 to-orange-500", playable: false },
-    { id: "sports", name: "Deportes", icon: "⚽", gradient: "from-blue-500 to-indigo-500", playable: false },
-    { id: "skill", name: "Habilidad", icon: "🎯", gradient: "from-pink-500 to-rose-500", playable: false },
-    { id: "mahjong", name: "Mahjong", icon: "🀄", gradient: "from-amber-500 to-yellow-500", playable: false },
-    { id: "logic", name: "Lógica", icon: "🧠", gradient: "from-teal-500 to-cyan-500", playable: false },
+    { id: "action", name: "Acción", icon: Zap, gradient: "from-red-500 to-orange-500", emoji: "⚡", playable: false },
+    {
+      id: "animals",
+      name: "Animales",
+      icon: Heart,
+      gradient: "from-green-500 to-emerald-500",
+      emoji: "🐾",
+      playable: false,
+    },
+    {
+      id: "adventure",
+      name: "Aventura",
+      icon: Target,
+      gradient: "from-purple-500 to-violet-500",
+      emoji: "🗺️",
+      playable: false,
+    },
+    {
+      id: "bubbles",
+      name: "Burbujas",
+      icon: Sparkles,
+      gradient: "from-cyan-500 to-blue-500",
+      emoji: "🫧",
+      playable: false,
+    },
+    {
+      id: "racing",
+      name: "Carreras",
+      icon: Car,
+      gradient: "from-yellow-500 to-orange-500",
+      emoji: "🏎️",
+      playable: false,
+    },
+    {
+      id: "sports",
+      name: "Deportes",
+      icon: Trophy,
+      gradient: "from-blue-500 to-indigo-500",
+      emoji: "⚽",
+      playable: false,
+    },
+    {
+      id: "skill",
+      name: "Habilidad",
+      icon: Target,
+      gradient: "from-pink-500 to-rose-500",
+      emoji: "🎯",
+      playable: true,
+      hasSnake: true,
+    },
+    {
+      id: "mahjong",
+      name: "Mahjong",
+      icon: Puzzle,
+      gradient: "from-amber-500 to-yellow-500",
+      emoji: "🀄",
+      playable: false,
+    },
+    { id: "girls", name: "Chicas", icon: Heart, gradient: "from-pink-500 to-purple-500", emoji: "👧", playable: false },
+    { id: "logic", name: "Lógica", icon: Brain, gradient: "from-teal-500 to-cyan-500", emoji: "🧠", playable: false },
   ],
   id: [
-    { id: "snake", name: "Ular", icon: "🐍", gradient: "from-green-500 to-emerald-500", playable: true },
-    { id: "action", name: "Aksi", icon: "⚡", gradient: "from-red-500 to-orange-500", playable: false },
-    { id: "animals", name: "Hewan", icon: "🐾", gradient: "from-green-500 to-emerald-500", playable: false },
-    { id: "adventure", name: "Petualangan", icon: "🗺️", gradient: "from-purple-500 to-violet-500", playable: false },
-    { id: "bubbles", name: "Gelembung", icon: "🫧", gradient: "from-cyan-500 to-blue-500", playable: false },
-    { id: "racing", name: "Balap", icon: "🏎️", gradient: "from-yellow-500 to-orange-500", playable: false },
-    { id: "sports", name: "Olahraga", icon: "⚽", gradient: "from-blue-500 to-indigo-500", playable: false },
-    { id: "skill", name: "Keterampilan", icon: "🎯", gradient: "from-pink-500 to-rose-500", playable: false },
-    { id: "mahjong", name: "Mahjong", icon: "🀄", gradient: "from-amber-500 to-yellow-500", playable: false },
-    { id: "logic", name: "Logika", icon: "🧠", gradient: "from-teal-500 to-cyan-500", playable: false },
+    { id: "action", name: "Aksi", icon: Zap, gradient: "from-red-500 to-orange-500", emoji: "⚡", playable: false },
+    {
+      id: "animals",
+      name: "Hewan",
+      icon: Heart,
+      gradient: "from-green-500 to-emerald-500",
+      emoji: "🐾",
+      playable: false,
+    },
+    {
+      id: "adventure",
+      name: "Petualangan",
+      icon: Target,
+      gradient: "from-purple-500 to-violet-500",
+      emoji: "🗺️",
+      playable: false,
+    },
+    {
+      id: "bubbles",
+      name: "Gelembung",
+      icon: Sparkles,
+      gradient: "from-cyan-500 to-blue-500",
+      emoji: "🫧",
+      playable: false,
+    },
+    { id: "racing", name: "Balap", icon: Car, gradient: "from-yellow-500 to-orange-500", emoji: "🏎️", playable: false },
+    {
+      id: "sports",
+      name: "Olahraga",
+      icon: Trophy,
+      gradient: "from-blue-500 to-indigo-500",
+      emoji: "⚽",
+      playable: false,
+    },
+    {
+      id: "skill",
+      name: "Keterampilan",
+      icon: Target,
+      gradient: "from-pink-500 to-rose-500",
+      emoji: "🎯",
+      playable: true,
+      hasSnake: true,
+    },
+    {
+      id: "mahjong",
+      name: "Mahjong",
+      icon: Puzzle,
+      gradient: "from-amber-500 to-yellow-500",
+      emoji: "🀄",
+      playable: false,
+    },
+    { id: "girls", name: "Gadis", icon: Heart, gradient: "from-pink-500 to-purple-500", emoji: "👧", playable: false },
+    { id: "logic", name: "Logika", icon: Brain, gradient: "from-teal-500 to-cyan-500", emoji: "🧠", playable: false },
   ],
 }
 
@@ -72,7 +287,7 @@ const featuredGames = [
     },
     image: "/images/snakegame-logo.jpg",
     gradient: "from-green-600 to-emerald-600",
-    category: "snake",
+    category: "skill",
     playable: true,
   },
   {
@@ -146,6 +361,7 @@ const translations = {
     close: "Close",
     playNow: "Play Now",
     loading: "Loading Game...",
+    snakeAvailable: "Snake Game Available!",
   },
   pt: {
     title: "Fi Games",
@@ -158,6 +374,7 @@ const translations = {
     close: "Fechar",
     playNow: "Jogar Agora",
     loading: "Carregando Jogo...",
+    snakeAvailable: "Jogo da Cobra Disponível!",
   },
   es: {
     title: "Fi Games",
@@ -170,6 +387,7 @@ const translations = {
     close: "Cerrar",
     playNow: "Jugar Ahora",
     loading: "Cargando Juego...",
+    snakeAvailable: "¡Juego de Serpiente Disponible!",
   },
   id: {
     title: "Fi Games",
@@ -182,6 +400,7 @@ const translations = {
     close: "Tutup",
     playNow: "Main Sekarang",
     loading: "Memuat Game...",
+    snakeAvailable: "Game Ular Tersedia!",
   },
 }
 
@@ -225,7 +444,7 @@ export default function FiGamesPage() {
 
   const handleCategoryClick = (categoryId: string) => {
     const category = categories.find((cat) => cat.id === categoryId)
-    if (category?.playable && categoryId === "snake") {
+    if (category?.playable && category.hasSnake) {
       handlePlaySnake()
     } else {
       setSelectedCategory(categoryId)
@@ -252,7 +471,7 @@ export default function FiGamesPage() {
   }
 
   const handleFeaturedGameClick = (game: any) => {
-    if (game.playable && game.category === "snake") {
+    if (game.playable && game.category === "skill") {
       handlePlaySnake()
     }
   }
@@ -448,11 +667,17 @@ export default function FiGamesPage() {
 
                 {/* Content */}
                 <div className="relative z-10 flex flex-col items-center space-y-2 md:space-y-3">
-                  <div className="text-2xl md:text-3xl">{category.icon}</div>
+                  <div className="text-2xl md:text-3xl">{category.emoji}</div>
+                  <div
+                    className={`w-8 h-8 md:w-10 md:h-10 bg-gradient-to-r ${category.gradient} rounded-full flex items-center justify-center`}
+                  >
+                    <category.icon className="w-4 h-4 md:w-5 md:h-5 text-white" />
+                  </div>
                   <span className="text-xs md:text-sm font-medium text-center">{category.name}</span>
-                  {category.playable && (
-                    <div className="text-xs text-green-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <Play className="w-3 h-3 mx-auto" />
+                  {category.playable && category.hasSnake && (
+                    <div className="text-xs text-green-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center space-x-1">
+                      <span>🐍</span>
+                      <Play className="w-3 h-3" />
                     </div>
                   )}
                 </div>
