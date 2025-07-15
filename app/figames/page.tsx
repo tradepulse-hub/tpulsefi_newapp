@@ -21,8 +21,9 @@ import {
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import SnakeGameMobile from "@/components/snake-game-mobile"
+import MahjongGameMobile from "@/components/mahjong-game-mobile"
 
-// Game categories with translations - original categories maintained
+// Game categories with translations - Mahjong now playable
 const gameCategories = {
   en: [
     { id: "action", name: "Action", icon: Zap, gradient: "from-red-500 to-orange-500", emoji: "⚡", playable: false },
@@ -72,9 +73,10 @@ const gameCategories = {
       id: "mahjong",
       name: "Mahjong",
       icon: Puzzle,
-      gradient: "from-amber-500 to-yellow-500",
+      gradient: "from-red-500 to-orange-500",
       emoji: "🀄",
-      playable: false,
+      playable: true,
+      hasMahjong: true,
     },
     { id: "girls", name: "Girls", icon: Heart, gradient: "from-pink-500 to-purple-500", emoji: "👧", playable: false },
     { id: "logic", name: "Logic", icon: Brain, gradient: "from-teal-500 to-cyan-500", emoji: "🧠", playable: false },
@@ -134,9 +136,10 @@ const gameCategories = {
       id: "mahjong",
       name: "Mahjong",
       icon: Puzzle,
-      gradient: "from-amber-500 to-yellow-500",
+      gradient: "from-red-500 to-orange-500",
       emoji: "🀄",
-      playable: false,
+      playable: true,
+      hasMahjong: true,
     },
     {
       id: "girls",
@@ -210,9 +213,10 @@ const gameCategories = {
       id: "mahjong",
       name: "Mahjong",
       icon: Puzzle,
-      gradient: "from-amber-500 to-yellow-500",
+      gradient: "from-red-500 to-orange-500",
       emoji: "🀄",
-      playable: false,
+      playable: true,
+      hasMahjong: true,
     },
     { id: "girls", name: "Chicas", icon: Heart, gradient: "from-pink-500 to-purple-500", emoji: "👧", playable: false },
     { id: "logic", name: "Lógica", icon: Brain, gradient: "from-teal-500 to-cyan-500", emoji: "🧠", playable: false },
@@ -265,16 +269,17 @@ const gameCategories = {
       id: "mahjong",
       name: "Mahjong",
       icon: Puzzle,
-      gradient: "from-amber-500 to-yellow-500",
+      gradient: "from-red-500 to-orange-500",
       emoji: "🀄",
-      playable: false,
+      playable: true,
+      hasMahjong: true,
     },
     { id: "girls", name: "Gadis", icon: Heart, gradient: "from-pink-500 to-purple-500", emoji: "👧", playable: false },
     { id: "logic", name: "Logika", icon: Brain, gradient: "from-teal-500 to-cyan-500", emoji: "🧠", playable: false },
   ],
 }
 
-// Featured games for slideshow - Snake with new description
+// Featured games for slideshow - Added Mahjong
 const featuredGames = [
   {
     id: 1,
@@ -292,6 +297,20 @@ const featuredGames = [
   },
   {
     id: 2,
+    title: "Mahjong Solitaire",
+    description: {
+      en: "Classic tile matching puzzle!",
+      pt: "Puzzle clássico de combinação!",
+      es: "¡Rompecabezas clásico de fichas!",
+      id: "Puzzle pencocokan ubin klasik!",
+    },
+    image: "/images/mahjonggame-logo.jpg",
+    gradient: "from-red-600 to-orange-600",
+    category: "mahjong",
+    playable: true,
+  },
+  {
+    id: 3,
     title: "Racing Thunder",
     description: {
       en: "High-speed racing action with amazing graphics!",
@@ -305,7 +324,7 @@ const featuredGames = [
     playable: false,
   },
   {
-    id: 3,
+    id: 4,
     title: "Bubble Pop",
     description: {
       en: "Match and pop colorful bubbles in this fun puzzle!",
@@ -319,7 +338,7 @@ const featuredGames = [
     playable: false,
   },
   {
-    id: 4,
+    id: 5,
     title: "Animal Kingdom",
     description: {
       en: "Take care of cute animals in this simulation!",
@@ -330,20 +349,6 @@ const featuredGames = [
     image: "/placeholder.svg?height=200&width=300",
     gradient: "from-green-600 to-emerald-600",
     category: "animals",
-    playable: false,
-  },
-  {
-    id: 5,
-    title: "Brain Teaser",
-    description: {
-      en: "Challenge your mind with these logic puzzles!",
-      pt: "Desafia a tua mente com estes puzzles de lógica!",
-      es: "¡Desafía tu mente con estos rompecabezas de lógica!",
-      id: "Tantang pikiranmu dengan teka-teki logika ini!",
-    },
-    image: "/placeholder.svg?height=200&width=300",
-    gradient: "from-indigo-600 to-purple-600",
-    category: "logic",
     playable: false,
   },
 ]
@@ -362,6 +367,7 @@ const translations = {
     playNow: "Play Now",
     loading: "Loading Game...",
     snakeAvailable: "Snake Game Available!",
+    mahjongAvailable: "Mahjong Available!",
   },
   pt: {
     title: "Fi Games",
@@ -375,6 +381,7 @@ const translations = {
     playNow: "Jogar Agora",
     loading: "Carregando Jogo...",
     snakeAvailable: "Jogo da Cobra Disponível!",
+    mahjongAvailable: "Mahjong Disponível!",
   },
   es: {
     title: "Fi Games",
@@ -388,6 +395,7 @@ const translations = {
     playNow: "Jugar Ahora",
     loading: "Cargando Juego...",
     snakeAvailable: "¡Juego de Serpiente Disponible!",
+    mahjongAvailable: "¡Mahjong Disponible!",
   },
   id: {
     title: "Fi Games",
@@ -401,6 +409,7 @@ const translations = {
     playNow: "Main Sekarang",
     loading: "Memuat Game...",
     snakeAvailable: "Game Ular Tersedia!",
+    mahjongAvailable: "Game Mahjong Tersedia!",
   },
 }
 
@@ -410,9 +419,11 @@ export default function FiGamesPage() {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [showComingSoon, setShowComingSoon] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<string>("")
-  const [showGame, setShowGame] = useState(false)
+  const [showSnakeGame, setShowSnakeGame] = useState(false)
+  const [showMahjongGame, setShowMahjongGame] = useState(false)
   const [gameLoading, setGameLoading] = useState(false)
   const [loadingProgress, setLoadingProgress] = useState(0)
+  const [loadingGame, setLoadingGame] = useState<string>("")
 
   // Load saved language
   useEffect(() => {
@@ -422,11 +433,11 @@ export default function FiGamesPage() {
     }
   }, [])
 
-  // Auto-advance slideshow every 2 seconds
+  // Auto-advance slideshow every 3 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % featuredGames.length)
-    }, 2000)
+    }, 3000)
 
     return () => clearInterval(interval)
   }, [])
@@ -444,8 +455,12 @@ export default function FiGamesPage() {
 
   const handleCategoryClick = (categoryId: string) => {
     const category = categories.find((cat) => cat.id === categoryId)
-    if (category?.playable && category.hasSnake) {
-      handlePlaySnake()
+    if (category?.playable) {
+      if (category.hasSnake) {
+        handlePlaySnake()
+      } else if (category.hasMahjong) {
+        handlePlayMahjong()
+      }
     } else {
       setSelectedCategory(categoryId)
       setShowComingSoon(true)
@@ -453,6 +468,7 @@ export default function FiGamesPage() {
   }
 
   const handlePlaySnake = () => {
+    setLoadingGame("snake")
     setGameLoading(true)
     setLoadingProgress(0)
 
@@ -462,7 +478,26 @@ export default function FiGamesPage() {
         if (prev >= 100) {
           clearInterval(interval)
           setGameLoading(false)
-          setShowGame(true)
+          setShowSnakeGame(true)
+          return 100
+        }
+        return prev + Math.random() * 15 + 5
+      })
+    }, 100)
+  }
+
+  const handlePlayMahjong = () => {
+    setLoadingGame("mahjong")
+    setGameLoading(true)
+    setLoadingProgress(0)
+
+    // Simulate loading progress
+    const interval = setInterval(() => {
+      setLoadingProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(interval)
+          setGameLoading(false)
+          setShowMahjongGame(true)
           return 100
         }
         return prev + Math.random() * 15 + 5
@@ -471,8 +506,12 @@ export default function FiGamesPage() {
   }
 
   const handleFeaturedGameClick = (game: any) => {
-    if (game.playable && game.category === "skill") {
-      handlePlaySnake()
+    if (game.playable) {
+      if (game.category === "skill") {
+        handlePlaySnake()
+      } else if (game.category === "mahjong") {
+        handlePlayMahjong()
+      }
     }
   }
 
@@ -674,9 +713,10 @@ export default function FiGamesPage() {
                     <category.icon className="w-4 h-4 md:w-5 md:h-5 text-white" />
                   </div>
                   <span className="text-xs md:text-sm font-medium text-center">{category.name}</span>
-                  {category.playable && category.hasSnake && (
+                  {category.playable && (
                     <div className="text-xs text-green-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center space-x-1">
-                      <span>🐍</span>
+                      {category.hasSnake && <span>🐍</span>}
+                      {category.hasMahjong && <span>🀄</span>}
                       <Play className="w-3 h-3" />
                     </div>
                   )}
@@ -684,7 +724,7 @@ export default function FiGamesPage() {
 
                 {/* Hover Glow */}
                 <div
-                  className={`absolute inset-0 bg-gradient-to-r ${category.gradient} opacity-0 group-hover:opacity-10 rounded-xl blur-xl transition-opacity duration-300`}
+                  className={`absolute inset-0 bg-gradient-to-r ${category.gradient} opacity-0 group-hover:opacity-1 rounded-xl blur-xl transition-opacity duration-300`}
                 />
               </motion.button>
             ))}
@@ -770,8 +810,8 @@ export default function FiGamesPage() {
             >
               <div className="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden">
                 <Image
-                  src="/images/snakegame-logo.jpg"
-                  alt="Snake Game Logo"
+                  src={loadingGame === "snake" ? "/images/snakegame-logo.jpg" : "/images/mahjonggame-logo.jpg"}
+                  alt={`${loadingGame} Game Logo`}
                   width={80}
                   height={80}
                   className="w-full h-full object-cover"
@@ -782,21 +822,30 @@ export default function FiGamesPage() {
               {/* Loading Bar */}
               <div className="w-full bg-gray-700 rounded-full h-4 mb-4 overflow-hidden">
                 <motion.div
-                  className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full"
+                  className={`h-full rounded-full ${
+                    loadingGame === "snake"
+                      ? "bg-gradient-to-r from-green-500 to-emerald-500"
+                      : "bg-gradient-to-r from-red-500 to-orange-500"
+                  }`}
                   initial={{ width: "0%" }}
                   animate={{ width: `${loadingProgress}%` }}
                   transition={{ duration: 0.3 }}
                 />
               </div>
 
-              <div className="text-lg font-semibold text-green-400">{Math.round(loadingProgress)}%</div>
+              <div className={`text-lg font-semibold ${loadingGame === "snake" ? "text-green-400" : "text-red-400"}`}>
+                {Math.round(loadingProgress)}%
+              </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Snake Game Modal */}
-      <AnimatePresence>{showGame && <SnakeGameMobile onClose={() => setShowGame(false)} />}</AnimatePresence>
+      {/* Game Modals */}
+      <AnimatePresence>{showSnakeGame && <SnakeGameMobile onClose={() => setShowSnakeGame(false)} />}</AnimatePresence>
+      <AnimatePresence>
+        {showMahjongGame && <MahjongGameMobile onClose={() => setShowMahjongGame(false)} />}
+      </AnimatePresence>
     </div>
   )
 }
