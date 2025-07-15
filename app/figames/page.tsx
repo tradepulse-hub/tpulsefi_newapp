@@ -19,6 +19,7 @@ import {
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
+import SnakeGameMobile from "@/components/snake-game-mobile"
 
 // Game categories with translations
 const gameCategories = {
@@ -76,11 +77,13 @@ const gameCategories = {
 const featuredGames = [
   {
     id: 1,
-    title: "Space Adventure",
-    description: "Explore the galaxy in this epic space adventure!",
+    title: "Snake Game",
+    description: "Classic snake game with swipe controls!",
     image: "/placeholder.svg?height=200&width=300",
-    gradient: "from-purple-600 to-blue-600",
-    category: "adventure",
+    gradient: "from-green-600 to-emerald-600",
+    category: "action",
+    gameComponent: "snake",
+    icon: "🐍",
   },
   {
     id: 2,
@@ -170,6 +173,10 @@ export default function FiGamesPage() {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [showComingSoon, setShowComingSoon] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<string>("")
+  const [showGame, setShowGame] = useState(false)
+  const [selectedGame, setSelectedGame] = useState<string>("")
+  const [gameLoading, setGameLoading] = useState(false)
+  const [loadingProgress, setLoadingProgress] = useState(0)
 
   // Load saved language
   useEffect(() => {
@@ -202,6 +209,27 @@ export default function FiGamesPage() {
   const handleCategoryClick = (categoryId: string) => {
     setSelectedCategory(categoryId)
     setShowComingSoon(true)
+  }
+
+  const handleGameClick = (gameComponent: string) => {
+    if (gameComponent === "snake") {
+      setSelectedGame(gameComponent)
+      setGameLoading(true)
+      setLoadingProgress(0)
+
+      // Simulate loading progress
+      const interval = setInterval(() => {
+        setLoadingProgress((prev) => {
+          if (prev >= 100) {
+            clearInterval(interval)
+            setGameLoading(false)
+            setShowGame(true)
+            return 100
+          }
+          return prev + Math.random() * 15 + 5
+        })
+      }, 100)
+    }
   }
 
   return (
@@ -311,7 +339,10 @@ export default function FiGamesPage() {
                     <div className="flex-1">
                       <h3 className="text-3xl font-bold mb-2">{featuredGames[currentSlide].title}</h3>
                       <p className="text-lg text-gray-200 mb-4">{featuredGames[currentSlide].description}</p>
-                      <button className="bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30 text-white px-6 py-2 rounded-lg transition-all duration-300">
+                      <button
+                        onClick={() => handleGameClick(featuredGames[currentSlide].gameComponent)}
+                        className="bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30 text-white px-6 py-2 rounded-lg transition-all duration-300"
+                      >
                         {t.playNow}
                       </button>
                     </div>
@@ -460,6 +491,45 @@ export default function FiGamesPage() {
             </motion.div>
           </motion.div>
         )}
+      </AnimatePresence>
+
+      {/* Game Loading Modal */}
+      <AnimatePresence>
+        {gameLoading && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              className="bg-black/90 backdrop-blur-xl border border-white/20 rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl text-center"
+            >
+              <div className="text-6xl mb-4">🐍</div>
+              <h3 className="text-2xl font-bold mb-4">Loading Snake Game</h3>
+
+              {/* Loading Bar */}
+              <div className="w-full bg-gray-700 rounded-full h-4 mb-4 overflow-hidden">
+                <motion.div
+                  className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full"
+                  initial={{ width: "0%" }}
+                  animate={{ width: `${loadingProgress}%` }}
+                  transition={{ duration: 0.3 }}
+                />
+              </div>
+
+              <div className="text-lg font-semibold text-green-400">{Math.round(loadingProgress)}%</div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Snake Game Modal */}
+      <AnimatePresence>
+        {showGame && selectedGame === "snake" && <SnakeGameMobile onClose={() => setShowGame(false)} />}
       </AnimatePresence>
     </div>
   )
