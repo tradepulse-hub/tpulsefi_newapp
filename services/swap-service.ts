@@ -36,7 +36,7 @@ const tokenProvider = new TokenProvider({ client, multicall3: config.multicall3 
 const zeroX = new ZeroX(tokenProvider, inmemoryTokenStorage)
 const worldswap = new HoldSo(tokenProvider, inmemoryTokenStorage)
 
-// Only load Holdstation SDK (removed ZeroX)
+swapHelper.load(zeroX)
 swapHelper.load(worldswap)
 
 // Export tokens - TPT token removed to fix errors
@@ -176,8 +176,10 @@ export async function doSwap({
       to: quoteResponse.to,
       value: quoteResponse.value,
     },
-    partnerCode: "24568", // Partner code for Holdstation team
+    partnerCode: "24568", // Replace with your partner code, contact to holdstation team to get one
     feeAmountOut: quoteResponse.addons?.feeAmountOut,
+    fee: "0.2",
+    feeReceiver: ethers.ZeroAddress, // ZERO_ADDRESS or your fee receiver address
   }
   const result = await swapHelper.swap(swapParams)
   console.log("💱 Swap result:", result)
@@ -215,25 +217,13 @@ export async function swap() {
       to: quoteResponse.to,
       value: quoteResponse.value,
     },
-    partnerCode: "24568", // Partner code for Holdstation team
+    partnerCode: "24568", // Replace with your partner code, contact to holdstation team to get one
     feeAmountOut: quoteResponse.addons?.feeAmountOut,
+    fee: "0.2",
+    feeReceiver: ethers.ZeroAddress, // ZERO_ADDRESS or your fee receiver address
   }
   const result = await swapHelper.swap(swapParams)
   console.log("✅ Swap result:", result)
-  return result
-}
-
-// Run doSwap function directly
-export async function runDoSwap() {
-  const result = await doSwap({
-    walletAddress: "0x1234567890123456789012345678901234567890",
-    quote: null,
-    amountIn: "1000000000000000000", // 1 WLD in wei
-    tokenInAddress: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003", // WLD
-    tokenOutAddress: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF
-  })
-
-  console.log("🎯 Final doSwap result:", result)
   return result
 }
 
