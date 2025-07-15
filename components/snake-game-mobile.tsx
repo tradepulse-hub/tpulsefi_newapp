@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import { useCallback, useEffect, useRef, useState } from "react"
 import { motion } from "framer-motion"
 import { ArrowLeft, Pause, Play, RotateCcw } from "lucide-react"
@@ -28,77 +30,10 @@ interface SnakeGameMobileProps {
   onClose: () => void
 }
 
-// Translations for the game
-const gameTranslations = {
-  en: {
-    title: "Snake Game",
-    score: "Score",
-    highScore: "High Score",
-    gameOver: "Game Over!",
-    finalScore: "Final Score",
-    snakeLength: "Snake Length",
-    restart: "Restart",
-    pause: "Pause",
-    resume: "Resume",
-    swipeToMove: "Swipe to move the snake",
-    collectFood: "Collect red food to grow!",
-    tapToStart: "Tap to Start",
-    paused: "Paused",
-  },
-  pt: {
-    title: "Jogo da Cobra",
-    score: "Pontuação",
-    highScore: "Melhor Pontuação",
-    gameOver: "Fim de Jogo!",
-    finalScore: "Pontuação Final",
-    snakeLength: "Tamanho da Cobra",
-    restart: "Reiniciar",
-    pause: "Pausar",
-    resume: "Continuar",
-    swipeToMove: "Desliza para mover a cobra",
-    collectFood: "Coleta comida vermelha para crescer!",
-    tapToStart: "Toca para Começar",
-    paused: "Pausado",
-  },
-  es: {
-    title: "Juego de la Serpiente",
-    score: "Puntuación",
-    highScore: "Mejor Puntuación",
-    gameOver: "¡Fin del Juego!",
-    finalScore: "Puntuación Final",
-    snakeLength: "Longitud de la Serpiente",
-    restart: "Reiniciar",
-    pause: "Pausar",
-    resume: "Continuar",
-    swipeToMove: "Desliza para mover la serpiente",
-    collectFood: "¡Recoge comida roja para crecer!",
-    tapToStart: "Toca para Empezar",
-    paused: "Pausado",
-  },
-  id: {
-    title: "Game Ular",
-    score: "Skor",
-    highScore: "Skor Tertinggi",
-    gameOver: "Game Over!",
-    finalScore: "Skor Akhir",
-    snakeLength: "Panjang Ular",
-    restart: "Mulai Ulang",
-    pause: "Jeda",
-    resume: "Lanjut",
-    swipeToMove: "Geser untuk menggerakkan ular",
-    collectFood: "Kumpulkan makanan merah untuk tumbuh!",
-    tapToStart: "Ketuk untuk Mulai",
-    paused: "Dijeda",
-  },
-}
-
 export default function SnakeGameMobile({ onClose }: SnakeGameMobileProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const gameLoopRef = useRef<NodeJS.Timeout>()
   const touchStartRef = useRef<{ x: number; y: number } | null>(null)
-
-  const [currentLang, setCurrentLang] = useState<keyof typeof gameTranslations>("en")
-  const [highScore, setHighScore] = useState(0)
 
   const [gameState, setGameState] = useState<GameState>({
     snake: [{ x: 10, y: 10 }],
@@ -110,20 +45,23 @@ export default function SnakeGameMobile({ onClose }: SnakeGameMobileProps) {
     isPaused: false,
   })
 
-  // Load saved language and high score
-  useEffect(() => {
-    const savedLanguage = localStorage.getItem("preferred-language") as keyof typeof gameTranslations
-    if (savedLanguage && gameTranslations[savedLanguage]) {
-      setCurrentLang(savedLanguage)
-    }
+  const [highScore, setHighScore] = useState(0)
 
+  // Load high score from localStorage
+  useEffect(() => {
     const savedHighScore = localStorage.getItem("snake-high-score")
     if (savedHighScore) {
       setHighScore(Number.parseInt(savedHighScore))
     }
   }, [])
 
-  const t = gameTranslations[currentLang]
+  // Save high score when game ends
+  useEffect(() => {
+    if (gameState.gameOver && gameState.score > highScore) {
+      setHighScore(gameState.score)
+      localStorage.setItem("snake-high-score", gameState.score.toString())
+    }
+  }, [gameState.gameOver, gameState.score, highScore])
 
   const generateFood = useCallback((): Position => {
     const maxX = Math.floor(CANVAS_WIDTH / GRID_SIZE)
@@ -163,70 +101,45 @@ export default function SnakeGameMobile({ onClose }: SnakeGameMobileProps) {
   }, [])
 
   // Touch controls for swipe detection
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0]
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY }
+  }
 
-    const handleTouchStart = (e: TouchEvent) => {
-      e.preventDefault()
-      const touch = e.touches[0]
-      touchStartRef.current = { x: touch.clientX, y: touch.clientY }
-    }
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStartRef.current || !gameState.gameStarted || gameState.gameOver || gameState.isPaused) return
 
-    const handleTouchEnd = (e: TouchEvent) => {
-      e.preventDefault()
-      if (!touchStartRef.current) return
+    const touch = e.changedTouches[0]
+    const deltaX = touch.clientX - touchStartRef.current.x
+    const deltaY = touch.clientY - touchStartRef.current.y
+    const minSwipeDistance = 30
 
-      const touch = e.changedTouches[0]
-      const deltaX = touch.clientX - touchStartRef.current.x
-      const deltaY = touch.clientY - touchStartRef.current.y
-      const minSwipeDistance = 30
-
-      if (Math.abs(deltaX) < minSwipeDistance && Math.abs(deltaY) < minSwipeDistance) {
-        // Tap to start or pause
-        if (!gameState.gameStarted) {
-          startGame()
-        } else if (!gameState.gameOver) {
-          togglePause()
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      // Horizontal swipe
+      if (Math.abs(deltaX) > minSwipeDistance) {
+        if (deltaX > 0 && gameState.direction.x === 0) {
+          // Swipe right
+          setGameState((prev) => ({ ...prev, direction: { x: 1, y: 0 } }))
+        } else if (deltaX < 0 && gameState.direction.x === 0) {
+          // Swipe left
+          setGameState((prev) => ({ ...prev, direction: { x: -1, y: 0 } }))
         }
-        return
       }
-
-      if (!gameState.gameStarted || gameState.gameOver || gameState.isPaused) return
-
-      setGameState((prev) => {
-        let newDirection = prev.direction
-
-        if (Math.abs(deltaX) > Math.abs(deltaY)) {
-          // Horizontal swipe
-          if (deltaX > 0 && prev.direction.x === 0) {
-            newDirection = { x: 1, y: 0 } // Right
-          } else if (deltaX < 0 && prev.direction.x === 0) {
-            newDirection = { x: -1, y: 0 } // Left
-          }
-        } else {
-          // Vertical swipe
-          if (deltaY > 0 && prev.direction.y === 0) {
-            newDirection = { x: 0, y: 1 } // Down
-          } else if (deltaY < 0 && prev.direction.y === 0) {
-            newDirection = { x: 0, y: -1 } // Up
-          }
+    } else {
+      // Vertical swipe
+      if (Math.abs(deltaY) > minSwipeDistance) {
+        if (deltaY > 0 && gameState.direction.y === 0) {
+          // Swipe down
+          setGameState((prev) => ({ ...prev, direction: { x: 0, y: 1 } }))
+        } else if (deltaY < 0 && gameState.direction.y === 0) {
+          // Swipe up
+          setGameState((prev) => ({ ...prev, direction: { x: 0, y: -1 } }))
         }
-
-        return { ...prev, direction: newDirection }
-      })
-
-      touchStartRef.current = null
+      }
     }
 
-    canvas.addEventListener("touchstart", handleTouchStart, { passive: false })
-    canvas.addEventListener("touchend", handleTouchEnd, { passive: false })
-
-    return () => {
-      canvas.removeEventListener("touchstart", handleTouchStart)
-      canvas.removeEventListener("touchend", handleTouchEnd)
-    }
-  }, [gameState.gameStarted, gameState.gameOver, gameState.isPaused, startGame, togglePause])
+    touchStartRef.current = null
+  }
 
   // Game loop
   useEffect(() => {
@@ -264,19 +177,11 @@ export default function SnakeGameMobile({ onClose }: SnakeGameMobileProps) {
 
         // Check food collision
         if (newHead.x === prev.food.x && newHead.y === prev.food.y) {
-          const newScore = prev.score + 10
-
-          // Update high score
-          if (newScore > highScore) {
-            setHighScore(newScore)
-            localStorage.setItem("snake-high-score", newScore.toString())
-          }
-
           return {
             ...prev,
             snake: newSnake,
             food: generateFood(),
-            score: newScore,
+            score: prev.score + 10,
           }
         }
 
@@ -295,7 +200,7 @@ export default function SnakeGameMobile({ onClose }: SnakeGameMobileProps) {
         clearInterval(gameLoopRef.current)
       }
     }
-  }, [gameState.gameStarted, gameState.gameOver, gameState.isPaused, generateFood, highScore])
+  }, [gameState.gameStarted, gameState.gameOver, gameState.isPaused, generateFood])
 
   // Canvas rendering
   useEffect(() => {
@@ -306,11 +211,11 @@ export default function SnakeGameMobile({ onClose }: SnakeGameMobileProps) {
     if (!ctx) return
 
     // Clear canvas
-    ctx.fillStyle = "#0f172a"
+    ctx.fillStyle = "#0f0f0f"
     ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
 
     // Draw grid
-    ctx.strokeStyle = "#1e293b"
+    ctx.strokeStyle = "#1a1a1a"
     ctx.lineWidth = 1
     for (let i = 0; i <= CANVAS_WIDTH; i += GRID_SIZE) {
       ctx.beginPath()
@@ -327,53 +232,72 @@ export default function SnakeGameMobile({ onClose }: SnakeGameMobileProps) {
 
     // Draw snake
     gameState.snake.forEach((segment, index) => {
-      const isHead = index === 0
-      ctx.fillStyle = isHead ? "#22c55e" : "#16a34a"
-      ctx.fillRect(segment.x * GRID_SIZE + 1, segment.y * GRID_SIZE + 1, GRID_SIZE - 2, GRID_SIZE - 2)
+      if (index === 0) {
+        // Snake head with eyes
+        ctx.fillStyle = "#22c55e"
+        ctx.fillRect(segment.x * GRID_SIZE + 1, segment.y * GRID_SIZE + 1, GRID_SIZE - 2, GRID_SIZE - 2)
 
-      // Add eyes to head
-      if (isHead) {
-        ctx.fillStyle = "#ffffff"
+        // Eyes
+        ctx.fillStyle = "#000"
         const eyeSize = 2
         const eyeOffset = 3
-
-        // Determine eye position based on direction
-        let eyeX1, eyeY1, eyeX2, eyeY2
         if (gameState.direction.x === 1) {
           // Moving right
-          eyeX1 = segment.x * GRID_SIZE + GRID_SIZE - eyeOffset
-          eyeY1 = segment.y * GRID_SIZE + eyeOffset
-          eyeX2 = segment.x * GRID_SIZE + GRID_SIZE - eyeOffset
-          eyeY2 = segment.y * GRID_SIZE + GRID_SIZE - eyeOffset
+          ctx.fillRect(
+            segment.x * GRID_SIZE + GRID_SIZE - eyeOffset,
+            segment.y * GRID_SIZE + eyeOffset,
+            eyeSize,
+            eyeSize,
+          )
+          ctx.fillRect(
+            segment.x * GRID_SIZE + GRID_SIZE - eyeOffset,
+            segment.y * GRID_SIZE + GRID_SIZE - eyeOffset - eyeSize,
+            eyeSize,
+            eyeSize,
+          )
         } else if (gameState.direction.x === -1) {
           // Moving left
-          eyeX1 = segment.x * GRID_SIZE + eyeOffset
-          eyeY1 = segment.y * GRID_SIZE + eyeOffset
-          eyeX2 = segment.x * GRID_SIZE + eyeOffset
-          eyeY2 = segment.y * GRID_SIZE + GRID_SIZE - eyeOffset
+          ctx.fillRect(segment.x * GRID_SIZE + eyeOffset - eyeSize, segment.y * GRID_SIZE + eyeOffset, eyeSize, eyeSize)
+          ctx.fillRect(
+            segment.x * GRID_SIZE + eyeOffset - eyeSize,
+            segment.y * GRID_SIZE + GRID_SIZE - eyeOffset - eyeSize,
+            eyeSize,
+            eyeSize,
+          )
         } else if (gameState.direction.y === -1) {
           // Moving up
-          eyeX1 = segment.x * GRID_SIZE + eyeOffset
-          eyeY1 = segment.y * GRID_SIZE + eyeOffset
-          eyeX2 = segment.x * GRID_SIZE + GRID_SIZE - eyeOffset
-          eyeY2 = segment.y * GRID_SIZE + eyeOffset
-        } else {
-          // Moving down or stationary
-          eyeX1 = segment.x * GRID_SIZE + eyeOffset
-          eyeY1 = segment.y * GRID_SIZE + GRID_SIZE - eyeOffset
-          eyeX2 = segment.x * GRID_SIZE + GRID_SIZE - eyeOffset
-          eyeY2 = segment.y * GRID_SIZE + GRID_SIZE - eyeOffset
+          ctx.fillRect(segment.x * GRID_SIZE + eyeOffset, segment.y * GRID_SIZE + eyeOffset - eyeSize, eyeSize, eyeSize)
+          ctx.fillRect(
+            segment.x * GRID_SIZE + GRID_SIZE - eyeOffset - eyeSize,
+            segment.y * GRID_SIZE + eyeOffset - eyeSize,
+            eyeSize,
+            eyeSize,
+          )
+        } else if (gameState.direction.y === 1) {
+          // Moving down
+          ctx.fillRect(
+            segment.x * GRID_SIZE + eyeOffset,
+            segment.y * GRID_SIZE + GRID_SIZE - eyeOffset,
+            eyeSize,
+            eyeSize,
+          )
+          ctx.fillRect(
+            segment.x * GRID_SIZE + GRID_SIZE - eyeOffset - eyeSize,
+            segment.y * GRID_SIZE + GRID_SIZE - eyeOffset,
+            eyeSize,
+            eyeSize,
+          )
         }
-
-        ctx.fillRect(eyeX1, eyeY1, eyeSize, eyeSize)
-        ctx.fillRect(eyeX2, eyeY2, eyeSize, eyeSize)
+      } else {
+        // Snake body
+        ctx.fillStyle = "#16a34a"
+        ctx.fillRect(segment.x * GRID_SIZE + 1, segment.y * GRID_SIZE + 1, GRID_SIZE - 2, GRID_SIZE - 2)
       }
     })
 
     // Draw food with pulsing effect
     const time = Date.now() * 0.005
     const pulseSize = Math.sin(time) * 2 + GRID_SIZE / 2 - 2
-
     ctx.fillStyle = "#ef4444"
     ctx.beginPath()
     ctx.arc(
@@ -385,13 +309,13 @@ export default function SnakeGameMobile({ onClose }: SnakeGameMobileProps) {
     )
     ctx.fill()
 
-    // Add highlight to food
+    // Food highlight
     ctx.fillStyle = "#fca5a5"
     ctx.beginPath()
     ctx.arc(
-      gameState.food.x * GRID_SIZE + GRID_SIZE / 2 - 3,
-      gameState.food.y * GRID_SIZE + GRID_SIZE / 2 - 3,
-      3,
+      gameState.food.x * GRID_SIZE + GRID_SIZE / 2 - 2,
+      gameState.food.y * GRID_SIZE + GRID_SIZE / 2 - 2,
+      2,
       0,
       2 * Math.PI,
     )
@@ -406,122 +330,122 @@ export default function SnakeGameMobile({ onClose }: SnakeGameMobileProps) {
       className="fixed inset-0 bg-black z-50 flex flex-col"
     >
       {/* Header */}
-      <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-600 to-emerald-600">
+      <div className="flex items-center justify-between p-4 bg-black/90 backdrop-blur-sm border-b border-white/10">
         <button
           onClick={onClose}
-          className="flex items-center space-x-2 text-white hover:text-gray-200 transition-colors"
+          className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
-          <span className="text-sm">Back</span>
+          <span>Back</span>
         </button>
 
-        <div className="text-center">
-          <h1 className="text-lg font-bold text-white">{t.title}</h1>
-          <div className="text-sm text-green-100">
-            {t.score}: {gameState.score} | {t.highScore}: {highScore}
+        <div className="flex items-center space-x-4">
+          <div className="text-center">
+            <div className="text-sm text-gray-400">Score</div>
+            <div className="text-lg font-bold text-green-400">{gameState.score}</div>
+          </div>
+          <div className="text-center">
+            <div className="text-sm text-gray-400">Best</div>
+            <div className="text-lg font-bold text-yellow-400">{highScore}</div>
           </div>
         </div>
 
-        <div className="flex space-x-2">
+        <div className="flex items-center space-x-2">
           {gameState.gameStarted && !gameState.gameOver && (
             <button
               onClick={togglePause}
-              className="w-10 h-10 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors"
+              className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all duration-200"
             >
-              {gameState.isPaused ? <Play className="w-5 h-5 text-white" /> : <Pause className="w-5 h-5 text-white" />}
+              {gameState.isPaused ? <Play className="w-5 h-5" /> : <Pause className="w-5 h-5" />}
             </button>
           )}
-
           <button
             onClick={resetGame}
-            className="w-10 h-10 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors"
+            className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all duration-200"
           >
-            <RotateCcw className="w-5 h-5 text-white" />
+            <RotateCcw className="w-5 h-5" />
           </button>
         </div>
       </div>
 
       {/* Game Area */}
-      <div className="flex-1 flex items-center justify-center bg-slate-900 p-4">
+      <div className="flex-1 flex items-center justify-center p-4">
         <div className="relative">
           <canvas
             ref={canvasRef}
             width={CANVAS_WIDTH}
             height={CANVAS_HEIGHT}
-            className="border-2 border-green-500 rounded-lg shadow-2xl"
+            className="border-2 border-gray-600 rounded-lg shadow-2xl"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
             style={{ touchAction: "none" }}
           />
 
           {/* Start Screen */}
           {!gameState.gameStarted && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center rounded-lg"
-            >
+            <div className="absolute inset-0 bg-black/80 flex items-center justify-center rounded-lg">
               <div className="text-center text-white p-6">
-                <div className="text-6xl mb-4">🐍</div>
-                <h2 className="text-2xl font-bold mb-4">{t.title}</h2>
-                <p className="text-sm mb-2 text-gray-300">{t.swipeToMove}</p>
-                <p className="text-sm mb-6 text-gray-300">{t.collectFood}</p>
-                <div className="text-green-400 text-lg font-semibold animate-pulse">{t.tapToStart}</div>
+                <div className="text-4xl mb-4">🐍</div>
+                <h2 className="text-2xl font-bold mb-4">Snake Game</h2>
+                <p className="text-sm mb-4 text-gray-300">Swipe to control the snake</p>
+                <p className="text-xs mb-6 text-gray-400">Collect red food to grow!</p>
+                <button
+                  onClick={startGame}
+                  className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-300"
+                >
+                  Start Game
+                </button>
               </div>
-            </motion.div>
+            </div>
           )}
 
           {/* Pause Screen */}
           {gameState.isPaused && gameState.gameStarted && !gameState.gameOver && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center rounded-lg"
-            >
+            <div className="absolute inset-0 bg-black/80 flex items-center justify-center rounded-lg">
               <div className="text-center text-white">
-                <Pause className="w-16 h-16 mx-auto mb-4 text-green-400" />
-                <h2 className="text-2xl font-bold mb-4">{t.paused}</h2>
-                <p className="text-green-400 text-lg font-semibold animate-pulse">Tap to {t.resume}</p>
+                <div className="text-3xl mb-4">⏸️</div>
+                <h2 className="text-xl font-bold mb-4">Game Paused</h2>
+                <button
+                  onClick={togglePause}
+                  className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-300"
+                >
+                  Resume
+                </button>
               </div>
-            </motion.div>
+            </div>
           )}
 
           {/* Game Over Screen */}
           {gameState.gameOver && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="absolute inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center rounded-lg"
-            >
+            <div className="absolute inset-0 bg-black/80 flex items-center justify-center rounded-lg">
               <div className="text-center text-white p-6">
-                <div className="text-4xl mb-4">💀</div>
-                <h2 className="text-2xl font-bold mb-4 text-red-400">{t.gameOver}</h2>
-                <div className="space-y-2 mb-6">
-                  <p className="text-lg">
-                    {t.finalScore}: <span className="text-green-400 font-bold">{gameState.score}</span>
-                  </p>
-                  <p className="text-sm text-gray-300">
-                    {t.snakeLength}: {gameState.snake.length}
-                  </p>
+                <div className="text-3xl mb-4">💀</div>
+                <h2 className="text-xl font-bold mb-4 text-red-500">Game Over!</h2>
+                <div className="mb-4">
+                  <p className="text-lg mb-2">Final Score: {gameState.score}</p>
+                  <p className="text-sm text-gray-300">Snake Length: {gameState.snake.length}</p>
                   {gameState.score === highScore && gameState.score > 0 && (
-                    <p className="text-yellow-400 text-sm font-semibold">🏆 New High Score!</p>
+                    <p className="text-sm text-yellow-400 mt-2">🎉 New High Score!</p>
                   )}
                 </div>
                 <button
                   onClick={resetGame}
-                  className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-6 py-2 rounded-lg font-medium transition-all duration-300 flex items-center space-x-2 mx-auto"
+                  className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-300"
                 >
-                  <RotateCcw className="w-4 h-4" />
-                  <span>{t.restart}</span>
+                  Play Again
                 </button>
               </div>
-            </motion.div>
+            </div>
           )}
         </div>
       </div>
 
-      {/* Instructions */}
-      <div className="bg-slate-800 p-3 text-center">
-        <p className="text-gray-300 text-xs">{gameState.gameStarted ? t.swipeToMove : t.tapToStart}</p>
-      </div>
+      {/* Swipe Instructions */}
+      {gameState.gameStarted && !gameState.gameOver && !gameState.isPaused && (
+        <div className="p-4 bg-black/90 backdrop-blur-sm border-t border-white/10">
+          <div className="text-center text-gray-400 text-sm">Swipe to control: ⬅️ ➡️ ⬆️ ⬇️</div>
+        </div>
+      )}
     </motion.div>
   )
 }
