@@ -581,10 +581,13 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       try {
         console.log(`🔄 Getting real quote for: ${amountFrom} WLD to TPF via Holdstation SDK`)
 
-        // Convert amount to wei (18 decimals)
-        const amountInWei = ethers.parseUnits(amountFrom, 18).toString()
+        // Convert amount to wei (18 decimals) - fix the decimal issue
+        const cleanAmount = Number.parseFloat(amountFrom).toFixed(18)
+        const amountInWei = ethers.parseUnits(cleanAmount, 18).toString()
 
-        // Get real quote using the SDK
+        console.log(`💰 Amount in wei: ${amountInWei}`)
+
+        // Get real quote using the SDK - exactly like swap-service.ts
         const quote = await swapHelper.estimate.quote({
           tokenIn: wldToken.address,
           tokenOut: tpfToken.address,
@@ -602,13 +605,13 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
         setSwapQuote(quote)
 
-        // Calculate output amount from quote
+        // Calculate output amount from quote - handle both possible response formats
         const outputAmount = quote.addons?.outAmount || quote.outAmount || "0"
         const formattedOutput = ethers.formatUnits(outputAmount, 18)
 
         setSwapForm((prev) => ({
           ...prev,
-          amountTo: formattedOutput,
+          amountTo: Number.parseFloat(formattedOutput).toFixed(6), // Limit decimal places
         }))
 
         console.log(`💱 Updated swap form with real amount: ${formattedOutput} TPF`)
@@ -667,14 +670,17 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
       console.log("🔄 Calling doSwap from swap service...")
 
-      // Convert amount to wei for the swap service
-      const amountInWei = ethers.parseUnits(swapForm.amountFrom, 18).toString()
+      // Convert amount to wei for the swap service - exactly like swap-service expects
+      const cleanAmount = Number.parseFloat(swapForm.amountFrom).toFixed(18)
+      const amountInWei = ethers.parseUnits(cleanAmount, 18).toString()
+
+      console.log(`💰 Sending amount in wei: ${amountInWei}`)
 
       // Call the doSwap function from the swap service
       await doSwap({
         walletAddress,
         quote: swapQuote,
-        amountIn: amountInWei, // Pass amount in wei format
+        amountIn: amountInWei, // Pass amount in wei format, exactly as swap-service expects
       })
 
       console.log("✅ Swap completed successfully via swap service")
