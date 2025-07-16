@@ -269,7 +269,7 @@ const translations = {
     noTransactions: "Sin transacciones recientes",
     sent: "Enviado",
     received: "Recibido",
-    pending: "Pendiente",
+    pending: "Pendente",
     confirmed: "Confirmado",
     failed: "Falló",
     viewOnExplorer: "Ver en Explorer",
@@ -600,28 +600,27 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
         console.log("📊 Raw quote response from Holdstation SDK:", quote)
 
+        // Validate essential fields in the quote response
         if (!quote || !quote.data || !quote.to || (!quote.outAmount && !quote.addons?.outAmount)) {
           throw new Error("Invalid quote received from SDK: Missing data, to, or outAmount.")
         }
 
         setSwapQuote(quote)
 
-        // Extract output amount directly from quote.outAmount and format it
-        let outputAmount = "0"
+        // Extract output amount. Assume it's already in human-readable format.
+        let outputAmountString = "0"
         if (quote.outAmount) {
-          outputAmount = quote.outAmount.toString()
+          outputAmountString = quote.outAmount.toString()
         } else if (quote.addons?.outAmount) {
-          outputAmount = quote.addons.outAmount.toString()
+          outputAmountString = quote.addons.outAmount.toString()
         } else {
-          // Este caso deve ser capturado pela validação acima, mas é um fallback seguro
+          // This case should ideally be caught by the validation above, but acts as a safe fallback
           throw new Error("Could not determine output amount from quote.")
         }
-        const outputAmountRaw = outputAmount
-        console.log(`🔍 Extracted raw output amount from quote.outAmount: ${outputAmountRaw}`)
 
-        // Convert from wei to token units using TPF token decimals
-        const formattedOutput = ethers.formatUnits(outputAmountRaw, tpfToken.decimals)
-        const finalAmount = Number.parseFloat(formattedOutput).toFixed(6) // Limit to 6 decimal places for display
+        // The SDK's outAmount is likely already in human-readable format.
+        // We just need to parse it to a number and then format its decimal places for display.
+        const finalAmount = Number.parseFloat(outputAmountString).toFixed(6) // Limit to 6 decimal places for display
 
         console.log(`✅ Final formatted amount: ${finalAmount} TPF`)
 
