@@ -580,15 +580,13 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       setQuoteError(null)
 
       try {
-        console.log(`🔄 Getting real quote for: ${amountFrom} WLD to TPF via Holdstation SDK`)
+        console.log(`🔄 Getting quote for: ${amountFrom} WLD to TPF via Holdstation SDK`)
 
-        // Convert amount to wei (18 decimals) - fix the decimal issue
-        const cleanAmount = Number.parseFloat(amountFrom).toFixed(18)
-        const amountInWei = ethers.parseUnits(cleanAmount, 18).toString()
+        // Convert input amount to wei properly
+        const amountInWei = ethers.parseUnits(amountFrom, 18).toString()
+        console.log(`💰 Input amount in wei: ${amountInWei}`)
 
-        console.log(`💰 Amount in wei: ${amountInWei}`)
-
-        // Get real quote using the SDK - exactly like swap-service.ts
+        // Get quote from Holdstation SDK
         const quote = await swapHelper.estimate.quote({
           tokenIn: wldToken.address,
           tokenOut: tpfToken.address,
@@ -598,49 +596,43 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
           feeReceiver: "0x4bb270ef6dcb052a083bd5cff518e2e019c0f4ee",
         })
 
-        console.log("✅ Real quote received:", quote)
+        console.log("📊 Raw quote response from Holdstation SDK:", quote)
 
         if (!quote || !quote.data || !quote.to) {
-          throw new Error("Invalid quote received from SDK")
+          throw new Error("Invalid quote received from Holdstation SDK")
         }
 
         setSwapQuote(quote)
 
-        // Calculate output amount from quote - fix the conversion issue
-        const outputAmount = quote.addons?.outAmount || quote.outAmount || "0"
+        // Extract output amount from quote response
+        // The Holdstation SDK should return the amount in the correct format
+        let outputAmount = "0"
 
-        console.log("🔍 Raw output amount from SDK:", outputAmount)
-
-        // The SDK returns the amount in wei format, so we need to format it directly
-        let formattedOutput: string
-
-        try {
-          // Ensure we have a valid string representation
-          const outputAmountStr = outputAmount.toString()
-
-          // Check if it's already a valid BigNumberish (no decimals)
-          if (!outputAmountStr.includes(".")) {
-            // It's already in wei format, format directly
-            formattedOutput = ethers.formatUnits(outputAmountStr, 18)
-          } else {
-            // If it has decimals, it might be in token units already
-            formattedOutput = Number.parseFloat(outputAmountStr).toFixed(6)
-          }
-
-          console.log("✅ Formatted output amount:", formattedOutput)
-        } catch (error) {
-          console.error("❌ Error formatting output amount:", error)
-          throw new Error("Failed to format quote output amount")
+        // Try different possible fields where the output amount might be
+        if (quote.addons?.outAmount) {
+          outputAmount = quote.addons.outAmount.toString()
+        } else if (quote.outAmount) {
+          outputAmount = quote.outAmount.toString()
+        } else if (quote.data && quote.data.includes("outAmount")) {
+          // If it's encoded in the data, we might need to decode it
+          console.log("⚠️ Output amount might be encoded in data field")
+          outputAmount = "0" // Fallback
         }
+
+        console.log(`🔍 Extracted output amount: ${outputAmount}`)
+
+        // Convert from wei to token units (18 decimals for TPF)
+        const formattedOutput = ethers.formatUnits(outputAmount, 18)
+        const finalAmount = Number.parseFloat(formattedOutput).toFixed(6)
+
+        console.log(`✅ Final formatted amount: ${finalAmount} TPF`)
 
         setSwapForm((prev) => ({
           ...prev,
-          amountTo: Number.parseFloat(formattedOutput).toFixed(6), // Limit decimal places
+          amountTo: finalAmount,
         }))
-
-        console.log(`💱 Updated swap form with corrected amount: ${formattedOutput} TPF`)
       } catch (error) {
-        console.error("❌ Error getting real quote:", error)
+        console.error("❌ Error getting quote from Holdstation SDK:", error)
 
         let errorMessage = t.quoteError
         if (error.message?.includes("timeout")) {
