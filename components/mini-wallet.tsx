@@ -26,7 +26,7 @@ import {
 } from "lucide-react"
 import Image from "next/image"
 import { walletService } from "@/services/wallet-service"
-import { doSwap } from "@/services/swap-service"
+import { doSwap } from "@/services/swap-service" // Importa doSwap do serviço de swap
 import {
   getTokenPrice,
   getCurrentTokenPrice,
@@ -41,7 +41,7 @@ import { ethers } from "ethers"
 import { config, HoldSo, SwapHelper, TokenProvider, ZeroX, inmemoryTokenStorage } from "@holdstation/worldchain-sdk"
 import { Client, Multicall3 } from "@holdstation/worldchain-ethers-v6"
 
-// Import TOKENS from swap-service or define them here to match the swap service
+// Definindo TOKENS para corresponder ao serviço de swap
 const TOKENS = [
   {
     address: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003",
@@ -61,7 +61,7 @@ const TOKENS = [
   },
 ]
 
-// SDK Setup - similar to swap-service.ts
+// Configuração do SDK Holdstation (mantida aqui para a função de cotação)
 const RPC_URL = "https://worldchain-mainnet.g.alchemy.com/public"
 const provider = new ethers.JsonRpcProvider(RPC_URL, { chainId: 480, name: "worldchain" }, { staticNetwork: true })
 const client = new Client(provider)
@@ -502,7 +502,9 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       setAllTransactions(history)
 
       const newDisplayCount = (currentPage + 1) * TRANSACTIONS_PER_PAGE
-      const newDisplayed = history.slice(0, newDisplayCount)
+
+      // Ensure we don't try to slice beyond the array length
+      const newDisplayed = history.slice(0, Math.min(history.length, newDisplayCount))
 
       setDisplayedTransactions(newDisplayed)
       setHasMoreTransactions(history.length > newDisplayCount)
@@ -580,13 +582,13 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       setQuoteError(null)
 
       try {
-        console.log(`🔄 Getting quote for: ${amountFrom} WLD to TPF via Holdstation SDK`)
+        console.log(`🔄 Getting real quote for: ${amountFrom} WLD to TPF via Holdstation SDK`)
 
-        // Convert input amount to wei properly
-        const amountInWei = ethers.parseUnits(amountFrom, 18).toString()
+        // Convert input amount to wei using WLD token decimals
+        const amountInWei = ethers.parseUnits(amountFrom, wldToken.decimals).toString()
         console.log(`💰 Input amount in wei: ${amountInWei}`)
 
-        // Get quote from Holdstation SDK
+        // Get real quote using the SDK
         const quote = await swapHelper.estimate.quote({
           tokenIn: wldToken.address,
           tokenOut: tpfToken.address,
@@ -598,32 +600,19 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
         console.log("📊 Raw quote response from Holdstation SDK:", quote)
 
-        if (!quote || !quote.data || !quote.to) {
-          throw new Error("Invalid quote received from Holdstation SDK")
+        if (!quote || !quote.data || !quote.to || !quote.outAmount) {
+          throw new Error("Invalid quote received from SDK: Missing data, to, or outAmount.")
         }
 
         setSwapQuote(quote)
 
-        // Extract output amount from quote response
-        // The Holdstation SDK should return the amount in the correct format
-        let outputAmount = "0"
+        // Extract output amount directly from quote.outAmount and format it
+        const outputAmountRaw = quote.outAmount.toString()
+        console.log(`🔍 Extracted raw output amount from quote.outAmount: ${outputAmountRaw}`)
 
-        // Try different possible fields where the output amount might be
-        if (quote.addons?.outAmount) {
-          outputAmount = quote.addons.outAmount.toString()
-        } else if (quote.outAmount) {
-          outputAmount = quote.outAmount.toString()
-        } else if (quote.data && quote.data.includes("outAmount")) {
-          // If it's encoded in the data, we might need to decode it
-          console.log("⚠️ Output amount might be encoded in data field")
-          outputAmount = "0" // Fallback
-        }
-
-        console.log(`🔍 Extracted output amount: ${outputAmount}`)
-
-        // Convert from wei to token units (18 decimals for TPF)
-        const formattedOutput = ethers.formatUnits(outputAmount, 18)
-        const finalAmount = Number.parseFloat(formattedOutput).toFixed(6)
+        // Convert from wei to token units using TPF token decimals
+        const formattedOutput = ethers.formatUnits(outputAmountRaw, tpfToken.decimals)
+        const finalAmount = Number.parseFloat(formattedOutput).toFixed(6) // Limit to 6 decimal places for display
 
         console.log(`✅ Final formatted amount: ${finalAmount} TPF`)
 
@@ -632,15 +621,19 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
           amountTo: finalAmount,
         }))
       } catch (error) {
-        console.error("❌ Error getting quote from Holdstation SDK:", error)
+        console.error("❌ Error getting real quote:", error)
 
         let errorMessage = t.quoteError
-        if (error.message?.includes("timeout")) {
-          errorMessage = `${t.networkError}. ${t.tryAgain}`
-        } else if (error.message?.includes("Network")) {
-          errorMessage = `${t.networkError}. ${t.tryAgain}`
-        } else if (error.message?.includes("insufficient")) {
-          errorMessage = t.insufficientBalance
+        if (error instanceof Error) {
+          if (error.message?.includes("timeout")) {
+            errorMessage = `${t.networkError}. ${t.tryAgain}`
+          } else if (error.message?.includes("Network")) {
+            errorMessage = `${t.networkError}. ${t.tryAgain}`
+          } else if (error.message?.includes("insufficient")) {
+            errorMessage = t.insufficientBalance
+          } else {
+            errorMessage = `${t.quoteError}: ${error.message}`
+          }
         }
 
         setQuoteError(errorMessage)
@@ -687,8 +680,8 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       console.log("🔄 Calling doSwap from swap service...")
 
       // Convert amount to wei for the swap service - exactly like swap-service expects
-      const cleanAmount = Number.parseFloat(swapForm.amountFrom).toFixed(18)
-      const amountInWei = ethers.parseUnits(cleanAmount, 18).toString()
+      const cleanAmount = Number.parseFloat(swapForm.amountFrom).toFixed(wldToken.decimals)
+      const amountInWei = ethers.parseUnits(cleanAmount, wldToken.decimals).toString()
 
       console.log(`💰 Sending amount in wei: ${amountInWei}`)
 
@@ -712,12 +705,16 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       console.error("❌ Swap error:", error)
 
       let errorMessage = t.swapFailed
-      if (error.message?.includes("Insufficient") || error.message?.includes("insuficiente")) {
-        errorMessage = `${t.swapFailed}: ${t.insufficientBalance}`
-      } else if (error.message?.includes("timeout")) {
-        errorMessage = `${t.swapFailed}: ${t.networkError}. ${t.tryAgain}`
-      } else if (error.message?.includes("Network")) {
-        errorMessage = `${t.swapFailed}: ${t.networkError}. ${t.tryAgain}`
+      if (error instanceof Error) {
+        if (error.message?.includes("Insufficient") || error.message?.includes("insuficiente")) {
+          errorMessage = `${t.swapFailed}: ${t.insufficientBalance}`
+        } else if (error.message?.includes("timeout")) {
+          errorMessage = `${t.swapFailed}: ${t.networkError}. ${t.tryAgain}`
+        } else if (error.message?.includes("Network")) {
+          errorMessage = `${t.swapFailed}: ${t.networkError}. ${t.tryAgain}`
+        } else {
+          errorMessage = `${t.swapFailed}: ${error.message}`
+        }
       }
 
       alert(`❌ ${errorMessage}`)
