@@ -607,24 +607,23 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
         setSwapQuote(quote)
 
-        // Extract output amount. Assume it's in wei and needs formatting.
-        let outputAmountRaw = "0"
+        // Extract output amount. The error indicates it's already a decimal string.
+        let outputAmountString = "0"
         if (quote.outAmount) {
-          outputAmountRaw = quote.outAmount.toString()
+          outputAmountString = quote.outAmount.toString()
         } else if (quote.addons?.outAmount) {
-          outputAmountRaw = quote.addons.outAmount.toString()
+          outputAmountString = quote.addons.outAmount.toString()
         } else {
           throw new Error("Could not determine output amount from quote.")
         }
 
         console.log(
-          `🔍 Extracted raw output amount (assumed wei): "${outputAmountRaw}" (Type: ${typeof outputAmountRaw})`,
+          `🔍 Extracted raw output amount string: "${outputAmountString}" (Type: ${typeof outputAmountString})`,
         )
 
-        // Convert from wei to token units using TPF token decimals
-        // Se o erro "invalid BigNumberish string" retornar, significa que outputAmountRaw NÃO está em wei.
-        const formattedOutput = ethers.formatUnits(outputAmountRaw, tpfToken.decimals)
-        const finalAmount = Number.parseFloat(formattedOutput).toFixed(6) // Limitar a 6 casas decimais para exibição
+        // The SDK's outAmount is already in human-readable format (decimal string).
+        // We just need to parse it to a number and then format its decimal places for display.
+        const finalAmount = Number.parseFloat(outputAmountString).toFixed(6) // Limit to 6 decimal places for display
 
         console.log(`✅ Final formatted amount: ${finalAmount} TPF`)
 
