@@ -345,7 +345,7 @@ const translations = {
     selectToken: "Pilih Token",
     enterAmount: "Masukkan jumlah untuk melihat kutipan",
     quoteError: "Gagal mendapatkan kutipan",
-    insufficientBalance: "Saldo tidak mencukupi",
+    insufficientBalance: "Saldo tidak mencukiente",
     networkError: "Kesalahan jaringan",
     tryAgain: "Coba lagi",
     priceUnavailable: "Data harga tidak tersedia",
@@ -592,10 +592,10 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         const quote = await swapHelper.estimate.quote({
           tokenIn: wldToken.address,
           tokenOut: tpfToken.address,
-          amountIn: amountInWei,
-          partnerCode: "24568", // Alterado de volta para "24568"
+          amountIn: amountInWei, // This is correct, amountIn should be in wei
+          partnerCode: "24568", // Mantido como "24568" conforme sua confirmação
           fee: "0.2",
-          feeReceiver: ethers.ZeroAddress,
+          feeReceiver: ethers.ZeroAddress, // Mantido como ethers.ZeroAddress
         })
 
         console.log("📊 Raw quote response from Holdstation SDK:", quote)
@@ -607,24 +607,24 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
         setSwapQuote(quote)
 
-        // Extract output amount. Assume it's already in human-readable format.
-        let outputAmountString = "0"
+        // Extract output amount. Assume it's in wei and needs formatting.
+        let outputAmountRaw = "0"
         if (quote.outAmount) {
-          outputAmountString = quote.outAmount.toString()
+          outputAmountRaw = quote.outAmount.toString()
         } else if (quote.addons?.outAmount) {
-          outputAmountString = quote.addons.outAmount.toString()
+          outputAmountRaw = quote.addons.outAmount.toString()
         } else {
-          // This case should ideally be caught by the validation above, but acts as a safe fallback
           throw new Error("Could not determine output amount from quote.")
         }
 
         console.log(
-          `🔍 Extracted raw output amount string: "${outputAmountString}" (Type: ${typeof outputAmountString})`,
+          `🔍 Extracted raw output amount (assumed wei): "${outputAmountRaw}" (Type: ${typeof outputAmountRaw})`,
         )
 
-        // The SDK's outAmount is likely already in human-readable format.
-        // We just need to parse it to a number and then format its decimal places for display.
-        const finalAmount = Number.parseFloat(outputAmountString).toFixed(6) // Limit to 6 decimal places for display
+        // Convert from wei to token units using TPF token decimals
+        // Se o erro "invalid BigNumberish string" retornar, significa que outputAmountRaw NÃO está em wei.
+        const formattedOutput = ethers.formatUnits(outputAmountRaw, tpfToken.decimals)
+        const finalAmount = Number.parseFloat(formattedOutput).toFixed(6) // Limitar a 6 casas decimais para exibição
 
         console.log(`✅ Final formatted amount: ${finalAmount} TPF`)
 
