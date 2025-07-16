@@ -507,7 +507,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       const newDisplayed = history.slice(0, Math.min(history.length, newDisplayCount))
 
       setDisplayedTransactions(newDisplayed)
-      setHasMoreTransactions(history.length > newDisplayCount)
+      setHasMoreTransactions(allTransactions.length > newDisplayCount)
     } catch (error) {
       console.error("❌ Error loading transaction history:", error)
     } finally {
@@ -606,7 +606,8 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
           feeReceiver: ethers.ZeroAddress, // Verifique se este endereço está correto para suas expectativas de "real"
         })
 
-        console.log("📊 FULL RAW QUOTE RESPONSE FROM HOLDSTATION SDK:", quote) // <-- Log do objeto completo
+        // Log do objeto completo da cotação para inspeção
+        console.log("📊 FULL RAW QUOTE RESPONSE FROM HOLDSTATION SDK:", JSON.stringify(quote, null, 2))
 
         // Validate essential fields in the quote response
         if (!quote || !quote.data || !quote.to || (!quote.outAmount && !quote.addons?.outAmount)) {
@@ -631,7 +632,10 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
         // The SDK's outAmount is already in human-readable format (decimal string).
         // We just need to parse it to a number and then format its decimal places for display.
-        const finalAmount = Number.parseFloat(outputAmountString).toFixed(6) // Limit to 6 decimal places for display
+        const parsedAmount = Number.parseFloat(outputAmountString)
+        console.log(`🔢 Parsed output amount (number): ${parsedAmount}`)
+
+        const finalAmount = parsedAmount.toFixed(6) // Limit to 6 decimal places for display
 
         console.log(`✅ Final formatted amount for display: ${finalAmount} TPF`)
 
@@ -705,21 +709,24 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       console.log(`💰 Sending amount in wei: ${amountInWei}`)
 
       // Call the doSwap function from the swap service
-      await doSwap({
+      const swapResult = await doSwap({
         walletAddress,
         quote: swapQuote,
         amountIn: amountInWei, // Pass amount in wei format, exactly as swap-service expects
       })
 
-      console.log("✅ Swap completed successfully via swap service")
-
-      alert(`✅ ${t.swapSuccess} ${swapForm.amountFrom} WLD for ${swapForm.amountTo} TPF!`)
-
-      setViewMode("main")
-      setSwapForm({ tokenFrom: "WLD", tokenTo: "TPF", amountFrom: "", amountTo: "" })
-      setSwapQuote(null)
-      await refreshBalances()
-      await loadTransactionHistory(true)
+      if (swapResult.success) {
+        console.log("✅ Swap completed successfully via swap service", swapResult)
+        alert(`✅ ${t.swapSuccess} ${swapForm.amountFrom} WLD for ${swapForm.amountTo} TPF!`)
+        setViewMode("main")
+        setSwapForm({ tokenFrom: "WLD", tokenTo: "TPF", amountFrom: "", amountTo: "" })
+        setSwapQuote(null)
+        await refreshBalances()
+        await loadTransactionHistory(true)
+      } else {
+        console.error("❌ Swap failed via swap service:", swapResult)
+        throw new Error(swapResult.errorCode || "Unknown swap error")
+      }
     } catch (error) {
       console.error("❌ Swap error:", error)
 
@@ -731,6 +738,9 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
           errorMessage = `${t.swapFailed}: ${t.networkError}. ${t.tryAgain}`
         } else if (error.message?.includes("Network")) {
           errorMessage = `${t.swapFailed}: ${t.networkError}. ${t.tryAgain}`
+        } else if (error.message?.includes("simulation_failed")) {
+          // Adicionado tratamento para simulation_failed
+          errorMessage = `${t.swapFailed}: Simulation failed. The quote might be invalid or expired.`
         } else {
           errorMessage = `${t.swapFailed}: ${error.message}`
         }
