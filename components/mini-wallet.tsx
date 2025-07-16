@@ -605,9 +605,21 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
         setSwapQuote(quote)
 
-        // Calculate output amount from quote - handle both possible response formats
+        // Calculate output amount from quote - handle both possible response formats and fix BigInt conversion
         const outputAmount = quote.addons?.outAmount || quote.outAmount || "0"
-        const formattedOutput = ethers.formatUnits(outputAmount, 18)
+
+        // Ensure the outputAmount is a valid BigNumberish string
+        let cleanOutputAmount = outputAmount.toString()
+
+        // If it's a decimal number, convert it to wei first
+        if (cleanOutputAmount.includes(".")) {
+          // If it's already a decimal, assume it's in token units and convert to wei
+          const decimalValue = Number.parseFloat(cleanOutputAmount).toFixed(18)
+          cleanOutputAmount = ethers.parseUnits(decimalValue, 18).toString()
+        }
+
+        // Now safely format from wei to token units
+        const formattedOutput = ethers.formatUnits(cleanOutputAmount, 18)
 
         setSwapForm((prev) => ({
           ...prev,
