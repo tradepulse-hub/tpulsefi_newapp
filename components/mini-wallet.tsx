@@ -37,6 +37,10 @@ import {
 import { PriceChart } from "@/components/price-chart"
 import { DebugConsole } from "@/components/debug-console"
 
+import { ethers } from "ethers"
+import { config, HoldSo, SwapHelper, TokenProvider, ZeroX, inmemoryTokenStorage } from "@holdstation/worldchain-sdk"
+import { Client, Multicall3 } from "@holdstation/worldchain-ethers-v6"
+
 // Import TOKENS from swap-service or define them here to match the swap service
 const TOKENS = [
   {
@@ -56,6 +60,22 @@ const TOKENS = [
     color: "#00D4FF",
   },
 ]
+
+// SDK Setup - similar to swap-service.ts
+const RPC_URL = "https://worldchain-mainnet.g.alchemy.com/public"
+const provider = new ethers.JsonRpcProvider(RPC_URL, { chainId: 480, name: "worldchain" }, { staticNetwork: true })
+const client = new Client(provider)
+config.client = client
+config.multicall3 = new Multicall3(provider)
+const swapHelper = new SwapHelper(client, { tokenStorage: inmemoryTokenStorage })
+const tokenProvider = new TokenProvider({ client, multicall3: config.multicall3 })
+const zeroX = new ZeroX(tokenProvider, inmemoryTokenStorage)
+const worldSwap = new HoldSo(tokenProvider, inmemoryTokenStorage)
+swapHelper.load(zeroX)
+swapHelper.load(worldSwap)
+
+const wldToken = TOKENS.find((t) => t.symbol === "WLD")!
+const tpfToken = TOKENS.find((t) => t.symbol === "TPF")!
 
 interface TokenBalance {
   symbol: string
@@ -546,7 +566,6 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     }
   }
 
-  // Create a simple quote function that generates a mock quote for the swap service
   const getSwapQuote = useCallback(
     async (amountFrom: string) => {
       if (!amountFrom || Number.parseFloat(amountFrom) <= 0 || isNaN(Number.parseFloat(amountFrom))) {
@@ -560,39 +579,49 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       setQuoteError(null)
 
       try {
-        console.log(`🔄 Getting quote for: ${amountFrom} WLD to TPF`)
+        console.log(`🔄 Getting real quote for: ${amountFrom} WLD to TPF via Holdstation SDK`)
 
-        // Create a mock quote that matches the expected format for the swap service
-        // The swap service expects: { data, to, value, addons: { feeAmountOut } }
-        const mockQuote = {
-          data: "0x", // Mock transaction data
-          to: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF token address
-          value: "0", // No ETH value needed for token swap
-          addons: {
-            feeAmountOut: "0", // No additional fees
-          },
+        // Convert amount to wei (18 decimals)
+        const amountInWei = ethers.parseUnits(amountFrom, 18).toString()
+
+        // Get real quote using the SDK
+        const quote = await swapHelper.estimate.quote({
+          tokenIn: wldToken.address,
+          tokenOut: tpfToken.address,
+          amountIn: amountInWei,
+          partnerCode: "24568",
+          fee: "0.2",
+          feeReceiver: "0x4bb270ef6dcb052a083bd5cff518e2e019c0f4ee",
+        })
+
+        console.log("✅ Real quote received:", quote)
+
+        if (!quote || !quote.data || !quote.to) {
+          throw new Error("Invalid quote received from SDK")
         }
 
-        // Calculate estimated output (mock conversion rate: 1 WLD = 1000 TPF)
-        const estimatedOutput = (Number.parseFloat(amountFrom) * 1000).toString()
+        setSwapQuote(quote)
 
-        console.log("✅ Mock quote generated:", mockQuote)
+        // Calculate output amount from quote
+        const outputAmount = quote.addons?.outAmount || quote.outAmount || "0"
+        const formattedOutput = ethers.formatUnits(outputAmount, 18)
 
-        setSwapQuote(mockQuote)
         setSwapForm((prev) => ({
           ...prev,
-          amountTo: estimatedOutput,
+          amountTo: formattedOutput,
         }))
 
-        console.log(`💱 Updated swap form with amount: ${estimatedOutput} TPF`)
+        console.log(`💱 Updated swap form with real amount: ${formattedOutput} TPF`)
       } catch (error) {
-        console.error("❌ Error getting quote:", error)
+        console.error("❌ Error getting real quote:", error)
 
         let errorMessage = t.quoteError
         if (error.message?.includes("timeout")) {
           errorMessage = `${t.networkError}. ${t.tryAgain}`
         } else if (error.message?.includes("Network")) {
           errorMessage = `${t.networkError}. ${t.tryAgain}`
+        } else if (error.message?.includes("insufficient")) {
+          errorMessage = t.insufficientBalance
         }
 
         setQuoteError(errorMessage)
@@ -602,7 +631,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         setGettingQuote(false)
       }
     },
-    [t.quoteError, t.networkError, t.tryAgain],
+    [t.quoteError, t.networkError, t.tryAgain, t.insufficientBalance],
   )
 
   // Auto-quote effect with debounce - only for WLD to TPF
@@ -638,17 +667,18 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
       console.log("🔄 Calling doSwap from swap service...")
 
+      // Convert amount to wei for the swap service
+      const amountInWei = ethers.parseUnits(swapForm.amountFrom, 18).toString()
+
       // Call the doSwap function from the swap service
-      // The swap service handles all the SDK logic internally
       await doSwap({
         walletAddress,
         quote: swapQuote,
-        amountIn: swapForm.amountFrom,
+        amountIn: amountInWei, // Pass amount in wei format
       })
 
       console.log("✅ Swap completed successfully via swap service")
 
-      // Since doSwap doesn't return a success indicator, we assume success if no error was thrown
       alert(`✅ ${t.swapSuccess} ${swapForm.amountFrom} WLD for ${swapForm.amountTo} TPF!`)
 
       setViewMode("main")
