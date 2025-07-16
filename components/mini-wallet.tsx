@@ -592,10 +592,10 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         const quote = await swapHelper.estimate.quote({
           tokenIn: wldToken.address,
           tokenOut: tpfToken.address,
-          amountIn: amountInWei,
-          partnerCode: "24568",
+          amountIn: amountInWei, // This is correct, amountIn should be in wei
+          partnerCode: "0", // Changed to "0" to match user's provided snippet
           fee: "0.2",
-          feeReceiver: "0x4bb270ef6dcb052a083bd5cff518e2e019c0f4ee",
+          feeReceiver: ethers.ZeroAddress, // Changed to ethers.ZeroAddress to match user's provided snippet
         })
 
         console.log("📊 Raw quote response from Holdstation SDK:", quote)
@@ -617,6 +617,10 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
           // This case should ideally be caught by the validation above, but acts as a safe fallback
           throw new Error("Could not determine output amount from quote.")
         }
+
+        console.log(
+          `🔍 Extracted raw output amount string: "${outputAmountString}" (Type: ${typeof outputAmountString})`,
+        )
 
         // The SDK's outAmount is likely already in human-readable format.
         // We just need to parse it to a number and then format its decimal places for display.
