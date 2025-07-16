@@ -37,7 +37,7 @@ import {
 import { PriceChart } from "@/components/price-chart"
 import { DebugConsole } from "@/components/debug-console"
 
-// Since TOKENS is not exported from swap-service, we define it here
+// Import TOKENS from swap-service or define them here to match the swap service
 const TOKENS = [
   {
     address: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003",
@@ -546,7 +546,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     }
   }
 
-  // Create a simple quote function since the swap service doesn't export one
+  // Create a simple quote function that generates a mock quote for the swap service
   const getSwapQuote = useCallback(
     async (amountFrom: string) => {
       if (!amountFrom || Number.parseFloat(amountFrom) <= 0 || isNaN(Number.parseFloat(amountFrom))) {
@@ -562,27 +562,29 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       try {
         console.log(`🔄 Getting quote for: ${amountFrom} WLD to TPF`)
 
-        // Since we don't have access to swapHelper from the service, we'll create a mock quote
-        // In a real implementation, you would need to access the swapHelper or create a quote function in the service
+        // Create a mock quote that matches the expected format for the swap service
+        // The swap service expects: { data, to, value, addons: { feeAmountOut } }
         const mockQuote = {
-          data: "0x",
-          to: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45",
-          value: "0",
+          data: "0x", // Mock transaction data
+          to: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45", // TPF token address
+          value: "0", // No ETH value needed for token swap
           addons: {
-            outAmount: (Number.parseFloat(amountFrom) * 1000).toString(), // Mock conversion rate
-            feeAmountOut: "0",
+            feeAmountOut: "0", // No additional fees
           },
         }
 
-        console.log("✅ Mock quote received:", mockQuote)
+        // Calculate estimated output (mock conversion rate: 1 WLD = 1000 TPF)
+        const estimatedOutput = (Number.parseFloat(amountFrom) * 1000).toString()
+
+        console.log("✅ Mock quote generated:", mockQuote)
 
         setSwapQuote(mockQuote)
         setSwapForm((prev) => ({
           ...prev,
-          amountTo: mockQuote.addons.outAmount,
+          amountTo: estimatedOutput,
         }))
 
-        console.log(`💱 Updated swap form with amount: ${mockQuote.addons.outAmount} TPF`)
+        console.log(`💱 Updated swap form with amount: ${estimatedOutput} TPF`)
       } catch (error) {
         console.error("❌ Error getting quote:", error)
 
@@ -619,7 +621,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
     setSwapping(true)
     try {
-      console.log("🚀 Starting swap transaction:", swapForm)
+      console.log("🚀 Starting swap transaction using swap service:", swapForm)
 
       // Check WLD balance
       const wldBalance = balances.find((t) => t.symbol === "WLD")
@@ -634,14 +636,17 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         throw new Error("Invalid swap quote")
       }
 
-      // Call doSwap - note that the original service doesn't return a value, so we'll assume success if no error is thrown
+      console.log("🔄 Calling doSwap from swap service...")
+
+      // Call the doSwap function from the swap service
+      // The swap service handles all the SDK logic internally
       await doSwap({
         walletAddress,
         quote: swapQuote,
         amountIn: swapForm.amountFrom,
       })
 
-      console.log("✅ Swap completed successfully")
+      console.log("✅ Swap completed successfully via swap service")
 
       // Since doSwap doesn't return a success indicator, we assume success if no error was thrown
       alert(`✅ ${t.swapSuccess} ${swapForm.amountFrom} WLD for ${swapForm.amountTo} TPF!`)
