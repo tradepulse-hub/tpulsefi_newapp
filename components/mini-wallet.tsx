@@ -106,7 +106,7 @@ interface MiniWalletProps {
 
 // Supported languages
 const SUPPORTED_LANGUAGES = ["en", "pt", "es", "id"] as const
-\
+
 type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number]
 
 // Translations for mini wallet
