@@ -592,10 +592,10 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         const quote = await swapHelper.estimate.quote({
           tokenIn: wldToken.address,
           tokenOut: tpfToken.address,
-          amountIn: amountInWei, // This is correct, amountIn should be in wei
-          partnerCode: "0", // Changed to "0" to match user's provided snippet
+          amountIn: amountInWei,
+          partnerCode: "24568", // Alterado de volta para "24568"
           fee: "0.2",
-          feeReceiver: ethers.ZeroAddress, // Changed to ethers.ZeroAddress to match user's provided snippet
+          feeReceiver: ethers.ZeroAddress,
         })
 
         console.log("📊 Raw quote response from Holdstation SDK:", quote)
