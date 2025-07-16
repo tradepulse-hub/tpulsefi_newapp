@@ -583,22 +583,30 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
       try {
         console.log(`🔄 Getting real quote for: ${amountFrom} WLD to TPF via Holdstation SDK`)
+        console.log(`⚙️ Request parameters:
+          tokenIn: ${wldToken.address} (WLD)
+          tokenOut: ${tpfToken.address} (TPF)
+          amountIn: ${amountFrom} (human-readable)
+          partnerCode: "24568"
+          fee: "0.2"
+          feeReceiver: "${ethers.ZeroAddress}"
+        `)
 
         // Convert input amount to wei using WLD token decimals
         const amountInWei = ethers.parseUnits(amountFrom, wldToken.decimals).toString()
-        console.log(`💰 Input amount in wei: ${amountInWei}`)
+        console.log(`💰 Input amount in wei (WLD): ${amountInWei}`)
 
         // Get real quote using the SDK
         const quote = await swapHelper.estimate.quote({
           tokenIn: wldToken.address,
           tokenOut: tpfToken.address,
           amountIn: amountInWei, // This is correct, amountIn should be in wei
-          partnerCode: "24568", // Mantido como "24568" conforme sua confirmação
-          fee: "0.2",
-          feeReceiver: ethers.ZeroAddress, // Mantido como ethers.ZeroAddress
+          partnerCode: "24568", // Confirmed por você
+          fee: "0.2", // Verifique se esta taxa está correta para suas expectativas de "real"
+          feeReceiver: ethers.ZeroAddress, // Verifique se este endereço está correto para suas expectativas de "real"
         })
 
-        console.log("📊 Raw quote response from Holdstation SDK:", quote)
+        console.log("📊 FULL RAW QUOTE RESPONSE FROM HOLDSTATION SDK:", quote) // <-- Log do objeto completo
 
         // Validate essential fields in the quote response
         if (!quote || !quote.data || !quote.to || (!quote.outAmount && !quote.addons?.outAmount)) {
@@ -607,7 +615,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
         setSwapQuote(quote)
 
-        // Extract output amount. The error indicates it's already a decimal string.
+        // Extract output amount. Based on previous error, it's already a decimal string.
         let outputAmountString = "0"
         if (quote.outAmount) {
           outputAmountString = quote.outAmount.toString()
@@ -618,14 +626,14 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         }
 
         console.log(
-          `🔍 Extracted raw output amount string: "${outputAmountString}" (Type: ${typeof outputAmountString})`,
+          `🔍 Extracted raw output amount string (from SDK): "${outputAmountString}" (Type: ${typeof outputAmountString})`,
         )
 
         // The SDK's outAmount is already in human-readable format (decimal string).
         // We just need to parse it to a number and then format its decimal places for display.
         const finalAmount = Number.parseFloat(outputAmountString).toFixed(6) // Limit to 6 decimal places for display
 
-        console.log(`✅ Final formatted amount: ${finalAmount} TPF`)
+        console.log(`✅ Final formatted amount for display: ${finalAmount} TPF`)
 
         setSwapForm((prev) => ({
           ...prev,
