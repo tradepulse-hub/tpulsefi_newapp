@@ -600,14 +600,23 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
         console.log("📊 Raw quote response from Holdstation SDK:", quote)
 
-        if (!quote || !quote.data || !quote.to || !quote.outAmount) {
+        if (!quote || !quote.data || !quote.to || (!quote.outAmount && !quote.addons?.outAmount)) {
           throw new Error("Invalid quote received from SDK: Missing data, to, or outAmount.")
         }
 
         setSwapQuote(quote)
 
         // Extract output amount directly from quote.outAmount and format it
-        const outputAmountRaw = quote.outAmount.toString()
+        let outputAmount = "0"
+        if (quote.outAmount) {
+          outputAmount = quote.outAmount.toString()
+        } else if (quote.addons?.outAmount) {
+          outputAmount = quote.addons.outAmount.toString()
+        } else {
+          // Este caso deve ser capturado pela validação acima, mas é um fallback seguro
+          throw new Error("Could not determine output amount from quote.")
+        }
+        const outputAmountRaw = outputAmount
         console.log(`🔍 Extracted raw output amount from quote.outAmount: ${outputAmountRaw}`)
 
         // Convert from wei to token units using TPF token decimals
