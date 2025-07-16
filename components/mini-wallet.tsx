@@ -106,6 +106,7 @@ interface MiniWalletProps {
 
 // Supported languages
 const SUPPORTED_LANGUAGES = ["en", "pt", "es", "id"] as const
+\
 type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number]
 
 // Translations for mini wallet
@@ -605,28 +606,39 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
         setSwapQuote(quote)
 
-        // Calculate output amount from quote - handle both possible response formats and fix BigInt conversion
+        // Calculate output amount from quote - fix the conversion issue
         const outputAmount = quote.addons?.outAmount || quote.outAmount || "0"
 
-        // Ensure the outputAmount is a valid BigNumberish string
-        let cleanOutputAmount = outputAmount.toString()
+        console.log("🔍 Raw output amount from SDK:", outputAmount)
 
-        // If it's a decimal number, convert it to wei first
-        if (cleanOutputAmount.includes(".")) {
-          // If it's already a decimal, assume it's in token units and convert to wei
-          const decimalValue = Number.parseFloat(cleanOutputAmount).toFixed(18)
-          cleanOutputAmount = ethers.parseUnits(decimalValue, 18).toString()
+        // The SDK returns the amount in wei format, so we need to format it directly
+        let formattedOutput: string
+
+        try {
+          // Ensure we have a valid string representation
+          const outputAmountStr = outputAmount.toString()
+
+          // Check if it's already a valid BigNumberish (no decimals)
+          if (!outputAmountStr.includes(".")) {
+            // It's already in wei format, format directly
+            formattedOutput = ethers.formatUnits(outputAmountStr, 18)
+          } else {
+            // If it has decimals, it might be in token units already
+            formattedOutput = Number.parseFloat(outputAmountStr).toFixed(6)
+          }
+
+          console.log("✅ Formatted output amount:", formattedOutput)
+        } catch (error) {
+          console.error("❌ Error formatting output amount:", error)
+          throw new Error("Failed to format quote output amount")
         }
-
-        // Now safely format from wei to token units
-        const formattedOutput = ethers.formatUnits(cleanOutputAmount, 18)
 
         setSwapForm((prev) => ({
           ...prev,
           amountTo: Number.parseFloat(formattedOutput).toFixed(6), // Limit decimal places
         }))
 
-        console.log(`💱 Updated swap form with real amount: ${formattedOutput} TPF`)
+        console.log(`💱 Updated swap form with corrected amount: ${formattedOutput} TPF`)
       } catch (error) {
         console.error("❌ Error getting real quote:", error)
 
