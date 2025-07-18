@@ -34,7 +34,7 @@ import {
   TrendingUp,
   Wallet,
 } from "lucide-react"
-import Image from "next/image"
+// import Image from "next/image" // Removido o import do next/image
 import { useCallback, useEffect, useState } from "react"
 
 import { Client, Multicall3 } from "@holdstation/worldchain-ethers-v6"
@@ -979,7 +979,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
               <div className="flex items-center space-x-2">
                 <img
-                  src={getTokenIcon(selectedTokenState.symbol) || "/placeholder.svg"}
+                  src={getTokenIcon(selectedTokenState.symbol) || "/placeholder.svg"} // Usando <img> tag
                   alt={selectedTokenState.symbol}
                   className="w-6 h-6 rounded-full"
                   onError={(e) => {
@@ -1193,12 +1193,13 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center space-x-3">
                                   <div className="w-8 h-8 rounded-full overflow-hidden bg-white flex items-center justify-center">
-                                    <Image
+                                    <img // Alterado de Image para <img>
                                       src={getTokenIcon(token.symbol) || "/placeholder.svg"}
                                       alt={token.name}
-                                      width={32}
-                                      height={32}
                                       className="w-full h-full object-contain"
+                                      onError={(e) => {
+                                        e.currentTarget.src = "/placeholder.svg?height=32&width=32"
+                                      }}
                                     />
                                   </div>
                                   <div>
@@ -1468,9 +1469,12 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center space-x-2">
                         <img
-                          src={getTokenIcon(swapForm.tokenFrom) || "/placeholder.svg"}
+                          src={getTokenIcon(swapForm.tokenFrom) || "/placeholder.svg"} // Usando <img> tag
                           alt={swapForm.tokenFrom}
                           className="w-6 h-6 rounded-full"
+                          onError={(e) => {
+                            e.currentTarget.src = "/placeholder.svg?height=24&width=24"
+                          }}
                         />
                         <select
                           value={swapForm.tokenFrom}
@@ -1519,7 +1523,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                     className="p-2 bg-gray-600/50 rounded-full hover:bg-gray-500/50 transition-colors"
                     title="Swap tokens"
                   >
-                    <ArrowLeftRight className="w-4 h-4 text-white" />
+                    <ArrowLeftRight className="w-4 h-4" />
                   </button>
                 </div>
 
@@ -1529,9 +1533,12 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                   <div className="bg-black/30 border border-white/20 rounded-lg p-3">
                     <div className="flex items-center space-x-2">
                       <img
-                        src={getTokenIcon(swapForm.tokenTo) || "/placeholder.svg"}
+                        src={getTokenIcon(swapForm.tokenTo) || "/placeholder.svg"} // Usando <img> tag
                         alt={swapForm.tokenTo}
                         className="w-6 h-6 rounded-full"
+                        onError={(e) => {
+                          e.currentTarget.src = "/placeholder.svg?height=24&width=24"
+                        }}
                       />
                       <select
                         value={swapForm.tokenTo}
@@ -1650,46 +1657,40 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                         className="bg-black/30 border border-white/10 rounded-lg p-3 hover:bg-white/5 transition-colors"
                       >
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3">
-                            <div
-                              className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                                tx.type === "sent" ? "bg-red-500/20 text-red-400" : "bg-green-500/20 text-green-400"
-                              }`}
-                            >
-                              {tx.type === "sent" ? (
-                                <ArrowUpRight className="w-4 h-4" />
-                              ) : (
-                                <ArrowDownLeft className="w-4 h-4" />
-                              )}
-                            </div>
-                            <div>
-                              <p className="text-white font-medium text-sm">
-                                {tx.type === "sent" ? t.sent : t.received} {tx.token}
-                              </p>
-                              <p className="text-gray-400 text-xs">{formatAddress(tx.address)}</p>
-                            </div>
+                          <div
+                            className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                              tx.type === "sent" ? "bg-red-500/20 text-red-400" : "bg-green-500/20 text-green-400"
+                            }`}
+                          >
+                            {tx.type === "sent" ? (
+                              <ArrowUpRight className="w-4 h-4" />
+                            ) : (
+                              <ArrowDownLeft className="w-4 h-4" />
+                            )}
                           </div>
-                          <div className="text-right">
+                          <div>
                             <p className="text-white font-medium text-sm">
-                              {tx.type === "sent" ? "-" : "+"}
-                              {tx.amount}
+                              {tx.type === "sent" ? t.sent : t.received} {tx.token}
                             </p>
-                            <div className="flex items-center space-x-2">
-                              <span className={`text-xs ${getStatusColor(tx.status)}`}>
-                                {tx.status === "confirmed"
-                                  ? t.confirmed
-                                  : tx.status === "pending"
-                                    ? t.pending
-                                    : t.failed}
-                              </span>
-                              <button
-                                onClick={() => openTransactionInExplorer(tx.hash)}
-                                className="text-gray-400 hover:text-white transition-colors"
-                                title={t.viewOnExplorer}
-                              >
-                                <ExternalLink className="w-3 h-3" />
-                              </button>
-                            </div>
+                            <p className="text-gray-400 text-xs">{formatAddress(tx.address)}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-white font-medium text-sm">
+                            {tx.type === "sent" ? "-" : "+"}
+                            {tx.amount}
+                          </p>
+                          <div className="flex items-center space-x-2">
+                            <span className={`text-xs ${getStatusColor(tx.status)}`}>
+                              {tx.status === "confirmed" ? t.confirmed : tx.status === "pending" ? t.pending : t.failed}
+                            </span>
+                            <button
+                              onClick={() => openTransactionInExplorer(tx.hash)}
+                              className="text-gray-400 hover:text-white transition-colors"
+                              title={t.viewOnExplorer}
+                            >
+                              <ExternalLink className="w-3 h-3" />
+                            </button>
                           </div>
                         </div>
                         <div className="mt-2 text-xs text-gray-500">{formatTimestamp(tx.timestamp)}</div>
