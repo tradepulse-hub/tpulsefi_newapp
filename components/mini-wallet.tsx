@@ -9,6 +9,7 @@ import {
   getPriceChange,
   getTokenPrice,
   type TokenPrice,
+  TOKENS, // Importar TOKENS do serviço de preço
 } from "@/services/token-price-service"
 import { walletService } from "@/services/wallet-service"
 import { AnimatePresence, motion } from "framer-motion"
@@ -40,34 +41,6 @@ import { useCallback, useEffect, useState } from "react"
 import { Client, Multicall3 } from "@holdstation/worldchain-ethers-v6"
 import { config, HoldSo, inmemoryTokenStorage, SwapHelper, TokenProvider, ZeroX } from "@holdstation/worldchain-sdk"
 import { ethers } from "ethers"
-
-// Definindo TOKENS para corresponder ao serviço de swap
-const TOKENS = [
-  {
-    address: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003",
-    symbol: "WLD",
-    name: "Worldcoin",
-    decimals: 18,
-    logo: "/images/worldcoin.jpeg",
-    color: "#000000",
-  },
-  {
-    address: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45",
-    symbol: "TPF",
-    name: "TPulseFi",
-    decimals: 18,
-    logo: "/images/logo-tpf.png",
-    color: "#00D4FF",
-  },
-  {
-    address: "0xEdE54d9c024ee80C85ec0a75eD2d8774c7Fbac9B", // Updated WDD address
-    symbol: "WDD",
-    name: "Drachma", // Updated name
-    decimals: 18,
-    logo: "/images/drachma-token.png", // Updated logo path
-    color: "#FFD700",
-  },
-]
 
 // Configuração do SDK Holdstation (mantida aqui para a função de cotação)
 const RPC_URL = "https://worldchain-mainnet.g.alchemy.com/public"
@@ -455,7 +428,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
           try {
             const [price, change] = await Promise.all([
               getCurrentTokenPrice(token.symbol),
-              getPriceChange(token.symbol, "1H"),
+              getPriceChange(token.symbol, "1h"),
             ])
             prices[token.symbol] = price
             changes[token.symbol] = change
