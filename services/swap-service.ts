@@ -34,9 +34,6 @@ const TOKENS = [
   },
 ]
 
-const wldToken = TOKENS.find((t) => t.symbol === "WLD")!
-const tpfToken = TOKENS.find((t) => t.symbol === "TPF")!
-
 // --- Provider and SDK setup ---
 const RPC_URL = "https://worldchain-mainnet.g.alchemy.com/public"
 const provider = new ethers.JsonRpcProvider(RPC_URL, { chainId: 480, name: "worldchain" }, { staticNetwork: true })
@@ -66,29 +63,44 @@ async function loadTpfBalance(address: string) {
 
 // --- The doSwap function ---
 /**
- * Executes a token swap from WLD to TPF using the Worldchain SDK.
+ * Executes a token swap using the Worldchain SDK.
  * @param walletAddress The user's wallet address
  * @param quote The quote object returned from swapHelper.estimate.quote
- * @param amountIn The amount of WLD to swap (as a string)
+ * @param amountIn The amount of tokenIn to swap (as a string)
+ * @param tokenInSymbol The symbol of the input token (e.g., "WLD")
+ * @param tokenOutSymbol The symbol of the output token (e.g., "TPF")
  * @returns A result object indicating success or failure.
  */
 export async function doSwap({
   walletAddress,
   quote,
   amountIn,
+  tokenInSymbol,
+  tokenOutSymbol,
 }: {
   walletAddress: string
   quote: any
   amountIn: string
+  tokenInSymbol: string
+  tokenOutSymbol: string
 }) {
-  if (!walletAddress || !quote || !amountIn) {
+  if (!walletAddress || !quote || !amountIn || !tokenInSymbol || !tokenOutSymbol) {
     console.warn("doSwap called with missing parameters.")
     return { success: false, errorCode: "MISSING_PARAMETERS" }
   }
+
+  const tokenIn = TOKENS.find((t) => t.symbol === tokenInSymbol)
+  const tokenOut = TOKENS.find((t) => t.symbol === tokenOutSymbol)
+
+  if (!tokenIn || !tokenOut) {
+    console.error("Invalid token symbols provided for swap.")
+    return { success: false, errorCode: "INVALID_TOKEN_SYMBOLS" }
+  }
+
   try {
     const swapParams: SwapParams["input"] = {
-      tokenIn: wldToken.address,
-      tokenOut: tpfToken.address,
+      tokenIn: tokenIn.address,
+      tokenOut: tokenOut.address,
       amountIn,
       tx: {
         data: quote.data,
@@ -108,7 +120,7 @@ export async function doSwap({
       await provider.getBlockNumber()
       await updateUserData(walletAddress)
       await loadTokenBalances(walletAddress)
-      await loadTpfBalance(walletAddress)
+      await loadTpfBalance(walletAddress) // Consider making this dynamic based on tokenOut
       console.log("Swap successful!")
       return { success: true } // Explicitly return success
     } else {
@@ -122,4 +134,4 @@ export async function doSwap({
 }
 
 // Example usage (uncomment and fill in real values to test):
-// doSwap({ walletAddress: "0x...", quote: { ... }, amountIn: "1.0" })
+// doSwap({ walletAddress: "0x...", quote: { ... }, amountIn: "1.0", tokenInSymbol: "WLD", tokenOutSymbol: "TPF" })
