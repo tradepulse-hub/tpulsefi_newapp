@@ -4,15 +4,12 @@ import { TOKENS, swapHelper } from "./token-price-service" // Importar TOKENS e 
 // --- Mocked helper functions (replace with real implementations as needed) ---
 async function updateUserData(address: string) {
   // Placeholder for updating user data after swap
-  // console.log(`User data updated for address: ${address}`) // Removed log
 }
 async function loadTokenBalances(address: string) {
   // Placeholder for reloading token balances after swap
-  // console.log(`Token balances loaded for address: ${address}`) // Removed log
 }
 async function loadTpfBalance(address: string) {
   // Placeholder for reloading ANI balance after swap
-  // console.log(`TPF balance loaded for address: ${address}`) // Removed log
 }
 
 // --- The doSwap function ---
@@ -39,7 +36,7 @@ export async function doSwap({
   tokenOutSymbol: string
 }) {
   if (!walletAddress || !quote || !amountIn || !tokenInSymbol || !tokenOutSymbol) {
-    console.error("doSwap called with missing parameters.") // Changed to error
+    console.error("doSwap called with missing parameters.")
     return { success: false, errorCode: "MISSING_PARAMETERS" }
   }
 
