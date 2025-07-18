@@ -13,34 +13,7 @@ import {
   type SwapParams,
 } from "@holdstation/worldchain-sdk"
 import { Client, Multicall3 } from "@holdstation/worldchain-ethers-v6"
-
-// --- Token definitions ---
-const TOKENS = [
-  {
-    address: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003",
-    symbol: "WLD",
-    name: "Worldcoin",
-    decimals: 18,
-    logo: "/images/worldcoin.jpeg",
-    color: "#000000",
-  },
-  {
-    address: "0x834a73c0a83F3BCe349A116FFB2A4c2d1C651E45",
-    symbol: "TPF",
-    name: "TPulseFi",
-    decimals: 18,
-    logo: "/images/logo-tpf.png",
-    color: "#00D4FF",
-  },
-  {
-    address: "0xEdE54d9c024ee80C85ec0a75eD2d8774c7Fbac9B", // Updated WDD address
-    symbol: "WDD",
-    name: "Drachma", // Updated name
-    decimals: 18,
-    logo: "/images/drachma-token.png", // Updated logo path
-    color: "#FFD700",
-  },
-]
+import { TOKENS } from "./token-price-service" // Importar TOKENS do serviço de preço
 
 // --- Provider and SDK setup ---
 const RPC_URL = "https://worldchain-mainnet.g.alchemy.com/public"
