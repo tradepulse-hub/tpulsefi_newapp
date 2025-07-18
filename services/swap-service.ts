@@ -35,9 +35,9 @@ const TOKENS = [
   {
     address: "0xEdE54d9c024ee80C85ec0a75eD2d8774c7Fbac9B",
     symbol: "WDD",
-    name: "World Digital Dollar",
+    name: "Drachma", // Updated name
     decimals: 18,
-    logo: "/placeholder.svg?height=32&width=32", // Placeholder logo for WDD
+    logo: "/images/drachma-token.png", // Updated logo path
     color: "#FFD700",
   },
 ]
