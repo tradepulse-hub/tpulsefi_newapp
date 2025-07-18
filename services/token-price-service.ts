@@ -28,6 +28,14 @@ const TOKENS = [
     logo: "/images/drachma-token.png", // Updated logo path
     color: "#FFD700",
   },
+  {
+    address: "0x79A02482A880bCE3F13e09Da970dC34db4CD24d1", // USDC address on Worldchain
+    symbol: "USDC",
+    name: "USD Coin",
+    decimals: 6, // USDC typically has 6 decimals
+    logo: "/images/usdc.png", // New USDC logo
+    color: "#2775CA", // USDC blue
+  },
 ]
 
 // Configuração do SDK Holdstation
@@ -97,7 +105,12 @@ function generateMockPriceHistory(
 
 async function getRealTokenPrice(tokenSymbol: string): Promise<number> {
   try {
-    const usdcAddress = "0x0b2C639c533813f4Aa9D2FDf37Fc2969E73aeF8C" // USDC address on Worldchain
+    const usdcToken = TOKENS.find((t) => t.symbol === "USDC")
+    if (!usdcToken) {
+      console.error("[getRealTokenPrice] USDC token not found in TOKENS list. Cannot get prices.")
+      return 0
+    }
+    const usdcAddress = usdcToken.address
 
     if (tokenSymbol === "USDC") {
       console.log(`[getRealTokenPrice] ✅ Price for USDC: $1.0`)
