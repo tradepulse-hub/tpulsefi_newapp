@@ -717,7 +717,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         amountIn: cleanAmount, // Pass real amount
       })
 
-      // Check if swapResult is defined before accessing its properties
+      // Check if swapResult is defined and indicates success
       if (swapResult && swapResult.success) {
         console.log("✅ Swap completed successfully via swap service", swapResult)
         alert(`✅ ${t.swapSuccess} ${swapForm.amountFrom} WLD for ${swapForm.amountTo} TPF!`)
@@ -740,6 +740,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         } else if (swapResult && swapResult.error instanceof Error) {
           errorMessage = `${t.swapFailed}: ${swapResult.error.message}`
         } else if (!swapResult) {
+          // This case should now be rare if doSwap always returns an object
           errorMessage = `${t.swapFailed}: ${t.tryAgain} (No result from swap service)`
         }
         throw new Error(errorMessage) // Re-throw to be caught by the outer catch block
@@ -940,7 +941,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
               <div className="flex items-center space-x-2">
                 <img
-                  src={getTokenIcon(selectedTokenState.symbol) || "/placeholder.svg" || "/placeholder.svg"}
+                  src={getTokenIcon(selectedTokenState.symbol) || "/placeholder.svg"}
                   alt={selectedTokenState.symbol}
                   className="w-6 h-6 rounded-full"
                   onError={(e) => {
@@ -1155,7 +1156,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                                 <div className="flex items-center space-x-3">
                                   <div className="w-8 h-8 rounded-full overflow-hidden bg-white flex items-center justify-center">
                                     <Image
-                                      src={getTokenIcon(token.symbol) || "/placeholder.svg" || "/placeholder.svg"}
+                                      src={getTokenIcon(token.symbol) || "/placeholder.svg"}
                                       alt={token.name}
                                       width={32}
                                       height={32}
