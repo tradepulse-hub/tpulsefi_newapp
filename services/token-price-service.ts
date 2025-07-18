@@ -1,14 +1,6 @@
 import { ethers } from "ethers"
-import {
-  Client,
-  Multicall3,
-  config,
-  TokenProvider,
-  HoldSo,
-  ZeroX,
-  inmemoryTokenStorage,
-  SwapHelper,
-} from "@holdstation/worldchain-sdk"
+import { config, TokenProvider, HoldSo, ZeroX, inmemoryTokenStorage, SwapHelper } from "@holdstation/worldchain-sdk"
+import { Client, Multicall3 } from "@holdstation/worldchain-ethers-v6" // Correct import for Client and Multicall3
 
 // Definindo TOKENS para corresponder ao serviço de swap e mini-carteira
 const TOKENS = [
