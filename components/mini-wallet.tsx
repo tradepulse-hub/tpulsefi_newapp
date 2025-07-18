@@ -59,6 +59,14 @@ const TOKENS = [
     logo: "/images/logo-tpf.png",
     color: "#00D4FF",
   },
+  {
+    address: "0xEdE54d9c024ee80C85ec0a75eD2d8774c7Fbac9B",
+    symbol: "WDD",
+    name: "World Digital Dollar",
+    decimals: 18,
+    logo: "/placeholder.svg?height=32&width=32", // Placeholder logo for WDD
+    color: "#FFD700",
+  },
 ]
 
 // Configuração do SDK Holdstation (mantida aqui para a função de cotação)
@@ -407,7 +415,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
   // Real-time token prices for main view
   const [tokenPrices, setTokenPrices] = useState<Record<string, number>>({})
   const [priceChanges, setPriceChanges] = useState<Record<string, number>>({})
-  const [loadingPrices, setLoadingPrices] = useState(true)
+  const [loadingPrices, setLoadingPrices] = true
 
   const TRANSACTIONS_PER_PAGE = 5
 
@@ -601,13 +609,13 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
           `🔄 Getting real quote for: ${amountFrom} ${tokenFromSymbol} to ${tokenToSymbol} via Holdstation SDK`,
         )
         console.log(`⚙️ Request parameters:
-          tokenIn: ${tokenInObj.address} (${tokenFromSymbol})
-          tokenOut: ${tokenOutObj.address} (${tokenToSymbol})
-          amountIn: ${amountFrom} (human-readable)
-          partnerCode: "24568"
-          fee: "0.2"
-          feeReceiver: "${ethers.ZeroAddress}"
-        `)
+        tokenIn: ${tokenInObj.address} (${tokenFromSymbol})
+        tokenOut: ${tokenOutObj.address} (${tokenToSymbol})
+        amountIn: ${amountFrom} (human-readable)
+        partnerCode: "24568"
+        fee: "0.2"
+        feeReceiver: "${ethers.ZeroAddress}"
+      `)
 
         // Convert input amount to wei using tokenInObj decimals
         const cleanAmount = Number.parseFloat(amountFrom).toFixed(tokenInObj.decimals)
@@ -1105,7 +1113,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                     className="p-2 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-white/10"
                     title={t.copyAddress}
                   >
-                    {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
+                    {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                   </button>
                   <button
                     onClick={() => setIsMinimized(true)}
@@ -1519,32 +1527,30 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">{t.to}</label>
                   <div className="bg-black/30 border border-white/20 rounded-lg p-3">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center space-x-2">
-                        <img
-                          src={getTokenIcon(swapForm.tokenTo) || "/placeholder.svg"}
-                          alt={swapForm.tokenTo}
-                          className="w-6 h-6 rounded-full"
-                        />
-                        <select
-                          value={swapForm.tokenTo}
-                          onChange={(e) =>
-                            setSwapForm((prev) => ({
-                              ...prev,
-                              tokenTo: e.target.value,
-                              amountTo: "", // Clear amountTo on token change
-                              amountFrom: "", // Clear amountFrom on token change
-                            }))
-                          }
-                          className="bg-transparent text-white font-medium focus:outline-none"
-                        >
-                          {TOKENS.map((token) => (
-                            <option key={token.symbol} value={token.symbol} className="bg-black">
-                              {token.symbol}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
+                    <div className="flex items-center space-x-2">
+                      <img
+                        src={getTokenIcon(swapForm.tokenTo) || "/placeholder.svg"}
+                        alt={swapForm.tokenTo}
+                        className="w-6 h-6 rounded-full"
+                      />
+                      <select
+                        value={swapForm.tokenTo}
+                        onChange={(e) =>
+                          setSwapForm((prev) => ({
+                            ...prev,
+                            tokenTo: e.target.value,
+                            amountTo: "", // Clear amountTo on token change
+                            amountFrom: "", // Clear amountFrom on token change
+                          }))
+                        }
+                        className="bg-transparent text-white font-medium focus:outline-none"
+                      >
+                        {TOKENS.map((token) => (
+                          <option key={token.symbol} value={token.symbol} className="bg-black">
+                            {token.symbol}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                     <div className="text-white text-lg font-medium">
                       {gettingQuote ? (
