@@ -102,17 +102,13 @@ function generateMockPriceHistory(
   return history
 }
 
-/**
- * Get real-time token price using Holdstation SDK's swapHelper.estimate.quote.
- * This simulates getting the price of 1 unit of the token against USDC.
- */
+// Replace the existing `getRealTokenPrice` function with the following:
 async function getRealTokenPrice(tokenSymbol: string): Promise<number> {
   try {
-    // USDC is our base currency for pricing
-    const usdcAddress = "0x0b2C639c533813f4Aa9D2FDf37Fc2969E73aeF8C" // Exemplo de endereço USDC na Worldchain
+    const usdcAddress = "0x0b2C639c533813f4Aa9D2FDf37Fc2969E73aeF8C" // USDC address on Worldchain
 
     if (tokenSymbol === "USDC") {
-      return 1.0 // USDC price is always 1
+      return 1.0
     }
 
     const token = TOKENS.find((t) => t.symbol === tokenSymbol)
@@ -123,46 +119,62 @@ async function getRealTokenPrice(tokenSymbol: string): Promise<number> {
 
     console.log(`🔄 Getting real price for ${tokenSymbol} via Holdstation SDK quote...`)
 
-    let quoteResult
-    try {
-      // Try to get quote for Token -> USDC
-      quoteResult = await swapHelper.estimate.quote({
-        tokenIn: token.address,
-        tokenOut: usdcAddress,
-        amountIn: "1", // 1 unit of the token
-        slippage: "0.5",
-        fee: "0", // Do not consider fee for price
-        feeReceiver: ethers.ZeroAddress,
-      })
-    } catch (quoteError) {
-      console.warn(`Failed to get direct quote for ${tokenSymbol}/USDC, trying reverse:`, quoteError)
-      // If direct quote fails, try reverse quote (USDC -> Token) and invert the price
+    const tryQuote = async (amountIn: string, tokenInAddr: string, tokenOutAddr: string): Promise<number | null> => {
       try {
-        quoteResult = await swapHelper.estimate.quote({
-          tokenIn: usdcAddress,
-          tokenOut: token.address,
-          amountIn: "1", // 1 USDC
+        const quote = await swapHelper.estimate.quote({
+          tokenIn: tokenInAddr,
+          tokenOut: tokenOutAddr,
+          amountIn: amountIn,
           slippage: "0.5",
           fee: "0",
           feeReceiver: ethers.ZeroAddress,
         })
-        if (quoteResult && quoteResult.outAmount && Number.parseFloat(quoteResult.outAmount) > 0) {
-          const price = 1 / Number.parseFloat(quoteResult.outAmount)
-          console.log(`✅ Real price for ${tokenSymbol} (reverse quote): $${price}`)
-          return price
+
+        if (quote && quote.outAmount) {
+          const parsedOutAmount = Number.parseFloat(quote.outAmount)
+          if (parsedOutAmount > 0) {
+            return parsedOutAmount / Number.parseFloat(amountIn)
+          }
         }
-      } catch (reverseQuoteError) {
-        console.error(`Failed to get reverse quote for USDC/${tokenSymbol}:`, reverseQuoteError)
+      } catch (e) {
+        console.warn(`Quote attempt failed for ${tokenInAddr} -> ${tokenOutAddr} with amount ${amountIn}:`, e)
       }
+      return null
     }
 
-    if (quoteResult && quoteResult.outAmount) {
-      const price = Number.parseFloat(quoteResult.outAmount)
-      console.log(`✅ Real price for ${tokenSymbol}: $${price}`)
+    // Strategy 1: Try quoting 1 unit of token to USDC
+    let price = await tryQuote("1", token.address, usdcAddress)
+    if (price !== null && price > 0) {
+      console.log(`✅ Price for ${tokenSymbol} (1 unit direct): $${price}`)
       return price
     }
 
-    console.warn(`Could not get a valid price for ${tokenSymbol}.`)
+    // Strategy 2: If Strategy 1 fails or returns 0, try quoting a larger amount (e.g., 1000 units)
+    // This helps with very low-value tokens where 1 unit might result in 0 output due to precision.
+    const largeAmountIn = "1000" // Try with 1000 units
+    price = await tryQuote(largeAmountIn, token.address, usdcAddress)
+    if (price !== null && price > 0) {
+      console.log(`✅ Price for ${tokenSymbol} (${largeAmountIn} units direct): $${price}`)
+      return price
+    }
+
+    // Strategy 3: If direct quotes fail, try reverse quote (USDC to token) and invert the price
+    price = await tryQuote("1", usdcAddress, token.address) // Quote 1 USDC to token
+    if (price !== null && price > 0) {
+      const invertedPrice = 1 / price
+      console.log(`✅ Price for ${tokenSymbol} (1 USDC reverse): $${invertedPrice}`)
+      return invertedPrice
+    }
+
+    // Strategy 4: If reverse quote with 1 USDC fails, try with a larger USDC amount
+    price = await tryQuote(largeAmountIn, usdcAddress, token.address) // Quote 1000 USDC to token
+    if (price !== null && price > 0) {
+      const invertedPrice = 1 / (price / Number.parseFloat(largeAmountIn)) // price is total output for largeAmountIn USDC
+      console.log(`✅ Price for ${tokenSymbol} (${largeAmountIn} USDC reverse): $${invertedPrice}`)
+      return invertedPrice
+    }
+
+    console.warn(`Could not get a valid price for ${tokenSymbol} after multiple attempts.`)
     return 0
   } catch (error) {
     console.error(`❌ Error fetching real price for ${tokenSymbol}:`, error)
