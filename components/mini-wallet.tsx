@@ -1497,7 +1497,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                     className="p-2 bg-gray-600/50 rounded-full hover:bg-gray-500/50 transition-colors"
                     title="Swap tokens"
                   >
-                    <ArrowLeftRight className="w-4 h-4 text-white" />
+                    <ArrowLeftRight className="w-4 h-4" />
                   </button>
                 </div>
 
