@@ -1,7 +1,6 @@
 import { ethers } from "ethers"
 import { config, TokenProvider, HoldSo, ZeroX, inmemoryTokenStorage, SwapHelper } from "@holdstation/worldchain-sdk"
 import { Client, Multicall3 } from "@holdstation/worldchain-ethers-v6"
-import { retry } from "../utils/retry" // Importar o utilitário de retry
 
 // Definindo TOKENS para corresponder ao serviço de swap e mini-carteira
 const TOKENS = [
@@ -129,39 +128,57 @@ async function getRealTokenPrice(tokenSymbol: string): Promise<number> {
       tokenOutObj: (typeof TOKENS)[0],
       attemptName: string,
     ): Promise<number | null> => {
-      try {
-        const amountInFormatted = Number.parseFloat(amountInHuman).toFixed(tokenInObj.decimals)
+      const MAX_RETRIES = 3
+      const INITIAL_DELAY_MS = 500
 
-        // Wrap the quote call with retry logic
-        const quote = await retry(
-          async () => {
-            return await swapHelper.estimate.quote({
-              tokenIn: tokenInObj.address,
-              tokenOut: tokenOutObj.address,
-              amountIn: amountInFormatted, // Use formatted human-readable amount
-              slippage: "0.5",
-              fee: "0",
-              feeReceiver: ethers.ZeroAddress,
-            })
-          },
-          3,
-          500,
-        ) // 3 retries, starting with 500ms delay
+      for (let i = 0; i <= MAX_RETRIES; i++) {
+        try {
+          const amountInFormatted = Number.parseFloat(amountInHuman).toFixed(tokenInObj.decimals)
 
-        if (quote && quote.outAmount !== undefined && quote.outAmount !== null) {
-          const parsedOutAmount = Number.parseFloat(quote.outAmount)
-          const parsedAmountIn = Number.parseFloat(amountInHuman)
+          const quote = await swapHelper.estimate.quote({
+            tokenIn: tokenInObj.address,
+            tokenOut: tokenOutObj.address,
+            amountIn: amountInFormatted, // Use formatted human-readable amount
+            slippage: "0.5",
+            fee: "0",
+            feeReceiver: ethers.ZeroAddress,
+          })
 
-          if (parsedOutAmount > 0 && parsedAmountIn > 0) {
-            const calculatedPrice = parsedOutAmount / parsedAmountIn
-            return calculatedPrice
+          if (quote && quote.outAmount !== undefined && quote.outAmount !== null) {
+            const parsedOutAmount = Number.parseFloat(quote.outAmount)
+            const parsedAmountIn = Number.parseFloat(amountInHuman)
+
+            if (parsedOutAmount > 0 && parsedAmountIn > 0) {
+              const calculatedPrice = parsedOutAmount / parsedAmountIn
+              return calculatedPrice
+            }
+          }
+          console.error(`[getRealTokenPrice]   -> Quote for ${attemptName} returned no valid outAmount or zero output.`)
+          if (i < MAX_RETRIES) {
+            const currentDelay = INITIAL_DELAY_MS * Math.pow(2, i)
+            console.warn(
+              `[getRealTokenPrice]   -> Attempt ${i + 1}/${
+                MAX_RETRIES + 1
+              } for ${attemptName} failed (no valid outAmount). Retrying in ${currentDelay}ms...`,
+            )
+            await new Promise((resolve) => setTimeout(resolve, currentDelay))
+          }
+        } catch (e: any) {
+          console.error(`[getRealTokenPrice]   -> Quote attempt ${attemptName} failed:`, e.message || e)
+          if (i < MAX_RETRIES) {
+            const currentDelay = INITIAL_DELAY_MS * Math.pow(2, i)
+            console.warn(
+              `[getRealTokenPrice]   -> Attempt ${i + 1}/${
+                MAX_RETRIES + 1
+              } for ${attemptName} failed (exception). Retrying in ${currentDelay}ms...`,
+            )
+            await new Promise((resolve) => setTimeout(resolve, currentDelay))
+          } else {
+            throw e // Re-throw the last error if all retries fail
           }
         }
-        console.error(`[getRealTokenPrice]   -> Quote for ${attemptName} returned no valid outAmount or zero output.`)
-      } catch (e: any) {
-        console.error(`[getRealTokenPrice]   -> Quote attempt ${attemptName} failed:`, e.message || e)
       }
-      return null
+      return null // Return null if all retries fail
     }
 
     // Strategy 1: Try quoting 1 unit of token to USDC
