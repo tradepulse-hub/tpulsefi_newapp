@@ -51,6 +51,7 @@ export interface TokenPrice {
   changePercent24h: number
   volume24h: number
   priceHistory: { price: number; time: number }[]
+  lastUpdated?: number // Adicionado para controle de cache
 }
 
 // Helper para simular dados históricos para o gráfico
@@ -94,64 +95,75 @@ function generateMockPriceHistory(
   return history
 }
 
-// Replace the existing `getRealTokenPrice` function with the following:
 async function getRealTokenPrice(tokenSymbol: string): Promise<number> {
   try {
     const usdcAddress = "0x0b2C639c533813f4Aa9D2FDf37Fc2969E73aeF8C" // USDC address on Worldchain
 
     if (tokenSymbol === "USDC") {
+      console.log(`✅ Price for USDC: $1.0`)
       return 1.0
     }
 
     const token = TOKENS.find((t) => t.symbol === tokenSymbol)
     if (!token) {
-      console.warn(`Token ${tokenSymbol} not found in TOKENS list.`)
+      console.warn(`Token ${tokenSymbol} not found in TOKENS list. Returning 0.`)
       return 0
     }
 
-    console.log(`🔄 Getting real price for ${tokenSymbol} via Holdstation SDK quote...`)
+    console.log(`🔄 Attempting to get real price for ${tokenSymbol} via Holdstation SDK quote...`)
 
-    const tryQuote = async (amountIn: string, tokenInAddr: string, tokenOutAddr: string): Promise<number | null> => {
+    const tryQuote = async (
+      amountIn: string,
+      tokenInAddr: string,
+      tokenOutAddr: string,
+      attemptName: string,
+    ): Promise<number | null> => {
       try {
+        console.log(`   -> Attempt ${attemptName}: Quoting ${amountIn} from ${tokenInAddr} to ${tokenOutAddr}`)
         const quote = await swapHelper.estimate.quote({
           tokenIn: tokenInAddr,
           tokenOut: tokenOutAddr,
           amountIn: amountIn,
           slippage: "0.5",
-          fee: "0",
-          feeReceiver: ethers.ZeroAddress,
+          fee: "0", // Using 0 fee for price estimation
+          feeReceiver: ethers.ZeroAddress, // Using ZeroAddress for price estimation
         })
+
+        console.log(`   -> Raw quote response for ${attemptName}:`, JSON.stringify(quote, null, 2))
 
         if (quote && quote.outAmount) {
           const parsedOutAmount = Number.parseFloat(quote.outAmount)
-          if (parsedOutAmount > 0) {
-            return parsedOutAmount / Number.parseFloat(amountIn)
+          const parsedAmountIn = Number.parseFloat(amountIn)
+          if (parsedOutAmount > 0 && parsedAmountIn > 0) {
+            const calculatedPrice = parsedOutAmount / parsedAmountIn
+            console.log(`   -> Success ${attemptName}: Calculated price = ${calculatedPrice}`)
+            return calculatedPrice
           }
         }
-      } catch (e) {
-        console.warn(`Quote attempt failed for ${tokenInAddr} -> ${tokenOutAddr} with amount ${amountIn}:`, e)
+        console.warn(`   -> Quote for ${attemptName} returned no valid outAmount or zero output.`)
+      } catch (e: any) {
+        console.warn(`   -> Quote attempt ${attemptName} failed:`, e.message || e)
       }
       return null
     }
 
     // Strategy 1: Try quoting 1 unit of token to USDC
-    let price = await tryQuote("1", token.address, usdcAddress)
+    let price = await tryQuote("1", token.address, usdcAddress, "1 unit direct")
     if (price !== null && price > 0) {
       console.log(`✅ Price for ${tokenSymbol} (1 unit direct): $${price}`)
       return price
     }
 
     // Strategy 2: If Strategy 1 fails or returns 0, try quoting a larger amount (e.g., 1000 units)
-    // This helps with very low-value tokens where 1 unit might result in 0 output due to precision.
-    const largeAmountIn = "1000" // Try with 1000 units
-    price = await tryQuote(largeAmountIn, token.address, usdcAddress)
+    const largeAmountIn = "1000"
+    price = await tryQuote(largeAmountIn, token.address, usdcAddress, `${largeAmountIn} units direct`)
     if (price !== null && price > 0) {
       console.log(`✅ Price for ${tokenSymbol} (${largeAmountIn} units direct): $${price}`)
       return price
     }
 
     // Strategy 3: If direct quotes fail, try reverse quote (USDC to token) and invert the price
-    price = await tryQuote("1", usdcAddress, token.address) // Quote 1 USDC to token
+    price = await tryQuote("1", usdcAddress, token.address, "1 USDC reverse")
     if (price !== null && price > 0) {
       const invertedPrice = 1 / price
       console.log(`✅ Price for ${tokenSymbol} (1 USDC reverse): $${invertedPrice}`)
@@ -159,17 +171,17 @@ async function getRealTokenPrice(tokenSymbol: string): Promise<number> {
     }
 
     // Strategy 4: If reverse quote with 1 USDC fails, try with a larger USDC amount
-    price = await tryQuote(largeAmountIn, usdcAddress, token.address) // Quote 1000 USDC to token
+    price = await tryQuote(largeAmountIn, usdcAddress, token.address, `${largeAmountIn} USDC reverse`)
     if (price !== null && price > 0) {
-      const invertedPrice = 1 / (price / Number.parseFloat(largeAmountIn)) // price is total output for largeAmountIn USDC
+      const invertedPrice = 1 / (price / Number.parseFloat(largeAmountIn))
       console.log(`✅ Price for ${tokenSymbol} (${largeAmountIn} USDC reverse): $${invertedPrice}`)
       return invertedPrice
     }
 
-    console.warn(`Could not get a valid price for ${tokenSymbol} after multiple attempts.`)
+    console.warn(`Could not get a valid price for ${tokenSymbol} after multiple attempts. Returning 0.`)
     return 0
-  } catch (error) {
-    console.error(`❌ Error fetching real price for ${tokenSymbol}:`, error)
+  } catch (error: any) {
+    console.error(`❌ Critical error fetching real price for ${tokenSymbol}:`, error.message || error)
     return 0
   }
 }
@@ -194,7 +206,7 @@ function getCachedPrice(symbol: string, interval: TimeInterval): TokenPrice | nu
   if (!cachedData) return null
 
   // Check if cache is still valid
-  if (Date.now() - cachedData.lastUpdated > CACHE_DURATION) {
+  if (Date.now() - cachedData.lastUpdated! > CACHE_DURATION) {
     return null
   }
 
@@ -210,13 +222,14 @@ function setCachedPrice(symbol: string, interval: TimeInterval, data: TokenPrice
   }
 
   const tokenCache = priceCache.get(symbol)!
-  tokenCache.set(interval, data)
+  tokenCache.set(interval, { ...data, lastUpdated: Date.now() })
 }
 
 /**
  * Main function to get token price with mock data
  */
-export async function getTokenPrice(symbol: string, interval: TimeInterval = "1h"): Promise<TokenPrice> {
+export async function getTokenPrice(symbol: string, interval: TimeInterval = "1d"): Promise<TokenPrice> {
+  // Default to "1d"
   try {
     console.log(`📊 Fetching price for ${symbol} (${interval})`)
 
@@ -251,7 +264,6 @@ export async function getTokenPrice(symbol: string, interval: TimeInterval = "1h
       priceHistory,
       volume24h,
       marketCap,
-      lastUpdated: Date.now(),
     }
 
     // Cache the result
@@ -269,7 +281,6 @@ export async function getTokenPrice(symbol: string, interval: TimeInterval = "1h
       changePercent24h: 0,
       priceHistory: [],
       volume24h: 0,
-      lastUpdated: Date.now(),
     }
   }
 }
@@ -342,31 +353,13 @@ export function formatPriceChange(change: number, includeSign = false): string {
 export function formatTime(timestamp: number, interval: TimeInterval): string {
   const date = new Date(timestamp)
 
-  switch (interval) {
-    case "1m":
-    case "5m":
-    case "15m":
-      return date.toLocaleTimeString("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-      })
-    case "1h":
-    case "4h":
-      return date.toLocaleTimeString("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-    case "8h":
-    case "1d":
-      return date.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-      })
-    default:
-      return date.toLocaleString("en-US")
-  }
+  // For a fixed "1d" interval, showing date and time is appropriate
+  return date.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  })
 }
 
 /**
@@ -428,12 +421,8 @@ export function startPriceUpdates(): void {
 
   updateInterval = setInterval(() => {
     TOKENS.forEach((token) => {
-      // Update 1m and 5m intervals more frequently
-      updateTokenPrice(token.symbol, "1m").catch(console.error)
-      if (Math.random() > 0.7) {
-        // 30% chance
-        updateTokenPrice(token.symbol, "5m").catch(console.error)
-      }
+      // Update only the "1d" interval for the chart, as it's now fixed
+      updateTokenPrice(token.symbol, "1d").catch(console.error)
     })
   }, 30000) // Update every 30 seconds
 }
