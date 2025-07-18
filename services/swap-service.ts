@@ -1,32 +1,19 @@
-// doSwap.ts
-// This file contains a standalone version of the doSwap function from the AniPage.
-// It is designed to be self-contained and ready to share with others for demonstration purposes.
-
-import { ethers } from "ethers"
-import {
-  config,
-  HoldSo,
-  SwapHelper,
-  TokenProvider,
-  ZeroX,
-  inmemoryTokenStorage,
-  type SwapParams,
-} from "@holdstation/worldchain-sdk"
-import { Client, Multicall3 } from "@holdstation/worldchain-ethers-v6"
-import { TOKENS } from "./token-price-service" // Importar TOKENS do serviço de preço
+import type { SwapParams } from "@holdstation/worldchain-sdk"
+import { TOKENS, swapHelper } from "./token-price-service" // Importar TOKENS e swapHelper do serviço de preço
 
 // --- Provider and SDK setup ---
-const RPC_URL = "https://worldchain-mainnet.g.alchemy.com/public"
-const provider = new ethers.JsonRpcProvider(RPC_URL, { chainId: 480, name: "worldchain" }, { staticNetwork: true })
-const client = new Client(provider)
-config.client = client
-config.multicall3 = new Multicall3(provider)
-const swapHelper = new SwapHelper(client, { tokenStorage: inmemoryTokenStorage })
-const tokenProvider = new TokenProvider({ client, multicall3: config.multicall3 })
-const zeroX = new ZeroX(tokenProvider, inmemoryTokenStorage)
-const worldSwap = new HoldSo(tokenProvider, inmemoryTokenStorage)
-swapHelper.load(zeroX)
-swapHelper.load(worldSwap)
+// REMOVED: Centralized in token-price-service.ts
+// const RPC_URL = "https://worldchain-mainnet.g.alchemy.com/public"
+// const provider = new ethers.JsonRpcProvider(RPC_URL, { chainId: 480, name: "worldchain" }, { staticNetwork: true })
+// const client = new Client(provider)
+// config.client = client
+// config.multicall3 = new Multicall3(provider)
+// const swapHelper = new SwapHelper(client, { tokenStorage: inmemoryTokenStorage })
+// const tokenProvider = new TokenProvider({ client, multicall3: config.multicall3 })
+// const zeroX = new ZeroX(tokenProvider, inmemoryTokenStorage)
+// const worldSwap = new HoldSo(tokenProvider, inmemoryTokenStorage)
+// swapHelper.load(zeroX)
+// swapHelper.load(worldSwap)
 
 // --- Mocked helper functions (replace with real implementations as needed) ---
 async function updateUserData(address: string) {
@@ -98,7 +85,8 @@ export async function doSwap({
     if (result.success) {
       // Wait for transaction to be confirmed
       await new Promise((res) => setTimeout(res, 2500))
-      await provider.getBlockNumber()
+      // provider is not available here, so we can't use provider.getBlockNumber()
+      // await provider.getBlockNumber()
       await updateUserData(walletAddress)
       await loadTokenBalances(walletAddress)
       await loadTpfBalance(walletAddress) // Considerar tornar isto dinâmico com base em tokenOut
