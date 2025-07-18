@@ -36,7 +36,6 @@ import {
   TrendingUp,
   Wallet,
 } from "lucide-react"
-// import Image from "next/image" // Removido o import do next/image
 import { useCallback, useEffect, useState } from "react"
 
 import { ethers } from "ethers"
@@ -404,7 +403,6 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       const changes: Record<string, number> = {}
 
       for (const token of TOKENS) {
-        // Changed to for...of loop to allow await inside
         try {
           const [price, change] = await Promise.all([
             getCurrentTokenPrice(token.symbol),
@@ -895,7 +893,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
               <div className="flex items-center space-x-2">
                 <img
-                  src={getTokenIcon(selectedTokenState.symbol) || "/placeholder.svg"} // Usando <img> tag
+                  src={getTokenIcon(selectedTokenState.symbol) || "/placeholder.svg"}
                   alt={selectedTokenState.symbol}
                   className="w-6 h-6 rounded-full"
                   onError={(e) => {
@@ -1109,7 +1107,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center space-x-3">
                                   <div className="w-8 h-8 rounded-full overflow-hidden bg-white flex items-center justify-center">
-                                    <img // Alterado de Image para <img>
+                                    <img
                                       src={getTokenIcon(token.symbol) || "/placeholder.svg"}
                                       alt={token.name}
                                       className="w-full h-full object-contain"
@@ -1385,7 +1383,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center space-x-2">
                         <img
-                          src={getTokenIcon(swapForm.tokenFrom) || "/placeholder.svg"} // Usando <img> tag
+                          src={getTokenIcon(swapForm.tokenFrom) || "/placeholder.svg"}
                           alt={swapForm.tokenFrom}
                           className="w-6 h-6 rounded-full"
                           onError={(e) => {
@@ -1449,7 +1447,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                   <div className="bg-black/30 border border-white/20 rounded-lg p-3">
                     <div className="flex items-center space-x-2">
                       <img
-                        src={getTokenIcon(swapForm.tokenTo) || "/placeholder.svg"} // Usando <img> tag
+                        src={getTokenIcon(swapForm.tokenTo) || "/placeholder.svg"}
                         alt={swapForm.tokenTo}
                         className="w-6 h-6 rounded-full"
                         onError={(e) => {
