@@ -1,6 +1,6 @@
 import { ethers } from "ethers"
 import { config, TokenProvider, HoldSo, ZeroX, inmemoryTokenStorage, SwapHelper } from "@holdstation/worldchain-sdk"
-import { Client, Multicall3 } from "@holdstation/worldchain-ethers-v6" // Correct import for Client and Multicall3
+import { Client, Multicall3 } from "@holdstation/worldchain-ethers-v6"
 
 // Definindo TOKENS para corresponder ao serviço de swap e mini-carteira
 const TOKENS = [
@@ -38,7 +38,7 @@ const TOKENS = [
   },
 ]
 
-// Configuração do SDK Holdstation
+// Configuração do SDK Holdstation (Centralizada aqui para uso consistente)
 const RPC_URL = "https://worldchain-mainnet.g.alchemy.com/public"
 const provider = new ethers.JsonRpcProvider(RPC_URL, { chainId: 480, name: "worldchain" }, { staticNetwork: true })
 const client = new Client(provider)
@@ -47,7 +47,7 @@ config.multicall3 = new Multicall3(provider)
 const tokenProvider = new TokenProvider({ client, multicall3: config.multicall3 })
 const zeroX = new ZeroX(tokenProvider, inmemoryTokenStorage)
 const worldSwap = new HoldSo(tokenProvider, inmemoryTokenStorage)
-const swapHelper = new SwapHelper(client, { tokenStorage: inmemoryTokenStorage })
+export const swapHelper = new SwapHelper(client, { tokenStorage: inmemoryTokenStorage }) // Export swapHelper
 swapHelper.load(zeroX)
 swapHelper.load(worldSwap)
 
@@ -110,7 +110,6 @@ async function getRealTokenPrice(tokenSymbol: string): Promise<number> {
       console.error("[getRealTokenPrice] USDC token not found in TOKENS list. Cannot get prices.")
       return 0
     }
-    const usdcAddress = usdcToken.address
 
     if (tokenSymbol === "USDC") {
       console.log(`[getRealTokenPrice] ✅ Price for USDC: $1.0`)
@@ -125,30 +124,34 @@ async function getRealTokenPrice(tokenSymbol: string): Promise<number> {
 
     console.log(`[getRealTokenPrice] 🔄 Attempting to get real price for ${tokenSymbol} via Holdstation SDK quote...`)
 
+    // Helper function to try a quote and return the price or null
     const tryQuote = async (
-      amountIn: string,
-      tokenInAddr: string,
-      tokenOutAddr: string,
+      amountInHuman: string, // Human-readable amount
+      tokenInObj: (typeof TOKENS)[0],
+      tokenOutObj: (typeof TOKENS)[0], // Corrected variable name
       attemptName: string,
     ): Promise<number | null> => {
       try {
+        // The SDK's quote function expects a human-readable string for amountIn
+        const amountInFormatted = Number.parseFloat(amountInHuman).toFixed(tokenInObj.decimals)
+
         console.log(
-          `[getRealTokenPrice]   -> Attempt ${attemptName}: Quoting ${amountIn} from ${tokenInAddr} to ${tokenOutAddr}`,
+          `[getRealTokenPrice]   -> Attempt ${attemptName}: Quoting ${amountInFormatted} ${tokenInObj.symbol} to ${tokenOutObj.symbol}`,
         )
         const quote = await swapHelper.estimate.quote({
-          tokenIn: tokenInAddr,
-          tokenOut: tokenOutAddr,
-          amountIn: amountIn,
+          tokenIn: tokenInObj.address,
+          tokenOut: tokenOutObj.address,
+          amountIn: amountInFormatted, // Use formatted human-readable amount
           slippage: "0.5",
-          fee: "0", // Using 0 fee for price estimation
-          feeReceiver: ethers.ZeroAddress, // Using ZeroAddress for price estimation
+          fee: "0",
+          feeReceiver: ethers.ZeroAddress,
         })
 
         console.log(`[getRealTokenPrice]   -> Raw quote response for ${attemptName}:`, JSON.stringify(quote, null, 2))
 
         if (quote && quote.outAmount !== undefined && quote.outAmount !== null) {
           const parsedOutAmount = Number.parseFloat(quote.outAmount)
-          const parsedAmountIn = Number.parseFloat(amountIn)
+          const parsedAmountIn = Number.parseFloat(amountInHuman) // Use the original human-readable amount for division
           console.log(
             `[getRealTokenPrice]   -> Parsed outAmount: ${parsedOutAmount}, Parsed amountIn: ${parsedAmountIn}`,
           )
@@ -167,25 +170,22 @@ async function getRealTokenPrice(tokenSymbol: string): Promise<number> {
     }
 
     // Strategy 1: Try quoting 1 unit of token to USDC
-    let price = await tryQuote("1", token.address, usdcAddress, "1 unit direct")
-    console.log(`[getRealTokenPrice] Result of 1 unit direct quote for ${tokenSymbol}: ${price}`)
+    let price = await tryQuote("1", token, usdcToken, "1 unit direct")
     if (price !== null && price > 0) {
       console.log(`[getRealTokenPrice] ✅ Price for ${tokenSymbol} (1 unit direct): $${price}`)
       return price
     }
 
-    // Strategy 2: If Strategy 1 fails or returns 0, try quoting a larger amount (e.g., 1000 units)
-    const largeAmountIn = "1000"
-    price = await tryQuote(largeAmountIn, token.address, usdcAddress, `${largeAmountIn} units direct`)
-    console.log(`[getRealTokenPrice] Result of ${largeAmountIn} units direct quote for ${tokenSymbol}: ${price}`)
+    // Strategy 2: If Strategy 1 fails or returns 0, try quoting a larger amount (e.g., 100 units)
+    const largeAmountIn = "100" // Using 100 units for larger amount
+    price = await tryQuote(largeAmountIn, token, usdcToken, `${largeAmountIn} units direct`)
     if (price !== null && price > 0) {
       console.log(`[getRealTokenPrice] ✅ Price for ${tokenSymbol} (${largeAmountIn} units direct): $${price}`)
       return price
     }
 
     // Strategy 3: If direct quotes fail, try reverse quote (USDC to token) and invert the price
-    price = await tryQuote("1", usdcAddress, token.address, "1 USDC reverse")
-    console.log(`[getRealTokenPrice] Result of 1 USDC reverse quote for ${tokenSymbol}: ${price}`)
+    price = await tryQuote("1", usdcToken, token, "1 USDC reverse")
     if (price !== null && price > 0) {
       const invertedPrice = 1 / price
       console.log(`[getRealTokenPrice] ✅ Price for ${tokenSymbol} (1 USDC reverse): $${invertedPrice}`)
@@ -193,10 +193,9 @@ async function getRealTokenPrice(tokenSymbol: string): Promise<number> {
     }
 
     // Strategy 4: If reverse quote with 1 USDC fails, try with a larger USDC amount
-    price = await tryQuote(largeAmountIn, usdcAddress, token.address, `${largeAmountIn} USDC reverse`)
-    console.log(`[getRealTokenPrice] Result of ${largeAmountIn} USDC reverse quote for ${tokenSymbol}: ${price}`)
+    price = await tryQuote(largeAmountIn, usdcToken, token, `${largeAmountIn} USDC reverse`)
     if (price !== null && price > 0) {
-      const invertedPrice = 1 / (price / Number.parseFloat(largeAmountIn))
+      const invertedPrice = 1 / (price / Number.parseFloat(largeAmountIn)) // Invert price per unit
       console.log(`[getRealTokenPrice] ✅ Price for ${tokenSymbol} (${largeAmountIn} USDC reverse): $${invertedPrice}`)
       return invertedPrice
     }
