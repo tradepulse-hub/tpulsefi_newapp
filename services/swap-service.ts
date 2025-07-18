@@ -66,7 +66,6 @@ export async function doSwap({
       fee: "0.2",
       feeReceiver: "0x4bb270ef6dcb052a083bd5cff518e2e019c0f4ee",
     }
-    // console.log("Swapping with params:", swapParams) // Removed log
     const result = await swapHelper.swap(swapParams)
     if (result.success) {
       // Wait for transaction to be confirmed
@@ -76,7 +75,6 @@ export async function doSwap({
       await updateUserData(walletAddress)
       await loadTokenBalances(walletAddress)
       await loadTpfBalance(walletAddress) // Considerar tornar isto dinâmico com base em tokenOut
-      // console.log("Swap successful!") // Removed log
       return { success: true } // Explicitamente retornar sucesso
     } else {
       console.error("Swap failed: ", result)
@@ -87,6 +85,3 @@ export async function doSwap({
     return { success: false, errorCode: error.message || "EXCEPTION_CAUGHT", error: error }
   }
 }
-
-// Example usage (uncomment and fill in real values to test):
-// doSwap({ walletAddress: "0x...", quote: { ... }, amountIn: "1.0", tokenInSymbol: "WLD", tokenOutSymbol: "TPF" })
