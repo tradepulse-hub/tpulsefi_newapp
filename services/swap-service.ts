@@ -70,6 +70,7 @@ async function loadTpfBalance(address: string) {
  * @param walletAddress The user's wallet address
  * @param quote The quote object returned from swapHelper.estimate.quote
  * @param amountIn The amount of WLD to swap (as a string)
+ * @returns A result object indicating success or failure.
  */
 export async function doSwap({
   walletAddress,
@@ -80,7 +81,10 @@ export async function doSwap({
   quote: any
   amountIn: string
 }) {
-  if (!walletAddress || !quote || !amountIn) return
+  if (!walletAddress || !quote || !amountIn) {
+    console.warn("doSwap called with missing parameters.")
+    return { success: false, errorCode: "MISSING_PARAMETERS" }
+  }
   try {
     const swapParams: SwapParams["input"] = {
       tokenIn: wldToken.address,
@@ -106,11 +110,14 @@ export async function doSwap({
       await loadTokenBalances(walletAddress)
       await loadTpfBalance(walletAddress)
       console.log("Swap successful!")
+      return { success: true } // Explicitly return success
     } else {
       console.error("Swap failed: ", result)
+      return { success: false, errorCode: result.errorCode || "UNKNOWN_SWAP_ERROR", error: result }
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Swap failed:", error)
+    return { success: false, errorCode: error.message || "EXCEPTION_CAUGHT", error: error }
   }
 }
 
