@@ -3,7 +3,7 @@ import { config, TokenProvider, HoldSo, ZeroX, inmemoryTokenStorage, SwapHelper 
 import { Client, Multicall3 } from "@holdstation/worldchain-ethers-v6"
 
 // Definindo TOKENS para corresponder ao serviço de swap e mini-carteira
-const TOKENS = [
+export const TOKENS = [
   {
     address: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003",
     symbol: "WLD",
@@ -468,5 +468,3 @@ export function stopPriceUpdates(): void {
 if (typeof window !== "undefined") {
   startPriceUpdates()
 }
-
-export { TOKENS }
