@@ -1,45 +1,52 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useCallback } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { DebugConsole } from "@/components/debug-console";
+import { PriceChart } from "@/components/price-chart";
+import { doSwap } from "@/services/swap-service"; // Importa doSwap do serviço de swap
 import {
-  Wallet,
-  LogOut,
-  Copy,
-  Check,
-  Minimize2,
-  Eye,
-  EyeOff,
-  Send,
-  RefreshCw,
-  ArrowLeft,
-  ArrowUpRight,
-  ArrowDownLeft,
-  AlertCircle,
-  AlertTriangle,
-  History,
-  ExternalLink,
-  ArrowLeftRight,
-  TrendingUp,
-  TrendingDown,
-  BarChart3,
-} from "lucide-react"
-import Image from "next/image"
-import { walletService } from "@/services/wallet-service"
-import { doSwap } from "@/services/swap-service" // Importa doSwap do serviço de swap
-import {
-  getTokenPrice,
+  formatPrice,
   getCurrentTokenPrice,
   getPriceChange,
-  formatPrice,
+  getTokenPrice,
   type TokenPrice,
-} from "@/services/token-price-service"
-import { PriceChart } from "@/components/price-chart"
-import { DebugConsole } from "@/components/debug-console"
+} from "@/services/token-price-service";
+import { walletService } from "@/services/wallet-service";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  AlertCircle,
+  AlertTriangle,
+  ArrowDownLeft,
+  ArrowLeft,
+  ArrowLeftRight,
+  ArrowUpRight,
+  BarChart3,
+  Check,
+  Copy,
+  ExternalLink,
+  Eye,
+  EyeOff,
+  History,
+  LogOut,
+  Minimize2,
+  RefreshCw,
+  Send,
+  TrendingDown,
+  TrendingUp,
+  Wallet,
+} from "lucide-react";
+import Image from "next/image";
+import { useCallback, useEffect, useState } from "react";
 
-import { ethers } from "ethers"
-import { config, HoldSo, SwapHelper, TokenProvider, ZeroX, inmemoryTokenStorage } from "@holdstation/worldchain-sdk"
-import { Client, Multicall3 } from "@holdstation/worldchain-ethers-v6"
+import { Client, Multicall3 } from "@holdstation/worldchain-ethers-v6";
+import {
+  config,
+  HoldSo,
+  inmemoryTokenStorage,
+  SwapHelper,
+  TokenProvider,
+  ZeroX,
+} from "@holdstation/worldchain-sdk";
+import { ethers } from "ethers";
 
 // Definindo TOKENS para corresponder ao serviço de swap
 const TOKENS = [
@@ -59,55 +66,64 @@ const TOKENS = [
     logo: "/images/logo-tpf.png",
     color: "#00D4FF",
   },
-]
+];
 
 // Configuração do SDK Holdstation (mantida aqui para a função de cotação)
-const RPC_URL = "https://worldchain-mainnet.g.alchemy.com/public"
-const provider = new ethers.JsonRpcProvider(RPC_URL, { chainId: 480, name: "worldchain" }, { staticNetwork: true })
-const client = new Client(provider)
-config.client = client
-config.multicall3 = new Multicall3(provider)
-const swapHelper = new SwapHelper(client, { tokenStorage: inmemoryTokenStorage })
-const tokenProvider = new TokenProvider({ client, multicall3: config.multicall3 })
-const zeroX = new ZeroX(tokenProvider, inmemoryTokenStorage)
-const worldSwap = new HoldSo(tokenProvider, inmemoryTokenStorage)
-swapHelper.load(zeroX)
-swapHelper.load(worldSwap)
+const RPC_URL = "https://worldchain-mainnet.g.alchemy.com/public";
+const provider = new ethers.JsonRpcProvider(
+  RPC_URL,
+  { chainId: 480, name: "worldchain" },
+  { staticNetwork: true }
+);
+const client = new Client(provider);
+config.client = client;
+config.multicall3 = new Multicall3(provider);
+const swapHelper = new SwapHelper(client, {
+  tokenStorage: inmemoryTokenStorage,
+});
+const tokenProvider = new TokenProvider({
+  client,
+  multicall3: config.multicall3,
+});
+const zeroX = new ZeroX(tokenProvider, inmemoryTokenStorage);
+const worldSwap = new HoldSo(tokenProvider, inmemoryTokenStorage);
+swapHelper.load(zeroX);
+swapHelper.load(worldSwap);
 
-const wldToken = TOKENS.find((t) => t.symbol === "WLD")!
-const tpfToken = TOKENS.find((t) => t.symbol === "TPF")!
+const wldToken = TOKENS.find((t) => t.symbol === "WLD")!;
+const tpfToken = TOKENS.find((t) => t.symbol === "TPF")!;
 
 interface TokenBalance {
-  symbol: string
-  name: string
-  address: string
-  balance: string
-  decimals: number
-  icon?: string
-  formattedBalance: string
+  symbol: string;
+  name: string;
+  address: string;
+  balance: string;
+  decimals: number;
+  icon?: string;
+  formattedBalance: string;
 }
 
 interface Transaction {
-  id: string
-  type: "sent" | "received"
-  token: string
-  amount: string
-  address: string
-  status: "pending" | "confirmed" | "failed"
-  timestamp: number
-  hash: string
+  id: string;
+  type: "sent" | "received";
+  token: string;
+  amount: string;
+  address: string;
+  status: "pending" | "confirmed" | "failed";
+  timestamp: number;
+  hash: string;
 }
 
 interface MiniWalletProps {
-  walletAddress: string
-  onMinimize: () => void
-  onDisconnect: () => void
+  walletAddress: string;
+  onMinimize: () => void;
+  onDisconnect: () => void;
 }
 
 // Supported languages
-const SUPPORTED_LANGUAGES = ["en", "pt", "es", "id"] as const
+const SUPPORTED_LANGUAGES = ["en", "pt", "es", "id"] as const;
 
-type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number]
+type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
 
 // Translations for mini wallet
 const translations = {
@@ -134,7 +150,8 @@ const translations = {
     swapping: "Swapping...",
     loadingPrice: "Loading price...",
     yourWalletAddress: "Your Wallet Address:",
-    networkWarning: "Only send Worldchain network supported tokens to this address.",
+    networkWarning:
+      "Only send Worldchain network supported tokens to this address.",
     sendWarning:
       "Only send assets supported by the Worldchain network, do not send to exchanges, your sending may result in loss of assets",
     sendSuccess: "Successfully sent",
@@ -194,7 +211,8 @@ const translations = {
     swapping: "Trocando...",
     loadingPrice: "Carregando preço...",
     yourWalletAddress: "Seu Endereço da Carteira:",
-    networkWarning: "Apenas envie para o seu endereço tokens suportados da rede Worldchain.",
+    networkWarning:
+      "Apenas envie para o seu endereço tokens suportados da rede Worldchain.",
     sendWarning:
       "Apenas envia ativos suportados pela rede Worldchain, não envie para exchanges, o seu envio poderá significar a perda dos ativos",
     sendSuccess: "Enviado com sucesso",
@@ -254,7 +272,8 @@ const translations = {
     swapping: "Intercambiando...",
     loadingPrice: "Cargando precio...",
     yourWalletAddress: "Tu Dirección de Billetera:",
-    networkWarning: "Solo envía tokens soportados por la red Worldchain a esta dirección.",
+    networkWarning:
+      "Solo envía tokens soportados por la red Worldchain a esta dirección.",
     sendWarning:
       "Solo envía activos soportados por la red Worldchain, no envíes a exchanges, tu envío podría resultar en la pérdida de activos",
     sendSuccess: "Enviado exitosamente",
@@ -314,7 +333,8 @@ const translations = {
     swapping: "Menukar...",
     loadingPrice: "Memuat harga...",
     yourWalletAddress: "Alamat Dompet Anda:",
-    networkWarning: "Hanya kirim token yang didukung jaringan Worldchain ke alamat ini.",
+    networkWarning:
+      "Hanya kirim token yang didukung jaringan Worldchain ke alamat ini.",
     sendWarning:
       "Hanya kirim aset yang didukung oleh jaringan Worldchain, jangan kirim ke exchange, pengiriman Anda dapat mengakibatkan kehilangan aset",
     sendSuccess: "Berhasil dikirim",
@@ -351,94 +371,109 @@ const translations = {
     priceUnavailable: "Data harga tidak tersedia",
     refreshPrice: "Perbarui Harga",
   },
-}
+};
 
 interface Token {
-  symbol: string
-  name: string
-  address: string
-  decimals: number
-  logo: string
-  color: string
+  symbol: string;
+  name: string;
+  address: string;
+  decimals: number;
+  logo: string;
+  color: string;
 }
 
-type ViewMode = "main" | "send" | "receive" | "history" | "swap" | "tokenDetail"
+type ViewMode =
+  | "main"
+  | "send"
+  | "receive"
+  | "history"
+  | "swap"
+  | "tokenDetail";
 
-export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: MiniWalletProps) {
-  const [currentLang, setCurrentLang] = useState<SupportedLanguage>("en")
-  const [viewMode, setViewMode] = useState<ViewMode>("main")
-  const [copied, setCopied] = useState(false)
-  const [balances, setBalances] = useState<TokenBalance[]>([])
-  const [transactions, setTransactions] = useState<Transaction[]>([])
-  const [allTransactions, setAllTransactions] = useState<Transaction[]>([])
-  const [displayedTransactions, setDisplayedTransactions] = useState<Transaction[]>([])
-  const [loading, setLoading] = useState(true)
-  const [loadingHistory, setLoadingHistory] = useState(false)
-  const [loadingMore, setLoadingMore] = useState(false)
-  const [showBalances, setShowBalances] = useState(true)
-  const [refreshing, setRefreshing] = useState(false)
-  const [currentPage, setCurrentPage] = useState(0)
-  const [hasMoreTransactions, setHasMoreTransactions] = useState(false)
+export default function MiniWallet({
+  walletAddress,
+  onMinimize,
+  onDisconnect,
+}: MiniWalletProps) {
+  const [currentLang, setCurrentLang] = useState<SupportedLanguage>("en");
+  const [viewMode, setViewMode] = useState<ViewMode>("main");
+  const [copied, setCopied] = useState(false);
+  const [balances, setBalances] = useState<TokenBalance[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
+  const [displayedTransactions, setDisplayedTransactions] = useState<
+    Transaction[]
+  >([]);
+  const [loading, setLoading] = useState(true);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [showBalances, setShowBalances] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [hasMoreTransactions, setHasMoreTransactions] = useState(false);
   const [sendForm, setSendForm] = useState({
     token: "TPF",
     amount: "",
     recipient: "",
-  })
+  });
   const [swapForm, setSwapForm] = useState({
     tokenFrom: "WLD",
     tokenTo: "TPF",
     amountFrom: "",
     amountTo: "",
-  })
-  const [sending, setSending] = useState(false)
-  const [swapping, setSwapping] = useState(false)
-  const [gettingQuote, setGettingQuote] = useState(false)
-  const [swapQuote, setSwapQuote] = useState<any>(null)
-  const [quoteError, setQuoteError] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  const [isMinimized, setIsMinimized] = useState(false)
+  });
+  const [sending, setSending] = useState(false);
+  const [swapping, setSwapping] = useState(false);
+  const [gettingQuote, setGettingQuote] = useState(false);
+  const [swapQuote, setSwapQuote] = useState<any>(null);
+  const [quoteError, setQuoteError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isMinimized, setIsMinimized] = useState(false);
 
   // Token detail states
-  const [selectedTokenState, setSelectedTokenState] = useState<TokenBalance | null>(null)
-  const [tokenPrice, setTokenPrice] = useState<TokenPrice | null>(null)
-  const [loadingPrice, setLoadingPrice] = useState(false)
+  const [selectedTokenState, setSelectedTokenState] =
+    useState<TokenBalance | null>(null);
+  const [tokenPrice, setTokenPrice] = useState<TokenPrice | null>(null);
+  const [loadingPrice, setLoadingPrice] = useState(false);
 
   // Real-time token prices for main view
-  const [tokenPrices, setTokenPrices] = useState<Record<string, number>>({})
-  const [priceChanges, setPriceChanges] = useState<Record<string, number>>({})
-  const [loadingPrices, setLoadingPrices] = useState(true)
+  const [tokenPrices, setTokenPrices] = useState<Record<string, number>>({});
+  const [priceChanges, setPriceChanges] = useState<Record<string, number>>({});
+  const [loadingPrices, setLoadingPrices] = useState(true);
 
-  const TRANSACTIONS_PER_PAGE = 5
+  const TRANSACTIONS_PER_PAGE = 5;
 
   // Load saved language
   useEffect(() => {
-    const savedLanguage = localStorage.getItem("preferred-language") as SupportedLanguage
+    const savedLanguage = localStorage.getItem(
+      "preferred-language"
+    ) as SupportedLanguage;
     if (savedLanguage && SUPPORTED_LANGUAGES.includes(savedLanguage)) {
-      setCurrentLang(savedLanguage)
+      setCurrentLang(savedLanguage);
     }
-  }, [])
+  }, []);
 
   // Get translations for current language
-  const t = translations[currentLang]
+  const t = translations[currentLang];
 
   const formatAddress = (address: string) => {
-    return `${address.slice(0, 6)}...${address.slice(-4)}`
-  }
+    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  };
 
   const copyAddress = () => {
-    navigator.clipboard.writeText(walletAddress)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
+    navigator.clipboard.writeText(walletAddress);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   // Load real-time token prices for main view
   const loadTokenPrices = async () => {
     try {
-      setLoadingPrices(true)
-      console.log("🔄 Loading real token prices via Holdstation SDK...")
+      setLoadingPrices(true);
+      console.log("🔄 Loading real token prices via Holdstation SDK...");
 
-      const prices: Record<string, number> = {}
-      const changes: Record<string, number> = {}
+      const prices: Record<string, number> = {};
+      const changes: Record<string, number> = {};
 
       await Promise.all(
         TOKENS.map(async (token) => {
@@ -446,143 +481,159 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
             const [price, change] = await Promise.all([
               getCurrentTokenPrice(token.symbol),
               getPriceChange(token.symbol, "1H"),
-            ])
-            prices[token.symbol] = price
-            changes[token.symbol] = change
-            console.log(`✅ Price loaded for ${token.symbol}: $${price}`)
+            ]);
+            prices[token.symbol] = price;
+            changes[token.symbol] = change;
+            console.log(`✅ Price loaded for ${token.symbol}: $${price}`);
           } catch (error) {
-            console.error(`❌ Error fetching data for ${token.symbol}:`, error)
-            prices[token.symbol] = 0
-            changes[token.symbol] = 0
+            console.error(`❌ Error fetching data for ${token.symbol}:`, error);
+            prices[token.symbol] = 0;
+            changes[token.symbol] = 0;
           }
-        }),
-      )
+        })
+      );
 
-      setTokenPrices(prices)
-      setPriceChanges(changes)
-      console.log("✅ All token prices loaded successfully")
+      setTokenPrices(prices);
+      setPriceChanges(changes);
+      console.log("✅ All token prices loaded successfully");
     } catch (error) {
-      console.error("❌ Error loading token prices:", error)
+      console.error("❌ Error loading token prices:", error);
     } finally {
-      setLoadingPrices(false)
+      setLoadingPrices(false);
     }
-  }
+  };
 
   const loadBalances = async () => {
     try {
-      setLoading(true)
-      setError(null)
-      console.log("🔄 Loading token balances for:", walletAddress)
-      const tokenBalances = await walletService.getTokenBalances(walletAddress)
-      console.log("✅ Token balances loaded:", tokenBalances)
-      setBalances(tokenBalances)
+      setLoading(true);
+      setError(null);
+      console.log("🔄 Loading token balances for:", walletAddress);
+      const tokenBalances = await walletService.getTokenBalances(walletAddress);
+      console.log("✅ Token balances loaded:", tokenBalances);
+      setBalances(tokenBalances);
     } catch (error) {
-      console.error("❌ Error loading balances:", error)
-      setError("Failed to load balances")
+      console.error("❌ Error loading balances:", error);
+      setError("Failed to load balances");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const loadTransactionHistory = async (reset = false) => {
     try {
       if (reset) {
-        setLoadingHistory(true)
-        setCurrentPage(0)
-        setDisplayedTransactions([])
+        setLoadingHistory(true);
+        setCurrentPage(0);
+        setDisplayedTransactions([]);
       } else {
-        setLoadingMore(true)
+        setLoadingMore(true);
       }
 
-      console.log("🔄 Loading transaction history for:", walletAddress)
-      const limit = (currentPage + 1) * TRANSACTIONS_PER_PAGE + 5
-      const history = await walletService.getTransactionHistory(walletAddress, limit)
-      console.log("✅ Transaction history loaded:", history.length, "transactions")
+      console.log("🔄 Loading transaction history for:", walletAddress);
+      const limit = (currentPage + 1) * TRANSACTIONS_PER_PAGE + 5;
+      const history = await walletService.getTransactionHistory(
+        walletAddress,
+        limit
+      );
+      console.log(
+        "✅ Transaction history loaded:",
+        history.length,
+        "transactions"
+      );
 
-      setAllTransactions(history)
+      setAllTransactions(history);
 
-      const newDisplayCount = (currentPage + 1) * TRANSACTIONS_PER_PAGE
+      const newDisplayCount = (currentPage + 1) * TRANSACTIONS_PER_PAGE;
 
       // Ensure we don't try to slice beyond the array length
-      const newDisplayed = history.slice(0, Math.min(history.length, newDisplayCount))
+      const newDisplayed = history.slice(
+        0,
+        Math.min(history.length, newDisplayCount)
+      );
 
-      setDisplayedTransactions(newDisplayed)
-      setHasMoreTransactions(allTransactions.length > newDisplayCount)
+      setDisplayedTransactions(newDisplayed);
+      setHasMoreTransactions(allTransactions.length > newDisplayCount);
     } catch (error) {
-      console.error("❌ Error loading transaction history:", error)
+      console.error("❌ Error loading transaction history:", error);
     } finally {
-      setLoadingHistory(false)
-      setLoadingMore(false)
+      setLoadingHistory(false);
+      setLoadingMore(false);
     }
-  }
+  };
 
   const loadMoreTransactions = async () => {
-    const nextPage = currentPage + 1
-    setCurrentPage(nextPage)
+    const nextPage = currentPage + 1;
+    setCurrentPage(nextPage);
 
-    const newDisplayCount = (nextPage + 1) * TRANSACTIONS_PER_PAGE
+    const newDisplayCount = (nextPage + 1) * TRANSACTIONS_PER_PAGE;
 
     if (allTransactions.length >= newDisplayCount) {
-      const newDisplayed = allTransactions.slice(0, newDisplayCount)
-      setDisplayedTransactions(newDisplayed)
-      setHasMoreTransactions(allTransactions.length > newDisplayCount)
+      const newDisplayed = allTransactions.slice(0, newDisplayCount);
+      setDisplayedTransactions(newDisplayed);
+      setHasMoreTransactions(allTransactions.length > newDisplayCount);
     } else {
-      await loadTransactionHistory(false)
+      await loadTransactionHistory(false);
     }
-  }
+  };
 
   const refreshBalances = async () => {
-    setRefreshing(true)
-    await Promise.all([loadBalances(), loadTokenPrices()])
-    setRefreshing(false)
-  }
+    setRefreshing(true);
+    await Promise.all([loadBalances(), loadTokenPrices()]);
+    setRefreshing(false);
+  };
 
   const handleSend = async () => {
-    if (!sendForm.amount || !sendForm.recipient) return
+    if (!sendForm.amount || !sendForm.recipient) return;
 
-    setSending(true)
+    setSending(true);
     try {
-      console.log("🚀 Starting send transaction:", sendForm)
-      const selectedToken = balances.find((t) => t.symbol === sendForm.token)
+      console.log("🚀 Starting send transaction:", sendForm);
+      const selectedToken = balances.find((t) => t.symbol === sendForm.token);
       const result = await walletService.sendToken({
         to: sendForm.recipient,
         amount: Number.parseFloat(sendForm.amount),
         tokenAddress: selectedToken?.address,
-      })
+      });
 
       if (result.success) {
-        console.log("✅ Send successful:", result)
-        alert(`✅ ${t.sendSuccess} ${sendForm.amount} ${sendForm.token}!`)
-        setViewMode("main")
-        setSendForm({ token: "TPF", amount: "", recipient: "" })
-        await refreshBalances()
-        await loadTransactionHistory(true)
+        console.log("✅ Send successful:", result);
+        alert(`✅ ${t.sendSuccess} ${sendForm.amount} ${sendForm.token}!`);
+        setViewMode("main");
+        setSendForm({ token: "TPF", amount: "", recipient: "" });
+        await refreshBalances();
+        await loadTransactionHistory(true);
       } else {
-        console.error("❌ Send failed:", result)
-        alert(`❌ ${t.sendFailed}: ${result.error}`)
+        console.error("❌ Send failed:", result);
+        alert(`❌ ${t.sendFailed}: ${result.error}`);
       }
     } catch (error) {
-      console.error("❌ Send error:", error)
-      alert(`❌ ${t.sendFailed}. ${t.tryAgain}`)
+      console.error("❌ Send error:", error);
+      alert(`❌ ${t.sendFailed}. ${t.tryAgain}`);
     } finally {
-      setSending(false)
+      setSending(false);
     }
-  }
+  };
 
   const getSwapQuote = useCallback(
     async (amountFrom: string) => {
-      if (!amountFrom || Number.parseFloat(amountFrom) <= 0 || isNaN(Number.parseFloat(amountFrom))) {
-        setSwapQuote(null)
-        setSwapForm((prev) => ({ ...prev, amountTo: "" }))
-        setQuoteError(null)
-        return
+      if (
+        !amountFrom ||
+        Number.parseFloat(amountFrom) <= 0 ||
+        isNaN(Number.parseFloat(amountFrom))
+      ) {
+        setSwapQuote(null);
+        setSwapForm((prev) => ({ ...prev, amountTo: "" }));
+        setQuoteError(null);
+        return;
       }
 
-      setGettingQuote(true)
-      setQuoteError(null)
+      setGettingQuote(true);
+      setQuoteError(null);
 
       try {
-        console.log(`🔄 Getting real quote for: ${amountFrom} WLD to TPF via Holdstation SDK`)
+        console.log(
+          `🔄 Getting real quote for: ${amountFrom} WLD to TPF via Holdstation SDK`
+        );
         console.log(`⚙️ Request parameters:
           tokenIn: ${wldToken.address} (WLD)
           tokenOut: ${tpfToken.address} (TPF)
@@ -590,286 +641,325 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
           partnerCode: "24568"
           fee: "0.2"
           feeReceiver: "${ethers.ZeroAddress}"
-        `)
+        `);
 
         // Convert input amount to wei using WLD token decimals
-        const amountInWei = ethers.parseUnits(amountFrom, wldToken.decimals).toString()
-        console.log(`💰 Input amount in wei (WLD): ${amountInWei}`)
+        const cleanAmount = Number.parseFloat(amountFrom).toFixed(
+          wldToken.decimals
+        );
+        console.log(`💰 Input amount (WLD): ${cleanAmount}`);
 
         // Get real quote using the SDK
         const quote = await swapHelper.estimate.quote({
           tokenIn: wldToken.address,
           tokenOut: tpfToken.address,
-          amountIn: amountInWei, // This is correct, amountIn should be in wei
-          partnerCode: "24568", // Confirmed por você
+          amountIn: cleanAmount,
+          slippage: "0.3",
+
           fee: "0.2", // Verifique se esta taxa está correta para suas expectativas de "real"
           feeReceiver: ethers.ZeroAddress, // Verifique se este endereço está correto para suas expectativas de "real"
-        })
+        });
 
         // Log do objeto completo da cotação para inspeção
-        console.log("📊 FULL RAW QUOTE RESPONSE FROM HOLDSTATION SDK:", JSON.stringify(quote, null, 2))
+        console.log(
+          "📊 FULL RAW QUOTE RESPONSE FROM HOLDSTATION SDK:",
+          JSON.stringify(quote, null, 2)
+        );
 
         // Validate essential fields in the quote response
-        if (!quote || !quote.data || !quote.to || (!quote.outAmount && !quote.addons?.outAmount)) {
-          throw new Error("Invalid quote received from SDK: Missing data, to, or outAmount.")
+        if (
+          !quote ||
+          !quote.data ||
+          !quote.to ||
+          (!quote.outAmount && !quote.addons?.outAmount)
+        ) {
+          throw new Error(
+            "Invalid quote received from SDK: Missing data, to, or outAmount."
+          );
         }
 
-        setSwapQuote(quote)
+        setSwapQuote(quote);
 
         // Extract output amount. Based on previous error, it's already a decimal string.
-        let outputAmountString = "0"
+        let outputAmountString = "0";
         if (quote.outAmount) {
-          outputAmountString = quote.outAmount.toString()
+          outputAmountString = quote.outAmount.toString();
         } else if (quote.addons?.outAmount) {
-          outputAmountString = quote.addons.outAmount.toString()
+          outputAmountString = quote.addons.outAmount.toString();
         } else {
-          throw new Error("Could not determine output amount from quote.")
+          throw new Error("Could not determine output amount from quote.");
         }
 
         console.log(
-          `🔍 Extracted raw output amount string (from SDK): "${outputAmountString}" (Type: ${typeof outputAmountString})`,
-        )
+          `🔍 Extracted raw output amount string (from SDK): "${outputAmountString}" (Type: ${typeof outputAmountString})`
+        );
 
         // The SDK's outAmount is already in human-readable format (decimal string).
         // We just need to parse it to a number and then format its decimal places for display.
-        const parsedAmount = Number.parseFloat(outputAmountString)
-        console.log(`🔢 Parsed output amount (number): ${parsedAmount}`)
+        const parsedAmount = Number.parseFloat(outputAmountString);
+        console.log(`🔢 Parsed output amount (number): ${parsedAmount}`);
 
-        const finalAmount = parsedAmount.toFixed(6) // Limit to 6 decimal places for display
+        const finalAmount = parsedAmount.toFixed(6); // Limit to 6 decimal places for display
 
-        console.log(`✅ Final formatted amount for display: ${finalAmount} TPF`)
+        console.log(
+          `✅ Final formatted amount for display: ${finalAmount} TPF`
+        );
 
         setSwapForm((prev) => ({
           ...prev,
           amountTo: finalAmount,
-        }))
+        }));
       } catch (error) {
-        console.error("❌ Error getting real quote:", error)
+        console.error("❌ Error getting real quote:", error);
 
-        let errorMessage = t.quoteError
+        let errorMessage = t.quoteError;
         if (error instanceof Error) {
           if (error.message?.includes("timeout")) {
-            errorMessage = `${t.networkError}. ${t.tryAgain}`
+            errorMessage = `${t.networkError}. ${t.tryAgain}`;
           } else if (error.message?.includes("Network")) {
-            errorMessage = `${t.networkError}. ${t.tryAgain}`
+            errorMessage = `${t.networkError}. ${t.tryAgain}`;
           } else if (error.message?.includes("insufficient")) {
-            errorMessage = t.insufficientBalance
+            errorMessage = t.insufficientBalance;
           } else {
-            errorMessage = `${t.quoteError}: ${error.message}`
+            errorMessage = `${t.quoteError}: ${error.message}`;
           }
         }
 
-        setQuoteError(errorMessage)
-        setSwapQuote(null)
-        setSwapForm((prev) => ({ ...prev, amountTo: "" }))
+        setQuoteError(errorMessage);
+        setSwapQuote(null);
+        setSwapForm((prev) => ({ ...prev, amountTo: "" }));
       } finally {
-        setGettingQuote(false)
+        setGettingQuote(false);
       }
     },
-    [t.quoteError, t.networkError, t.tryAgain, t.insufficientBalance],
-  )
+    [t.quoteError, t.networkError, t.tryAgain, t.insufficientBalance]
+  );
 
   // Auto-quote effect with debounce - only for WLD to TPF
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (swapForm.amountFrom) {
-        getSwapQuote(swapForm.amountFrom)
+        getSwapQuote(swapForm.amountFrom);
       }
-    }, 1000)
+    }, 1000);
 
-    return () => clearTimeout(timeoutId)
-  }, [swapForm.amountFrom, getSwapQuote])
+    return () => clearTimeout(timeoutId);
+  }, [swapForm.amountFrom, getSwapQuote]);
 
   const handleSwap = async () => {
-    if (!swapQuote || !swapForm.amountFrom) return
+    if (!swapQuote || !swapForm.amountFrom) return;
 
-    setSwapping(true)
+    setSwapping(true);
     try {
-      console.log("🚀 Starting swap transaction using swap service:", swapForm)
+      console.log("🚀 Starting swap transaction using swap service:", swapForm);
 
       // Check WLD balance
-      const wldBalance = balances.find((t) => t.symbol === "WLD")
-      if (!wldBalance || Number.parseFloat(wldBalance.balance) < Number.parseFloat(swapForm.amountFrom)) {
+      const wldBalance = balances.find((t) => t.symbol === "WLD");
+      if (
+        !wldBalance ||
+        Number.parseFloat(wldBalance.balance) <
+          Number.parseFloat(swapForm.amountFrom)
+      ) {
         throw new Error(
-          `${t.insufficientBalance}. Available: ${wldBalance?.balance || "0"}, Required: ${swapForm.amountFrom}`,
-        )
+          `${t.insufficientBalance}. Available: ${
+            wldBalance?.balance || "0"
+          }, Required: ${swapForm.amountFrom}`
+        );
       }
 
       // Validate quote
       if (!swapQuote.data || !swapQuote.to) {
-        throw new Error("Invalid swap quote")
+        throw new Error("Invalid swap quote");
       }
 
-      console.log("🔄 Calling doSwap from swap service...")
+      console.log("🔄 Calling doSwap from swap service...");
 
-      // Convert amount to wei for the swap service - exactly like swap-service expects
-      const cleanAmount = Number.parseFloat(swapForm.amountFrom).toFixed(wldToken.decimals)
-      const amountInWei = ethers.parseUnits(cleanAmount, wldToken.decimals).toString()
-
-      console.log(`💰 Sending amount in wei: ${amountInWei}`)
+      const cleanAmount = Number.parseFloat(swapForm.amountFrom).toFixed(
+        wldToken.decimals
+      );
 
       // Call the doSwap function from the swap service
       const swapResult = await doSwap({
         walletAddress,
         quote: swapQuote,
-        amountIn: amountInWei, // Pass amount in wei format, exactly as swap-service expects
-      })
+        amountIn: cleanAmount, // Pass real amount
+      });
 
       if (swapResult.success) {
-        console.log("✅ Swap completed successfully via swap service", swapResult)
-        alert(`✅ ${t.swapSuccess} ${swapForm.amountFrom} WLD for ${swapForm.amountTo} TPF!`)
-        setViewMode("main")
-        setSwapForm({ tokenFrom: "WLD", tokenTo: "TPF", amountFrom: "", amountTo: "" })
-        setSwapQuote(null)
-        await refreshBalances()
-        await loadTransactionHistory(true)
+        console.log(
+          "✅ Swap completed successfully via swap service",
+          swapResult
+        );
+        alert(
+          `✅ ${t.swapSuccess} ${swapForm.amountFrom} WLD for ${swapForm.amountTo} TPF!`
+        );
+        setViewMode("main");
+        setSwapForm({
+          tokenFrom: "WLD",
+          tokenTo: "TPF",
+          amountFrom: "",
+          amountTo: "",
+        });
+        setSwapQuote(null);
+        await refreshBalances();
+        await loadTransactionHistory(true);
       } else {
-        console.error("❌ Swap failed via swap service:", swapResult)
-        throw new Error(swapResult.errorCode || "Unknown swap error")
+        console.error("❌ Swap failed via swap service:", swapResult);
+        throw new Error(swapResult.errorCode || "Unknown swap error");
       }
     } catch (error) {
-      console.error("❌ Swap error:", error)
+      console.error("❌ Swap error:", error);
 
-      let errorMessage = t.swapFailed
+      let errorMessage = t.swapFailed;
       if (error instanceof Error) {
-        if (error.message?.includes("Insufficient") || error.message?.includes("insuficiente")) {
-          errorMessage = `${t.swapFailed}: ${t.insufficientBalance}`
+        if (
+          error.message?.includes("Insufficient") ||
+          error.message?.includes("insuficiente")
+        ) {
+          errorMessage = `${t.swapFailed}: ${t.insufficientBalance}`;
         } else if (error.message?.includes("timeout")) {
-          errorMessage = `${t.swapFailed}: ${t.networkError}. ${t.tryAgain}`
+          errorMessage = `${t.swapFailed}: ${t.networkError}. ${t.tryAgain}`;
         } else if (error.message?.includes("Network")) {
-          errorMessage = `${t.swapFailed}: ${t.networkError}. ${t.tryAgain}`
+          errorMessage = `${t.swapFailed}: ${t.networkError}. ${t.tryAgain}`;
         } else if (error.message?.includes("simulation_failed")) {
           // Adicionado tratamento para simulation_failed
-          errorMessage = `${t.swapFailed}: Simulation failed. The quote might be invalid or expired.`
+          errorMessage = `${t.swapFailed}: Simulation failed. The quote might be invalid or expired.`;
         } else {
-          errorMessage = `${t.swapFailed}: ${error.message}`
+          errorMessage = `${t.swapFailed}: ${error.message}`;
         }
       }
 
-      alert(`❌ ${errorMessage}`)
+      alert(`❌ ${errorMessage}`);
     } finally {
-      setSwapping(false)
+      setSwapping(false);
     }
-  }
+  };
 
   const handleBackToMain = () => {
-    setViewMode("main")
-    setSendForm({ token: "TPF", amount: "", recipient: "" })
-    setSwapForm({ tokenFrom: "WLD", tokenTo: "TPF", amountFrom: "", amountTo: "" })
-    setSwapQuote(null)
-    setQuoteError(null)
-    setSelectedTokenState(null)
-    setTokenPrice(null)
-  }
+    setViewMode("main");
+    setSendForm({ token: "TPF", amount: "", recipient: "" });
+    setSwapForm({
+      tokenFrom: "WLD",
+      tokenTo: "TPF",
+      amountFrom: "",
+      amountTo: "",
+    });
+    setSwapQuote(null);
+    setQuoteError(null);
+    setSelectedTokenState(null);
+    setTokenPrice(null);
+  };
 
   const handleTokenClick = async (token: TokenBalance) => {
-    console.log("🔄 Loading token details for:", token.symbol)
-    setSelectedTokenState(token)
-    setViewMode("tokenDetail")
-    setLoadingPrice(true)
+    console.log("🔄 Loading token details for:", token.symbol);
+    setSelectedTokenState(token);
+    setViewMode("tokenDetail");
+    setLoadingPrice(true);
 
     try {
-      console.log(`📊 Fetching real price data for ${token.symbol} via Holdstation SDK`)
-      const priceData = await getTokenPrice(token.symbol, "1h")
-      console.log(`✅ Price data loaded for ${token.symbol}:`, priceData)
-      setTokenPrice(priceData)
+      console.log(
+        `📊 Fetching real price data for ${token.symbol} via Holdstation SDK`
+      );
+      const priceData = await getTokenPrice(token.symbol, "1h");
+      console.log(`✅ Price data loaded for ${token.symbol}:`, priceData);
+      setTokenPrice(priceData);
     } catch (error) {
-      console.error("❌ Error loading token price:", error)
-      setTokenPrice(null)
+      console.error("❌ Error loading token price:", error);
+      setTokenPrice(null);
     } finally {
-      setLoadingPrice(false)
+      setLoadingPrice(false);
     }
-  }
+  };
 
   const refreshTokenPrice = async () => {
-    if (!selectedTokenState) return
+    if (!selectedTokenState) return;
 
-    setLoadingPrice(true)
+    setLoadingPrice(true);
     try {
-      console.log(`🔄 Refreshing price for ${selectedTokenState.symbol}`)
-      const priceData = await getTokenPrice(selectedTokenState.symbol, "1h")
-      setTokenPrice(priceData)
-      console.log(`✅ Price refreshed for ${selectedTokenState.symbol}`)
+      console.log(`🔄 Refreshing price for ${selectedTokenState.symbol}`);
+      const priceData = await getTokenPrice(selectedTokenState.symbol, "1h");
+      setTokenPrice(priceData);
+      console.log(`✅ Price refreshed for ${selectedTokenState.symbol}`);
     } catch (error) {
-      console.error("❌ Error refreshing token price:", error)
+      console.error("❌ Error refreshing token price:", error);
     } finally {
-      setLoadingPrice(false)
+      setLoadingPrice(false);
     }
-  }
+  };
 
   const openTransactionInExplorer = (hash: string) => {
-    const explorerUrl = walletService.getExplorerTransactionUrl(hash)
-    window.open(explorerUrl, "_blank")
-  }
+    const explorerUrl = walletService.getExplorerTransactionUrl(hash);
+    window.open(explorerUrl, "_blank");
+  };
 
   const formatTimestamp = (timestamp: number) => {
-    const date = new Date(timestamp)
-    const now = new Date()
-    const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60)
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
 
     if (diffInHours < 1) {
-      const diffInMinutes = Math.floor(diffInHours * 60)
-      return `${diffInMinutes}m ago`
+      const diffInMinutes = Math.floor(diffInHours * 60);
+      return `${diffInMinutes}m ago`;
     } else if (diffInHours < 24) {
-      return `${Math.floor(diffInHours)}h ago`
+      return `${Math.floor(diffInHours)}h ago`;
     } else {
-      const diffInDays = Math.floor(diffInHours / 24)
-      return `${diffInDays}d ago`
+      const diffInDays = Math.floor(diffInHours / 24);
+      return `${diffInDays}d ago`;
     }
-  }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "confirmed":
-        return "text-green-400"
+        return "text-green-400";
       case "pending":
-        return "text-yellow-400"
+        return "text-yellow-400";
       case "failed":
-        return "text-red-400"
+        return "text-red-400";
       default:
-        return "text-gray-400"
+        return "text-gray-400";
     }
-  }
+  };
 
   useEffect(() => {
     if (walletAddress) {
-      console.log("🔗 Wallet connected:", walletAddress)
-      loadBalances()
-      loadTransactionHistory(true)
-      loadTokenPrices()
+      console.log("🔗 Wallet connected:", walletAddress);
+      loadBalances();
+      loadTransactionHistory(true);
+      loadTokenPrices();
     }
-  }, [walletAddress])
+  }, [walletAddress]);
 
   // Auto-refresh prices every 30 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       if (walletAddress && viewMode === "main") {
-        loadTokenPrices()
+        loadTokenPrices();
       }
-    }, 30000)
+    }, 30000);
 
-    return () => clearInterval(interval)
-  }, [walletAddress, viewMode])
+    return () => clearInterval(interval);
+  }, [walletAddress, viewMode]);
 
   const formatBalance = (balance: string): string => {
-    const num = Number.parseFloat(balance)
-    if (num === 0) return "0"
-    if (num < 0.0001) return "<0.0001"
-    if (num < 1) return num.toFixed(4)
-    if (num < 1000) return num.toFixed(2)
-    if (num < 1000000) return `${(num / 1000).toFixed(1)}K`
-    return `${(num / 1000000).toFixed(1)}M`
-  }
+    const num = Number.parseFloat(balance);
+    if (num === 0) return "0";
+    if (num < 0.0001) return "<0.0001";
+    if (num < 1) return num.toFixed(4);
+    if (num < 1000) return num.toFixed(2);
+    if (num < 1000000) return `${(num / 1000).toFixed(1)}K`;
+    return `${(num / 1000000).toFixed(1)}M`;
+  };
 
   const getTokenIcon = (symbol: string) => {
-    const token = TOKENS.find((t) => t.symbol === symbol)
-    return token?.logo || "/placeholder.svg?height=32&width=32"
-  }
+    const token = TOKENS.find((t) => t.symbol === symbol);
+    return token?.logo || "/placeholder.svg?height=32&width=32";
+  };
 
   const getTokenColor = (symbol: string) => {
-    const token = TOKENS.find((t) => t.symbol === symbol)
-    return token?.color || "#00D4FF"
-  }
+    const token = TOKENS.find((t) => t.symbol === symbol);
+    return token?.color || "#00D4FF";
+  };
 
   if (isMinimized) {
     return (
@@ -879,14 +969,19 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
           animate={{ scale: 1, opacity: 1 }}
           className="bg-black/60 backdrop-blur-xl border border-cyan-400/30 rounded-full p-3 shadow-2xl fixed top-20 right-4 z-40"
         >
-          <button onClick={() => setIsMinimized(false)} className="flex items-center space-x-2">
+          <button
+            onClick={() => setIsMinimized(false)}
+            className="flex items-center space-x-2"
+          >
             <Wallet className="w-5 h-5 text-cyan-400" />
-            <span className="text-white text-sm font-medium">{formatAddress(walletAddress)}</span>
+            <span className="text-white text-sm font-medium">
+              {formatAddress(walletAddress)}
+            </span>
           </button>
         </motion.div>
         <DebugConsole />
       </>
-    )
+    );
   }
 
   // Token detail view
@@ -918,16 +1013,23 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
               <div className="flex items-center space-x-2">
                 <img
-                  src={getTokenIcon(selectedTokenState.symbol) || "/placeholder.svg"}
+                  src={
+                    getTokenIcon(selectedTokenState.symbol) ||
+                    "/placeholder.svg"
+                  }
                   alt={selectedTokenState.symbol}
                   className="w-6 h-6 rounded-full"
                   onError={(e) => {
-                    e.currentTarget.src = "/placeholder.svg?height=24&width=24"
+                    e.currentTarget.src = "/placeholder.svg?height=24&width=24";
                   }}
                 />
                 <div className="text-center">
-                  <h3 className="font-semibold text-sm text-white">{selectedTokenState.symbol}</h3>
-                  <p className="text-xs text-gray-500">{selectedTokenState.name}</p>
+                  <h3 className="font-semibold text-sm text-white">
+                    {selectedTokenState.symbol}
+                  </h3>
+                  <p className="text-xs text-gray-500">
+                    {selectedTokenState.name}
+                  </p>
                 </div>
               </div>
 
@@ -937,28 +1039,39 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                 className="p-1 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-white/10 disabled:opacity-50"
                 title={t.refreshPrice}
               >
-                <RefreshCw className={`w-4 h-4 ${loadingPrice ? "animate-spin" : ""}`} />
+                <RefreshCw
+                  className={`w-4 h-4 ${loadingPrice ? "animate-spin" : ""}`}
+                />
               </button>
             </div>
 
             {/* Price Info */}
             {loadingPrice ? (
               <div className="text-center mb-4">
-                <div className="text-2xl font-bold mb-1 text-gray-400">{t.loadingPrice}</div>
+                <div className="text-2xl font-bold mb-1 text-gray-400">
+                  {t.loadingPrice}
+                </div>
               </div>
             ) : tokenPrice && tokenPrice.currentPrice > 0 ? (
               <div className="text-center mb-4">
                 <div className="text-2xl font-bold mb-1 text-white">
-                  {formatPrice(tokenPrice.currentPrice, selectedTokenState.symbol)}
+                  {formatPrice(
+                    tokenPrice.currentPrice,
+                    selectedTokenState.symbol
+                  )}
                 </div>
                 {(() => {
-                  const isPositive = tokenPrice.changePercent24h > 0
-                  const isNegative = tokenPrice.changePercent24h < 0
+                  const isPositive = tokenPrice.changePercent24h > 0;
+                  const isNegative = tokenPrice.changePercent24h < 0;
 
                   return (
                     <div
                       className={`flex items-center justify-center space-x-1 ${
-                        isPositive ? "text-green-500" : isNegative ? "text-red-500" : "text-gray-500"
+                        isPositive
+                          ? "text-green-500"
+                          : isNegative
+                          ? "text-red-500"
+                          : "text-gray-500"
                       }`}
                     >
                       {isPositive && <TrendingUp className="w-3 h-3" />}
@@ -968,12 +1081,14 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                         {tokenPrice.changePercent24h.toFixed(2)}%
                       </span>
                     </div>
-                  )
+                  );
                 })()}
               </div>
             ) : (
               <div className="text-center mb-4">
-                <div className="text-2xl font-bold mb-1 text-gray-400">{t.priceUnavailable}</div>
+                <div className="text-2xl font-bold mb-1 text-gray-400">
+                  {t.priceUnavailable}
+                </div>
               </div>
             )}
 
@@ -990,8 +1105,11 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
             <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={() => {
-                  setSendForm((prev) => ({ ...prev, token: selectedTokenState.symbol }))
-                  setViewMode("send")
+                  setSendForm((prev) => ({
+                    ...prev,
+                    token: selectedTokenState.symbol,
+                  }));
+                  setViewMode("send");
                 }}
                 className="flex items-center justify-center space-x-2 py-2 px-3 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 rounded-lg transition-all duration-200 text-blue-300 hover:text-blue-200"
               >
@@ -1000,7 +1118,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
               </button>
               <button
                 onClick={() => {
-                  setViewMode("swap")
+                  setViewMode("swap");
                 }}
                 className="flex items-center justify-center space-x-2 py-2 px-3 bg-orange-600/20 hover:bg-orange-600/30 border border-orange-500/30 rounded-lg transition-all duration-200 text-orange-300 hover:text-orange-200"
               >
@@ -1011,7 +1129,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
           </motion.div>
         </AnimatePresence>
       </motion.div>
-    )
+    );
   }
 
   return (
@@ -1039,8 +1157,12 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                     <Wallet className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <p className="text-white font-semibold text-sm">{t.connected}</p>
-                    <p className="text-gray-400 text-xs">{formatAddress(walletAddress)}</p>
+                    <p className="text-white font-semibold text-sm">
+                      {t.connected}
+                    </p>
+                    <p className="text-gray-400 text-xs">
+                      {formatAddress(walletAddress)}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-1">
@@ -1049,7 +1171,11 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                     className="p-2 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-white/10"
                     title={t.copyAddress}
                   >
-                    {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
+                    {copied ? (
+                      <Check className="w-4 h-4 text-green-400" />
+                    ) : (
+                      <Copy className="w-4 h-4" />
+                    )}
                   </button>
                   <button
                     onClick={() => setIsMinimized(true)}
@@ -1076,7 +1202,11 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                       onClick={() => setShowBalances(!showBalances)}
                       className="flex items-center space-x-2 text-white hover:text-gray-300 transition-colors"
                     >
-                      {showBalances ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      {showBalances ? (
+                        <EyeOff className="w-4 h-4" />
+                      ) : (
+                        <Eye className="w-4 h-4" />
+                      )}
                       <span className="text-sm font-medium">{t.tokens}</span>
                     </button>
                   </div>
@@ -1086,7 +1216,9 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                     className="p-1.5 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-white/10 disabled:opacity-50"
                     title={t.refreshBalances}
                   >
-                    <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
+                    <RefreshCw
+                      className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`}
+                    />
                   </button>
                 </div>
 
@@ -1101,7 +1233,9 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                       {loading ? (
                         <div className="flex items-center justify-center py-4">
                           <RefreshCw className="w-4 h-4 text-gray-400 animate-spin mr-2" />
-                          <span className="text-gray-400 text-sm">{t.loading}</span>
+                          <span className="text-gray-400 text-sm">
+                            {t.loading}
+                          </span>
                         </div>
                       ) : error ? (
                         <div className="flex items-center justify-center py-4">
@@ -1110,12 +1244,14 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                         </div>
                       ) : balances.length === 0 ? (
                         <div className="text-center py-4">
-                          <span className="text-gray-400 text-sm">No tokens found</span>
+                          <span className="text-gray-400 text-sm">
+                            No tokens found
+                          </span>
                         </div>
                       ) : (
                         balances.map((token, index) => {
-                          const price = tokenPrices[token.symbol] || 0
-                          const change = priceChanges[token.symbol] || 0
+                          const price = tokenPrices[token.symbol] || 0;
+                          const change = priceChanges[token.symbol] || 0;
 
                           return (
                             <motion.button
@@ -1130,7 +1266,10 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                                 <div className="flex items-center space-x-3">
                                   <div className="w-8 h-8 rounded-full overflow-hidden bg-white flex items-center justify-center">
                                     <Image
-                                      src={getTokenIcon(token.symbol) || "/placeholder.svg"}
+                                      src={
+                                        getTokenIcon(token.symbol) ||
+                                        "/placeholder.svg"
+                                      }
                                       alt={token.name}
                                       width={32}
                                       height={32}
@@ -1138,14 +1277,20 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                                     />
                                   </div>
                                   <div>
-                                    <p className="text-white font-medium text-sm text-left">{token.symbol}</p>
-                                    <p className="text-gray-400 text-xs text-left">{token.name}</p>
+                                    <p className="text-white font-medium text-sm text-left">
+                                      {token.symbol}
+                                    </p>
+                                    <p className="text-gray-400 text-xs text-left">
+                                      {token.name}
+                                    </p>
                                   </div>
                                 </div>
                                 <div className="text-right flex items-center space-x-2">
                                   <div>
                                     <p className="text-white font-medium text-sm">
-                                      {showBalances ? formatBalance(token.balance) : "••••"}
+                                      {showBalances
+                                        ? formatBalance(token.balance)
+                                        : "••••"}
                                     </p>
                                     <div className="flex items-center space-x-1">
                                       {loadingPrices ? (
@@ -1157,7 +1302,9 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                                           </span>
                                           <div
                                             className={`flex items-center space-x-1 ${
-                                              change >= 0 ? "text-green-500" : "text-red-500"
+                                              change >= 0
+                                                ? "text-green-500"
+                                                : "text-red-500"
                                             }`}
                                           >
                                             {change >= 0 ? (
@@ -1165,11 +1312,15 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                                             ) : (
                                               <TrendingDown className="w-2 h-2" />
                                             )}
-                                            <span className="text-xs">{Math.abs(change).toFixed(1)}%</span>
+                                            <span className="text-xs">
+                                              {Math.abs(change).toFixed(1)}%
+                                            </span>
                                           </div>
                                         </>
                                       ) : (
-                                        <span className="text-gray-500 text-xs">Price N/A</span>
+                                        <span className="text-gray-500 text-xs">
+                                          Price N/A
+                                        </span>
                                       )}
                                     </div>
                                   </div>
@@ -1177,7 +1328,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                                 </div>
                               </div>
                             </motion.button>
-                          )
+                          );
                         })
                       )}
                     </motion.div>
@@ -1244,37 +1395,63 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">{t.token}</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    {t.token}
+                  </label>
                   <select
                     value={sendForm.token}
-                    onChange={(e) => setSendForm((prev) => ({ ...prev, token: e.target.value }))}
+                    onChange={(e) =>
+                      setSendForm((prev) => ({
+                        ...prev,
+                        token: e.target.value,
+                      }))
+                    }
                     className="w-full bg-black/30 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-400"
                   >
                     {balances.map((token) => (
-                      <option key={token.symbol} value={token.symbol} className="bg-black">
-                        {token.symbol} ({t.available}: {formatBalance(token.balance)})
+                      <option
+                        key={token.symbol}
+                        value={token.symbol}
+                        className="bg-black"
+                      >
+                        {token.symbol} ({t.available}:{" "}
+                        {formatBalance(token.balance)})
                       </option>
                     ))}
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">{t.amount}</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    {t.amount}
+                  </label>
                   <input
                     type="number"
                     value={sendForm.amount}
-                    onChange={(e) => setSendForm((prev) => ({ ...prev, amount: e.target.value }))}
+                    onChange={(e) =>
+                      setSendForm((prev) => ({
+                        ...prev,
+                        amount: e.target.value,
+                      }))
+                    }
                     placeholder="0.00"
                     className="w-full bg-black/30 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-400"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">{t.recipientAddress}</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    {t.recipientAddress}
+                  </label>
                   <input
                     type="text"
                     value={sendForm.recipient}
-                    onChange={(e) => setSendForm((prev) => ({ ...prev, recipient: e.target.value }))}
+                    onChange={(e) =>
+                      setSendForm((prev) => ({
+                        ...prev,
+                        recipient: e.target.value,
+                      }))
+                    }
                     placeholder="0x..."
                     className="w-full bg-black/30 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-400"
                   />
@@ -1337,15 +1514,23 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                 </div>
 
                 <div>
-                  <p className="text-gray-300 text-sm mb-2">{t.yourWalletAddress}</p>
+                  <p className="text-gray-300 text-sm mb-2">
+                    {t.yourWalletAddress}
+                  </p>
                   <div className="bg-black/30 border border-white/20 rounded-lg p-3 break-all">
-                    <p className="text-white text-sm font-mono">{walletAddress}</p>
+                    <p className="text-white text-sm font-mono">
+                      {walletAddress}
+                    </p>
                   </div>
                   <button
                     onClick={copyAddress}
                     className="mt-2 flex items-center justify-center space-x-2 w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
                   >
-                    {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                    {copied ? (
+                      <Check className="w-4 h-4" />
+                    ) : (
+                      <Copy className="w-4 h-4" />
+                    )}
                     <span>{t.copyAddress}</span>
                   </button>
                 </div>
@@ -1353,7 +1538,9 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                 <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3">
                   <div className="flex items-start space-x-2">
                     <AlertTriangle className="w-4 h-4 text-yellow-400 mt-0.5 flex-shrink-0" />
-                    <p className="text-yellow-300 text-xs">{t.networkWarning}</p>
+                    <p className="text-yellow-300 text-xs">
+                      {t.networkWarning}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -1384,23 +1571,36 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
               <div className="space-y-4">
                 {/* From Token - Fixed to WLD */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">{t.from}</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    {t.from}
+                  </label>
                   <div className="bg-black/30 border border-white/20 rounded-lg p-3">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center space-x-2">
-                        <img src="/images/worldcoin.jpeg" alt="WLD" className="w-6 h-6 rounded-full" />
+                        <img
+                          src="/images/worldcoin.jpeg"
+                          alt="WLD"
+                          className="w-6 h-6 rounded-full"
+                        />
                         <span className="text-white font-medium">WLD</span>
                       </div>
                       <div className="text-right">
                         <p className="text-gray-400 text-xs">
-                          {t.available}: {balances.find((b) => b.symbol === "WLD")?.balance || "0"}
+                          {t.available}:{" "}
+                          {balances.find((b) => b.symbol === "WLD")?.balance ||
+                            "0"}
                         </p>
                       </div>
                     </div>
                     <input
                       type="number"
                       value={swapForm.amountFrom}
-                      onChange={(e) => setSwapForm((prev) => ({ ...prev, amountFrom: e.target.value }))}
+                      onChange={(e) =>
+                        setSwapForm((prev) => ({
+                          ...prev,
+                          amountFrom: e.target.value,
+                        }))
+                      }
                       placeholder="0.00"
                       className="w-full bg-transparent text-white text-lg font-medium focus:outline-none"
                     />
@@ -1416,11 +1616,17 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
                 {/* To Token - Fixed to TPF */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">{t.to}</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    {t.to}
+                  </label>
                   <div className="bg-black/30 border border-white/20 rounded-lg p-3">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center space-x-2">
-                        <img src="/images/logo-tpf.png" alt="TPF" className="w-6 h-6 rounded-full" />
+                        <img
+                          src="/images/logo-tpf.png"
+                          alt="TPF"
+                          className="w-6 h-6 rounded-full"
+                        />
                         <span className="text-white font-medium">TPF</span>
                       </div>
                     </div>
@@ -1428,7 +1634,9 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                       {gettingQuote ? (
                         <div className="flex items-center space-x-2">
                           <RefreshCw className="w-4 h-4 animate-spin" />
-                          <span className="text-gray-400">{t.gettingQuote}</span>
+                          <span className="text-gray-400">
+                            {t.gettingQuote}
+                          </span>
                         </div>
                       ) : swapForm.amountTo ? (
                         swapForm.amountTo
@@ -1453,7 +1661,12 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                 <button
                   onClick={handleSwap}
                   disabled={
-                    swapping || !swapForm.amountFrom || !swapForm.amountTo || !swapQuote || gettingQuote || !!quoteError
+                    swapping ||
+                    !swapForm.amountFrom ||
+                    !swapForm.amountTo ||
+                    !swapQuote ||
+                    gettingQuote ||
+                    !!quoteError
                   }
                   className="w-full bg-orange-600 hover:bg-orange-700 disabled:bg-gray-600 disabled:opacity-50 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
                 >
@@ -1490,7 +1703,9 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                   <ArrowLeft className="w-4 h-4" />
                   <span className="text-sm font-medium">{t.back}</span>
                 </button>
-                <h3 className="font-semibold text-white">{t.transactionHistory}</h3>
+                <h3 className="font-semibold text-white">
+                  {t.transactionHistory}
+                </h3>
                 <div className="w-6"></div>
               </div>
 
@@ -1519,7 +1734,9 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                           <div className="flex items-center space-x-3">
                             <div
                               className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                                tx.type === "sent" ? "bg-red-500/20 text-red-400" : "bg-green-500/20 text-green-400"
+                                tx.type === "sent"
+                                  ? "bg-red-500/20 text-red-400"
+                                  : "bg-green-500/20 text-green-400"
                               }`}
                             >
                               {tx.type === "sent" ? (
@@ -1530,9 +1747,12 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                             </div>
                             <div>
                               <p className="text-white font-medium text-sm">
-                                {tx.type === "sent" ? t.sent : t.received} {tx.token}
+                                {tx.type === "sent" ? t.sent : t.received}{" "}
+                                {tx.token}
                               </p>
-                              <p className="text-gray-400 text-xs">{formatAddress(tx.address)}</p>
+                              <p className="text-gray-400 text-xs">
+                                {formatAddress(tx.address)}
+                              </p>
                             </div>
                           </div>
                           <div className="text-right">
@@ -1541,15 +1761,21 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                               {tx.amount}
                             </p>
                             <div className="flex items-center space-x-2">
-                              <span className={`text-xs ${getStatusColor(tx.status)}`}>
+                              <span
+                                className={`text-xs ${getStatusColor(
+                                  tx.status
+                                )}`}
+                              >
                                 {tx.status === "confirmed"
                                   ? t.confirmed
                                   : tx.status === "pending"
-                                    ? t.pending
-                                    : t.failed}
+                                  ? t.pending
+                                  : t.failed}
                               </span>
                               <button
-                                onClick={() => openTransactionInExplorer(tx.hash)}
+                                onClick={() =>
+                                  openTransactionInExplorer(tx.hash)
+                                }
                                 className="text-gray-400 hover:text-white transition-colors"
                                 title={t.viewOnExplorer}
                               >
@@ -1558,7 +1784,9 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                             </div>
                           </div>
                         </div>
-                        <div className="mt-2 text-xs text-gray-500">{formatTimestamp(tx.timestamp)}</div>
+                        <div className="mt-2 text-xs text-gray-500">
+                          {formatTimestamp(tx.timestamp)}
+                        </div>
                       </motion.div>
                     ))}
 
@@ -1587,5 +1815,5 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       </motion.div>
       <DebugConsole />
     </>
-  )
+  );
 }
