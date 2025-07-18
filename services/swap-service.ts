@@ -33,7 +33,7 @@ const TOKENS = [
     color: "#00D4FF",
   },
   {
-    address: "0xEdE54d9c024ee80C85ec0a75eD2d8774c7Fbac9B",
+    address: "0xEdE54d9c024ee80C85ec0a75eD2d8774c7Fbac9B", // Updated WDD address
     symbol: "WDD",
     name: "Drachma", // Updated name
     decimals: 18,
@@ -128,9 +128,9 @@ export async function doSwap({
       await provider.getBlockNumber()
       await updateUserData(walletAddress)
       await loadTokenBalances(walletAddress)
-      await loadTpfBalance(walletAddress) // Consider making this dynamic based on tokenOut
+      await loadTpfBalance(walletAddress) // Considerar tornar isto dinâmico com base em tokenOut
       console.log("Swap successful!")
-      return { success: true } // Explicitly return success
+      return { success: true } // Explicitamente retornar sucesso
     } else {
       console.error("Swap failed: ", result)
       return { success: false, errorCode: result.errorCode || "UNKNOWN_SWAP_ERROR", error: result }
