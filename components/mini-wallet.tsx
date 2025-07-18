@@ -428,7 +428,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
           try {
             const [price, change] = await Promise.all([
               getCurrentTokenPrice(token.symbol),
-              getPriceChange(token.symbol, "1h"),
+              getPriceChange(token.symbol, "1d"), // Fixed to "1d"
             ])
             prices[token.symbol] = price
             changes[token.symbol] = change
@@ -793,7 +793,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
     try {
       console.log(`📊 Fetching real price data for ${token.symbol} via Holdstation SDK`)
-      const priceData = await getTokenPrice(token.symbol, "1h")
+      const priceData = await getTokenPrice(token.symbol, "1d") // Fixed to "1d"
       console.log(`✅ Price data loaded for ${token.symbol}:`, priceData)
       setTokenPrice(priceData)
     } catch (error) {
@@ -810,7 +810,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     setLoadingPrice(true)
     try {
       console.log(`🔄 Refreshing price for ${selectedTokenState.symbol}`)
-      const priceData = await getTokenPrice(selectedTokenState.symbol, "1h")
+      const priceData = await getTokenPrice(selectedTokenState.symbol, "1d") // Fixed to "1d"
       setTokenPrice(priceData)
       console.log(`✅ Price refreshed for ${selectedTokenState.symbol}`)
     } catch (error) {
