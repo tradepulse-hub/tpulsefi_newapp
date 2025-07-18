@@ -28,14 +28,14 @@ export function PriceChart({ symbol, color = "#00D4FF", height = 200 }: PriceCha
       try {
         setLoading(true)
         setError(null)
-        console.log(`📊 Fetching chart data for ${symbol} (${fixedInterval})`)
+        console.log(`[PriceChart] 📊 Fetching chart data for ${symbol} (${fixedInterval})`)
 
         // Use the fixed interval
         const data = await getTokenPrice(symbol, fixedInterval)
         setPriceData(data)
-        console.log(`✅ Chart data loaded for ${symbol}`)
+        console.log(`[PriceChart] ✅ Chart data loaded for ${symbol}`)
       } catch (err) {
-        console.error(`❌ Error loading chart data for ${symbol}:`, err)
+        console.error(`[PriceChart] ❌ Error loading chart data for ${symbol}:`, err)
         setError("Failed to load chart data")
       } finally {
         setLoading(false)
