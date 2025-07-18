@@ -60,7 +60,7 @@ const TOKENS = [
     color: "#00D4FF",
   },
   {
-    address: "0xEdE54d9c024ee80C85ec0a75eD2d8774c7Fbac9B",
+    address: "0xEdE54d9c024ee80C85ec0a75eD2d8774c7Fbac9B", // Updated WDD address
     symbol: "WDD",
     name: "Drachma", // Updated name
     decimals: 18,
@@ -328,6 +328,7 @@ const translations = {
     sendWarning:
       "Hanya kirim aset yang didukung oleh jaringan Worldchain, jangan kirim ke exchange, pengiriman Anda dapat mengakibatkan kehilangan aset",
     sendSuccess: "Berhasil dikirim",
+    sendFailed: "Pengiriman gagal",
     swapSuccess: "Berhasil ditukar",
     swapFailed: "Penukaran gagal",
     copyAddress: "Salin Alamat",
@@ -415,7 +416,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
   // Real-time token prices for main view
   const [tokenPrices, setTokenPrices] = useState<Record<string, number>>({})
   const [priceChanges, setPriceChanges] = useState<Record<string, number>>({})
-  const [loadingPrices, setLoadingPrices] = true
+  const [loadingPrices, setLoadingPrices] = useState(true)
 
   const TRANSACTIONS_PER_PAGE = 5
 
@@ -1523,7 +1524,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                     className="p-2 bg-gray-600/50 rounded-full hover:bg-gray-500/50 transition-colors"
                     title="Swap tokens"
                   >
-                    <ArrowLeftRight className="w-4 h-4" />
+                    <ArrowLeftRight className="w-4 h-4 text-white" />
                   </button>
                 </div>
 
