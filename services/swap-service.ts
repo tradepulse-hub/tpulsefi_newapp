@@ -1,32 +1,18 @@
 import type { SwapParams } from "@holdstation/worldchain-sdk"
 import { TOKENS, swapHelper } from "./token-price-service" // Importar TOKENS e swapHelper do serviço de preço
 
-// --- Provider and SDK setup ---
-// REMOVED: Centralized in token-price-service.ts
-// const RPC_URL = "https://worldchain-mainnet.g.alchemy.com/public"
-// const provider = new ethers.JsonRpcProvider(RPC_URL, { chainId: 480, name: "worldchain" }, { staticNetwork: true })
-// const client = new Client(provider)
-// config.client = client
-// config.multicall3 = new Multicall3(provider)
-// const swapHelper = new SwapHelper(client, { tokenStorage: inmemoryTokenStorage })
-// const tokenProvider = new TokenProvider({ client, multicall3: config.multicall3 })
-// const zeroX = new ZeroX(tokenProvider, inmemoryTokenStorage)
-// const worldSwap = new HoldSo(tokenProvider, inmemoryTokenStorage)
-// swapHelper.load(zeroX)
-// swapHelper.load(worldSwap)
-
 // --- Mocked helper functions (replace with real implementations as needed) ---
 async function updateUserData(address: string) {
   // Placeholder for updating user data after swap
-  console.log(`User data updated for address: ${address}`)
+  // console.log(`User data updated for address: ${address}`) // Removed log
 }
 async function loadTokenBalances(address: string) {
   // Placeholder for reloading token balances after swap
-  console.log(`Token balances loaded for address: ${address}`)
+  // console.log(`Token balances loaded for address: ${address}`) // Removed log
 }
 async function loadTpfBalance(address: string) {
   // Placeholder for reloading ANI balance after swap
-  console.log(`TPF balance loaded for address: ${address}`)
+  // console.log(`TPF balance loaded for address: ${address}`) // Removed log
 }
 
 // --- The doSwap function ---
@@ -53,7 +39,7 @@ export async function doSwap({
   tokenOutSymbol: string
 }) {
   if (!walletAddress || !quote || !amountIn || !tokenInSymbol || !tokenOutSymbol) {
-    console.warn("doSwap called with missing parameters.")
+    console.error("doSwap called with missing parameters.") // Changed to error
     return { success: false, errorCode: "MISSING_PARAMETERS" }
   }
 
@@ -80,7 +66,7 @@ export async function doSwap({
       fee: "0.2",
       feeReceiver: "0x4bb270ef6dcb052a083bd5cff518e2e019c0f4ee",
     }
-    console.log("Swapping with params:", swapParams)
+    // console.log("Swapping with params:", swapParams) // Removed log
     const result = await swapHelper.swap(swapParams)
     if (result.success) {
       // Wait for transaction to be confirmed
@@ -90,7 +76,7 @@ export async function doSwap({
       await updateUserData(walletAddress)
       await loadTokenBalances(walletAddress)
       await loadTpfBalance(walletAddress) // Considerar tornar isto dinâmico com base em tokenOut
-      console.log("Swap successful!")
+      // console.log("Swap successful!") // Removed log
       return { success: true } // Explicitamente retornar sucesso
     } else {
       console.error("Swap failed: ", result)
