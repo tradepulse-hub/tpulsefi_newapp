@@ -112,32 +112,33 @@ async function getRealTokenPrice(tokenSymbol: string): Promise<number> {
     }
 
     if (tokenSymbol === "USDC") {
-      console.log(`[getRealTokenPrice] ✅ Price for USDC: $1.0`)
+      // console.log(`[getRealTokenPrice] ✅ Price for USDC: $1.0`) // Removed log
       return 1.0
     }
 
     const token = TOKENS.find((t) => t.symbol === tokenSymbol)
     if (!token) {
-      console.warn(`[getRealTokenPrice] Token ${tokenSymbol} not found in TOKENS list. Returning 0.`)
+      console.error(`[getRealTokenPrice] Token ${tokenSymbol} not found in TOKENS list. Returning 0.`) // Changed to error
       return 0
     }
 
-    console.log(`[getRealTokenPrice] 🔄 Attempting to get real price for ${tokenSymbol} via Holdstation SDK quote...`)
+    // console.log(`[getRealTokenPrice] 🔄 Attempting to get real price for ${tokenSymbol} via Holdstation SDK quote...`) // Removed log
 
     // Helper function to try a quote and return the price or null
     const tryQuote = async (
       amountInHuman: string, // Human-readable amount
       tokenInObj: (typeof TOKENS)[0],
-      tokenOutObj: (typeof TOKENS)[0], // Corrected variable name
+      tokenOutObj: (typeof TOKENS)[0],
       attemptName: string,
     ): Promise<number | null> => {
       try {
         // The SDK's quote function expects a human-readable string for amountIn
+        // Ensure amountInFormatted is a string representation of the number with correct decimals
         const amountInFormatted = Number.parseFloat(amountInHuman).toFixed(tokenInObj.decimals)
 
-        console.log(
-          `[getRealTokenPrice]   -> Attempt ${attemptName}: Quoting ${amountInFormatted} ${tokenInObj.symbol} to ${tokenOutObj.symbol}`,
-        )
+        // console.log( // Removed log
+        //   `[getRealTokenPrice]   -> Attempt ${attemptName}: Quoting ${amountInHuman} ${tokenInObj.symbol} (${tokenInObj.address}) to ${tokenOutObj.symbol} (${tokenOutObj.address})`,
+        // )
         const quote = await swapHelper.estimate.quote({
           tokenIn: tokenInObj.address,
           tokenOut: tokenOutObj.address,
@@ -147,60 +148,68 @@ async function getRealTokenPrice(tokenSymbol: string): Promise<number> {
           feeReceiver: ethers.ZeroAddress,
         })
 
-        console.log(`[getRealTokenPrice]   -> Raw quote response for ${attemptName}:`, JSON.stringify(quote, null, 2))
+        // console.log(`[getRealTokenPrice]   -> Raw quote response for ${attemptName}:`, JSON.stringify(quote, null, 2)) // Removed log
 
         if (quote && quote.outAmount !== undefined && quote.outAmount !== null) {
           const parsedOutAmount = Number.parseFloat(quote.outAmount)
           const parsedAmountIn = Number.parseFloat(amountInHuman) // Use the original human-readable amount for division
-          console.log(
-            `[getRealTokenPrice]   -> Parsed outAmount: ${parsedOutAmount}, Parsed amountIn: ${parsedAmountIn}`,
-          )
+          // console.log( // Removed log
+          //   `[getRealTokenPrice]   -> Parsed outAmount: ${parsedOutAmount}, Parsed amountIn: ${parsedAmountIn}`,
+          // )
 
           if (parsedOutAmount > 0 && parsedAmountIn > 0) {
             const calculatedPrice = parsedOutAmount / parsedAmountIn
-            console.log(`[getRealTokenPrice]   -> Success ${attemptName}: Calculated price = ${calculatedPrice}`)
+            // console.log(`[getRealTokenPrice]   -> Success ${attemptName}: Calculated price = ${calculatedPrice}`) // Removed log
             return calculatedPrice
           }
         }
-        console.warn(`[getRealTokenPrice]   -> Quote for ${attemptName} returned no valid outAmount or zero output.`)
+        console.error(`[getRealTokenPrice]   -> Quote for ${attemptName} returned no valid outAmount or zero output.`) // Changed to error
       } catch (e: any) {
-        console.warn(`[getRealTokenPrice]   -> Quote attempt ${attemptName} failed:`, e.message || e)
+        console.error(`[getRealTokenPrice]   -> Quote attempt ${attemptName} failed:`, e.message || e) // Changed to error
       }
       return null
     }
 
     // Strategy 1: Try quoting 1 unit of token to USDC
     let price = await tryQuote("1", token, usdcToken, "1 unit direct")
+    // console.log(`[getRealTokenPrice] Result of 1 unit direct quote for ${tokenSymbol}: ${price}`) // Removed log
     if (price !== null && price > 0) {
-      console.log(`[getRealTokenPrice] ✅ Price for ${tokenSymbol} (1 unit direct): $${price}`)
+      // console.log(`[getRealTokenPrice] ✅ Price for ${tokenSymbol} (1 unit direct): $${price}`) // Removed log
       return price
     }
 
     // Strategy 2: If Strategy 1 fails or returns 0, try quoting a larger amount (e.g., 100 units)
     const largeAmountIn = "100" // Using 100 units for larger amount
     price = await tryQuote(largeAmountIn, token, usdcToken, `${largeAmountIn} units direct`)
+    // console.log(`[getRealTokenPrice] Result of ${largeAmountIn} units direct quote for ${tokenSymbol}: ${price}`) // Removed log
     if (price !== null && price > 0) {
-      console.log(`[getRealTokenPrice] ✅ Price for ${tokenSymbol} (${largeAmountIn} units direct): $${price}`)
-      return price
+      const calculatedPrice = price // Price is already calculated per unit in tryQuote
+      // console.log( // Removed log
+      //   `[getRealTokenPrice] ✅ Price for ${tokenSymbol} (${largeAmountIn} units direct): $${calculatedPrice}`,
+      // )
+      return calculatedPrice
     }
 
     // Strategy 3: If direct quotes fail, try reverse quote (USDC to token) and invert the price
     price = await tryQuote("1", usdcToken, token, "1 USDC reverse")
+    // console.log(`[getRealTokenPrice] Result of 1 USDC reverse quote for ${tokenSymbol}: ${price}`) // Removed log
     if (price !== null && price > 0) {
       const invertedPrice = 1 / price
-      console.log(`[getRealTokenPrice] ✅ Price for ${tokenSymbol} (1 USDC reverse): $${invertedPrice}`)
+      // console.log(`[getRealTokenPrice] ✅ Price for ${tokenSymbol} (1 USDC reverse): $${invertedPrice}`) // Removed log
       return invertedPrice
     }
 
     // Strategy 4: If reverse quote with 1 USDC fails, try with a larger USDC amount
     price = await tryQuote(largeAmountIn, usdcToken, token, `${largeAmountIn} USDC reverse`)
+    // console.log(`[getRealTokenPrice] Result of ${largeAmountIn} USDC reverse quote for ${tokenSymbol}: ${price}`) // Removed log
     if (price !== null && price > 0) {
       const invertedPrice = 1 / (price / Number.parseFloat(largeAmountIn)) // Invert price per unit
-      console.log(`[getRealTokenPrice] ✅ Price for ${tokenSymbol} (${largeAmountIn} USDC reverse): $${invertedPrice}`)
+      // console.log(`[getRealTokenPrice] ✅ Price for ${tokenSymbol} (${largeAmountIn} USDC reverse): $${invertedPrice}`) // Removed log
       return invertedPrice
     }
 
-    console.warn(
+    console.error(
+      // Changed to error
       `[getRealTokenPrice] Could not get a valid price for ${tokenSymbol} after multiple attempts. Returning 0.`,
     )
     return 0
@@ -258,12 +267,12 @@ function setCachedPrice(symbol: string, interval: TimeInterval, data: TokenPrice
 export async function getTokenPrice(symbol: string, interval: TimeInterval = "1d"): Promise<TokenPrice> {
   // Default to "1d"
   try {
-    console.log(`[getTokenPrice] 📊 Fetching price for ${symbol} (${interval})`)
+    // console.log(`[getTokenPrice] 📊 Fetching price for ${symbol} (${interval})`) // Removed log
 
     // Check cache first
     const cached = getCachedPrice(symbol, interval)
     if (cached) {
-      console.log(`[getTokenPrice] ✅ Using cached price for ${symbol} (${interval})`)
+      // console.log(`[getTokenPrice] ✅ Using cached price for ${symbol} (${interval})`) // Removed log
       return cached
     }
 
@@ -296,11 +305,10 @@ export async function getTokenPrice(symbol: string, interval: TimeInterval = "1d
     // Cache the result
     setCachedPrice(symbol, interval, tokenPrice)
 
-    console.log(`[getTokenPrice] ✅ Price fetched for ${symbol}: $${currentPrice.toFixed(8)} (${interval})`)
+    // console.log(`[getTokenPrice] ✅ Price fetched for ${symbol}: $${currentPrice.toFixed(8)} (${interval})`) // Removed log
     return tokenPrice
   } catch (error) {
     console.error(`[getTokenPrice] ❌ Error fetching price for ${symbol}:`, error)
-
     // Return fallback data with zero price to indicate error
     return {
       symbol,
