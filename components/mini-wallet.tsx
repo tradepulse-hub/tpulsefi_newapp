@@ -8,8 +8,9 @@ import {
   getCurrentTokenPrice,
   getPriceChange,
   getTokenPrice,
-  type TokenPrice,
   TOKENS, // Importar TOKENS do serviço de preço
+  swapHelper, // Importar swapHelper centralizado
+  type TokenPrice,
 } from "@/services/token-price-service"
 import { walletService } from "@/services/wallet-service"
 import { AnimatePresence, motion } from "framer-motion"
@@ -38,27 +39,29 @@ import {
 // import Image from "next/image" // Removido o import do next/image
 import { useCallback, useEffect, useState } from "react"
 
-import { Client, Multicall3 } from "@holdstation/worldchain-ethers-v6"
-import { config, HoldSo, inmemoryTokenStorage, SwapHelper, TokenProvider, ZeroX } from "@holdstation/worldchain-sdk"
+// REMOVED: Centralized in token-price-service.ts
+// import { Client, Multicall3 } from "@holdstation/worldchain-ethers-v6"
+// import { config, HoldSo, inmemoryTokenStorage, SwapHelper, TokenProvider, ZeroX } from "@holdstation/worldchain-sdk"
 import { ethers } from "ethers"
 
+// REMOVED: Centralized in token-price-service.ts
 // Configuração do SDK Holdstation (mantida aqui para a função de cotação)
-const RPC_URL = "https://worldchain-mainnet.g.alchemy.com/public"
-const provider = new ethers.JsonRpcProvider(RPC_URL, { chainId: 480, name: "worldchain" }, { staticNetwork: true })
-const client = new Client(provider)
-config.client = client
-config.multicall3 = new Multicall3(provider)
-const swapHelper = new SwapHelper(client, {
-  tokenStorage: inmemoryTokenStorage,
-})
-const tokenProvider = new TokenProvider({
-  client,
-  multicall3: config.multicall3,
-})
-const zeroX = new ZeroX(tokenProvider, inmemoryTokenStorage)
-const worldSwap = new HoldSo(tokenProvider, inmemoryTokenStorage)
-swapHelper.load(zeroX)
-swapHelper.load(worldSwap)
+// const RPC_URL = "https://worldchain-mainnet.g.alchemy.com/public"
+// const provider = new ethers.JsonRpcProvider(RPC_URL, { chainId: 480, name: "worldchain" }, { staticNetwork: true })
+// const client = new Client(provider)
+// config.client = client
+// config.multicall3 = new Multicall3(provider)
+// const swapHelper = new SwapHelper(client, {
+//   tokenStorage: inmemoryTokenStorage,
+// })
+// const tokenProvider = new TokenProvider({
+//   client,
+//   multicall3: config.multicall3,
+// })
+// const zeroX = new ZeroX(tokenProvider, inmemoryTokenStorage)
+// const worldSwap = new HoldSo(tokenProvider, inmemoryTokenStorage)
+// swapHelper.load(zeroX)
+// swapHelper.load(worldSwap)
 
 interface TokenBalance {
   symbol: string
