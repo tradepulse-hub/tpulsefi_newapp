@@ -1,16 +1,8 @@
 // Token Price Service for fetching current prices and historical data using Holdstation SDK
 
 import { ethers } from "ethers"
-import {
-  Client,
-  Multicall3,
-  config,
-  HoldSo,
-  inmemoryTokenStorage,
-  SwapHelper,
-  TokenProvider,
-  ZeroX,
-} from "@holdstation/worldchain-sdk"
+import { config, HoldSo, inmemoryTokenStorage, SwapHelper, TokenProvider, ZeroX } from "@holdstation/worldchain-sdk"
+import { Client, Multicall3 } from "@holdstation/worldchain-ethers-v6"
 
 // Since TOKENS is not exported from swap-service, we define it here
 // Ensure this list is consistent across all files that use it (mini-wallet, swap-service)
