@@ -67,7 +67,7 @@ const TOKENS = [
   },
   {
     address: "0x5fa570E9c8514cdFaD81DB6ce0A327D55251fBD4",
-    symbol: "KPL", // Assuming KPL as symbol for KeplerPay
+    symbol: "KPP", // Assuming KPP as symbol for KeplerPay
     name: "KeplerPay",
     decimals: 18, // Assuming 18 decimals
     logo: "/images/keplerpay-logo.png",
@@ -361,7 +361,7 @@ const translations = {
     selectToken: "Pilih Token",
     enterAmount: "Masukkan jumlah untuk melihat kutipan",
     quoteError: "Gagal mendapatkan kutipan",
-    insufficientBalance: "Saldo tidak mencukiente",
+    insufficientBalance: "Saldo tidak mencuciente",
     networkError: "Kesalahan jaringan",
     tryAgain: "Coba lagi",
     priceUnavailable: "Data harga tidak tersedia",
