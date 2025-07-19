@@ -87,6 +87,13 @@ const TOKENS_INFO = {
     logo: "/images/usdc.png",
     decimals: 6,
   },
+  KPP: {
+    symbol: "KPP",
+    name: "KeplerPay",
+    address: "0x5fa570E9c8514cdFaD81DB6ce0A327D55251fBD4",
+    logo: "/images/keplerpay-logo.png",
+    decimals: 18,
+  },
 }
 
 interface TokenBalance {
