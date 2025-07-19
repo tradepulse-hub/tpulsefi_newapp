@@ -385,6 +385,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
   const [viewMode, setViewMode] = useState<ViewMode>("main")
   const [copied, setCopied] = useState(false)
   const [balances, setBalances] = useState<TokenBalance[]>([])
+  // Removed displayedTokenBalances, tokenPage, hasMoreTokenBalances
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [allTransactions, setAllTransactions] = useState<Transaction[]>([])
   const [displayedTransactions, setDisplayedTransactions] = useState<Transaction[]>([])
@@ -421,6 +422,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
   const [loadingPrices, setLoadingPrices] = useState(true)
 
   const TRANSACTIONS_PER_PAGE = 5
+  // Removed TOKENS_PER_DISPLAY
 
   // Load saved language
   useEffect(() => {
@@ -433,18 +435,18 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
   // Get translations for current language
   const t = translations[currentLang]
 
-  const formatAddress = (address: string) => {
+  const formatAddress = useCallback((address: string) => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`
-  }
+  }, [])
 
-  const copyAddress = () => {
+  const copyAddress = useCallback(() => {
     navigator.clipboard.writeText(walletAddress)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
-  }
+  }, [walletAddress])
 
   // Load real-time token prices for main view
-  const loadTokenPrices = async () => {
+  const loadTokenPrices = useCallback(async () => {
     try {
       setLoadingPrices(true)
       console.log("🔄 Loading real token prices via Holdstation SDK...")
@@ -478,9 +480,9 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     } finally {
       setLoadingPrices(false)
     }
-  }
+  }, [])
 
-  const loadBalances = async () => {
+  const loadBalances = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -488,47 +490,53 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       const tokenBalances = await walletService.getTokenBalances(walletAddress)
       console.log("✅ Token balances loaded:", tokenBalances)
       setBalances(tokenBalances)
+      // Removed initialization of displayedTokenBalances, hasMoreTokenBalances, tokenPage
     } catch (error) {
       console.error("❌ Error loading balances:", error)
       setError("Failed to load balances")
     } finally {
       setLoading(false)
     }
-  }
+  }, [walletAddress])
 
-  const loadTransactionHistory = async (reset = false) => {
-    try {
-      if (reset) {
-        setLoadingHistory(true)
-        setCurrentPage(0)
-        setDisplayedTransactions([])
-      } else {
-        setLoadingMore(true)
+  // Removed loadMoreTokenBalances
+
+  const loadTransactionHistory = useCallback(
+    async (reset = false) => {
+      try {
+        if (reset) {
+          setLoadingHistory(true)
+          setCurrentPage(0)
+          setDisplayedTransactions([])
+        } else {
+          setLoadingMore(true)
+        }
+
+        console.log("🔄 Loading transaction history for:", walletAddress)
+        const limit = (currentPage + 1) * TRANSACTIONS_PER_PAGE + 5
+        const history = await walletService.getTransactionHistory(walletAddress, limit)
+        console.log("✅ Transaction history loaded:", history.length, "transactions")
+
+        setAllTransactions(history)
+
+        const newDisplayCount = (currentPage + 1) * TRANSACTIONS_PER_PAGE
+
+        // Ensure we don't try to slice beyond the array length
+        const newDisplayed = history.slice(0, Math.min(history.length, newDisplayCount))
+
+        setDisplayedTransactions(newDisplayed)
+        setHasMoreTransactions(allTransactions.length > newDisplayCount)
+      } catch (error) {
+        console.error("❌ Error loading transaction history:", error)
+      } finally {
+        setLoadingHistory(false)
+        setLoadingMore(false)
       }
+    },
+    [walletAddress, currentPage, allTransactions],
+  )
 
-      console.log("🔄 Loading transaction history for:", walletAddress)
-      const limit = (currentPage + 1) * TRANSACTIONS_PER_PAGE + 5
-      const history = await walletService.getTransactionHistory(walletAddress, limit)
-      console.log("✅ Transaction history loaded:", history.length, "transactions")
-
-      setAllTransactions(history)
-
-      const newDisplayCount = (currentPage + 1) * TRANSACTIONS_PER_PAGE
-
-      // Ensure we don't try to slice beyond the array length
-      const newDisplayed = history.slice(0, Math.min(history.length, newDisplayCount))
-
-      setDisplayedTransactions(newDisplayed)
-      setHasMoreTransactions(allTransactions.length > newDisplayCount)
-    } catch (error) {
-      console.error("❌ Error loading transaction history:", error)
-    } finally {
-      setLoadingHistory(false)
-      setLoadingMore(false)
-    }
-  }
-
-  const loadMoreTransactions = async () => {
+  const loadMoreTransactions = useCallback(async () => {
     const nextPage = currentPage + 1
     setCurrentPage(nextPage)
 
@@ -541,15 +549,15 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     } else {
       await loadTransactionHistory(false)
     }
-  }
+  }, [allTransactions, currentPage, loadTransactionHistory])
 
-  const refreshBalances = async () => {
+  const refreshBalances = useCallback(async () => {
     setRefreshing(true)
     await Promise.all([loadBalances(), loadTokenPrices()])
     setRefreshing(false)
-  }
+  }, [loadBalances, loadTokenPrices])
 
-  const handleSend = async () => {
+  const handleSend = useCallback(async () => {
     if (!sendForm.amount || !sendForm.recipient) return
 
     setSending(true)
@@ -579,7 +587,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     } finally {
       setSending(false)
     }
-  }
+  }, [sendForm, balances, t.sendSuccess, t.sendFailed, t.tryAgain, refreshBalances, loadTransactionHistory])
 
   const getSwapQuote = useCallback(
     async (amountFrom: string, tokenFromSymbol: string, tokenToSymbol: string) => {
@@ -707,7 +715,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     return () => clearTimeout(timeoutId)
   }, [swapForm.amountFrom, swapForm.tokenFrom, swapForm.tokenTo, getSwapQuote])
 
-  const handleSwap = async () => {
+  const handleSwap = useCallback(async () => {
     if (!swapQuote || !swapForm.amountFrom || !swapForm.tokenFrom || !swapForm.tokenTo) return
 
     setSwapping(true)
@@ -797,9 +805,20 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     } finally {
       setSwapping(false)
     }
-  }
+  }, [
+    swapQuote,
+    swapForm,
+    balances,
+    t.insufficientBalance,
+    t.swapSuccess,
+    t.swapFailed,
+    t.tryAgain,
+    t.networkError,
+    refreshBalances,
+    loadTransactionHistory,
+  ])
 
-  const handleBackToMain = () => {
+  const handleBackToMain = useCallback(() => {
     setViewMode("main")
     setSendForm({ token: "TPF", amount: "", recipient: "" })
     setSwapForm({
@@ -810,24 +829,20 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     })
     setSwapQuote(null)
     setQuoteError(null)
-  }
+  }, [])
 
-  const handleTokenClick = async (token: TokenBalance) => {
+  const handleTokenClick = useCallback(async (token: TokenBalance) => {
     console.log("🔄 Loading token details for:", token.symbol)
-    // No longer setting selectedTokenState or tokenPrice for detail view
-    // as the chart and price details are being removed.
-    // If a token detail view without chart is desired, this logic would need adjustment.
-    // For now, clicking a token will not navigate to a detail view.
     setSelectedTokenState(token)
     setViewMode("tokenDetail")
-  }
+  }, [])
 
-  const openTransactionInExplorer = (hash: string) => {
+  const openTransactionInExplorer = useCallback((hash: string) => {
     const explorerUrl = walletService.getExplorerTransactionUrl(hash)
     window.open(explorerUrl, "_blank")
-  }
+  }, [])
 
-  const formatTimestamp = (timestamp: number) => {
+  const formatTimestamp = useCallback((timestamp: number) => {
     const date = new Date(timestamp)
     const now = new Date()
     const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60)
@@ -841,9 +856,9 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       const diffInDays = Math.floor(diffInHours / 24)
       return `${diffInDays}d ago`
     }
-  }
+  }, [])
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = useCallback((status: string) => {
     switch (status) {
       case "confirmed":
         return "text-green-400"
@@ -854,7 +869,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       default:
         return "text-gray-400"
     }
-  }
+  }, [])
 
   useEffect(() => {
     if (walletAddress) {
@@ -863,7 +878,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       loadTransactionHistory(true)
       loadTokenPrices()
     }
-  }, [walletAddress])
+  }, [walletAddress, loadBalances, loadTransactionHistory, loadTokenPrices])
 
   // Auto-refresh prices every 30 seconds
   useEffect(() => {
@@ -874,9 +889,9 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     }, 30000)
 
     return () => clearInterval(interval)
-  }, [walletAddress, viewMode])
+  }, [walletAddress, viewMode, loadTokenPrices])
 
-  const formatBalance = (balance: string): string => {
+  const formatBalance = useCallback((balance: string): string => {
     const num = Number.parseFloat(balance)
     if (num === 0) return "0"
     if (num < 0.0001) return "<0.0001"
@@ -884,19 +899,19 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     if (num < 1000) return num.toFixed(2)
     if (num < 1000000) return `${(num / 1000).toFixed(1)}K`
     return `${(num / 1000000).toFixed(1)}M`
-  }
+  }, [])
 
-  const getTokenIcon = (symbol: string) => {
+  const getTokenIcon = useCallback((symbol: string) => {
     const token = TOKENS.find((t) => t.symbol === symbol)
     return token?.logo || "/placeholder.svg?height=32&width=32"
-  }
+  }, [])
 
-  const getTokenColor = (symbol: string) => {
+  const getTokenColor = useCallback((symbol: string) => {
     const token = TOKENS.find((t) => t.symbol === symbol)
     return token?.color || "#00D4FF"
-  }
+  }, [])
 
-  const handleSwapTokens = () => {
+  const handleSwapTokens = useCallback(() => {
     setSwapForm((prev) => ({
       ...prev,
       tokenFrom: prev.tokenTo,
@@ -906,7 +921,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     }))
     setSwapQuote(null) // Clear quote as tokens changed
     setQuoteError(null)
-  }
+  }, [setSwapForm, setSwapQuote, setQuoteError])
 
   if (isMinimized) {
     return (
@@ -1092,7 +1107,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
                       exit={{ opacity: 0, height: 0 }}
-                      className="space-y-2"
+                      className="space-y-2 max-h-[280px] overflow-y-auto pr-1" // Added max-height and overflow-y-auto
                     >
                       {loading ? (
                         <div className="flex items-center justify-center py-4">
@@ -1109,6 +1124,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                           <span className="text-gray-400 text-sm">No tokens found</span>
                         </div>
                       ) : (
+                        // Directly map all balances, let overflow handle scrolling
                         balances.map((token, index) => {
                           const price = tokenPrices[token.symbol] || 0
                           const change = priceChanges[token.symbol] || 0
@@ -1177,6 +1193,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                           )
                         })
                       )}
+                      {/* Removed "Show More Tokens" button */}
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -1210,7 +1227,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                     onClick={() => setViewMode("history")}
                     className="flex flex-col items-center justify-center space-y-1 py-2 px-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 rounded-lg transition-all duration-200 text-purple-300 hover:text-purple-200"
                   >
-                    <History className="w-4 h-4" />
+                    <ArrowDownLeft className="w-4 h-4" />
                     <span className="text-xs font-medium">{t.history}</span>
                   </button>
                 </div>
@@ -1455,7 +1472,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                     className="p-2 bg-gray-600/50 rounded-full hover:bg-gray-500/50 transition-colors"
                     title="Swap tokens"
                   >
-                    <ArrowLeftRight className="w-4 h-4 text-white" />
+                    <ArrowLeftRight className="w-4 h-4" />
                   </button>
                 </div>
 
