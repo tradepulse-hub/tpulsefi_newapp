@@ -186,7 +186,6 @@ const translations = {
     tryAgain: "Try again",
     priceUnavailable: "Price data unavailable",
     refreshPrice: "Refresh Price",
-    valueInUsdc: "Value in USDC", // New translation
   },
   pt: {
     connected: "Conectado",
@@ -247,7 +246,6 @@ const translations = {
     tryAgain: "Tente novamente",
     priceUnavailable: "Dados de preço indisponíveis",
     refreshPrice: "Atualizar Preço",
-    valueInUsdc: "Valor em USDC", // New translation
   },
   es: {
     connected: "Conectado",
@@ -308,7 +306,6 @@ const translations = {
     tryAgain: "Intentar de nuevo",
     priceUnavailable: "Datos de precio no disponibles",
     refreshPrice: "Actualizar Precio",
-    valueInUsdc: "Valor en USDC", // New translation
   },
   id: {
     connected: "Terhubung",
@@ -369,7 +366,6 @@ const translations = {
     tryAgain: "Coba lagi",
     priceUnavailable: "Data harga tidak tersedia",
     refreshPrice: "Perbarui Harga",
-    valueInUsdc: "Nilai dalam USDC", // New translation
   },
 }
 
@@ -519,8 +515,6 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         setAllTransactions(history)
 
         const newDisplayCount = (currentPage + 1) * TRANSACTIONS_PER_PAGE
-
-        // Ensure we don't try to slice beyond the array length
         const newDisplayed = history.slice(0, Math.min(history.length, newDisplayCount))
 
         setDisplayedTransactions(newDisplayed)
@@ -1159,13 +1153,13 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                                   <p className="text-white font-medium text-sm">
                                     {showBalances ? formatBalance(token.balance) : "••••"}
                                   </p>
-                                  {loadingPrices ? (
-                                    <div className="animate-pulse bg-gray-600 h-3 w-16 rounded mt-1"></div>
-                                  ) : (
-                                    <p className="text-gray-400 text-xs mt-1">
-                                      {t.valueInUsdc}: ${valueInUsdc.toFixed(2)}
-                                    </p>
-                                  )}
+                                  <p className="text-gray-400 text-xs mt-1">
+                                    {loadingPrices ? (
+                                      <div className="animate-pulse bg-gray-600 h-3 w-16 rounded"></div>
+                                    ) : (
+                                      `$${valueInUsdc.toFixed(2)}`
+                                    )}
+                                  </p>
                                   <div className="flex items-center space-x-1 mt-1">
                                     {loadingPrices ? (
                                       <div className="animate-pulse bg-gray-600 h-3 w-12 rounded"></div>
