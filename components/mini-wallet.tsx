@@ -65,6 +65,14 @@ const TOKENS = [
     logo: "/images/usdc.png",
     color: "#2775CA",
   },
+  {
+    address: "0x5fa570E9c8514cdFaD81DB6ce0A327D55251fBD4",
+    symbol: "KPL", // Assuming KPL as symbol for KeplerPay
+    name: "KeplerPay",
+    decimals: 18, // Assuming 18 decimals
+    logo: "/images/keplerpay-logo.png",
+    color: "#6A0DAD", // Deep purple color
+  },
 ]
 
 // Configuração do SDK Holdstation (mantida aqui para a função de cotação)
