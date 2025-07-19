@@ -186,6 +186,7 @@ const translations = {
     tryAgain: "Try again",
     priceUnavailable: "Price data unavailable",
     refreshPrice: "Refresh Price",
+    valueInUsdc: "Value in USDC", // New translation
   },
   pt: {
     connected: "Conectado",
@@ -246,6 +247,7 @@ const translations = {
     tryAgain: "Tente novamente",
     priceUnavailable: "Dados de preço indisponíveis",
     refreshPrice: "Atualizar Preço",
+    valueInUsdc: "Valor em USDC", // New translation
   },
   es: {
     connected: "Conectado",
@@ -306,6 +308,7 @@ const translations = {
     tryAgain: "Intentar de nuevo",
     priceUnavailable: "Datos de precio no disponibles",
     refreshPrice: "Actualizar Precio",
+    valueInUsdc: "Valor en USDC", // New translation
   },
   id: {
     connected: "Terhubung",
@@ -366,6 +369,7 @@ const translations = {
     tryAgain: "Coba lagi",
     priceUnavailable: "Data harga tidak tersedia",
     refreshPrice: "Perbarui Harga",
+    valueInUsdc: "Nilai dalam USDC", // New translation
   },
 }
 
@@ -385,7 +389,6 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
   const [viewMode, setViewMode] = useState<ViewMode>("main")
   const [copied, setCopied] = useState(false)
   const [balances, setBalances] = useState<TokenBalance[]>([])
-  // Removed displayedTokenBalances, tokenPage, hasMoreTokenBalances
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [allTransactions, setAllTransactions] = useState<Transaction[]>([])
   const [displayedTransactions, setDisplayedTransactions] = useState<Transaction[]>([])
@@ -422,7 +425,6 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
   const [loadingPrices, setLoadingPrices] = useState(true)
 
   const TRANSACTIONS_PER_PAGE = 5
-  // Removed TOKENS_PER_DISPLAY
 
   // Load saved language
   useEffect(() => {
@@ -490,7 +492,6 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       const tokenBalances = await walletService.getTokenBalances(walletAddress)
       console.log("✅ Token balances loaded:", tokenBalances)
       setBalances(tokenBalances)
-      // Removed initialization of displayedTokenBalances, hasMoreTokenBalances, tokenPage
     } catch (error) {
       console.error("❌ Error loading balances:", error)
       setError("Failed to load balances")
@@ -498,8 +499,6 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       setLoading(false)
     }
   }, [walletAddress])
-
-  // Removed loadMoreTokenBalances
 
   const loadTransactionHistory = useCallback(
     async (reset = false) => {
@@ -1128,6 +1127,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                         balances.map((token, index) => {
                           const price = tokenPrices[token.symbol] || 0
                           const change = priceChanges[token.symbol] || 0
+                          const valueInUsdc = Number.parseFloat(token.balance) * price
 
                           return (
                             <motion.button
@@ -1155,45 +1155,48 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                                     <p className="text-gray-400 text-xs text-left">{token.name}</p>
                                   </div>
                                 </div>
-                                <div className="text-right flex items-center space-x-2">
-                                  <div>
-                                    <p className="text-white font-medium text-sm">
-                                      {showBalances ? formatBalance(token.balance) : "••••"}
+                                <div className="text-right flex flex-col items-end">
+                                  <p className="text-white font-medium text-sm">
+                                    {showBalances ? formatBalance(token.balance) : "••••"}
+                                  </p>
+                                  {loadingPrices ? (
+                                    <div className="animate-pulse bg-gray-600 h-3 w-16 rounded mt-1"></div>
+                                  ) : (
+                                    <p className="text-gray-400 text-xs mt-1">
+                                      {t.valueInUsdc}: ${valueInUsdc.toFixed(2)}
                                     </p>
-                                    <div className="flex items-center space-x-1">
-                                      {loadingPrices ? (
-                                        <div className="animate-pulse bg-gray-600 h-3 w-12 rounded"></div>
-                                      ) : price > 0 ? (
-                                        <>
-                                          <span className="text-gray-400 text-xs">
-                                            {formatPrice(price, token.symbol)}
-                                          </span>
-                                          <div
-                                            className={`flex items-center space-x-1 ${
-                                              change >= 0 ? "text-green-500" : "text-red-500"
-                                            }`}
-                                          >
-                                            {change >= 0 ? (
-                                              <TrendingUp className="w-2 h-2" />
-                                            ) : (
-                                              <TrendingDown className="w-2 h-2" />
-                                            )}
-                                            <span className="text-xs">{Math.abs(change).toFixed(1)}%</span>
-                                          </div>
-                                        </>
-                                      ) : (
-                                        <span className="text-gray-500 text-xs">Price N/A</span>
-                                      )}
-                                    </div>
+                                  )}
+                                  <div className="flex items-center space-x-1 mt-1">
+                                    {loadingPrices ? (
+                                      <div className="animate-pulse bg-gray-600 h-3 w-12 rounded"></div>
+                                    ) : price > 0 ? (
+                                      <>
+                                        <span className="text-gray-400 text-xs">
+                                          {formatPrice(price, token.symbol)}
+                                        </span>
+                                        <div
+                                          className={`flex items-center space-x-1 ${
+                                            change >= 0 ? "text-green-500" : "text-red-500"
+                                          }`}
+                                        >
+                                          {change >= 0 ? (
+                                            <TrendingUp className="w-2 h-2" />
+                                          ) : (
+                                            <TrendingDown className="w-2 h-2" />
+                                          )}
+                                          <span className="text-xs">{Math.abs(change).toFixed(1)}%</span>
+                                        </div>
+                                      </>
+                                    ) : (
+                                      <span className="text-gray-500 text-xs">Price N/A</span>
+                                    )}
                                   </div>
-                                  {/* Removed BarChart3 icon as chart is removed */}
                                 </div>
                               </div>
                             </motion.button>
                           )
                         })
                       )}
-                      {/* Removed "Show More Tokens" button */}
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -1227,7 +1230,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                     onClick={() => setViewMode("history")}
                     className="flex flex-col items-center justify-center space-y-1 py-2 px-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 rounded-lg transition-all duration-200 text-purple-300 hover:text-purple-200"
                   >
-                    <ArrowDownLeft className="w-4 h-4" />
+                    <History className="w-4 h-4" />
                     <span className="text-xs font-medium">{t.history}</span>
                   </button>
                 </div>
