@@ -40,6 +40,14 @@ const TOKENS = [
     logo: "/images/drachma-token.png", // Updated logo path
     color: "#FFD700",
   },
+  {
+    address: "0x79A02482A880bCE3F13e09Da970dC34db4CD24d1",
+    symbol: "USDC",
+    name: "USD Coin",
+    decimals: 6,
+    logo: "/images/usdc.png",
+    color: "#2775CA",
+  },
 ]
 
 // --- Provider and SDK setup ---
