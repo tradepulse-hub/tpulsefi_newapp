@@ -1,6 +1,6 @@
 "use client"
 
-import { doSwap } from "@/services/swap-service" // Importa doSwap do serviço de swap
+import { doSwap } from "@/services/swap-service"
 import { walletService } from "@/services/wallet-service"
 import { AnimatePresence, motion } from "framer-motion"
 import {
@@ -414,7 +414,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
   const [error, setError] = useState<string | null>(null)
   const [isMinimized, setIsMinimized] = useState(false)
 
-  const [tokenUnitPrices, setTokenUnitPrices] = useState<Record<string, number>>({}) // Renamed from tokenPrices
+  const [tokenUnitPrices, setTokenUnitPrices] = useState<Record<string, number>>({})
   const [loadingPrices, setLoadingPrices] = useState(true)
 
   const TRANSACTIONS_PER_PAGE = 5
@@ -441,7 +441,6 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
   }, [walletAddress])
 
   const loadTokenUnitPrices = useCallback(async () => {
-    // Renamed from loadTokenPrices
     if (!USDC_ADDRESS) {
       console.error("USDC address is not defined, cannot load token unit prices.")
       setLoadingPrices(false)
@@ -476,13 +475,13 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
               prices[token.symbol] = 0 // Price unavailable or failed to get quote
             }
           } catch (error) {
-            console.warn(`⚠️ Failed to get unit price for ${token.symbol} against USDC:`, error)
+            // console.warn(`⚠️ Failed to get unit price for ${token.symbol} against USDC:`, error) // Removed verbose log
             prices[token.symbol] = 0 // Price unavailable
           }
         }),
       )
 
-      setTokenUnitPrices(prices) // Set to tokenUnitPrices
+      setTokenUnitPrices(prices)
     } catch (error) {
       console.error("❌ Error loading token unit prices:", error)
     } finally {
@@ -494,12 +493,9 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     try {
       setLoading(true)
       setError(null)
-      // console.log("🔄 Loading token balances for:", walletAddress)
       const tokenBalances = await walletService.getTokenBalances(walletAddress)
-      // console.log("✅ Token balances loaded:", tokenBalances)
       setBalances(tokenBalances)
     } catch (error) {
-      // console.error("❌ Error loading balances:", error)
       setError("Failed to load balances")
     } finally {
       setLoading(false)
@@ -517,10 +513,8 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
           setLoadingMore(true)
         }
 
-        // console.log("🔄 Loading transaction history for:", walletAddress)
         const limit = (currentPage + 1) * TRANSACTIONS_PER_PAGE + 5
         const history = await walletService.getTransactionHistory(walletAddress, limit)
-        // console.log("✅ Transaction history loaded:", history.length, "transactions")
 
         setAllTransactions(history)
 
@@ -530,7 +524,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         setDisplayedTransactions(newDisplayed)
         setHasMoreTransactions(allTransactions.length > newDisplayCount)
       } catch (error) {
-        // console.error("❌ Error loading transaction history:", error)
+        // console.error("❌ Error loading transaction history:", error) // Removed verbose log
       } finally {
         setLoadingHistory(false)
         setLoadingMore(false)
@@ -566,7 +560,6 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
     setSending(true)
     try {
-      // console.log("🚀 Starting send transaction:", sendForm)
       const selectedToken = balances.find((t) => t.symbol === sendForm.token)
       const result = await walletService.sendToken({
         to: sendForm.recipient,
@@ -575,18 +568,16 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       })
 
       if (result.success) {
-        // console.log("✅ Send successful:", result)
         alert(`✅ ${t.sendSuccess} ${sendForm.amount} ${sendForm.token}!`)
         setViewMode("main")
         setSendForm({ token: "TPF", amount: "", recipient: "" })
         await refreshBalances()
         await loadTransactionHistory(true)
       } else {
-        // console.error("❌ Send failed:", result)
         alert(`❌ ${t.sendFailed}: ${result.error}`)
       }
     } catch (error) {
-      // console.error("❌ Send error:", error)
+      console.error("❌ Send error:", error) // Kept for critical error
       alert(`❌ ${t.sendFailed}. ${t.tryAgain}`)
     } finally {
       setSending(false)
@@ -620,10 +611,8 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       }
 
       try {
-        // Convert input amount to wei using tokenInObj decimals
         const cleanAmount = Number.parseFloat(amountFrom).toFixed(tokenInObj.decimals)
 
-        // Get real quote using the SDK
         const quote = await swapHelper.estimate.quote({
           tokenIn: tokenInObj.address,
           tokenOut: tokenOutObj.address,
@@ -634,14 +623,12 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
           feeReceiver: ethers.ZeroAddress,
         })
 
-        // Validate essential fields in the quote response
         if (!quote || !quote.data || !quote.to || (!quote.outAmount && !quote.addons?.outAmount)) {
           throw new Error("Invalid quote received from SDK: Missing data, to, or outAmount.")
         }
 
         setSwapQuote(quote)
 
-        // Extract output amount. The SDK's outAmount is already in human-readable format (decimal string).
         let outputAmountString = "0"
         if (quote.outAmount) {
           outputAmountString = quote.outAmount.toString()
@@ -653,7 +640,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
         const parsedAmount = Number.parseFloat(outputAmountString)
 
-        const finalAmount = parsedAmount.toFixed(tokenOutObj.decimals > 6 ? 6 : tokenOutObj.decimals) // Limit to 6 decimal places for display or token decimals
+        const finalAmount = parsedAmount.toFixed(tokenOutObj.decimals > 6 ? 6 : tokenOutObj.decimals)
 
         setSwapForm((prev) => ({
           ...prev,
@@ -699,7 +686,6 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
     setSwapping(true)
     try {
-      // Check balance of the token being sent
       const tokenFromBalance = balances.find((t) => t.symbol === swapForm.tokenFrom)
       if (!tokenFromBalance || Number.parseFloat(tokenFromBalance.balance) < Number.parseFloat(swapForm.amountFrom)) {
         throw new Error(
@@ -709,7 +695,6 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         )
       }
 
-      // Validate quote
       if (!swapQuote.data || !swapQuote.to) {
         throw new Error("Invalid swap quote")
       }
@@ -719,7 +704,6 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
       const cleanAmount = Number.parseFloat(swapForm.amountFrom).toFixed(tokenInObj.decimals)
 
-      // Call the doSwap function from the swap service
       const swapResult = await doSwap({
         walletAddress,
         quote: swapQuote,
@@ -728,7 +712,6 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         tokenOutSymbol: swapForm.tokenTo,
       })
 
-      // Check if swapResult is defined and indicates success
       if (swapResult && swapResult.success) {
         alert(
           `✅ ${t.swapSuccess} ${swapForm.amountFrom} ${swapForm.tokenFrom} for ${swapForm.amountTo} ${swapForm.tokenTo}!`,
@@ -744,7 +727,6 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         await refreshBalances()
         await loadTransactionHistory(true)
       } else {
-        // Provide a generic error message if swapResult is undefined or indicates failure
         let errorMessage = t.swapFailed
         if (swapResult && swapResult.errorCode) {
           errorMessage = `${t.swapFailed}: ${swapResult.errorCode}`
@@ -753,9 +735,11 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         } else if (!swapResult) {
           errorMessage = `${t.swapFailed}: ${t.tryAgain} (No result from swap service)`
         }
-        throw new Error(errorMessage) // Re-throw to be caught by the outer catch block
+        throw new Error(errorMessage)
       }
     } catch (error) {
+      console.error("❌ Swap error:", error) // Kept for critical error
+
       let errorMessage = t.swapFailed
       if (error instanceof Error) {
         if (error.message?.includes("Insufficient") || error.message?.includes("insuficiente")) {
@@ -765,7 +749,6 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         } else if (error.message?.includes("Network")) {
           errorMessage = `${t.swapFailed}: ${t.networkError}. ${t.tryAgain}`
         } else if (error.message?.includes("simulation_failed")) {
-          // Adicionado tratamento para simulation_failed
           errorMessage = `${t.swapFailed}: Simulation failed. The quote might be invalid or expired.`
         } else {
           errorMessage = `${t.swapFailed}: ${error.message}`
@@ -840,16 +823,21 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     if (walletAddress) {
       loadBalances()
       loadTransactionHistory(true)
-      loadTokenUnitPrices() // Ensure unit prices are loaded on component mount
+      loadTokenUnitPrices()
     }
-  }, [walletAddress, loadBalances, loadTransactionHistory, loadTokenUnitPrices]) // Add loadTokenUnitPrices to dependencies
+  }, [walletAddress, loadBalances, loadTransactionHistory, loadTokenUnitPrices])
 
   const formatBalance = useCallback((balance: string): string => {
     const num = Number.parseFloat(balance)
     if (num === 0) return "0"
-    if (num < 0.0001) return "<0.0001"
-    if (num < 1) return num.toFixed(4)
-    if (num < 1000) return num.toFixed(2) // Changed to 2 decimal places for numbers < 1000
+    // For numbers less than 1, dynamically determine decimal places for precision
+    if (num < 1) {
+      // Calculate decimal places needed to show significant digits, up to a max of 10
+      const decimalPlaces = Math.max(2, -Math.floor(Math.log10(Math.abs(num))) + 2)
+      return num.toFixed(Math.min(decimalPlaces, 10))
+    }
+    // For larger numbers, use fixed decimal places or K/M notation
+    if (num < 1000) return num.toFixed(2)
     if (num < 1000000) return `${(num / 1000).toFixed(1)}K`
     return `${(num / 1000000).toFixed(1)}M`
   }, [])
@@ -975,7 +963,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
                       exit={{ opacity: 0, height: 0 }}
-                      className="space-y-2 max-h-[280px] overflow-y-auto pr-1" // Added max-height and overflow-y-auto
+                      className="space-y-2 max-h-[280px] overflow-y-auto pr-1"
                     >
                       {loading ? (
                         <div className="flex items-center justify-center py-4">
@@ -992,9 +980,8 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                           <span className="text-gray-400 text-sm">No tokens found</span>
                         </div>
                       ) : (
-                        // Directly map all balances, let overflow handle scrolling
                         balances.map((token, index) => {
-                          const unitPrice = tokenUnitPrices[token.symbol] || 0 // Use tokenUnitPrices
+                          const unitPrice = tokenUnitPrices[token.symbol] || 0
                           const valueInUsdc = Number.parseFloat(token.balance) * unitPrice
 
                           return (
@@ -1030,8 +1017,10 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                                     {/* Total value in USDC */}
                                     {loadingPrices ? (
                                       <div className="animate-pulse bg-gray-600 h-3 w-16 rounded"></div>
-                                    ) : (
+                                    ) : unitPrice > 0 ? (
                                       <span className="text-gray-400 text-xs">{`$${valueInUsdc.toFixed(2)}`}</span>
+                                    ) : (
+                                      <span className="text-gray-500 text-xs">{t.priceUnavailable}</span>
                                     )}
 
                                     {/* Unit price in USDC */}
@@ -1277,7 +1266,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center space-x-2">
                         <img
-                          src={getTokenIcon(swapForm.tokenFrom) || "/placeholder.svg"} // Usando <img> tag
+                          src={getTokenIcon(swapForm.tokenFrom) || "/placeholder.svg"}
                           alt={swapForm.tokenFrom}
                           className="w-6 h-6 rounded-full"
                           onError={(e) => {
@@ -1290,8 +1279,8 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                             setSwapForm((prev) => ({
                               ...prev,
                               tokenFrom: e.target.value,
-                              amountTo: "", // Clear amountTo on token change
-                              amountFrom: "", // Clear amountFrom on token change
+                              amountTo: "",
+                              amountFrom: "",
                             }))
                           }
                           className="bg-transparent text-white font-medium focus:outline-none"
@@ -1341,7 +1330,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                   <div className="bg-black/30 border border-white/20 rounded-lg p-3">
                     <div className="flex items-center space-x-2">
                       <img
-                        src={getTokenIcon(swapForm.tokenTo) || "/placeholder.svg"} // Usando <img> tag
+                        src={getTokenIcon(swapForm.tokenTo) || "/placeholder.svg"}
                         alt={swapForm.tokenTo}
                         className="w-6 h-6 rounded-full"
                         onError={(e) => {
@@ -1354,8 +1343,8 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                           setSwapForm((prev) => ({
                             ...prev,
                             tokenTo: e.target.value,
-                            amountTo: "", // Clear amountTo on token change
-                            amountFrom: "", // Clear amountFrom on token change
+                            amountTo: "",
+                            amountFrom: "",
                           }))
                         }
                         className="bg-transparent text-white font-medium focus:outline-none"
