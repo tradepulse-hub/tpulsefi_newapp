@@ -94,9 +94,10 @@ const worldSwap = new HoldSo(tokenProvider, inmemoryTokenStorage)
 swapHelper.load(zeroX)
 swapHelper.load(worldSwap)
 
-// Define the fee and feeReceiver consistently with swap-service.ts
+// Define the fee, feeReceiver, and partnerCode consistently with swap-service.ts
 const SWAP_FEE = "0.2"
 const SWAP_FEE_RECEIVER = "0x4bb270ef6dcb052a083bd5cff518e2e019c0f4ee"
+const PARTNER_CODE = "24568" // Added partnerCode
 
 /**
  * Get real-time token price using swapHelper.estimate.quote
@@ -124,6 +125,7 @@ async function getRealTokenPrice(tokenSymbol: string): Promise<number> {
       slippage: "0.3", // Standard slippage for price estimation
       fee: SWAP_FEE, // Use consistent fee
       feeReceiver: SWAP_FEE_RECEIVER, // Use consistent feeReceiver
+      partnerCode: PARTNER_CODE, // Added partnerCode
     })
 
     if (!quote || !quote.outAmount) {
