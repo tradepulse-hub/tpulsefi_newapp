@@ -1,5 +1,5 @@
 import type { SwapParams } from "@holdstation/worldchain-sdk"
-import { TOKENS, swapHelper } from "./swap-config" // Importar TOKENS e swapHelper do novo serviço de configuração
+import { TOKENS, swapHelper } from "./token-price-service" // Importar TOKENS e swapHelper do serviço de preço
 
 // --- Mocked helper functions (replace with real implementations as needed) ---
 async function updateUserData(address: string) {
