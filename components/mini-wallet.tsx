@@ -1,6 +1,5 @@
 "use client"
 
-import { DebugConsole } from "@/components/debug-console"
 import { PriceChart } from "@/components/price-chart"
 import { doSwap } from "@/services/swap-service" // Importa doSwap do serviço de swap
 import {
@@ -455,7 +454,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
           try {
             const [price, change] = await Promise.all([
               getCurrentTokenPrice(token.symbol),
-              getPriceChange(token.symbol, "1H"),
+              getPriceChange(token.symbol, "1h"),
             ])
             prices[token.symbol] = price
             changes[token.symbol] = change
@@ -610,13 +609,13 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
           `🔄 Getting real quote for: ${amountFrom} ${tokenFromSymbol} to ${tokenToSymbol} via Holdstation SDK`,
         )
         console.log(`⚙️ Request parameters:
-        tokenIn: ${tokenInObj.address} (${tokenFromSymbol})
-        tokenOut: ${tokenOutObj.address} (${tokenToSymbol})
-        amountIn: ${amountFrom} (human-readable)
-        partnerCode: "24568"
-        fee: "0.2"
-        feeReceiver: "${ethers.ZeroAddress}"
-      `)
+      tokenIn: ${tokenInObj.address} (${tokenFromSymbol})
+      tokenOut: ${tokenOutObj.address} (${tokenToSymbol})
+      amountIn: ${amountFrom} (human-readable)
+      partnerCode: "24568"
+      fee: "0.2"
+      feeReceiver: "${ethers.ZeroAddress}"
+    `)
 
         // Convert input amount to wei using tokenInObj decimals
         const cleanAmount = Number.parseFloat(amountFrom).toFixed(tokenInObj.decimals)
@@ -946,7 +945,6 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
             <span className="text-white text-sm font-medium">{formatAddress(walletAddress)}</span>
           </button>
         </motion.div>
-        <DebugConsole />
       </>
     )
   }
@@ -1721,7 +1719,6 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
           )}
         </AnimatePresence>
       </motion.div>
-      <DebugConsole />
     </>
   )
 }
