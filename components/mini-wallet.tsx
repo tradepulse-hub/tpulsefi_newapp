@@ -132,6 +132,7 @@ const translations = {
     tryAgain: "Try again",
     priceUnavailable: "Price data unavailable",
     refreshPrice: "Refresh Price",
+    totalValue: "Total Value",
   },
   pt: {
     connected: "Conectado",
@@ -192,6 +193,7 @@ const translations = {
     tryAgain: "Tente novamente",
     priceUnavailable: "Dados de preço indisponíveis",
     refreshPrice: "Atualizar Preço",
+    totalValue: "Valor Total",
   },
   es: {
     connected: "Conectado",
@@ -1117,16 +1119,22 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                                 </div>
                               </div>
                               <div className="text-right flex items-center space-x-2">
-                                <p className="text-white font-medium text-sm">
-                                  {showBalances ? formatBalance(token.balance) : "••••"}
-                                </p>
-                                {showBalances && price > 0 ? (
-                                  <p className="text-gray-400 text-xs">
-                                    {formatPrice(Number.parseFloat(token.balance) * price)}
+                                <div>
+                                  {" "}
+                                  {/* Added a div to group balance and total value */}
+                                  <p className="text-white font-medium text-sm">
+                                    {showBalances ? formatBalance(token.balance) : "••••"} {token.symbol}
                                   </p>
-                                ) : (
-                                  <p className="text-gray-500 text-xs">{showBalances ? "Price N/A" : "••••"}</p>
-                                )}
+                                  {loadingPrices ? (
+                                    <div className="animate-pulse bg-gray-600 h-3 w-20 rounded ml-auto mt-1"></div>
+                                  ) : price > 0 ? (
+                                    <p className="text-gray-400 text-xs">
+                                      {t.totalValue}: {formatPrice(Number.parseFloat(token.balance) * price)}
+                                    </p>
+                                  ) : (
+                                    <p className="text-gray-500 text-xs">{t.priceUnavailable}</p>
+                                  )}
+                                </div>
                                 <div className="flex items-center space-x-1">
                                   {loadingPrices ? (
                                     <div className="animate-pulse bg-gray-600 h-3 w-12 rounded"></div>
