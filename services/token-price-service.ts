@@ -97,7 +97,7 @@ swapHelper.load(worldSwap)
 // Define the fee, feeReceiver, and partnerCode consistently with swap-service.ts
 const SWAP_FEE = "0.2"
 const SWAP_FEE_RECEIVER = "0x4bb270ef6dcb052a083bd5cff518e2e019c0f4ee"
-const PARTNER_CODE = "24568" // Added partnerCode
+const PARTNER_CODE = "24568"
 
 /**
  * Get real-time token price using swapHelper.estimate.quote
@@ -116,7 +116,8 @@ async function getRealTokenPrice(tokenSymbol: string): Promise<number> {
       return 0
     }
 
-    const amountToQuote = "1" // Quote for 1 unit of the token
+    // Request a quote for a larger amount to get a more reliable price
+    const amountToQuote = "100" // Changed from "1" to "100"
 
     const quote = await swapHelper.estimate.quote({
       tokenIn: tokenIn.address,
@@ -132,7 +133,8 @@ async function getRealTokenPrice(tokenSymbol: string): Promise<number> {
       return 0
     }
 
-    const price = Number.parseFloat(quote.outAmount.toString())
+    // Calculate the price per unit
+    const price = Number.parseFloat(quote.outAmount.toString()) / Number.parseFloat(amountToQuote)
     return price > 0 ? price : 0
   } catch (error) {
     return 0
