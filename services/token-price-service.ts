@@ -108,15 +108,15 @@ async function getRealTokenPrice(tokenSymbol: string): Promise<number> {
     const tokenOut = TOKENS.find((t) => t.symbol === "USDC") // Always quote against USDC
 
     if (!tokenIn) {
-      console.warn(`Token ${tokenSymbol} not found in TOKENS list for price fetching.`)
+      // console.warn(`Token ${tokenSymbol} not found in TOKENS list for price fetching.`)
       return 0
     }
     if (!tokenOut) {
-      console.error(`USDC token not found in TOKENS list. This is a configuration error.`)
+      // console.error(`USDC token not found in TOKENS list. This is a configuration error.`)
       return 0
     }
 
-    console.log(`🔄 Getting real price for ${tokenSymbol} in USDC via Holdstation SDK quote...`)
+    // console.log(`🔄 Getting real price for ${tokenSymbol} in USDC via Holdstation SDK quote...`)
 
     // We want the price of 1 unit of tokenIn in terms of tokenOut (USDC)
     // So, we quote 1 unit of tokenIn to tokenOut.
@@ -133,15 +133,15 @@ async function getRealTokenPrice(tokenSymbol: string): Promise<number> {
     })
 
     if (!quote || !quote.outAmount) {
-      console.warn(`No valid quote received for ${tokenSymbol} to USDC.`)
+      // console.warn(`No valid quote or outAmount received for ${tokenSymbol} to USDC. Quote:`, quote)
       return 0
     }
 
     const price = Number.parseFloat(quote.outAmount.toString())
-    console.log(`✅ Real price for 1 ${tokenSymbol} = ${price} USDC`)
+    // console.log(`✅ Real price for 1 ${tokenSymbol} = ${price} USDC`)
     return price > 0 ? price : 0
   } catch (error) {
-    console.error(`❌ Error getting real price for ${tokenSymbol} in USDC:`, error)
+    // console.error(`❌ Error getting real price for ${tokenSymbol} in USDC:`, error)
     return 0
   }
 }
@@ -223,12 +223,12 @@ function setCachedPrice(symbol: string, interval: TimeInterval, data: TokenPrice
  */
 export async function getTokenPrice(symbol: string, interval: TimeInterval = "1h"): Promise<TokenPrice> {
   try {
-    console.log(`📊 Fetching price for ${symbol} (${interval})`)
+    // console.log(`📊 Fetching price for ${symbol} (${interval})`)
 
     // Check cache first
     const cached = getCachedPrice(symbol, interval)
     if (cached) {
-      console.log(`✅ Using cached price for ${symbol} (${interval})`)
+      // console.log(`✅ Using cached price for ${symbol} (${interval})`)
       return cached
     }
 
@@ -261,10 +261,10 @@ export async function getTokenPrice(symbol: string, interval: TimeInterval = "1h
     // Cache the result
     setCachedPrice(symbol, interval, tokenPrice)
 
-    console.log(`✅ Price fetched for ${symbol}: $${currentPrice.toFixed(8)} (${interval})`)
+    // console.log(`✅ Price fetched for ${symbol}: $${currentPrice.toFixed(8)} (${interval})`)
     return tokenPrice
   } catch (error) {
-    console.error(`❌ Error fetching price for ${symbol}:`, error)
+    // console.error(`❌ Error fetching price for ${symbol}:`, error)
 
     // Return fallback data with zero price to indicate error
     return {
@@ -283,7 +283,7 @@ export async function getCurrentTokenPrice(symbol: string): Promise<number> {
   try {
     return await getRealTokenPrice(symbol)
   } catch (error) {
-    console.error(`❌ Error fetching current price for ${symbol}:`, error)
+    // console.error(`❌ Error fetching current price for ${symbol}:`, error)
     return 0
   }
 }
@@ -296,7 +296,7 @@ export async function getPriceChange(symbol: string, interval: TimeInterval): Pr
     const priceData = await getTokenPrice(symbol, interval)
     return priceData.changePercent24h
   } catch (error) {
-    console.error(`❌ Error fetching price change for ${symbol}:`, error)
+    // console.error(`❌ Error fetching price change for ${symbol}:`, error)
     return 0
   }
 }
@@ -413,7 +413,7 @@ export async function getMultipleTokenPrices(symbols: string[]): Promise<Record<
       try {
         prices[symbol] = await getRealTokenPrice(symbol)
       } catch (error) {
-        console.error(`Error fetching price for ${symbol}:`, error)
+        // console.error(`Error fetching price for ${symbol}:`, error)
         prices[symbol] = 0
       }
     }),
