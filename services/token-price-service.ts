@@ -1,6 +1,19 @@
 // Token Price Service for fetching current prices and historical data using Holdstation SDK
 
+import { ethers } from "ethers"
+import {
+  Client,
+  Multicall3,
+  config,
+  HoldSo,
+  inmemoryTokenStorage,
+  SwapHelper,
+  TokenProvider,
+  ZeroX,
+} from "@holdstation/worldchain-sdk"
+
 // Since TOKENS is not exported from swap-service, we define it here
+// Ensure this list is consistent across all files that use it (mini-wallet, swap-service)
 const TOKENS = [
   {
     address: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003",
@@ -46,13 +59,13 @@ const TOKENS = [
 
 // Time intervals in milliseconds
 export const TIME_INTERVALS = {
-  "1M": 60 * 1000,
-  "5M": 5 * 60 * 1000,
-  "15M": 15 * 60 * 1000,
-  "1H": 60 * 60 * 1000,
-  "4H": 4 * 60 * 60 * 1000,
-  "8H": 8 * 60 * 60 * 1000,
-  "1D": 24 * 60 * 60 * 1000,
+  "1m": 60 * 1000,
+  "5m": 5 * 60 * 1000,
+  "15m": 15 * 60 * 1000,
+  "1h": 60 * 60 * 1000,
+  "4h": 4 * 60 * 60 * 1000,
+  "8h": 8 * 60 * 60 * 1000,
+  "1d": 24 * 60 * 60 * 1000,
 } as const
 
 export type TimeInterval = keyof typeof TIME_INTERVALS
@@ -76,42 +89,67 @@ TOKENS.forEach((token) => {
   priceCache.set(token.symbol, new Map())
 })
 
+// SDK setup (copied from swap-service.ts and mini-wallet.tsx for consistency)
+const RPC_URL = "https://worldchain-mainnet.g.alchemy.com/public"
+const provider = new ethers.JsonRpcProvider(RPC_URL, { chainId: 480, name: "worldchain" }, { staticNetwork: true })
+const client = new Client(provider)
+config.client = client
+config.multicall3 = new Multicall3(provider)
+const swapHelper = new SwapHelper(client, { tokenStorage: inmemoryTokenStorage })
+const tokenProvider = new TokenProvider({ client, multicall3: config.multicall3 })
+const zeroX = new ZeroX(tokenProvider, inmemoryTokenStorage)
+const worldSwap = new HoldSo(tokenProvider, inmemoryTokenStorage)
+swapHelper.load(zeroX)
+swapHelper.load(worldSwap)
+
 /**
- * Get real-time token price - simplified version without getRealQuote
+ * Get real-time token price using swapHelper.estimate.quote
+ * This function will now get the price of 1 unit of tokenSymbol in USDC.
  */
 async function getRealTokenPrice(tokenSymbol: string): Promise<number> {
   try {
-    // USDC is our base currency
     if (tokenSymbol === "USDC") {
-      return 1.0
+      return 1.0 // USDC price is always 1.0 against itself
     }
 
-    const token = TOKENS.find((t) => t.symbol === tokenSymbol)
-    if (!token) {
-      console.warn(`Token ${tokenSymbol} not found in TOKENS list`)
+    const tokenIn = TOKENS.find((t) => t.symbol === tokenSymbol)
+    const tokenOut = TOKENS.find((t) => t.symbol === "USDC") // Always quote against USDC
+
+    if (!tokenIn) {
+      console.warn(`Token ${tokenSymbol} not found in TOKENS list for price fetching.`)
+      return 0
+    }
+    if (!tokenOut) {
+      console.error(`USDC token not found in TOKENS list. This is a configuration error.`)
       return 0
     }
 
-    console.log(`🔄 Getting real price for ${tokenSymbol}`)
+    console.log(`🔄 Getting real price for ${tokenSymbol} in USDC via Holdstation SDK quote...`)
 
-    // Since we don't have access to getRealQuote, we'll use mock prices
-    // In a real implementation, you would need to implement proper price fetching
-    let price = 0
+    // We want the price of 1 unit of tokenIn in terms of tokenOut (USDC)
+    // So, we quote 1 unit of tokenIn to tokenOut.
+    const amountToQuote = "1" // Quote for 1 unit of the token
 
-    if (tokenSymbol === "WLD") {
-      price = 2.5 + (Math.random() - 0.5) * 0.1 // Mock WLD price around $2.5
-    } else if (tokenSymbol === "TPF") {
-      price = 0.0025 + (Math.random() - 0.5) * 0.0002 // Mock TPF price around $0.0025
-    } else if (tokenSymbol === "WDD") {
-      price = 0.000001 + (Math.random() - 0.5) * 0.0000001 // Mock WDD price
-    } else if (tokenSymbol === "KPP") {
-      price = 0.05 + (Math.random() - 0.5) * 0.005 // Mock KPP price around $0.05
+    const quote = await swapHelper.estimate.quote({
+      tokenIn: tokenIn.address,
+      tokenOut: tokenOut.address,
+      amountIn: amountToQuote,
+      slippage: "0.3", // Standard slippage for price estimation
+      // No fee or feeReceiver needed for price estimation, but including for consistency if required by SDK
+      fee: "0",
+      feeReceiver: ethers.ZeroAddress,
+    })
+
+    if (!quote || !quote.outAmount) {
+      console.warn(`No valid quote received for ${tokenSymbol} to USDC.`)
+      return 0
     }
 
-    console.log(`✅ Real price for ${tokenSymbol}: $${price}`)
+    const price = Number.parseFloat(quote.outAmount.toString())
+    console.log(`✅ Real price for 1 ${tokenSymbol} = ${price} USDC`)
     return price > 0 ? price : 0
   } catch (error) {
-    console.error(`❌ Error getting real price for ${tokenSymbol}:`, error)
+    console.error(`❌ Error getting real price for ${tokenSymbol} in USDC:`, error)
     return 0
   }
 }
@@ -135,7 +173,7 @@ function generatePriceHistory(
     const time = now - i * intervalMs
 
     // Add realistic price movement
-    const volatility = interval === "1M" ? 0.002 : interval === "5M" ? 0.005 : 0.01
+    const volatility = interval === "1m" ? 0.002 : interval === "5m" ? 0.005 : 0.01
     const change = (Math.random() - 0.5) * volatility
 
     // Gradually trend towards current price
@@ -191,7 +229,7 @@ function setCachedPrice(symbol: string, interval: TimeInterval, data: TokenPrice
 /**
  * Main function to get token price with mock data
  */
-export async function getTokenPrice(symbol: string, interval: TimeInterval = "1H"): Promise<TokenPrice> {
+export async function getTokenPrice(symbol: string, interval: TimeInterval = "1h"): Promise<TokenPrice> {
   try {
     console.log(`📊 Fetching price for ${symbol} (${interval})`)
 
@@ -315,22 +353,22 @@ export function formatTime(timestamp: number, interval: TimeInterval): string {
   const date = new Date(timestamp)
 
   switch (interval) {
-    case "1M":
-    case "5M":
-    case "15M":
+    case "1m":
+    case "5m":
+    case "15m":
       return date.toLocaleTimeString("en-US", {
         hour: "2-digit",
         minute: "2-digit",
         second: "2-digit",
       })
-    case "1H":
-    case "4H":
+    case "1h":
+    case "4h":
       return date.toLocaleTimeString("en-US", {
         hour: "2-digit",
         minute: "2-digit",
       })
-    case "8H":
-    case "1D":
+    case "8h":
+    case "1d":
       return date.toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
@@ -400,11 +438,11 @@ export function startPriceUpdates(): void {
 
   updateInterval = setInterval(() => {
     TOKENS.forEach((token) => {
-      // Update 1M and 5M intervals more frequently
-      updateTokenPrice(token.symbol, "1M").catch(console.error)
+      // Update 1m and 5m intervals more frequently
+      updateTokenPrice(token.symbol, "1m").catch(console.error)
       if (Math.random() > 0.7) {
         // 30% chance
-        updateTokenPrice(token.symbol, "5M").catch(console.error)
+        updateTokenPrice(token.symbol, "5m").catch(console.error)
       }
     })
   }, 30000) // Update every 30 seconds
