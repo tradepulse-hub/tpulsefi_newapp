@@ -1,7 +1,7 @@
 "use client"
 
 import { doSwap } from "@/services/swap-service" // Importa doSwap do serviço de swap
-import { formatPrice, getCurrentTokenPrice, getPriceChange } from "@/services/token-price-service"
+import { getCurrentTokenPrice, getPriceChange } from "@/services/token-price-service"
 import { walletService } from "@/services/wallet-service"
 import { AnimatePresence, motion } from "framer-motion"
 import {
@@ -224,7 +224,7 @@ const translations = {
     available: "Disponível",
     noTransactions: "Sem transações recentes",
     sent: "Enviado",
-    received: "Recebido",
+    received: "Recibido",
     pending: "Pendente",
     confirmed: "Confirmado",
     failed: "Falhou",
@@ -447,7 +447,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
   const loadTokenPrices = useCallback(async () => {
     try {
       setLoadingPrices(true)
-      console.log("🔄 Loading real token prices via Holdstation SDK...")
+      // console.log("🔄 Loading real token prices via Holdstation SDK...")
 
       const prices: Record<string, number> = {}
       const changes: Record<string, number> = {}
@@ -461,9 +461,9 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
             ])
             prices[token.symbol] = price
             changes[token.symbol] = change
-            console.log(`✅ Price loaded for ${token.symbol}: $${price}`)
+            // console.log(`✅ Price loaded for ${token.symbol}: $${price}`)
           } catch (error) {
-            console.error(`❌ Error fetching data for ${token.symbol}:`, error)
+            // console.error(`❌ Error fetching data for ${token.symbol}:`, error)
             prices[token.symbol] = 0
             changes[token.symbol] = 0
           }
@@ -472,9 +472,9 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
       setTokenPrices(prices)
       setPriceChanges(changes)
-      console.log("✅ All token prices loaded successfully")
+      // console.log("✅ All token prices loaded successfully")
     } catch (error) {
-      console.error("❌ Error loading token prices:", error)
+      // console.error("❌ Error loading token prices:", error)
     } finally {
       setLoadingPrices(false)
     }
@@ -484,12 +484,12 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     try {
       setLoading(true)
       setError(null)
-      console.log("🔄 Loading token balances for:", walletAddress)
+      // console.log("🔄 Loading token balances for:", walletAddress)
       const tokenBalances = await walletService.getTokenBalances(walletAddress)
-      console.log("✅ Token balances loaded:", tokenBalances)
+      // console.log("✅ Token balances loaded:", tokenBalances)
       setBalances(tokenBalances)
     } catch (error) {
-      console.error("❌ Error loading balances:", error)
+      // console.error("❌ Error loading balances:", error)
       setError("Failed to load balances")
     } finally {
       setLoading(false)
@@ -507,10 +507,10 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
           setLoadingMore(true)
         }
 
-        console.log("🔄 Loading transaction history for:", walletAddress)
+        // console.log("🔄 Loading transaction history for:", walletAddress)
         const limit = (currentPage + 1) * TRANSACTIONS_PER_PAGE + 5
         const history = await walletService.getTransactionHistory(walletAddress, limit)
-        console.log("✅ Transaction history loaded:", history.length, "transactions")
+        // console.log("✅ Transaction history loaded:", history.length, "transactions")
 
         setAllTransactions(history)
 
@@ -520,7 +520,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         setDisplayedTransactions(newDisplayed)
         setHasMoreTransactions(allTransactions.length > newDisplayCount)
       } catch (error) {
-        console.error("❌ Error loading transaction history:", error)
+        // console.error("❌ Error loading transaction history:", error)
       } finally {
         setLoadingHistory(false)
         setLoadingMore(false)
@@ -555,7 +555,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
     setSending(true)
     try {
-      console.log("🚀 Starting send transaction:", sendForm)
+      // console.log("🚀 Starting send transaction:", sendForm)
       const selectedToken = balances.find((t) => t.symbol === sendForm.token)
       const result = await walletService.sendToken({
         to: sendForm.recipient,
@@ -564,18 +564,18 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       })
 
       if (result.success) {
-        console.log("✅ Send successful:", result)
+        // console.log("✅ Send successful:", result)
         alert(`✅ ${t.sendSuccess} ${sendForm.amount} ${sendForm.token}!`)
         setViewMode("main")
         setSendForm({ token: "TPF", amount: "", recipient: "" })
         await refreshBalances()
         await loadTransactionHistory(true)
       } else {
-        console.error("❌ Send failed:", result)
+        // console.error("❌ Send failed:", result)
         alert(`❌ ${t.sendFailed}: ${result.error}`)
       }
     } catch (error) {
-      console.error("❌ Send error:", error)
+      // console.error("❌ Send error:", error)
       alert(`❌ ${t.sendFailed}. ${t.tryAgain}`)
     } finally {
       setSending(false)
@@ -609,21 +609,21 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       }
 
       try {
-        console.log(
-          `🔄 Getting real quote for: ${amountFrom} ${tokenFromSymbol} to ${tokenToSymbol} via Holdstation SDK`,
-        )
-        console.log(`⚙️ Request parameters:
-      tokenIn: ${tokenInObj.address} (${tokenFromSymbol})
-      tokenOut: ${tokenOutObj.address} (${tokenToSymbol})
-      amountIn: ${amountFrom} (human-readable)
-      partnerCode: "24568"
-      fee: "0.2"
-      feeReceiver: "${ethers.ZeroAddress}"
-    `)
+        // console.log(
+        //   `🔄 Getting real quote for: ${amountFrom} ${tokenFromSymbol} to ${tokenToSymbol} via Holdstation SDK`,
+        // )
+        // console.log(`⚙️ Request parameters:
+        // tokenIn: ${tokenInObj.address} (${tokenFromSymbol})
+        // tokenOut: ${tokenOutObj.address} (${tokenToSymbol})
+        // amountIn: ${amountFrom} (human-readable)
+        // partnerCode: "24568"
+        // fee: "0.2"
+        // feeReceiver: "${ethers.ZeroAddress}"
+        // `)
 
         // Convert input amount to wei using tokenInObj decimals
         const cleanAmount = Number.parseFloat(amountFrom).toFixed(tokenInObj.decimals)
-        console.log(`💰 Input amount (${tokenFromSymbol}): ${cleanAmount}`)
+        // console.log(`💰 Input amount (${tokenFromSymbol}): ${cleanAmount}`)
 
         // Get real quote using the SDK
         const quote = await swapHelper.estimate.quote({
@@ -637,7 +637,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         })
 
         // Log do objeto completo da cotação para inspeção
-        console.log("📊 FULL RAW QUOTE RESPONSE FROM HOLDSTATION SDK:", JSON.stringify(quote, null, 2))
+        // console.log("📊 FULL RAW QUOTE RESPONSE FROM HOLDSTATION SDK:", JSON.stringify(quote, null, 2))
 
         // Validate essential fields in the quote response
         if (!quote || !quote.data || !quote.to || (!quote.outAmount && !quote.addons?.outAmount)) {
@@ -656,23 +656,23 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
           throw new Error("Could not determine output amount from quote.")
         }
 
-        console.log(
-          `🔍 Extracted raw output amount string (from SDK): "${outputAmountString}" (Type: ${typeof outputAmountString})`,
-        )
+        // console.log(
+        //   `🔍 Extracted raw output amount string (from SDK): "${outputAmountString}" (Type: ${typeof outputAmountString})`,
+        // )
 
         const parsedAmount = Number.parseFloat(outputAmountString)
-        console.log(`🔢 Parsed output amount (number): ${parsedAmount}`)
+        // console.log(`🔢 Parsed output amount (number): ${parsedAmount}`)
 
         const finalAmount = parsedAmount.toFixed(tokenOutObj.decimals > 6 ? 6 : tokenOutObj.decimals) // Limit to 6 decimal places for display or token decimals
 
-        console.log(`✅ Final formatted amount for display: ${finalAmount} ${tokenToSymbol}`)
+        // console.log(`✅ Final formatted amount for display: ${finalAmount} ${tokenToSymbol}`)
 
         setSwapForm((prev) => ({
           ...prev,
           amountTo: finalAmount,
         }))
       } catch (error) {
-        console.error("❌ Error getting real quote:", error)
+        // console.error("❌ Error getting real quote:", error)
 
         let errorMessage = t.quoteError
         if (error instanceof Error) {
@@ -713,7 +713,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
     setSwapping(true)
     try {
-      console.log("🚀 Starting swap transaction using swap service:", swapForm)
+      // console.log("🚀 Starting swap transaction using swap service:", swapForm)
 
       // Check balance of the token being sent
       const tokenFromBalance = balances.find((t) => t.symbol === swapForm.tokenFrom)
@@ -730,7 +730,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         throw new Error("Invalid swap quote")
       }
 
-      console.log("🔄 Calling doSwap from swap service...")
+      // console.log("🔄 Calling doSwap from swap service...")
 
       const tokenInObj = TOKENS.find((t) => t.symbol === swapForm.tokenFrom)
       if (!tokenInObj) throw new Error("Input token not found.")
@@ -748,7 +748,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
       // Check if swapResult is defined and indicates success
       if (swapResult && swapResult.success) {
-        console.log("✅ Swap completed successfully via swap service", swapResult)
+        // console.log("✅ Swap completed successfully via swap service", swapResult)
         alert(
           `✅ ${t.swapSuccess} ${swapForm.amountFrom} ${swapForm.tokenFrom} for ${swapForm.amountTo} ${swapForm.tokenTo}!`,
         )
@@ -763,7 +763,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         await refreshBalances()
         await loadTransactionHistory(true)
       } else {
-        console.error("❌ Swap failed via swap service:", swapResult)
+        // console.error("❌ Swap failed via swap service:", swapResult)
         // Provide a generic error message if swapResult is undefined or indicates failure
         let errorMessage = t.swapFailed
         if (swapResult && swapResult.errorCode) {
@@ -776,7 +776,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         throw new Error(errorMessage) // Re-throw to be caught by the outer catch block
       }
     } catch (error) {
-      console.error("❌ Swap error:", error)
+      // console.error("❌ Swap error:", error)
 
       let errorMessage = t.swapFailed
       if (error instanceof Error) {
@@ -825,7 +825,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
   }, [])
 
   const handleTokenClick = useCallback(async (token: TokenBalance) => {
-    console.log("🔄 Loading token details for:", token.symbol)
+    // console.log("🔄 Loading token details for:", token.symbol)
     setSelectedTokenState(token)
     setViewMode("tokenDetail")
   }, [])
@@ -866,7 +866,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
   useEffect(() => {
     if (walletAddress) {
-      console.log("🔗 Wallet connected:", walletAddress)
+      // console.log("🔗 Wallet connected:", walletAddress)
       loadBalances()
       loadTransactionHistory(true)
       loadTokenPrices()
@@ -1153,21 +1153,13 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                                   <p className="text-white font-medium text-sm">
                                     {showBalances ? formatBalance(token.balance) : "••••"}
                                   </p>
-                                  <p className="text-gray-400 text-xs mt-1">
-                                    {loadingPrices ? (
-                                      <div className="animate-pulse bg-gray-600 h-3 w-16 rounded"></div>
-                                    ) : (
-                                      `$${valueInUsdc.toFixed(2)}`
-                                    )}
-                                  </p>
                                   <div className="flex items-center space-x-1 mt-1">
                                     {loadingPrices ? (
                                       <div className="animate-pulse bg-gray-600 h-3 w-12 rounded"></div>
                                     ) : price > 0 ? (
                                       <>
-                                        <span className="text-gray-400 text-xs">
-                                          {formatPrice(price, token.symbol)}
-                                        </span>
+                                        {/* Display the total value in USDC here */}
+                                        <span className="text-gray-400 text-xs">{`$${valueInUsdc.toFixed(2)}`}</span>
                                         <div
                                           className={`flex items-center space-x-1 ${
                                             change >= 0 ? "text-green-500" : "text-red-500"
