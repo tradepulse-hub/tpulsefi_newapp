@@ -48,6 +48,14 @@ const TOKENS = [
     logo: "/images/usdc.png",
     color: "#2775CA",
   },
+  {
+    address: "0x5fa570E9c8514cdFaD81DB6ce0A327D55251fBD4",
+    symbol: "KPP", // Corrected symbol to KPP
+    name: "KeplerPay",
+    decimals: 18, // Assuming 18 decimals
+    logo: "/images/keplerpay-logo.png",
+    color: "#6A0DAD", // Deep purple color
+  },
 ]
 
 // --- Provider and SDK setup ---
@@ -125,8 +133,8 @@ export async function doSwap({
       },
       partnerCode: "24568",
       feeAmountOut: quote.addons?.feeAmountOut,
-      fee: "0.2",
-      feeReceiver: "0x4bb270ef6dcb052a083bd5cff518e2e019c0f4ee",
+      fee: "0.2", // Fee from the attached file
+      feeReceiver: "0x4bb270ef6dcb052a083bd5cff518e2e019c0f4ee", // Fee receiver from the attached file
     }
     console.log("Swapping with params:", swapParams)
     const result = await swapHelper.swap(swapParams)
