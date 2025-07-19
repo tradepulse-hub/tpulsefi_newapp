@@ -1,14 +1,7 @@
 "use client"
 
-import { PriceChart } from "@/components/price-chart"
 import { doSwap } from "@/services/swap-service" // Importa doSwap do serviço de swap
-import {
-  formatPrice,
-  getCurrentTokenPrice,
-  getPriceChange,
-  getTokenPrice,
-  type TokenPrice,
-} from "@/services/token-price-service"
+import { formatPrice, getCurrentTokenPrice, getPriceChange } from "@/services/token-price-service"
 import { walletService } from "@/services/wallet-service"
 import { AnimatePresence, motion } from "framer-motion"
 import {
@@ -18,7 +11,6 @@ import {
   ArrowLeft,
   ArrowLeftRight,
   ArrowUpRight,
-  BarChart3,
   Check,
   Copy,
   ExternalLink,
@@ -33,7 +25,6 @@ import {
   TrendingUp,
   Wallet,
 } from "lucide-react"
-// import Image from "next/image" // Removido o import do next/image
 import { useCallback, useEffect, useState } from "react"
 
 import { Client, Multicall3 } from "@holdstation/worldchain-ethers-v6"
@@ -414,11 +405,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
   const [quoteError, setQuoteError] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isMinimized, setIsMinimized] = useState(false)
-
-  // Token detail states
   const [selectedTokenState, setSelectedTokenState] = useState<TokenBalance | null>(null)
-  const [tokenPrice, setTokenPrice] = useState<TokenPrice | null>(null)
-  const [loadingPrice, setLoadingPrice] = useState(false)
 
   // Real-time token prices for main view
   const [tokenPrices, setTokenPrices] = useState<Record<string, number>>({})
@@ -815,43 +802,16 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     })
     setSwapQuote(null)
     setQuoteError(null)
-    setSelectedTokenState(null)
-    setTokenPrice(null)
   }
 
   const handleTokenClick = async (token: TokenBalance) => {
     console.log("🔄 Loading token details for:", token.symbol)
+    // No longer setting selectedTokenState or tokenPrice for detail view
+    // as the chart and price details are being removed.
+    // If a token detail view without chart is desired, this logic would need adjustment.
+    // For now, clicking a token will not navigate to a detail view.
     setSelectedTokenState(token)
     setViewMode("tokenDetail")
-    setLoadingPrice(true)
-
-    try {
-      console.log(`📊 Fetching real price data for ${token.symbol} via Holdstation SDK`)
-      const priceData = await getTokenPrice(token.symbol, "1h")
-      console.log(`✅ Price data loaded for ${token.symbol}:`, priceData)
-      setTokenPrice(priceData)
-    } catch (error) {
-      console.error("❌ Error loading token price:", error)
-      setTokenPrice(null)
-    } finally {
-      setLoadingPrice(false)
-    }
-  }
-
-  const refreshTokenPrice = async () => {
-    if (!selectedTokenState) return
-
-    setLoadingPrice(true)
-    try {
-      console.log(`🔄 Refreshing price for ${selectedTokenState.symbol}`)
-      const priceData = await getTokenPrice(selectedTokenState.symbol, "1h")
-      setTokenPrice(priceData)
-      console.log(`✅ Price refreshed for ${selectedTokenState.symbol}`)
-    } catch (error) {
-      console.error("❌ Error refreshing token price:", error)
-    } finally {
-      setLoadingPrice(false)
-    }
   }
 
   const openTransactionInExplorer = (hash: string) => {
@@ -957,8 +917,8 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     )
   }
 
-  // Token detail view
-  if (viewMode === "tokenDetail" && selectedTokenState) {
+  // Token detail view (removed chart and price info)
+  if (viewMode === "tokenDetail") {
     return (
       <motion.div
         initial={{ opacity: 0, y: -20, scale: 0.95 }}
@@ -986,72 +946,29 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
               <div className="flex items-center space-x-2">
                 <img
-                  src={getTokenIcon(selectedTokenState.symbol) || "/placeholder.svg"} // Usando <img> tag
-                  alt={selectedTokenState.symbol}
+                  src={getTokenIcon(selectedTokenState?.symbol || "") || "/placeholder.svg"}
+                  alt={selectedTokenState?.symbol || "Token"}
                   className="w-6 h-6 rounded-full"
                   onError={(e) => {
                     e.currentTarget.src = "/placeholder.svg?height=24&width=24"
                   }}
                 />
                 <div className="text-center">
-                  <h3 className="font-semibold text-sm text-white">{selectedTokenState.symbol}</h3>
-                  <p className="text-xs text-gray-500">{selectedTokenState.name}</p>
+                  <h3 className="font-semibold text-sm text-white">{selectedTokenState?.symbol}</h3>
+                  <p className="text-xs text-gray-500">{selectedTokenState?.name}</p>
                 </div>
               </div>
 
-              <button
-                onClick={refreshTokenPrice}
-                disabled={loadingPrice}
-                className="p-1 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-white/10 disabled:opacity-50"
-                title={t.refreshPrice}
-              >
-                <RefreshCw className={`w-4 h-4 ${loadingPrice ? "animate-spin" : ""}`} />
-              </button>
+              {/* Removed refresh button as price info is gone */}
+              <div className="w-6"></div>
             </div>
 
-            {/* Price Info */}
-            {loadingPrice ? (
-              <div className="text-center mb-4">
-                <div className="text-2xl font-bold mb-1 text-gray-400">{t.loadingPrice}</div>
+            {/* Removed Price Info and Price Chart */}
+            <div className="text-center mb-4">
+              <div className="text-2xl font-bold mb-1 text-white">
+                {selectedTokenState ? formatBalance(selectedTokenState.balance) : "0.00"}
               </div>
-            ) : tokenPrice && tokenPrice.currentPrice > 0 ? (
-              <div className="text-center mb-4">
-                <div className="text-2xl font-bold mb-1 text-white">
-                  {formatPrice(tokenPrice.currentPrice, selectedTokenState.symbol)}
-                </div>
-                {(() => {
-                  const isPositive = tokenPrice.changePercent24h > 0
-                  const isNegative = tokenPrice.changePercent24h < 0
-
-                  return (
-                    <div
-                      className={`flex items-center justify-center space-x-1 ${
-                        isPositive ? "text-green-500" : isNegative ? "text-red-500" : "text-gray-500"
-                      }`}
-                    >
-                      {isPositive && <TrendingUp className="w-3 h-3" />}
-                      {isNegative && <TrendingDown className="w-3 h-3" />}
-                      <span className="text-xs font-medium">
-                        {isPositive ? "+" : ""}
-                        {tokenPrice.changePercent24h.toFixed(2)}%
-                      </span>
-                    </div>
-                  )
-                })()}
-              </div>
-            ) : (
-              <div className="text-center mb-4">
-                <div className="text-2xl font-bold mb-1 text-gray-400">{t.priceUnavailable}</div>
-              </div>
-            )}
-
-            {/* Price Chart */}
-            <div className="mb-4">
-              <PriceChart
-                symbol={selectedTokenState.symbol}
-                color={getTokenColor(selectedTokenState.symbol)}
-                height={250}
-              />
+              <p className="text-gray-400 text-xs">{t.available}</p>
             </div>
 
             {/* Action Buttons - Compact */}
@@ -1060,7 +977,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                 onClick={() => {
                   setSendForm((prev) => ({
                     ...prev,
-                    token: selectedTokenState.symbol,
+                    token: selectedTokenState?.symbol || "TPF", // Default to TPF if symbol is null
                   }))
                   setViewMode("send")
                 }}
@@ -1245,7 +1162,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                                       )}
                                     </div>
                                   </div>
-                                  <BarChart3 className="w-4 h-4 text-gray-400 group-hover:text-cyan-400 transition-colors" />
+                                  {/* Removed BarChart3 icon as chart is removed */}
                                 </div>
                               </div>
                             </motion.button>
