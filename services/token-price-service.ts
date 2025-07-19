@@ -116,8 +116,8 @@ async function getRealTokenPrice(tokenSymbol: string): Promise<number> {
       return 0
     }
 
-    // Request a quote for a larger amount to get a more reliable price
-    const amountToQuote = "100" // Changed from "1" to "100"
+    // Reverted to quoting for 1 unit as requested
+    const amountToQuote = "1"
 
     const quote = await swapHelper.estimate.quote({
       tokenIn: tokenIn.address,
@@ -126,14 +126,14 @@ async function getRealTokenPrice(tokenSymbol: string): Promise<number> {
       slippage: "0.3", // Standard slippage for price estimation
       fee: SWAP_FEE, // Use consistent fee
       feeReceiver: SWAP_FEE_RECEIVER, // Use consistent feeReceiver
-      partnerCode: PARTNER_CODE, // Added partnerCode
+      partnerCode: PARTNER_CODE, // Use consistent partnerCode
     })
 
     if (!quote || !quote.outAmount) {
       return 0
     }
 
-    // Calculate the price per unit
+    // When amountToQuote is "1", the division is not strictly necessary but kept for clarity
     const price = Number.parseFloat(quote.outAmount.toString()) / Number.parseFloat(amountToQuote)
     return price > 0 ? price : 0
   } catch (error) {
