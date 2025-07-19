@@ -80,12 +80,12 @@ const TOKENS_INFO = {
     logo: "/images/drachma-token.png",
     decimals: 18,
   },
-  TPT: {
-    symbol: "TPT",
-    name: "TradePulse Token",
-    address: "0x868D08798F91ba9D6AC126148fdE8bBdfb6354D5", // Real contract address
-    logo: "/images/logo-tpf.png",
-    decimals: 18,
+  USDC: {
+    symbol: "USDC",
+    name: "USD Coin",
+    address: "0x79A02482A880bCE3F13e09Da970dC34db4CD24d1",
+    logo: "/images/usdc.png",
+    decimals: 6,
   },
 }
 
@@ -191,7 +191,7 @@ class WalletService {
                 realBalance = ethers.formatUnits(result.balance, tokenInfo.decimals)
                 console.log(`✅ MiniKit ${symbol}: ${realBalance}`)
               }
-            } catch (miniKitError) {
+            } catch (miniKitError: any) {
               console.log(`⚠️ MiniKit failed for ${symbol}:`, miniKitError.message)
             }
           }
@@ -209,7 +209,7 @@ class WalletService {
               const balance = await contract.balanceOf(walletAddress)
               realBalance = ethers.formatUnits(balance, tokenInfo.decimals)
               console.log(`✅ RPC ${symbol}: ${realBalance}`)
-            } catch (rpcError) {
+            } catch (rpcError: any) {
               console.log(`⚠️ RPC failed for ${symbol}:`, rpcError.message)
             }
           }
