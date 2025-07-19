@@ -414,8 +414,8 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
   const [error, setError] = useState<string | null>(null)
   const [isMinimized, setIsMinimized] = useState(false)
 
-  const [tokenUnitPrices, setTokenUnitPrices] = useState<Record<string, number>>({})
-  const [loadingPrices, setLoadingPrices] = useState(true)
+  // Removido: const [tokenUnitPrices, setTokenUnitPrices] = useState<Record<string, number>>({})
+  // Removido: const [loadingPrices, setLoadingPrices] = useState(true)
 
   const TRANSACTIONS_PER_PAGE = 5
 
@@ -440,54 +440,8 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     setTimeout(() => setCopied(false), 2000)
   }, [walletAddress])
 
-  const loadTokenUnitPrices = useCallback(async () => {
-    if (!USDC_ADDRESS) {
-      console.error("USDC address is not defined, cannot load token unit prices.")
-      setLoadingPrices(false)
-      return
-    }
-
-    try {
-      setLoadingPrices(true)
-      const prices: Record<string, number> = {}
-
-      await Promise.all(
-        TOKENS.map(async (token) => {
-          if (token.symbol === "USDC") {
-            prices[token.symbol] = 1 // USDC price against itself is 1
-            return
-          }
-          try {
-            // Get quote for 1 unit of token against USDC
-            const quote = await swapHelper.estimate.quote({
-              tokenIn: token.address,
-              tokenOut: USDC_ADDRESS,
-              amountIn: "1", // Get price for 1 unit of the token
-              slippage: "0.3",
-              fee: "0.2",
-              feeReceiver: ethers.ZeroAddress,
-            })
-
-            if (quote && quote.outAmount) {
-              // The outAmount is already human-readable for the target token (USDC)
-              prices[token.symbol] = Number.parseFloat(quote.outAmount.toString())
-            } else {
-              prices[token.symbol] = 0 // Price unavailable or failed to get quote
-            }
-          } catch (error) {
-            // console.warn(`⚠️ Failed to get unit price for ${token.symbol} against USDC:`, error) // Removed verbose log
-            prices[token.symbol] = 0 // Price unavailable
-          }
-        }),
-      )
-
-      setTokenUnitPrices(prices)
-    } catch (error) {
-      console.error("❌ Error loading token unit prices:", error)
-    } finally {
-      setLoadingPrices(false)
-    }
-  }, [USDC_ADDRESS])
+  // Removido: loadTokenUnitPrices function
+  // const loadTokenUnitPrices = useCallback(async () => { ... }, [USDC_ADDRESS])
 
   const loadBalances = useCallback(async () => {
     try {
@@ -551,9 +505,9 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
   const refreshBalances = useCallback(async () => {
     setRefreshing(true)
     await loadBalances()
-    await loadTokenUnitPrices() // Refresh unit prices as well
+    // Removido: await loadTokenUnitPrices() // Refresh unit prices as well
     setRefreshing(false)
-  }, [loadBalances, loadTokenUnitPrices])
+  }, [loadBalances]) // Removido loadTokenUnitPrices da dependência
 
   const handleSend = useCallback(async () => {
     if (!sendForm.amount || !sendForm.recipient) return
@@ -823,21 +777,16 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     if (walletAddress) {
       loadBalances()
       loadTransactionHistory(true)
-      loadTokenUnitPrices()
+      // Removido: loadTokenUnitPrices()
     }
-  }, [walletAddress, loadBalances, loadTransactionHistory, loadTokenUnitPrices])
+  }, [walletAddress, loadBalances, loadTransactionHistory]) // Removido loadTokenUnitPrices da dependência
 
   const formatBalance = useCallback((balance: string): string => {
     const num = Number.parseFloat(balance)
     if (num === 0) return "0"
-    // For numbers less than 1, dynamically determine decimal places for precision
-    if (num < 1) {
-      // Calculate decimal places needed to show significant digits, up to a max of 10
-      const decimalPlaces = Math.max(2, -Math.floor(Math.log10(Math.abs(num))) + 2)
-      return num.toFixed(Math.min(decimalPlaces, 10))
-    }
-    // For larger numbers, use fixed decimal places or K/M notation
-    if (num < 1000) return num.toFixed(2)
+    if (num < 0.000001) return "<0.000001" // Show more precision for very small amounts
+    if (num < 1) return num.toFixed(6) // Show up to 6 decimal places for numbers less than 1
+    if (num < 1000) return num.toFixed(2) // Keep 2 decimal places for numbers between 1 and 1000
     if (num < 1000000) return `${(num / 1000).toFixed(1)}K`
     return `${(num / 1000000).toFixed(1)}M`
   }, [])
@@ -981,8 +930,8 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                         </div>
                       ) : (
                         balances.map((token, index) => {
-                          const unitPrice = tokenUnitPrices[token.symbol] || 0
-                          const valueInUsdc = Number.parseFloat(token.balance) * unitPrice
+                          // Removido: const unitPrice = tokenUnitPrices[token.symbol] || 0
+                          // Removido: const valueInUsdc = Number.parseFloat(token.balance) * unitPrice
 
                           return (
                             <motion.button
@@ -1013,29 +962,8 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                                   <p className="text-white font-medium text-sm">
                                     {showBalances ? formatBalance(token.balance) : "••••"}
                                   </p>
-                                  <div className="flex flex-col items-end mt-1">
-                                    {/* Total value in USDC */}
-                                    {loadingPrices ? (
-                                      <div className="animate-pulse bg-gray-600 h-3 w-16 rounded"></div>
-                                    ) : unitPrice > 0 ? (
-                                      <span className="text-gray-400 text-xs">{`$${valueInUsdc.toFixed(2)}`}</span>
-                                    ) : (
-                                      <span className="text-gray-500 text-xs">{t.priceUnavailable}</span>
-                                    )}
-
-                                    {/* Unit price in USDC */}
-                                    {loadingPrices ? (
-                                      <div className="animate-pulse bg-gray-600 h-3 w-24 rounded mt-1"></div>
-                                    ) : (
-                                      <span className="text-gray-500 text-xs mt-1">
-                                        {token.symbol === "USDC"
-                                          ? `1 USDC = $1.00 USDC`
-                                          : unitPrice > 0
-                                            ? `1 ${token.symbol} = $${unitPrice.toFixed(4)} USDC`
-                                            : t.priceUnavailable}
-                                      </span>
-                                    )}
-                                  </div>
+                                  {/* Removido: Bloco de exibição de valor em USDC */}
+                                  {/* Removido: Bloco de exibição de preço unitário em USDC */}
                                 </div>
                               </div>
                             </motion.button>
