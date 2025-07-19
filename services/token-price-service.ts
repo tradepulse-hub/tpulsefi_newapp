@@ -34,6 +34,14 @@ const TOKENS = [
     logo: "/images/usdc.png",
     color: "#2775CA",
   },
+  {
+    address: "0x5fa570E9c8514cdFaD81DB6ce0A327D55251fBD4",
+    symbol: "KPP",
+    name: "KeplerPay",
+    decimals: 18,
+    logo: "/images/keplerpay-logo.png",
+    color: "#6A0DAD",
+  },
 ]
 
 // Time intervals in milliseconds
@@ -96,6 +104,8 @@ async function getRealTokenPrice(tokenSymbol: string): Promise<number> {
       price = 0.0025 + (Math.random() - 0.5) * 0.0002 // Mock TPF price around $0.0025
     } else if (tokenSymbol === "WDD") {
       price = 0.000001 + (Math.random() - 0.5) * 0.0000001 // Mock WDD price
+    } else if (tokenSymbol === "KPP") {
+      price = 0.05 + (Math.random() - 0.5) * 0.005 // Mock KPP price around $0.05
     }
 
     console.log(`✅ Real price for ${tokenSymbol}: $${price}`)
