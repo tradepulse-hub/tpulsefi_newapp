@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useEffect, useState, useRef } from "react"
-import { getTokenPrice, type TokenPrice } from "@/services/token-price-service" // Removed TimeInterval import as it's now fixed
+import { getTokenPrice, type TokenPrice, type TimeInterval } from "@/services/token-price-service"
 
 interface PriceChartProps {
   symbol: string
@@ -11,31 +11,37 @@ interface PriceChartProps {
   height?: number
 }
 
-// Removed TIME_INTERVALS constant as it's no longer needed
+const TIME_INTERVALS: { value: TimeInterval; label: string }[] = [
+  { value: "1m", label: "1M" },
+  { value: "5m", label: "5M" },
+  { value: "15m", label: "15M" },
+  { value: "1h", label: "1H" },
+  { value: "4h", label: "4H" },
+  { value: "8h", label: "8H" },
+  { value: "1d", label: "1D" },
+]
 
 export function PriceChart({ symbol, color = "#00D4FF", height = 200 }: PriceChartProps) {
-  // Fixed interval to "1d" (24 hours) as requested to "gravar o trajeto"
-  const fixedInterval = "1d"
+  const [selectedInterval, setSelectedInterval] = useState<TimeInterval>("1h")
   const [priceData, setPriceData] = useState<TokenPrice | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [tooltip, setTooltip] = useState<{ x: number; y: number; price: number; time: number } | null>(null)
 
-  // Fetch price data when symbol changes (interval is now fixed)
+  // Fetch price data when symbol or interval changes
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true)
         setError(null)
-        // console.log(`[PriceChart] 📊 Fetching chart data for ${symbol} (${fixedInterval})`) // Removed log
+        console.log(`📊 Fetching chart data for ${symbol} (${selectedInterval})`)
 
-        // Use the fixed interval
-        const data = await getTokenPrice(symbol, fixedInterval)
+        const data = await getTokenPrice(symbol, selectedInterval)
         setPriceData(data)
-        // console.log(`[PriceChart] ✅ Chart data loaded for ${symbol}`) // Removed log
+        console.log(`✅ Chart data loaded for ${symbol}`)
       } catch (err) {
-        console.error(`[PriceChart] ❌ Error loading chart data for ${symbol}:`, err)
+        console.error(`❌ Error loading chart data for ${symbol}:`, err)
         setError("Failed to load chart data")
       } finally {
         setLoading(false)
@@ -44,13 +50,16 @@ export function PriceChart({ symbol, color = "#00D4FF", height = 200 }: PriceCha
 
     fetchData()
 
-    // Auto-refresh for the fixed interval (e.g., every 30 seconds)
-    const interval = setInterval(fetchData, 30000)
+    // Auto-refresh for short intervals
+    let interval: NodeJS.Timeout | null = null
+    if (selectedInterval === "1m" || selectedInterval === "5m") {
+      interval = setInterval(fetchData, 30000) // Refresh every 30 seconds
+    }
 
     return () => {
       if (interval) clearInterval(interval)
     }
-  }, [symbol]) // Dependency only on symbol, as interval is fixed
+  }, [symbol, selectedInterval])
 
   // Draw chart when data changes
   useEffect(() => {
@@ -67,7 +76,7 @@ export function PriceChart({ symbol, color = "#00D4FF", height = 200 }: PriceCha
     ctx.scale(window.devicePixelRatio, window.devicePixelRatio)
 
     const width = rect.width
-    const chartHeight = rect.height // Use full height as no interval buttons
+    const chartHeight = rect.height - 40 // Leave space for intervals
 
     // Clear canvas
     ctx.clearRect(0, 0, width, rect.height)
@@ -157,7 +166,7 @@ export function PriceChart({ symbol, color = "#00D4FF", height = 200 }: PriceCha
     const { priceHistory } = priceData
     const padding = 20
     const width = rect.width
-    const chartHeight = rect.height // Use full height
+    const chartHeight = rect.height - 40
 
     if (x >= padding && x <= width - padding && y >= padding && y <= chartHeight - padding) {
       // Find closest data point
@@ -181,10 +190,15 @@ export function PriceChart({ symbol, color = "#00D4FF", height = 200 }: PriceCha
     setTooltip(null)
   }
 
-  // Format time for the fixed "1d" interval
-  const formatTimeForTooltip = (timestamp: number): string => {
+  const formatTime = (timestamp: number): string => {
     const date = new Date(timestamp)
-    return date.toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })
+    if (selectedInterval === "1m" || selectedInterval === "5m") {
+      return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    } else if (selectedInterval === "15m" || selectedInterval === "1h") {
+      return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    } else {
+      return date.toLocaleDateString([], { month: "short", day: "numeric" })
+    }
   }
 
   if (loading) {
@@ -211,7 +225,22 @@ export function PriceChart({ symbol, color = "#00D4FF", height = 200 }: PriceCha
 
   return (
     <div className="relative w-full">
-      {/* Removed Time Interval Buttons */}
+      {/* Time Interval Buttons */}
+      <div className="flex justify-center space-x-1 mb-2">
+        {TIME_INTERVALS.map((interval) => (
+          <button
+            key={interval.value}
+            onClick={() => setSelectedInterval(interval.value)}
+            className={`px-2 py-1 text-xs rounded transition-colors ${
+              selectedInterval === interval.value
+                ? "bg-blue-500 text-white"
+                : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+            }`}
+          >
+            {interval.label}
+          </button>
+        ))}
+      </div>
 
       {/* Chart Canvas */}
       <div className="relative">
@@ -233,7 +262,7 @@ export function PriceChart({ symbol, color = "#00D4FF", height = 200 }: PriceCha
             }}
           >
             <div>${tooltip.price.toFixed(6)}</div>
-            <div className="text-gray-300">{formatTimeForTooltip(tooltip.time)}</div>
+            <div className="text-gray-300">{formatTime(tooltip.time)}</div>
           </div>
         )}
       </div>
