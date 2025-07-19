@@ -72,6 +72,9 @@ const TOKENS = [
   },
 ]
 
+const USDC_TOKEN_INFO = TOKENS.find((token) => token.symbol === "USDC")
+const USDC_ADDRESS = USDC_TOKEN_INFO?.address
+
 // Configuração do SDK Holdstation (mantida aqui para a função de cotação)
 const RPC_URL = "https://worldchain-mainnet.g.alchemy.com/public"
 const provider = new ethers.JsonRpcProvider(RPC_URL, { chainId: 480, name: "worldchain" }, { staticNetwork: true })
@@ -417,6 +420,8 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
   // const [tokenPrices, setTokenPrices] = useState<Record<string, number>>({})
   // const [priceChanges, setPriceChanges] = useState<Record<string, number>>({})
   // const [loadingPrices, setLoadingPrices] = useState(true)
+  const [tokenPrices, setTokenPrices] = useState<Record<string, number>>({})
+  const [loadingPrices, setLoadingPrices] = useState(true)
 
   const TRANSACTIONS_PER_PAGE = 5
 
@@ -477,6 +482,55 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
   //     setLoadingPrices(false)
   //   }
   // }, [])
+
+  const loadTokenPrices = useCallback(async () => {
+    if (!USDC_ADDRESS) {
+      console.error("USDC address is not defined, cannot load token prices.")
+      setLoadingPrices(false)
+      return
+    }
+
+    try {
+      setLoadingPrices(true)
+      const prices: Record<string, number> = {}
+
+      await Promise.all(
+        TOKENS.map(async (token) => {
+          if (token.symbol === "USDC") {
+            prices[token.symbol] = 1 // USDC price against itself is 1
+            return
+          }
+          try {
+            // Get quote for 1 unit of token against USDC
+            const quote = await swapHelper.estimate.quote({
+              tokenIn: token.address,
+              tokenOut: USDC_ADDRESS,
+              amountIn: "1", // Get price for 1 unit of the token
+              slippage: "0.3",
+              fee: "0.2",
+              feeReceiver: ethers.ZeroAddress,
+            })
+
+            if (quote && quote.outAmount) {
+              // The outAmount is already human-readable for the target token (USDC)
+              prices[token.symbol] = Number.parseFloat(quote.outAmount.toString())
+            } else {
+              prices[token.symbol] = 0 // Price unavailable
+            }
+          } catch (error) {
+            console.warn(`⚠️ Failed to get price for ${token.symbol} against USDC:`, error)
+            prices[token.symbol] = 0 // Price unavailable
+          }
+        }),
+      )
+
+      setTokenPrices(prices)
+    } catch (error) {
+      console.error("❌ Error loading token prices:", error)
+    } finally {
+      setLoadingPrices(false)
+    }
+  }, [])
 
   const loadBalances = useCallback(async () => {
     try {
@@ -822,13 +876,6 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     setQuoteError(null)
   }, [])
 
-  // Remove the entire handleTokenClick useCallback function
-  // const handleTokenClick = useCallback(async (token: TokenBalance) => {
-  //   // console.log("🔄 Loading token details for:", token.symbol)
-  //   setSelectedTokenState(token)
-  //   setViewMode("tokenDetail")
-  // }, [])
-
   const openTransactionInExplorer = useCallback((hash: string) => {
     const explorerUrl = walletService.getExplorerTransactionUrl(hash)
     window.open(explorerUrl, "_blank")
@@ -868,27 +915,16 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       // console.log("🔗 Wallet connected:", walletAddress)
       loadBalances()
       loadTransactionHistory(true)
-      // REMOVE THIS LINE: loadTokenPrices()
+      loadTokenPrices() // Uncomment this line
     }
-  }, [walletAddress, loadBalances, loadTransactionHistory])
-
-  // Remove the entire auto-refresh useEffect block
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     if (walletAddress && viewMode === "main") {
-  //       loadTokenPrices()
-  //     }
-  //   }, 30000)
-
-  //   return () => clearInterval(interval)
-  // }, [walletAddress, viewMode, loadTokenPrices])
+  }, [walletAddress, loadBalances, loadTransactionHistory, loadTokenPrices]) // Add loadTokenPrices to dependencies
 
   const formatBalance = useCallback((balance: string): string => {
     const num = Number.parseFloat(balance)
     if (num === 0) return "0"
     if (num < 0.0001) return "<0.0001"
     if (num < 1) return num.toFixed(4)
-    if (num < 1000) return num.toFixed(2)
+    if (num < 1000) return `${(num / 1000).toFixed(1)}K`
     if (num < 1000000) return `${(num / 1000).toFixed(1)}K`
     return `${(num / 1000000).toFixed(1)}M`
   }, [])
@@ -931,91 +967,6 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       </>
     )
   }
-
-  // Remove the entire tokenDetail view JSX block
-  // if (viewMode === "tokenDetail") {
-  //   return (
-  //     <motion.div
-  //       initial={{ opacity: 0, y: -20, scale: 0.95 }}
-  //       animate={{ opacity: 1, y: 0, scale: 1 }}
-  //       exit={{ opacity: 0, y: -20, scale: 0.95 }}
-  //       className="bg-black/40 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl min-w-[320px] max-w-[380px] overflow-hidden fixed top-20 right-4 z-40"
-  //     >
-  //       <AnimatePresence mode="wait">
-  //         <motion.div
-  //           key="tokenDetail"
-  //           initial={{ opacity: 0, x: 20 }}
-  //           animate={{ opacity: 1, x: 0 }}
-  //           exit={{ opacity: 0, x: 20 }}
-  //           className="p-4"
-  //         >
-  //           {/* Header */}
-  //           <div className="flex items-center justify-between mb-4">
-  //             <button
-  //               onClick={handleBackToMain}
-  //               className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors"
-  //             >
-  //               <ArrowLeft className="w-4 h-4" />
-  //               <span className="text-sm font-medium">{t.back}</span>
-  //             </button>
-
-  //             <div className="flex items-center space-x-2">
-  //               <img
-  //                 src={getTokenIcon(selectedTokenState?.symbol || "") || "/placeholder.svg"}
-  //                 alt={selectedTokenState?.symbol || "Token"}
-  //                 className="w-6 h-6 rounded-full"
-  //                 onError={(e) => {
-  //                   e.currentTarget.src = "/placeholder.svg?height=24&width=24"
-  //                 }}
-  //               />
-  //               <div className="text-center">
-  //                 <h3 className="font-semibold text-sm text-white">{selectedTokenState?.symbol}</h3>
-  //                 <p className="text-xs text-gray-500">{selectedTokenState?.name}</p>
-  //               </div>
-  //             </div>
-
-  //             {/* Removed refresh button as price info is gone */}
-  //             <div className="w-6"></div>
-  //           </div>
-
-  //           {/* Removed Price Info and Price Chart */}
-  //           <div className="text-center mb-4">
-  //             <div className="text-2xl font-bold mb-1 text-white">
-  //               {selectedTokenState ? formatBalance(selectedTokenState.balance) : "0.00"}
-  //             </div>
-  //             <p className="text-gray-400 text-xs">{t.available}</p>
-  //           </div>
-
-  //           {/* Action Buttons - Compact */}
-  //           <div className="grid grid-cols-2 gap-2">
-  //             <button
-  //               onClick={() => {
-  //                 setSendForm((prev) => ({
-  //                   ...prev,
-  //                   token: selectedTokenState?.symbol || "TPF", // Default to TPF if symbol is null
-  //                 }))
-  //                 setViewMode("send")
-  //               }}
-  //               className="flex items-center justify-center space-x-2 py-2 px-3 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 rounded-lg transition-all duration-200 text-blue-300 hover:text-blue-200"
-  //             >
-  //               <Send className="w-4 h-4" />
-  //               <span className="text-sm font-medium">{t.send}</span>
-  //             </button>
-  //             <button
-  //               onClick={() => {
-  //                 setViewMode("swap")
-  //               }}
-  //               className="flex items-center justify-center space-x-2 py-2 px-3 bg-orange-600/20 hover:bg-orange-600/30 border border-orange-500/30 rounded-lg transition-all duration-200 text-orange-300 hover:text-orange-200"
-  //             >
-  //               <ArrowLeftRight className="w-4 h-4" />
-  //               <span className="text-sm font-medium">{t.swap}</span>
-  //             </button>
-  //           </div>
-  //         </motion.div>
-  //       </AnimatePresence>
-  //     </motion.div>
-  //   )
-  // }
 
   return (
     <>
@@ -1123,19 +1074,23 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                           // const change = priceChanges[token.symbol] || 0
                           // const valueInUsdc = Number.parseFloat(token.balance) * price
 
+                          // Add these lines:
+                          const price = tokenPrices[token.symbol] || 0
+                          const valueInUsdc = Number.parseFloat(token.balance) * price
+
                           return (
                             <motion.button
                               key={token.symbol}
                               initial={{ opacity: 0, x: -20 }}
                               animate={{ opacity: 1, x: 0 }}
                               transition={{ delay: index * 0.1 }}
-                              // onClick={() => handleTokenClick(token)}
+                              // onClick={() => handleTokenClick(token)} // Keep this commented out as per original request
                               className="w-full bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl p-3 hover:bg-white/5 transition-all duration-200 group"
                             >
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center space-x-3">
                                   <div className="w-8 h-8 rounded-full overflow-hidden bg-white flex items-center justify-center">
-                                    <img // Alterado de Image para <img>
+                                    <img
                                       src={getTokenIcon(token.symbol) || "/placeholder.svg"}
                                       alt={token.name}
                                       className="w-full h-full object-contain"
@@ -1153,31 +1108,16 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                                   <p className="text-white font-medium text-sm">
                                     {showBalances ? formatBalance(token.balance) : "••••"}
                                   </p>
-                                  {/* Remove the entire div below */}
-                                  {/* <div className="flex items-center space-x-1 mt-1">
+                                  {/* Display the total value in USDC here */}
+                                  <div className="flex items-center space-x-1 mt-1">
                                     {loadingPrices ? (
                                       <div className="animate-pulse bg-gray-600 h-3 w-12 rounded"></div>
                                     ) : price > 0 ? (
-                                      <>
-                                        {/* Display the total value in USDC here */}
-                                  {/* <span className="text-gray-400 text-xs">{`$${valueInUsdc.toFixed(2)}`}</span>
-                                        <div
-                                          className={`flex items-center space-x-1 ${
-                                            change >= 0 ? "text-green-500" : "text-red-500"
-                                          }`}
-                                        >
-                                          {change >= 0 ? (
-                                            <TrendingUp className="w-2 h-2" />
-                                          ) : (
-                                            <TrendingDown className="w-2 h-2" />
-                                          )}
-                                          <span className="text-xs">{Math.abs(change).toFixed(1)}%</span>
-                                        </div>
-                                      </>
+                                      <span className="text-gray-400 text-xs">{`$${valueInUsdc.toFixed(2)}`}</span>
                                     ) : (
-                                      <span className="text-gray-500 text-xs">Price N/A</span>
+                                      <span className="text-gray-500 text-xs">{t.priceUnavailable}</span>
                                     )}
-                                  </div> */}
+                                  </div>
                                 </div>
                               </div>
                             </motion.button>
