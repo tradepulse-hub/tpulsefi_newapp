@@ -1,16 +1,9 @@
 "use client"
-
-import { PriceChart } from "@/components/price-chart"
-import { doSwap } from "@/services/swap-service" // Importa doSwap do serviço de swap
+import { doSwap } from "@/services/swap-service"
 import {
-  formatPrice,
-  getCurrentTokenPrice,
-  getPriceChange,
-  getTokenPrice,
   TOKENS, // Importar TOKENS do serviço de preço
   swapHelper, // Importar swapHelper centralizado
-  type TokenPrice,
-} from "@/services/token-price-service"
+} from "@/services/token-price-service" // Removidas importações relacionadas a preços
 import { walletService } from "@/services/wallet-service"
 import { AnimatePresence, motion } from "framer-motion"
 import {
@@ -20,7 +13,6 @@ import {
   ArrowLeft,
   ArrowLeftRight,
   ArrowUpRight,
-  BarChart3,
   Check,
   Copy,
   ExternalLink,
@@ -31,10 +23,8 @@ import {
   Minimize2,
   RefreshCw,
   Send,
-  TrendingDown,
-  TrendingUp,
   Wallet,
-} from "lucide-react"
+} from "lucide-react" // Removidos TrendingDown, TrendingUp, BarChart3
 import { useCallback, useEffect, useState } from "react"
 
 import { ethers } from "ethers"
@@ -85,16 +75,11 @@ const translations = {
     receiveTokens: "Receive Tokens",
     swapTokens: "Swap Tokens",
     transactionHistory: "Transaction History",
-    tokenDetails: "Token Details",
-    currentPrice: "Current Price",
-    priceChange24h: "24h Change",
-    priceChart: "Price Chart",
     token: "Token",
     amount: "Amount",
     recipientAddress: "Recipient Address",
     sending: "Sending...",
     swapping: "Swapping...",
-    loadingPrice: "Loading price...",
     yourWalletAddress: "Your Wallet Address:",
     networkWarning: "Only send Worldchain network supported tokens to this address.",
     sendWarning:
@@ -130,9 +115,6 @@ const translations = {
     insufficientBalance: "Insufficient balance",
     networkError: "Network error",
     tryAgain: "Try again",
-    priceUnavailable: "Price data unavailable",
-    refreshPrice: "Refresh Price",
-    totalValue: "Total Value",
   },
   pt: {
     connected: "Conectado",
@@ -146,16 +128,11 @@ const translations = {
     receiveTokens: "Receber Tokens",
     swapTokens: "Trocar Tokens",
     transactionHistory: "Histórico de Transações",
-    tokenDetails: "Detalhes do Token",
-    currentPrice: "Preço Atual",
-    priceChange24h: "Mudança 24h",
-    priceChart: "Gráfico de Preço",
     token: "Token",
     amount: "Quantidade",
     recipientAddress: "Endereço do Destinatário",
     sending: "Enviando...",
     swapping: "Trocando...",
-    loadingPrice: "Carregando preço...",
     yourWalletAddress: "Seu Endereço da Carteira:",
     networkWarning: "Apenas envie para o seu endereço tokens suportados da rede Worldchain.",
     sendWarning:
@@ -191,9 +168,6 @@ const translations = {
     insufficientBalance: "Saldo insuficiente",
     networkError: "Erro de rede",
     tryAgain: "Tente novamente",
-    priceUnavailable: "Dados de preço indisponíveis",
-    refreshPrice: "Atualizar Preço",
-    totalValue: "Valor Total",
   },
   es: {
     connected: "Conectado",
@@ -207,16 +181,11 @@ const translations = {
     receiveTokens: "Recibir Tokens",
     swapTokens: "Intercambiar Tokens",
     transactionHistory: "Historial de Transacciones",
-    tokenDetails: "Detalles del Token",
-    currentPrice: "Precio Actual",
-    priceChange24h: "Cambio 24h",
-    priceChart: "Gráfico de Precio",
     token: "Token",
     amount: "Cantidad",
     recipientAddress: "Dirección del Destinatario",
     sending: "Enviando...",
     swapping: "Intercambiando...",
-    loadingPrice: "Cargando precio...",
     yourWalletAddress: "Tu Dirección de Billetera:",
     networkWarning: "Solo envía tokens soportados por la red Worldchain a esta dirección.",
     sendWarning:
@@ -252,8 +221,6 @@ const translations = {
     insufficientBalance: "Saldo insuficiente",
     networkError: "Error de red",
     tryAgain: "Intentar de nuevo",
-    priceUnavailable: "Datos de precio no disponibles",
-    refreshPrice: "Actualizar Precio",
   },
   id: {
     connected: "Terhubung",
@@ -267,16 +234,11 @@ const translations = {
     receiveTokens: "Terima Token",
     swapTokens: "Tukar Token",
     transactionHistory: "Riwayat Transaksi",
-    tokenDetails: "Detail Token",
-    currentPrice: "Harga Saat Ini",
-    priceChange24h: "Perubahan 24j",
-    priceChart: "Grafik Harga",
     token: "Token",
     amount: "Jumlah",
     recipientAddress: "Alamat Penerima",
     sending: "Mengirim...",
     swapping: "Menukar...",
-    loadingPrice: "Memuat harga...",
     yourWalletAddress: "Alamat Dompet Anda:",
     networkWarning: "Hanya kirim token yang didukung jaringan Worldchain ke alamat ini.",
     sendWarning:
@@ -312,8 +274,6 @@ const translations = {
     insufficientBalance: "Saldo tidak mencukiente",
     networkError: "Kesalahan jaringan",
     tryAgain: "Coba lagi",
-    priceUnavailable: "Data harga tidak tersedia",
-    refreshPrice: "Perbarui Harga",
   },
 }
 
@@ -326,7 +286,7 @@ interface Token {
   color: string
 }
 
-type ViewMode = "main" | "send" | "receive" | "history" | "swap" | "tokenDetail"
+type ViewMode = "main" | "send" | "receive" | "history" | "swap" // Removido "tokenDetail"
 
 export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: MiniWalletProps) {
   const [currentLang, setCurrentLang] = useState<SupportedLanguage>("en")
@@ -362,15 +322,13 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
   const [error, setError] = useState<string | null>(null)
   const [isMinimized, setIsMinimized] = useState(false)
 
-  // Token detail states
-  const [selectedTokenState, setSelectedTokenState] = useState<TokenBalance | null>(null)
-  const [tokenPrice, setTokenPrice] = useState<TokenPrice | null>(null)
-  const [loadingPrice, setLoadingPrice] = useState(false)
-
-  // Real-time token prices for main view
-  const [tokenPrices, setTokenPrices] = useState<Record<string, number>>({})
-  const [priceChanges, setPriceChanges] = useState<Record<string, number>>({})
-  const [loadingPrices, setLoadingPrices] = useState(true)
+  // Estados relacionados a preços e detalhes de token removidos
+  // const [selectedTokenState, setSelectedTokenState] = useState<TokenBalance | null>(null)
+  // const [tokenPrice, setTokenPrice] = useState<TokenPrice | null>(null)
+  // const [loadingPrice, setLoadingPrice] = useState(false)
+  // const [tokenPrices, setTokenPrices] = useState<Record<string, number>>({}) // Removido
+  // const [priceChanges, setPriceChanges] = useState<Record<string, number>>({}) // Removido
+  // const [loadingPrices, setLoadingPrices] = useState(true) // Removido
 
   const TRANSACTIONS_PER_PAGE = 5
 
@@ -395,38 +353,8 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     setTimeout(() => setCopied(false), 2000)
   }
 
-  // Load real-time token prices for main view
-  const loadTokenPrices = async () => {
-    try {
-      setLoadingPrices(true)
-
-      const prices: Record<string, number> = {}
-      const changes: Record<string, number> = {}
-
-      for (const token of TOKENS) {
-        try {
-          const [price, change] = await Promise.all([
-            getCurrentTokenPrice(token.symbol),
-            getPriceChange(token.symbol, "1d"), // Fixed to "1d"
-          ])
-          prices[token.symbol] = price
-          changes[token.symbol] = change
-          await new Promise((resolve) => setTimeout(resolve, 50)) // Add a small delay
-        } catch (error) {
-          console.error(`❌ Error fetching data for ${token.symbol}:`, error)
-          prices[token.symbol] = 0
-          changes[token.symbol] = 0
-        }
-      }
-
-      setTokenPrices(prices)
-      setPriceChanges(changes)
-    } catch (error) {
-      console.error("❌ Error loading token prices:", error)
-    } finally {
-      setLoadingPrices(false)
-    }
-  }
+  // Função loadTokenPrices removida
+  // const loadTokenPrices = async () => { /* ... */ }
 
   const loadBalances = async () => {
     try {
@@ -489,7 +417,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
   const refreshBalances = async () => {
     setRefreshing(true)
-    await Promise.all([loadBalances(), loadTokenPrices()])
+    await Promise.all([loadBalances()]) // loadTokenPrices removido
     setRefreshing(false)
   }
 
@@ -728,39 +656,18 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     })
     setSwapQuote(null)
     setQuoteError(null)
-    setSelectedTokenState(null)
-    setTokenPrice(null)
+    // setSelectedTokenState(null) // Removido
+    // setTokenPrice(null) // Removido
   }
 
+  // handleTokenClick removido ou modificado para não navegar para tokenDetail
   const handleTokenClick = async (token: TokenBalance) => {
-    setSelectedTokenState(token)
-    setViewMode("tokenDetail")
-    setLoadingPrice(true)
-
-    try {
-      const priceData = await getTokenPrice(token.symbol, "1d") // Fixed to "1d"
-      setTokenPrice(priceData)
-    } catch (error) {
-      console.error("❌ Error loading token price:", error)
-      setTokenPrice(null)
-    } finally {
-      setLoadingPrice(false)
-    }
+    // Não faz nada ou pode ser removido se o botão não for mais clicável
+    console.log(`Clicked on token: ${token.symbol}`)
   }
 
-  const refreshTokenPrice = async () => {
-    if (!selectedTokenState) return
-
-    setLoadingPrice(true)
-    try {
-      const priceData = await getTokenPrice(selectedTokenState.symbol, "1d") // Fixed to "1d"
-      setTokenPrice(priceData)
-    } catch (error) {
-      console.error("❌ Error refreshing token price:", error)
-    } finally {
-      setLoadingPrice(false)
-    }
-  }
+  // refreshTokenPrice removido
+  // const refreshTokenPrice = async () => { /* ... */ }
 
   const openTransactionInExplorer = (hash: string) => {
     const explorerUrl = walletService.getExplorerTransactionUrl(hash)
@@ -800,20 +707,12 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     if (walletAddress) {
       loadBalances()
       loadTransactionHistory(true)
-      loadTokenPrices()
+      // loadTokenPrices() // Removido
     }
   }, [walletAddress])
 
-  // Auto-refresh prices every 30 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (walletAddress && viewMode === "main") {
-        loadTokenPrices()
-      }
-    }, 30000)
-
-    return () => clearInterval(interval)
-  }, [walletAddress, viewMode])
+  // Auto-refresh prices useEffect removido
+  // useEffect(() => { /* ... */ }, [walletAddress, viewMode])
 
   const formatBalance = (balance: string): string => {
     const num = Number.parseFloat(balance)
@@ -862,132 +761,9 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     )
   }
 
-  // Token detail view
-  if (viewMode === "tokenDetail" && selectedTokenState) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: -20, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: -20, scale: 0.95 }}
-        className="bg-black/40 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl min-w-[320px] max-w-[380px] overflow-hidden fixed top-20 right-4 z-40"
-      >
-        <AnimatePresence mode="wait">
-          <motion.div
-            key="tokenDetail"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            className="p-4"
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between mb-4">
-              <button
-                onClick={handleBackToMain}
-                className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                <span className="text-sm font-medium">{t.back}</span>
-              </button>
-
-              <div className="flex items-center space-x-2">
-                <img
-                  src={getTokenIcon(selectedTokenState.symbol) || "/placeholder.svg"}
-                  alt={selectedTokenState.symbol}
-                  className="w-6 h-6 rounded-full"
-                  onError={(e) => {
-                    e.currentTarget.src = "/placeholder.svg?height=24&width=24"
-                  }}
-                />
-                <div className="text-center">
-                  <h3 className="font-semibold text-sm text-white">{selectedTokenState.symbol}</h3>
-                  <p className="text-xs text-gray-500">{selectedTokenState.name}</p>
-                </div>
-              </div>
-
-              <button
-                onClick={refreshTokenPrice}
-                disabled={loadingPrice}
-                className="p-1 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-white/10 disabled:opacity-50"
-                title={t.refreshPrice}
-              >
-                <RefreshCw className={`w-4 h-4 ${loadingPrice ? "animate-spin" : ""}`} />
-              </button>
-            </div>
-
-            {/* Price Info */}
-            {loadingPrice ? (
-              <div className="text-center mb-4">
-                <div className="text-2xl font-bold mb-1 text-gray-400">{t.loadingPrice}</div>
-              </div>
-            ) : tokenPrice && tokenPrice.currentPrice > 0 ? (
-              <div className="text-center mb-4">
-                <div className="text-2xl font-bold mb-1 text-white">
-                  {formatPrice(tokenPrice.currentPrice, selectedTokenState.symbol)}
-                </div>
-                {(() => {
-                  const isPositive = tokenPrice.changePercent24h > 0
-                  const isNegative = tokenPrice.changePercent24h < 0
-
-                  return (
-                    <div
-                      className={`flex items-center justify-center space-x-1 ${
-                        isPositive ? "text-green-500" : isNegative ? "text-red-500" : "text-gray-500"
-                      }`}
-                    >
-                      {isPositive && <TrendingUp className="w-3 h-3" />}
-                      {isNegative && <TrendingDown className="w-3 h-3" />}
-                      <span className="text-xs font-medium">
-                        {isPositive ? "+" : ""}
-                        {tokenPrice.changePercent24h.toFixed(2)}%
-                      </span>
-                    </div>
-                  )
-                })()}
-              </div>
-            ) : (
-              <div className="text-center mb-4">
-                <div className="text-2xl font-bold mb-1 text-gray-400">{t.priceUnavailable}</div>
-              </div>
-            )}
-
-            {/* Price Chart */}
-            <div className="mb-4">
-              <PriceChart
-                symbol={selectedTokenState.symbol}
-                color={getTokenColor(selectedTokenState.symbol)}
-                height={250}
-              />
-            </div>
-
-            {/* Action Buttons - Compact */}
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                onClick={() => {
-                  setSendForm((prev) => ({
-                    ...prev,
-                    token: selectedTokenState.symbol,
-                  }))
-                  setViewMode("send")
-                }}
-                className="flex items-center justify-center space-x-2 py-2 px-3 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 rounded-lg transition-all duration-200 text-blue-300 hover:text-blue-200"
-              >
-                <Send className="w-4 h-4" />
-                <span className="text-sm font-medium">{t.send}</span>
-              </button>
-              <button
-                onClick={() => {
-                  setViewMode("swap")
-                }}
-                className="flex items-center justify-center space-x-2 py-2 px-3 bg-orange-600/20 hover:bg-orange-600/30 border border-orange-500/30 rounded-lg transition-all duration-200 text-orange-300 hover:text-orange-200"
-              >
-                <ArrowLeftRight className="w-4 h-4" />
-                <span className="text-sm font-medium">{t.swap}</span>
-              </button>
-            </div>
-          </motion.div>
-        </AnimatePresence>
-      </motion.div>
-    )
+  // A visualização de detalhes do token (tokenDetail) foi removida
+  if (viewMode === "tokenDetail") {
+    return null // Ou um fallback, mas para este caso, null é suficiente
   }
 
   return (
@@ -1089,16 +865,13 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                       </div>
                     ) : (
                       balances.map((token, index) => {
-                        const price = tokenPrices[token.symbol] || 0
-                        const change = priceChanges[token.symbol] || 0
-
                         return (
                           <motion.button
                             key={token.symbol}
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: index * 0.1 }}
-                            onClick={() => handleTokenClick(token)}
+                            // onClick={() => handleTokenClick(token)} // Removido o clique para detalhes do token
                             className="w-full bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl p-3 hover:bg-white/5 transition-all duration-200 group"
                           >
                             <div className="flex items-center justify-between">
@@ -1118,47 +891,11 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                                   <p className="text-gray-400 text-xs text-left">{token.name}</p>
                                 </div>
                               </div>
-                              <div className="text-right flex items-center space-x-2">
-                                <div>
-                                  {" "}
-                                  {/* Added a div to group balance and total value */}
-                                  <p className="text-white font-medium text-sm">
-                                    {showBalances ? formatBalance(token.balance) : "••••"} {token.symbol}
-                                  </p>
-                                  {loadingPrices ? (
-                                    <div className="animate-pulse bg-gray-600 h-3 w-20 rounded ml-auto mt-1"></div>
-                                  ) : price > 0 ? (
-                                    <p className="text-gray-400 text-xs">
-                                      {t.totalValue}: {formatPrice(Number.parseFloat(token.balance) * price)}
-                                    </p>
-                                  ) : (
-                                    <p className="text-gray-500 text-xs">{t.priceUnavailable}</p>
-                                  )}
-                                </div>
-                                <div className="flex items-center space-x-1">
-                                  {loadingPrices ? (
-                                    <div className="animate-pulse bg-gray-600 h-3 w-12 rounded"></div>
-                                  ) : price > 0 ? (
-                                    <>
-                                      <span className="text-gray-400 text-xs">{formatPrice(price, token.symbol)}</span>
-                                      <div
-                                        className={`flex items-center space-x-1 ${
-                                          change >= 0 ? "text-green-500" : "text-red-500"
-                                        }`}
-                                      >
-                                        {change >= 0 ? (
-                                          <TrendingUp className="w-2 h-2" />
-                                        ) : (
-                                          <TrendingDown className="w-2 h-2" />
-                                        )}
-                                        <span className="text-xs">{Math.abs(change).toFixed(1)}%</span>
-                                      </div>
-                                    </>
-                                  ) : (
-                                    <span className="text-gray-500 text-xs">Price N/A</span>
-                                  )}
-                                </div>
-                                <BarChart3 className="w-4 h-4 text-gray-400 group-hover:text-cyan-400 transition-colors" />
+                              <div className="text-right">
+                                <p className="text-white font-medium text-sm">
+                                  {showBalances ? formatBalance(token.balance) : "••••"}
+                                </p>
+                                {/* Informações de preço e mudança removidas */}
                               </div>
                             </div>
                           </motion.button>
