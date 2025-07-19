@@ -1,9 +1,10 @@
 "use client"
+
 import { doSwap } from "@/services/swap-service"
 import {
-  TOKENS, // Importar TOKENS do serviço de preço
-  swapHelper, // Importar swapHelper centralizado
-} from "@/services/token-price-service" // Removidas importações relacionadas a preços
+  TOKENS, // Importar TOKENS do novo serviço de configuração
+  swapHelper, // Importar swapHelper do novo serviço de configuração
+} from "@/services/swap-config" // Alterado para o novo ficheiro de configuração
 import { walletService } from "@/services/wallet-service"
 import { AnimatePresence, motion } from "framer-motion"
 import {
@@ -24,7 +25,7 @@ import {
   RefreshCw,
   Send,
   Wallet,
-} from "lucide-react" // Removidos TrendingDown, TrendingUp, BarChart3
+} from "lucide-react" // Removidos BarChart3, TrendingDown, TrendingUp
 import { useCallback, useEffect, useState } from "react"
 
 import { ethers } from "ethers"
@@ -326,9 +327,9 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
   // const [selectedTokenState, setSelectedTokenState] = useState<TokenBalance | null>(null)
   // const [tokenPrice, setTokenPrice] = useState<TokenPrice | null>(null)
   // const [loadingPrice, setLoadingPrice] = useState(false)
-  // const [tokenPrices, setTokenPrices] = useState<Record<string, number>>({}) // Removido
-  // const [priceChanges, setPriceChanges] = useState<Record<string, number>>({}) // Removido
-  // const [loadingPrices, setLoadingPrices] = useState(true) // Removido
+  // const [tokenPrices, setTokenPrices] = useState<Record<string, number>>({})
+  // const [priceChanges, setPriceChanges] = useState<Record<string, number>>({})
+  // const [loadingPrices, setLoadingPrices] = useState(true)
 
   const TRANSACTIONS_PER_PAGE = 5
 
@@ -353,7 +354,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     setTimeout(() => setCopied(false), 2000)
   }
 
-  // Função loadTokenPrices removida
+  // loadTokenPrices e useEffect de auto-refresh de preços removidos
   // const loadTokenPrices = async () => { /* ... */ }
 
   const loadBalances = async () => {
@@ -662,7 +663,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
   // handleTokenClick removido ou modificado para não navegar para tokenDetail
   const handleTokenClick = async (token: TokenBalance) => {
-    // Não faz nada ou pode ser removido se o botão não for mais clicável
+    // Não faz nada, pois a visualização de detalhes do token foi removida
     console.log(`Clicked on token: ${token.symbol}`)
   }
 
@@ -763,7 +764,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
   // A visualização de detalhes do token (tokenDetail) foi removida
   if (viewMode === "tokenDetail") {
-    return null // Ou um fallback, mas para este caso, null é suficiente
+    return null // Retorna null para não renderizar nada nesta view
   }
 
   return (
@@ -871,7 +872,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: index * 0.1 }}
-                            // onClick={() => handleTokenClick(token)} // Removido o clique para detalhes do token
+                            // Removido onClick para handleTokenClick
                             className="w-full bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl p-3 hover:bg-white/5 transition-all duration-200 group"
                           >
                             <div className="flex items-center justify-between">
@@ -893,7 +894,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                               </div>
                               <div className="text-right">
                                 <p className="text-white font-medium text-sm">
-                                  {showBalances ? formatBalance(token.balance) : "••••"}
+                                  {showBalances ? formatBalance(token.balance) : "••••"} {token.symbol}
                                 </p>
                                 {/* Informações de preço e mudança removidas */}
                               </div>
