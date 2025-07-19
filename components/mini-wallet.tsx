@@ -1117,35 +1117,38 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                                 </div>
                               </div>
                               <div className="text-right flex items-center space-x-2">
-                                <div>
-                                  <p className="text-white font-medium text-sm">
-                                    {showBalances ? formatBalance(token.balance) : "••••"}
+                                <p className="text-white font-medium text-sm">
+                                  {showBalances ? formatBalance(token.balance) : "••••"}
+                                </p>
+                                {showBalances && price > 0 ? (
+                                  <p className="text-gray-400 text-xs">
+                                    {formatPrice(Number.parseFloat(token.balance) * price)}
                                   </p>
-                                  <div className="flex items-center space-x-1">
-                                    {loadingPrices ? (
-                                      <div className="animate-pulse bg-gray-600 h-3 w-12 rounded"></div>
-                                    ) : price > 0 ? (
-                                      <>
-                                        <span className="text-gray-400 text-xs">
-                                          {formatPrice(price, token.symbol)}
-                                        </span>
-                                        <div
-                                          className={`flex items-center space-x-1 ${
-                                            change >= 0 ? "text-green-500" : "text-red-500"
-                                          }`}
-                                        >
-                                          {change >= 0 ? (
-                                            <TrendingUp className="w-2 h-2" />
-                                          ) : (
-                                            <TrendingDown className="w-2 h-2" />
-                                          )}
-                                          <span className="text-xs">{Math.abs(change).toFixed(1)}%</span>
-                                        </div>
-                                      </>
-                                    ) : (
-                                      <span className="text-gray-500 text-xs">Price N/A</span>
-                                    )}
-                                  </div>
+                                ) : (
+                                  <p className="text-gray-500 text-xs">{showBalances ? "Price N/A" : "••••"}</p>
+                                )}
+                                <div className="flex items-center space-x-1">
+                                  {loadingPrices ? (
+                                    <div className="animate-pulse bg-gray-600 h-3 w-12 rounded"></div>
+                                  ) : price > 0 ? (
+                                    <>
+                                      <span className="text-gray-400 text-xs">{formatPrice(price, token.symbol)}</span>
+                                      <div
+                                        className={`flex items-center space-x-1 ${
+                                          change >= 0 ? "text-green-500" : "text-red-500"
+                                        }`}
+                                      >
+                                        {change >= 0 ? (
+                                          <TrendingUp className="w-2 h-2" />
+                                        ) : (
+                                          <TrendingDown className="w-2 h-2" />
+                                        )}
+                                        <span className="text-xs">{Math.abs(change).toFixed(1)}%</span>
+                                      </div>
+                                    </>
+                                  ) : (
+                                    <span className="text-gray-500 text-xs">Price N/A</span>
+                                  )}
                                 </div>
                                 <BarChart3 className="w-4 h-4 text-gray-400 group-hover:text-cyan-400 transition-colors" />
                               </div>
