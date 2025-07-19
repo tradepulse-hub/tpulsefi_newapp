@@ -19,6 +19,14 @@ const TOKENS = [
     color: "#00D4FF",
   },
   {
+    address: "0xEdE54d9c024ee80C85ec0a75eD2d8774c7Fbac9B", // Updated WDD address
+    symbol: "WDD",
+    name: "Drachma", // Updated name
+    decimals: 18,
+    logo: "/images/drachma-token.png", // Updated logo path
+    color: "#FFD700",
+  },
+  {
     address: "0x79A02482A880bCE3F13e09Da970dC34db4CD24d1",
     symbol: "USDC",
     name: "USD Coin",
@@ -30,13 +38,13 @@ const TOKENS = [
 
 // Time intervals in milliseconds
 export const TIME_INTERVALS = {
-  "1m": 60 * 1000,
-  "5m": 5 * 60 * 1000,
-  "15m": 15 * 60 * 1000,
-  "1h": 60 * 60 * 1000,
-  "4h": 4 * 60 * 60 * 1000,
-  "8h": 8 * 60 * 60 * 1000,
-  "1d": 24 * 60 * 60 * 1000,
+  "1M": 60 * 1000,
+  "5M": 5 * 60 * 1000,
+  "15M": 15 * 60 * 1000,
+  "1H": 60 * 60 * 1000,
+  "4H": 4 * 60 * 60 * 1000,
+  "8H": 8 * 60 * 60 * 1000,
+  "1D": 24 * 60 * 60 * 1000,
 } as const
 
 export type TimeInterval = keyof typeof TIME_INTERVALS
@@ -86,6 +94,8 @@ async function getRealTokenPrice(tokenSymbol: string): Promise<number> {
       price = 2.5 + (Math.random() - 0.5) * 0.1 // Mock WLD price around $2.5
     } else if (tokenSymbol === "TPF") {
       price = 0.0025 + (Math.random() - 0.5) * 0.0002 // Mock TPF price around $0.0025
+    } else if (tokenSymbol === "WDD") {
+      price = 0.000001 + (Math.random() - 0.5) * 0.0000001 // Mock WDD price
     }
 
     console.log(`✅ Real price for ${tokenSymbol}: $${price}`)
@@ -115,7 +125,7 @@ function generatePriceHistory(
     const time = now - i * intervalMs
 
     // Add realistic price movement
-    const volatility = interval === "1m" ? 0.002 : interval === "5m" ? 0.005 : 0.01
+    const volatility = interval === "1M" ? 0.002 : interval === "5M" ? 0.005 : 0.01
     const change = (Math.random() - 0.5) * volatility
 
     // Gradually trend towards current price
@@ -171,7 +181,7 @@ function setCachedPrice(symbol: string, interval: TimeInterval, data: TokenPrice
 /**
  * Main function to get token price with mock data
  */
-export async function getTokenPrice(symbol: string, interval: TimeInterval = "1h"): Promise<TokenPrice> {
+export async function getTokenPrice(symbol: string, interval: TimeInterval = "1H"): Promise<TokenPrice> {
   try {
     console.log(`📊 Fetching price for ${symbol} (${interval})`)
 
@@ -295,22 +305,22 @@ export function formatTime(timestamp: number, interval: TimeInterval): string {
   const date = new Date(timestamp)
 
   switch (interval) {
-    case "1m":
-    case "5m":
-    case "15m":
+    case "1M":
+    case "5M":
+    case "15M":
       return date.toLocaleTimeString("en-US", {
         hour: "2-digit",
         minute: "2-digit",
         second: "2-digit",
       })
-    case "1h":
-    case "4h":
+    case "1H":
+    case "4H":
       return date.toLocaleTimeString("en-US", {
         hour: "2-digit",
         minute: "2-digit",
       })
-    case "8h":
-    case "1d":
+    case "8H":
+    case "1D":
       return date.toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
@@ -380,11 +390,11 @@ export function startPriceUpdates(): void {
 
   updateInterval = setInterval(() => {
     TOKENS.forEach((token) => {
-      // Update 1m and 5m intervals more frequently
-      updateTokenPrice(token.symbol, "1m").catch(console.error)
+      // Update 1M and 5M intervals more frequently
+      updateTokenPrice(token.symbol, "1M").catch(console.error)
       if (Math.random() > 0.7) {
         // 30% chance
-        updateTokenPrice(token.symbol, "5m").catch(console.error)
+        updateTokenPrice(token.symbol, "5M").catch(console.error)
       }
     })
   }, 30000) // Update every 30 seconds
