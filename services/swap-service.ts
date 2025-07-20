@@ -134,7 +134,7 @@ export async function doSwap({
       partnerCode: "24568",
       feeAmountOut: quote.addons?.feeAmountOut,
       fee: "0.2", // Fee from the attached file
-      feeReceiver: "0x3CdAfeD0Ba21fc648CE5Aa3EE0F9bE9378Cf5A50", // Fee receiver from the attached file
+      feeReceiver: "0xf04a78df4cc3017c0c23f37528d7b6cbbeea6677", // Fee receiver from the attached file
     }
     console.log("Swapping with params:", swapParams)
     const result = await swapHelper.swap(swapParams)
