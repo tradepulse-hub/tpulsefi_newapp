@@ -271,7 +271,7 @@ const SOFT_STAKING_ABI = [
 export default function PulseCodePage() {
   const router = useRouter()
   const [currentLang, setCurrentLang] = useState<string>("en")
-  const [activeFooterTab, setActiveFooterTab] = useState<"about" | "projects" | "burn">("about") // Removed "codestaking" from type
+  const [activeFooterTab, setActiveFooterTab] = useState<"about" | "projects" | "burn">("about")
 
   // Use useMiniKit hook
   const { address: userAddress, isConnected: isAuthenticated, isConnecting } = useMiniKit()
@@ -745,7 +745,9 @@ export default function PulseCodePage() {
         )
       case "burn":
         return (
-          <main className="relative flex min-h-[600px] flex-col items-center pt-4 pb-20 overflow-hidden w-full">
+          <main className="relative flex min-h-[500px] flex-col items-center pt-4 pb-20 overflow-hidden w-full">
+            {" "}
+            {/* Adjusted min-h */}
             <motion.div
               initial={{ y: -20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -761,7 +763,6 @@ export default function PulseCodePage() {
                 {t.furnace?.subtitle || "Queime tokens PSC e contribua para a substabilidade do token"}{" "}
               </p>
             </motion.div>
-
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -773,12 +774,11 @@ export default function PulseCodePage() {
                 {Number.parseFloat(totalBurned).toLocaleString()} PSC
               </p>{" "}
             </motion.div>
-
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="w-full max-w-sm relative z-10 px-4"
+              className="w-full max-w-xs relative z-10 px-4" // Changed max-w-sm to max-w-xs
             >
               <div className="bg-gray-900/70 backdrop-blur-sm rounded-xl border border-gray-800/50 overflow-hidden">
                 <div className="relative p-4 bg-gradient-to-b from-gray-800 to-gray-900 border-b border-gray-700/50">
@@ -829,7 +829,9 @@ export default function PulseCodePage() {
                       ))}
                     </div>
 
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32">
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-28 h-28">
+                      {" "}
+                      {/* Adjusted w-32 h-32 to w-28 h-28 */}
                       <div className="absolute inset-0 rounded-lg bg-gradient-to-b from-gray-600 to-gray-800 border-2 border-gray-700 shadow-inner">
                         {[
                           { top: "10%", left: "10%" },
@@ -844,7 +846,6 @@ export default function PulseCodePage() {
                           />
                         ))}
                       </div>
-
                       <motion.div
                         className="absolute inset-0 origin-left bg-gradient-to-br from-gray-700 via-gray-800 to-gray-900 rounded-lg border border-gray-700 shadow-md overflow-hidden"
                         animate={{
@@ -876,7 +877,6 @@ export default function PulseCodePage() {
                           </div>
                         </div>
                       </motion.div>
-
                       <div className="absolute inset-0 -z-10 rounded-lg overflow-hidden">
                         <div className="absolute inset-0 bg-gradient-to-b from-gray-900 via-gray-800 to-black">
                           <div className="absolute inset-0 grid grid-cols-4 grid-rows-4 gap-1 p-2 opacity-40">
@@ -1289,13 +1289,12 @@ export default function PulseCodePage() {
                 </div>
               </div>
             </motion.div>
-
             {burnTxHash && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
-                className="mt-4 w-full max-w-sm px-4"
+                className="mt-4 w-full max-w-xs px-4" // Changed max-w-sm to max-w-xs
               >
                 <div className="bg-gray-900/70 backdrop-blur-sm rounded-xl border border-gray-800/50 p-3">
                   <h3 className="text-sm font-medium text-gray-300 mb-2">
