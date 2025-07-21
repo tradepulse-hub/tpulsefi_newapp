@@ -1,9 +1,10 @@
 "use client"
 
 import Image from "next/image"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Coins, Info, Hammer } from "lucide-react" // Added Coins, Info, Hammer
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
+import { Button } from "@/components/ui/button" // Assuming Button is available from shadcn/ui
 
 // Simplified language support (replicated from presentation page for consistency)
 const translations = {
@@ -13,6 +14,13 @@ const translations = {
       description:
         "A project focused on helping various projects get developed for a fee of 500 WLD. What do we do with this fee? 50% - Liquidity, 50% - Repurchase, continuously increasing the value of PulseCode (PSC).",
       back: "Back",
+      footer: {
+        codeStaking: "CodeStaking",
+        about: "About",
+        projectsInDevelopment: "Projects in Development",
+        underDevelopment: "Under Development",
+        keplerPay: "KeplerPay (KPP)",
+      },
     },
   },
   pt: {
@@ -21,6 +29,13 @@ const translations = {
       description:
         "Projeto que o foco passa por ajudar varios projetos a serem desenvolvidos por uma taxa de 500 WLD, o que fazemos com essa taxa, 50% - Liquidez, 50% - Recompra Aumentando cada vez mais o valor de PulseCode (PSC).",
       back: "Voltar",
+      footer: {
+        codeStaking: "CodeStaking",
+        about: "Sobre",
+        projectsInDevelopment: "Projetos em Desenvolvimento",
+        underDevelopment: "Em Desenvolvimento",
+        keplerPay: "KeplerPay (KPP)",
+      },
     },
   },
   es: {
@@ -29,6 +44,13 @@ const translations = {
       description:
         "Proyecto que se enfoca en ayudar a desarrollar varios proyectos por una tarifa de 500 WLD. ¿Qué hacemos con esta tarifa? 50% - Liquidez, 50% - Recompra, aumentando continuamente el valor de PulseCode (PSC).",
       back: "Atrás",
+      footer: {
+        codeStaking: "CodeStaking",
+        about: "Acerca de",
+        projectsInDevelopment: "Proyectos en Desarrollo",
+        underDevelopment: "En Desarrollo",
+        keplerPay: "KeplerPay (KPP)",
+      },
     },
   },
   id: {
@@ -37,6 +59,13 @@ const translations = {
       description:
         "Proyek yang berfokus pada membantu berbagai proyek dikembangkan dengan biaya 500 WLD. Apa yang kami lakukan dengan biaya ini? 50% - Likuiditas, 50% - Pembelian Kembali, terus meningkatkan nilai PulseCode (PSC).",
       back: "Kembali",
+      footer: {
+        codeStaking: "CodeStaking",
+        about: "Tentang",
+        projectsInDevelopment: "Proyek dalam Pengembangan",
+        underDevelopment: "Dalam Pengembangan",
+        keplerPay: "KeplerPay (KPP)",
+      },
     },
   },
 }
@@ -44,6 +73,7 @@ const translations = {
 export default function CodePulsePage() {
   const router = useRouter()
   const [currentLang, setCurrentLang] = useState<keyof typeof translations>("en")
+  const [activeFooterTab, setActiveFooterTab] = useState<"about" | "codestaking" | "projects">("about") // Default active tab
 
   useEffect(() => {
     const savedLanguage = localStorage.getItem("preferred-language") as keyof typeof translations
@@ -53,6 +83,33 @@ export default function CodePulsePage() {
   }, [])
 
   const t = translations[currentLang]
+
+  const renderContent = () => {
+    switch (activeFooterTab) {
+      case "about":
+        return (
+          <p className="text-lg text-gray-300 leading-relaxed">
+            {t.codepulse?.description ||
+              "A project focused on helping various projects get developed for a fee of 500 WLD. What do we do with this fee? 50% - Liquidity, 50% - Repurchase, continuously increasing the value of PulseCode (PSC)."}
+          </p>
+        )
+      case "codestaking":
+        return (
+          <div className="text-center text-xl font-semibold text-cyan-400">
+            {t.codepulse?.footer?.underDevelopment || "Under Development"}
+          </div>
+        )
+      case "projects":
+        return (
+          <div className="flex items-center justify-center text-xl font-semibold text-gray-300">
+            {t.codepulse?.footer?.keplerPay || "KeplerPay (KPP)"}
+            <Hammer className="w-6 h-6 ml-2 animate-hammer" />
+          </div>
+        )
+      default:
+        return null
+    }
+  }
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4 relative overflow-hidden">
@@ -158,7 +215,9 @@ export default function CodePulsePage() {
         <span className="text-lg font-medium">{t.codepulse?.back || "Back"}</span>
       </button>
 
-      <div className="relative z-10 bg-black/60 backdrop-blur-lg border border-white/10 rounded-xl p-8 max-w-2xl text-center shadow-2xl">
+      <div className="relative z-10 bg-black/60 backdrop-blur-lg border border-white/10 rounded-xl p-8 max-w-2xl text-center shadow-2xl mb-20">
+        {" "}
+        {/* Added mb-20 for footer space */}
         {/* CodePulse Logo */}
         <div className="relative mb-8 flex items-center justify-center">
           <div
@@ -242,16 +301,12 @@ export default function CodePulsePage() {
             </div>
           </div>
         </div>
-
         <h1 className="text-4xl md:text-5xl font-bold mb-4 tracking-wider">
           <span className="bg-gradient-to-r from-white via-cyan-200 to-blue-200 bg-clip-text text-transparent">
             {t.codepulse?.title || "CodePulse: The Project Unifier"}
           </span>
         </h1>
-        <p className="text-lg text-gray-300 leading-relaxed">
-          {t.codepulse?.description ||
-            "A project focused on helping various projects get developed for a fee of 500 WLD. What do we do with this fee? 50% - Liquidity, 50% - Repurchase, continuously increasing the value of PulseCode (PSC)."}
-        </p>
+        {renderContent()} {/* Render content based on active footer tab */}
       </div>
 
       {/* Enhanced Floating Particles */}
@@ -288,6 +343,47 @@ export default function CodePulsePage() {
           }}
         />
       ))}
+
+      {/* Bottom Navigation Bar */}
+      <footer className="fixed bottom-0 left-0 w-full bg-black/70 backdrop-blur-md border-t border-white/10 p-2 z-50">
+        <div className="flex justify-around items-center max-w-md mx-auto">
+          <Button
+            variant="ghost"
+            size="icon"
+            className={`flex flex-col items-center justify-center p-2 ${
+              activeFooterTab === "codestaking" ? "text-cyan-400" : "text-gray-400 hover:text-cyan-400"
+            }`}
+            onClick={() => setActiveFooterTab("codestaking")}
+          >
+            <Coins className="w-6 h-6" />
+            <span className="text-xs mt-1">{t.codepulse?.footer?.codeStaking || "CodeStaking"}</span>
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className={`flex flex-col items-center justify-center p-2 ${
+              activeFooterTab === "about" ? "text-cyan-400" : "text-gray-400 hover:text-cyan-400"
+            }`}
+            onClick={() => setActiveFooterTab("about")}
+          >
+            <Info className="w-6 h-6" />
+            <span className="text-xs mt-1">{t.codepulse?.footer?.about || "About"}</span>
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className={`flex flex-col items-center justify-center p-2 ${
+              activeFooterTab === "projects" ? "text-cyan-400" : "text-gray-400 hover:text-cyan-400"
+            }`}
+            onClick={() => setActiveFooterTab("projects")}
+          >
+            <Hammer className="w-6 h-6" />
+            <span className="text-xs mt-1">
+              {t.codepulse?.footer?.projectsInDevelopment || "Projects in Development"}
+            </span>
+          </Button>
+        </div>
+      </footer>
 
       <style jsx>{`
         @keyframes moveRight {
@@ -403,6 +499,17 @@ export default function CodePulsePage() {
           to {
             transform: rotate(360deg);
           }
+        }
+
+        @keyframes hammer {
+          0% { transform: rotate(0deg); }
+          25% { transform: rotate(-20deg); }
+          50% { transform: rotate(0deg); }
+          75% { transform: rotate(20deg); }
+          100% { transform: rotate(0deg); }
+        }
+        .animate-hammer {
+          animation: hammer 1s ease-in-out infinite;
         }
       `}</style>
     </div>
