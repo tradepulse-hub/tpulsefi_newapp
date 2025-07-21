@@ -607,7 +607,14 @@ export default function PulseCodePage() {
 
   const renderContent = () => {
     // Add console logs here to check the state right before rendering
-    console.log("Rendering CodeStaking tab. isAuthenticated:", isAuthenticated, "userAddress:", userAddress)
+    console.log(
+      "Rendering CodeStaking tab. isAuthenticated:",
+      isAuthenticated,
+      "userAddress:",
+      userAddress,
+      "isLoadingStakingData:",
+      isLoadingStakingData,
+    )
 
     switch (activeFooterTab) {
       case "about":
@@ -764,7 +771,24 @@ export default function PulseCodePage() {
               )}
             </AnimatePresence>
 
-            {!isAuthenticated ? (
+            {isLoadingStakingData ? (
+              <div className="flex items-center justify-center h-48 w-full max-w-md">
+                <svg
+                  className="animate-spin h-8 w-8 text-cyan-400"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                <span className="ml-3 text-lg">{t.common?.loading || "Loading..."}</span>
+              </div>
+            ) : !isAuthenticated ? (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -772,6 +796,13 @@ export default function PulseCodePage() {
               >
                 <p className="text-blue-400 text-xs">{t.common?.connectWalletFirst || "Connect your wallet first"}</p>
               </motion.div>
+            ) : stakingError ? (
+              <div className="text-red-500 text-center text-sm w-full max-w-md">
+                {stakingError}
+                <Button onClick={fetchStakingData} className="mt-2 bg-blue-600 hover:bg-blue-700 text-white">
+                  {t.common?.retry || "Retry"}
+                </Button>
+              </div>
             ) : (
               <>
                 {/* PSC Staking Card - Adapted from FiStaking */}
@@ -821,89 +852,56 @@ export default function PulseCodePage() {
                   </div>
                 </motion.div>
 
-                {isLoadingStakingData ? (
-                  <div className="flex items-center justify-center h-48 w-full max-w-md">
-                    <svg
-                      className="animate-spin h-8 w-8 text-cyan-400"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
-                    </svg>
-                    <span className="ml-3 text-lg">{t.common?.loading || "Loading..."}</span>
-                  </div>
-                ) : stakingError ? (
-                  <div className="text-red-500 text-center text-sm w-full max-w-md">
-                    {stakingError}
-                    <Button onClick={fetchStakingData} className="mt-2 bg-blue-600 hover:bg-blue-700 text-white">
-                      {t.common?.retry || "Retry"}
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="w-full max-w-md space-y-4">
-                    <div className="bg-gray-900/70 backdrop-blur-sm rounded-xl border border-gray-800/50 p-4">
-                      <h3 className="text-lg font-semibold text-white mb-3">
-                        {t.staking?.yourStats || "Your Staking Stats"}
-                      </h3>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">{t.staking?.yourPscBalance || "Your PSC Balance"}:</span>
-                          <span className="text-white font-medium">{Number(pscBalance).toLocaleString()} PSC</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">{t.staking?.pendingRewards || "Pending Rewards"}:</span>
-                          <span className="text-yellow-400 font-medium">
-                            {Number(pendingRewards).toLocaleString(undefined, {
-                              minimumFractionDigits: 4,
-                              maximumFractionDigits: 4,
-                            })}{" "}
-                            PSC
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">{t.staking?.totalClaimed || "Total Claimed"}:</span>
-                          <span className="text-green-400 font-medium">
-                            {Number(totalClaimedRewards).toLocaleString()} PSC
-                          </span>
-                        </div>
+                <div className="w-full max-w-md space-y-4">
+                  <div className="bg-gray-900/70 backdrop-blur-sm rounded-xl border border-gray-800/50 p-4">
+                    <h3 className="text-lg font-semibold text-white mb-3">
+                      {t.staking?.yourStats || "Your Staking Stats"}
+                    </h3>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">{t.staking?.yourPscBalance || "Your PSC Balance"}:</span>
+                        <span className="text-white font-medium">{Number(pscBalance).toLocaleString()} PSC</span>
                       </div>
-                      {/* The claim button is now above, in the PSC Staking Card */}
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">{t.staking?.pendingRewards || "Pending Rewards"}:</span>
+                        <span className="text-yellow-400 font-medium">
+                          {Number(pendingRewards).toLocaleString(undefined, {
+                            minimumFractionDigits: 4,
+                            maximumFractionDigits: 4,
+                          })}{" "}
+                          PSC
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">{t.staking?.totalClaimed || "Total Claimed"}:</span>
+                        <span className="text-green-400 font-medium">
+                          {Number(totalClaimedRewards).toLocaleString()} PSC
+                        </span>
+                      </div>
                     </div>
+                    {/* The claim button is now above, in the PSC Staking Card */}
+                  </div>
 
-                    <div className="bg-gray-900/70 backdrop-blur-sm rounded-xl border border-gray-800/50 p-4">
-                      <h3 className="text-lg font-semibold text-white mb-3">
-                        {t.staking?.contractStats || "Contract Stats"}
-                      </h3>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">{t.staking?.currentAPY || "Current APY"}:</span>
-                          <span className="text-white font-medium">{stakingAPY}%</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">
-                            {t.staking?.contractBalance || "Contract Reward Balance"}:
-                          </span>
-                          <span className="text-white font-medium">
-                            {Number(contractRewardBalance).toLocaleString()} PSC
-                          </span>
-                        </div>
+                  <div className="bg-gray-900/70 backdrop-blur-sm rounded-xl border border-gray-800/50 p-4">
+                    <h3 className="text-lg font-semibold text-white mb-3">
+                      {t.staking?.contractStats || "Contract Stats"}
+                    </h3>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">{t.staking?.currentAPY || "Current APY"}:</span>
+                        <span className="text-white font-medium">{stakingAPY}%</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">
+                          {t.staking?.contractBalance || "Contract Reward Balance"}:
+                        </span>
+                        <span className="text-white font-medium">
+                          {Number(contractRewardBalance).toLocaleString()} PSC
+                        </span>
                       </div>
                     </div>
                   </div>
-                )}
+                </div>
               </>
             )}
           </div>
