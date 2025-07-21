@@ -1,84 +1,148 @@
 "use client"
 
 import Image from "next/image"
-import { ArrowLeft, Coins, Info, Hammer } from "lucide-react"
+import { ArrowLeft, Coins, Info, Hammer, Flame } from "lucide-react" // Added Flame icon
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
+import Link from "next/link" // Import Link for navigation
 
 // Simplified language support (replicated from presentation page for consistency)
 const translations = {
   en: {
     pulsecode: {
-      // Changed from codepulse
-      title: "PulseCode: The Project Unifier", // Changed title
+      title: "PulseCode: The Project Unifier",
       description:
-        "A project focused on helping various projects get developed for a fee of 500 WLD. What do we do with this fee? 50% - Liquidity, 50% - Repurchase, continuously increasing the value of PulseCode (PSC).", // Changed description
+        "A project focused on helping various projects get developed for a fee of 500 WLD. What do we do with this fee? 50% - Liquidity, 50% - Repurchase, continuously increasing the value of PulseCode (PSC).",
       back: "Back",
       footer: {
         codeStaking: "CodeStaking",
         about: "About",
         projectsInDevelopment: "Projects in Development",
+        burn: "Burn", // New translation for burn tab
         underDevelopment: "Under Development",
         keplerPay: "KeplerPay (KPP)",
       },
     },
+    furnace: {
+      // New translations for the Furnace page, moved here
+      title: "Furnace",
+      subtitle: "Burn PSC tokens and contribute to token stability",
+      totalBurned: "Total burned",
+      amountToBurn: "Amount of PSC to burn",
+      openFurnace: "OPEN FURNACE",
+      startBurn: "START BURN",
+      burning: "Burning...",
+      burnCompleted: "Burn Completed!",
+      lastTransaction: "Last Transaction",
+      instructions: "Click the button to open the furnace",
+      furnaceInfo: "Furnace Information",
+      deflation:
+        "Deflation: Each token burned is sent to a dead wallet (0x000...dEaD) and permanently removed from circulation.",
+    },
   },
   pt: {
     pulsecode: {
-      // Changed from codepulse
-      title: "PulseCode: O Projeto que Une Projetos", // Changed title
+      title: "PulseCode: O Projeto que Une Projetos",
       description:
-        "Projeto que o foco passa por ajudar varios projetos a serem desenvolvidos por uma taxa de 500 WLD, o que fazemos com essa taxa, 50% - Liquidez, 50% - Recompra Aumentando cada vez mais o valor de PulseCode (PSC).", // Changed description
+        "Projeto que o foco passa por ajudar varios projetos a serem desenvolvidos por uma taxa de 500 WLD, o que fazemos com essa taxa, 50% - Liquidez, 50% - Recompra Aumentando cada vez mais o valor de PulseCode (PSC).",
       back: "Voltar",
       footer: {
         codeStaking: "CodeStaking",
         about: "Sobre",
         projectsInDevelopment: "Projetos em Desenvolvimento",
+        burn: "Queima", // New translation for burn tab
         underDevelopment: "Em Desenvolvimento",
         keplerPay: "KeplerPay (KPP)",
       },
     },
+    furnace: {
+      // New translations for the Furnace page, moved here
+      title: "Fornalha",
+      subtitle: "Queime tokens PSC e contribua para a estabilidade do token",
+      totalBurned: "Total queimado",
+      amountToBurn: "Quantidade de PSC para queimar",
+      openFurnace: "ABRIR FORNALHA",
+      startBurn: "INICIAR QUEIMA",
+      burning: "Queimando...",
+      burnCompleted: "Queima Concluída!",
+      lastTransaction: "Última Transação",
+      instructions: "Clique no botão para abrir a fornalha",
+      furnaceInfo: "Informações sobre a Fornalha",
+      deflation:
+        "Deflação: Cada token queimado é enviado para uma carteira morta (0x000...dEaD) e removido permanentemente da circulação.",
+    },
   },
   es: {
     pulsecode: {
-      // Changed from codepulse
-      title: "PulseCode: El Proyecto que Une Proyectos", // Changed title
+      title: "PulseCode: El Proyecto que Une Proyectos",
       description:
-        "Proyecto que se enfoca en ayudar a desarrollar varios proyectos por una tarifa de 500 WLD. ¿Qué hacemos con esta tarifa? 50% - Liquidez, 50% - Recompra, aumentando continuamente el valor de PulseCode (PSC).", // Changed description
+        "Proyecto que se enfoca en ayudar a desarrollar varios proyectos por una tarifa de 500 WLD. ¿Qué hacemos con esta tarifa? 50% - Liquidez, 50% - Recompra, aumentando continuamente el valor de PulseCode (PSC).",
       back: "Atrás",
       footer: {
         codeStaking: "CodeStaking",
         about: "Acerca de",
         projectsInDevelopment: "Proyectos en Desarrollo",
+        burn: "Quema", // New translation for burn tab
         underDevelopment: "En Desarrollo",
         keplerPay: "KeplerPay (KPP)",
       },
     },
+    furnace: {
+      // New translations for the Furnace page, moved here
+      title: "Horno",
+      subtitle: "Quema tokens PSC y contribuye a la estabilidad del token",
+      totalBurned: "Total quemado",
+      amountToBurn: "Cantidad de PSC a quemar",
+      openFurnace: "ABRIR HORNO",
+      startBurn: "INICIAR QUEMA",
+      burning: "Quemando...",
+      burnCompleted: "¡Quema Completada!",
+      lastTransaction: "Última Transacción",
+      instructions: "Haz clic en el botón para abrir el horno",
+      furnaceInfo: "Información sobre el Horno",
+      deflation:
+        "Deflación: Cada token quemado se envía a una billetera muerta (0x000...dEaD) y se elimina permanentemente de la circulación.",
+    },
   },
   id: {
     pulsecode: {
-      // Changed from codepulse
-      title: "PulseCode: Proyek Pemersatu Proyek", // Changed title
+      title: "PulseCode: Proyek Pemersatu Proyek",
       description:
-        "Proyek yang berfokus pada membantu berbagai proyek dikembangkan dengan biaya 500 WLD. Apa yang kami lakukan dengan biaya ini? 50% - Likuiditas, 50% - Pembelian Kembali, terus meningkatkan nilai PulseCode (PSC).", // Changed description
+        "Proyek yang berfokus pada membantu berbagai proyek dikembangkan dengan biaya 500 WLD. Apa yang kami lakukan dengan biaya ini? 50% - Likuiditas, 50% - Pembelian Kembali, terus meningkatkan nilai PulseCode (PSC).",
       back: "Kembali",
       footer: {
         codeStaking: "CodeStaking",
         about: "Tentang",
         projectsInDevelopment: "Proyek dalam Pengembangan",
+        burn: "Bakar", // New translation for burn tab
         underDevelopment: "Dalam Pengembangan",
         keplerPay: "KeplerPay (KPP)",
       },
+    },
+    furnace: {
+      // New translations for the Furnace page, moved here
+      title: "Tungku",
+      subtitle: "Bakar token PSC dan berkontribusi pada stabilitas token",
+      totalBurned: "Total dibakar",
+      amountToBurn: "Jumlah PSC yang akan dibakar",
+      openFurnace: "BUKA TUNGKU",
+      startBurn: "MULAI PEMBAKARAN",
+      burning: "Membakar...",
+      burnCompleted: "Pembakaran Selesai!",
+      lastTransaction: "Transaksi Terakhir",
+      instructions: "Klik tombol untuk membuka tungku",
+      furnaceInfo: "Informasi tentang Tungku",
+      deflation:
+        "Deflasi: Setiap token yang dibakar dikirim ke dompet mati (0x000...dEaD) dan dihapus secara permanen dari peredaran.",
     },
   },
 }
 
 export default function PulseCodePage() {
-  // Changed component name
   const router = useRouter()
   const [currentLang, setCurrentLang] = useState<keyof typeof translations>("en")
-  const [activeFooterTab, setActiveFooterTab] = useState<"about" | "codestaking" | "projects">("about") // Default active tab
+  const [activeFooterTab, setActiveFooterTab] = useState<"about" | "codestaking" | "projects" | "burn">("about") // Added 'burn' tab
 
   useEffect(() => {
     const savedLanguage = localStorage.getItem("preferred-language") as keyof typeof translations
@@ -165,8 +229,8 @@ export default function PulseCodePage() {
                 />
                 <div className="relative z-10 w-20 h-20 rounded-full overflow-hidden bg-white p-1">
                   <Image
-                    src="/images/pulsecode-logo.png" // Changed logo path
-                    alt="PulseCode Logo" // Changed alt text
+                    src="/images/pulsecode-logo.png"
+                    alt="PulseCode Logo"
                     width={80}
                     height={80}
                     className="w-full h-full object-contain"
@@ -179,7 +243,7 @@ export default function PulseCodePage() {
             </div>
             <h1 className="text-4xl md:text-5xl font-bold mb-4 tracking-wider">
               <span className="bg-gradient-to-r from-white via-cyan-200 to-blue-200 bg-clip-text text-transparent">
-                {t.pulsecode?.title || "PulseCode: The Project Unifier"} {/* Changed title text */}
+                {t.pulsecode?.title || "PulseCode: The Project Unifier"}
               </span>
             </h1>
             <p className="text-lg text-gray-300 leading-relaxed">
@@ -211,6 +275,20 @@ export default function PulseCodePage() {
               <span>{t.pulsecode?.footer?.keplerPay || "KeplerPay (KPP)"}</span>
               <Hammer className="w-6 h-6 ml-2 animate-hammer" />
             </div>
+          </div>
+        )
+      case "burn": // New case for burn tab
+        return (
+          <div className="text-center text-xl font-semibold text-orange-400">
+            <h2 className="text-2xl font-bold mb-4 text-orange-300">{t.furnace?.title || "Furnace"}</h2>
+            <p className="text-lg text-gray-300 leading-relaxed">
+              {t.furnace?.instructions || "Click the burn icon to burn tokens."}
+            </p>
+            <Link href="/burn" passHref>
+              <Button className="mt-4 bg-orange-600 hover:bg-orange-700 text-white">
+                {t.furnace?.openFurnace || "Open Furnace Page"}
+              </Button>
+            </Link>
           </div>
         )
       default:
@@ -324,8 +402,7 @@ export default function PulseCodePage() {
 
       <div className="relative z-10 bg-black/60 backdrop-blur-lg border border-white/10 rounded-xl p-8 max-w-2xl text-center shadow-2xl mb-20">
         {" "}
-        {/* Added mb-20 for footer space */}
-        {renderContent()} {/* Render content based on active footer tab */}
+        {renderContent()}
       </div>
 
       {/* Enhanced Floating Particles */}
@@ -363,7 +440,7 @@ export default function PulseCodePage() {
         />
       ))}
 
-      {/* Bottom Navigation Bar */}
+      {/* Bottom Navigation Bar (local to PulseCodePage) */}
       <footer className="fixed bottom-4 left-1/2 -translate-x-1/2 w-full max-w-xs bg-black/70 backdrop-blur-md border border-white/10 rounded-full p-2 z-50">
         <div className="flex justify-around items-center">
           <Button
@@ -395,6 +472,17 @@ export default function PulseCodePage() {
             onClick={() => setActiveFooterTab("projects")}
           >
             <Hammer className="w-6 h-6" />
+          </Button>
+          {/* New Burn Button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className={`flex flex-col items-center justify-center p-2 ${
+              activeFooterTab === "burn" ? "text-orange-400" : "text-gray-400 hover:text-orange-400"
+            }`}
+            onClick={() => setActiveFooterTab("burn")}
+          >
+            <Flame className="w-6 h-6" />
           </Button>
         </div>
       </footer>
