@@ -517,11 +517,23 @@ export default function PulseCodePage() {
   }, [t, PSC_CONTRACT_ADDRESS, SOFT_STAKING_CONTRACT_ADDRESS, isAuthenticated, userAddress]) // Added isAuthenticated and userAddress to dependencies
 
   useEffect(() => {
-    fetchStakingData()
-    // Optionally, refetch data periodically or on tab change
-    const interval = setInterval(fetchStakingData, 15000) // Refetch every 15 seconds
-    return () => clearInterval(interval)
-  }, [fetchStakingData, activeFooterTab]) // Refetch when tab changes to ensure fresh data
+    let interval: NodeJS.Timeout | undefined
+
+    if (isAuthenticated && userAddress) {
+      fetchStakingData()
+      interval = setInterval(fetchStakingData, 15000) // Refetch every 15 seconds
+    } else {
+      // If not authenticated or address is null, ensure loading state is false and error is set
+      setIsLoadingStakingData(false)
+      setStakingError(t.common?.walletNotConnected || "Wallet not connected.")
+    }
+
+    return () => {
+      if (interval) {
+        clearInterval(interval)
+      }
+    }
+  }, [fetchStakingData, activeFooterTab, isAuthenticated, userAddress, t]) // Refetch when tab changes or wallet status changes
 
   // Handle Claim Rewards
   const handleClaimRewards = async () => {
