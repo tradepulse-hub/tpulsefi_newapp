@@ -438,18 +438,27 @@ export default function PulseCodePage() {
 
   // Function to fetch staking data
   const fetchStakingData = useCallback(async () => {
+    setIsLoadingStakingData(true) // Set loading true immediately
+    setStakingError(null) // Clear any previous errors
+
+    console.log("fetchStakingData called. isAuthenticated:", isAuthenticated, "userAddress:", userAddress)
+
+    if (!MiniKit.isInstalled()) {
+      console.log("MiniKit is NOT installed. Cannot fetch staking data.")
+      setStakingError(t.common?.minikitNotInstalled || "MiniKit is not installed.")
+      setIsLoadingStakingData(false)
+      return
+    }
+
     if (!isAuthenticated || !userAddress) {
-      console.log("Wallet not connected or not authenticated. Cannot fetch staking data.")
+      console.log("Wallet is NOT connected or userAddress is null. Cannot fetch staking data.")
       setStakingError(t.common?.walletNotConnected || "Wallet not connected.")
       setIsLoadingStakingData(false)
       return
     }
 
-    setIsLoadingStakingData(true)
-    setStakingError(null)
-
     try {
-      console.log("Connected Wallet Address:", userAddress)
+      console.log("Attempting to fetch staking data for address:", userAddress)
 
       // Fetch PSC balance
       console.log("Fetching PSC balance...")
@@ -508,15 +517,18 @@ export default function PulseCodePage() {
         "Formatted:",
         ethers.formatUnits(contractRewardBalanceWei, 18),
       )
+      console.log("Staking data fetched successfully.")
     } catch (err: any) {
-      console.error("Detailed Error fetching staking data:", err)
+      console.error("Error during staking data fetch:", err)
       setStakingError(t.common?.errorFetchingData || `Error fetching staking data: ${err.message || err.toString()}`)
     } finally {
       setIsLoadingStakingData(false)
+      console.log("Finished fetching staking data. isLoadingStakingData set to false.")
     }
   }, [t, PSC_CONTRACT_ADDRESS, SOFT_STAKING_CONTRACT_ADDRESS, isAuthenticated, userAddress]) // Added isAuthenticated and userAddress to dependencies
 
   useEffect(() => {
+    console.log("Main useEffect running. isAuthenticated:", isAuthenticated, "userAddress:", userAddress)
     let interval: NodeJS.Timeout | undefined
 
     if (isAuthenticated && userAddress) {
