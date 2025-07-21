@@ -9,10 +9,11 @@ import { Button } from "@/components/ui/button"
 // Simplified language support (replicated from presentation page for consistency)
 const translations = {
   en: {
-    codepulse: {
-      title: "CodePulse: The Project Unifier",
+    pulsecode: {
+      // Changed from codepulse
+      title: "PulseCode: The Project Unifier", // Changed title
       description:
-        "A project focused on helping various projects get developed for a fee of 500 WLD. What do we do with this fee? 50% - Liquidity, 50% - Repurchase, continuously increasing the value of PulseCode (PSC).",
+        "A project focused on helping various projects get developed for a fee of 500 WLD. What do we do with this fee? 50% - Liquidity, 50% - Repurchase, continuously increasing the value of PulseCode (PSC).", // Changed description
       back: "Back",
       footer: {
         codeStaking: "CodeStaking",
@@ -24,10 +25,11 @@ const translations = {
     },
   },
   pt: {
-    codepulse: {
-      title: "CodePulse: O Projeto que Une Projetos",
+    pulsecode: {
+      // Changed from codepulse
+      title: "PulseCode: O Projeto que Une Projetos", // Changed title
       description:
-        "Projeto que o foco passa por ajudar varios projetos a serem desenvolvidos por uma taxa de 500 WLD, o que fazemos com essa taxa, 50% - Liquidez, 50% - Recompra Aumentando cada vez mais o valor de PulseCode (PSC).",
+        "Projeto que o foco passa por ajudar varios projetos a serem desenvolvidos por uma taxa de 500 WLD, o que fazemos com essa taxa, 50% - Liquidez, 50% - Recompra Aumentando cada vez mais o valor de PulseCode (PSC).", // Changed description
       back: "Voltar",
       footer: {
         codeStaking: "CodeStaking",
@@ -39,10 +41,11 @@ const translations = {
     },
   },
   es: {
-    codepulse: {
-      title: "CodePulse: El Proyecto que Une Proyectos",
+    pulsecode: {
+      // Changed from codepulse
+      title: "PulseCode: El Proyecto que Une Proyectos", // Changed title
       description:
-        "Proyecto que se enfoca en ayudar a desarrollar varios proyectos por una tarifa de 500 WLD. ¿Qué hacemos con esta tarifa? 50% - Liquidez, 50% - Recompra, aumentando continuamente el valor de PulseCode (PSC).",
+        "Proyecto que se enfoca en ayudar a desarrollar varios proyectos por una tarifa de 500 WLD. ¿Qué hacemos con esta tarifa? 50% - Liquidez, 50% - Recompra, aumentando continuamente el valor de PulseCode (PSC).", // Changed description
       back: "Atrás",
       footer: {
         codeStaking: "CodeStaking",
@@ -54,10 +57,11 @@ const translations = {
     },
   },
   id: {
-    codepulse: {
-      title: "CodePulse: Proyek Pemersatu Proyek",
+    pulsecode: {
+      // Changed from codepulse
+      title: "PulseCode: Proyek Pemersatu Proyek", // Changed title
       description:
-        "Proyek yang berfokus pada membantu berbagai proyek dikembangkan dengan biaya 500 WLD. Apa yang kami lakukan dengan biaya ini? 50% - Likuiditas, 50% - Pembelian Kembali, terus meningkatkan nilai PulseCode (PSC).",
+        "Proyek yang berfokus pada membantu berbagai proyek dikembangkan dengan biaya 500 WLD. Apa yang kami lakukan dengan biaya ini? 50% - Likuiditas, 50% - Pembelian Kembali, terus meningkatkan nilai PulseCode (PSC).", // Changed description
       back: "Kembali",
       footer: {
         codeStaking: "CodeStaking",
@@ -70,7 +74,8 @@ const translations = {
   },
 }
 
-export default function CodePulsePage() {
+export default function PulseCodePage() {
+  // Changed component name
   const router = useRouter()
   const [currentLang, setCurrentLang] = useState<keyof typeof translations>("en")
   const [activeFooterTab, setActiveFooterTab] = useState<"about" | "codestaking" | "projects">("about") // Default active tab
@@ -89,7 +94,7 @@ export default function CodePulsePage() {
       case "about":
         return (
           <>
-            {/* CodePulse Logo - Only visible in About tab */}
+            {/* PulseCode Logo - Only visible in About tab */}
             <div className="relative mb-8 flex items-center justify-center">
               <div
                 className="absolute w-48 h-48 rounded-full"
@@ -160,8 +165,8 @@ export default function CodePulsePage() {
                 />
                 <div className="relative z-10 w-20 h-20 rounded-full overflow-hidden bg-white p-1">
                   <Image
-                    src="/images/codepulse-logo.png"
-                    alt="CodePulse Logo"
+                    src="/images/pulsecode-logo.png" // Changed logo path
+                    alt="PulseCode Logo" // Changed alt text
                     width={80}
                     height={80}
                     className="w-full h-full object-contain"
@@ -174,11 +179,11 @@ export default function CodePulsePage() {
             </div>
             <h1 className="text-4xl md:text-5xl font-bold mb-4 tracking-wider">
               <span className="bg-gradient-to-r from-white via-cyan-200 to-blue-200 bg-clip-text text-transparent">
-                {t.codepulse?.title || "CodePulse: The Project Unifier"}
+                {t.pulsecode?.title || "PulseCode: The Project Unifier"} {/* Changed title text */}
               </span>
             </h1>
             <p className="text-lg text-gray-300 leading-relaxed">
-              {t.codepulse?.description ||
+              {t.pulsecode?.description ||
                 "A project focused on helping various projects get developed for a fee of 500 WLD. What do we do with this fee? 50% - Liquidity, 50% - Repurchase, continuously increasing the value of PulseCode (PSC)."}
             </p>
           </>
@@ -186,14 +191,14 @@ export default function CodePulsePage() {
       case "codestaking":
         return (
           <div className="text-center text-xl font-semibold text-cyan-400">
-            {t.codepulse?.footer?.underDevelopment || "Under Development"}
+            {t.pulsecode?.footer?.underDevelopment || "Under Development"}
           </div>
         )
       case "projects":
         return (
           <div className="flex flex-col items-center justify-center text-xl font-semibold text-gray-300">
             <h2 className="text-2xl font-bold mb-4 text-cyan-300">
-              {t.codepulse?.footer?.projectsInDevelopment || "Projects in Development"}
+              {t.pulsecode?.footer?.projectsInDevelopment || "Projects in Development"}
             </h2>
             <div className="flex items-center gap-2">
               <Image
@@ -203,8 +208,8 @@ export default function CodePulsePage() {
                 height={40}
                 className="rounded-full"
               />
-              <span>{t.codepulse?.footer?.keplerPay || "KeplerPay (KPP)"}</span>
-              <Hammer className="w-6 h-6 animate-hammer" />
+              <span>{t.pulsecode?.footer?.keplerPay || "KeplerPay (KPP)"}</span>
+              <Hammer className="w-6 h-6 ml-2 animate-hammer" />
             </div>
           </div>
         )
@@ -314,7 +319,7 @@ export default function CodePulsePage() {
         className="absolute top-6 left-6 flex items-center space-x-2 text-gray-400 hover:text-white transition-colors z-50"
       >
         <ArrowLeft className="w-5 h-5" />
-        <span className="text-lg font-medium">{t.codepulse?.back || "Back"}</span>
+        <span className="text-lg font-medium">{t.pulsecode?.back || "Back"}</span>
       </button>
 
       <div className="relative z-10 bg-black/60 backdrop-blur-lg border border-white/10 rounded-xl p-8 max-w-2xl text-center shadow-2xl mb-20">
