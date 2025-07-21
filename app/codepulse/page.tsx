@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { ArrowLeft, Coins, Info, Hammer, Flame, Loader2, CheckCircle, Gift } from "lucide-react"
+import { ArrowLeft, Info, Hammer, Flame } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState, useRef, useCallback } from "react"
 import { Button } from "@/components/ui/button"
@@ -271,7 +271,7 @@ const SOFT_STAKING_ABI = [
 export default function PulseCodePage() {
   const router = useRouter()
   const [currentLang, setCurrentLang] = useState<string>("en")
-  const [activeFooterTab, setActiveFooterTab] = useState<"about" | "codestaking" | "projects" | "burn">("about")
+  const [activeFooterTab, setActiveFooterTab] = useState<"about" | "projects" | "burn">("about") // Removed "codestaking" from type
 
   // Use useMiniKit hook
   const { address: userAddress, isConnected: isAuthenticated, isConnecting } = useMiniKit()
@@ -288,7 +288,7 @@ export default function PulseCodePage() {
   const [totalBurned, setTotalBurned] = useState<string>("0")
   const furnaceRef = useRef<HTMLDivElement>(null)
 
-  // Staking states
+  // Staking states (these states are no longer directly used for rendering the tab, but might be used by other logic)
   const [pscBalance, setPscBalance] = useState<string>("0")
   const [pendingRewards, setPendingRewards] = useState<string>("0")
   const [totalClaimedRewards, setTotalClaimedRewards] = useState<string>("0")
@@ -723,186 +723,7 @@ export default function PulseCodePage() {
             </p>
           </>
         )
-      case "codestaking":
-        return (
-          <div className="flex flex-col items-center justify-center text-gray-300 p-4">
-            <h2 className="text-2xl font-bold mb-6 text-cyan-300">
-              {t.pulsecode?.footer?.codestakingTitle || "CodeStaking"}
-            </h2>
-
-            <AnimatePresence>
-              {claimSuccess && (
-                <motion.div
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 mb-3 w-full max-w-md"
-                >
-                  <div className="flex items-start space-x-2">
-                    <CheckCircle className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-green-400 text-xs font-medium mb-1">
-                        {t.staking?.claimSuccess || "Claim Successful!"}
-                      </p>
-                      <p className="text-green-300 text-[10px]">PSC rewards claimed successfully</p>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            <AnimatePresence>
-              {claimError && (
-                <motion.div
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 mb-3 w-full max-w-md"
-                >
-                  <div className="flex items-start space-x-2">
-                    <div className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0">⚠️</div>
-                    <div>
-                      <p className="text-red-400 text-xs font-medium mb-1">
-                        {t.staking?.claimFailed || "Claim Failed"}
-                      </p>
-                      <p className="text-red-300 text-[10px]">{claimError}</p>
-                      <button
-                        onClick={() => setClaimError(null)}
-                        className="mt-1 text-red-400 text-[10px] hover:text-red-300"
-                      >
-                        {t.common?.dismiss || "Dismiss"}
-                      </button>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {isConnecting ? (
-              <div className="flex items-center justify-center h-48 w-full max-w-md">
-                <Loader2 className="animate-spin h-8 w-8 text-cyan-400" />
-                <span className="ml-3 text-lg">{t.common?.connectingWallet || "Connecting wallet..."}</span>
-              </div>
-            ) : !isAuthenticated ? (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 text-center w-full max-w-md"
-              >
-                <p className="text-blue-400 text-xs">{t.common?.connectWalletFirst || "Connect your wallet first"}</p>
-              </motion.div>
-            ) : isLoadingStakingData ? (
-              <div className="flex items-center justify-center h-48 w-full max-w-md">
-                <Loader2 className="animate-spin h-8 w-8 text-cyan-400" />
-                <span className="ml-3 text-lg">{t.common?.loading || "Loading..."}</span>
-              </div>
-            ) : stakingError ? (
-              <div className="text-red-500 text-center text-sm w-full max-w-md">
-                {stakingError}
-                <Button onClick={fetchStakingData} className="mt-2 bg-blue-600 hover:bg-blue-700 text-white">
-                  {t.common?.retry || "Retry"}
-                </Button>
-              </div>
-            ) : (
-              <>
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-lg p-3 w-full max-w-md mb-4"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Image
-                        src="/images/codepulse-logo.png"
-                        alt="PulseCode Token"
-                        width={32}
-                        height={32}
-                        className="w-8 h-8 rounded-full"
-                      />
-                      <div>
-                        <h3 className="text-white font-medium text-sm">PSC</h3>
-                        <p className="text-gray-400 text-[10px]">PulseCode Token</p>
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={handleClaimRewards}
-                      disabled={isClaiming || Number(pendingRewards) <= 0}
-                      className={`py-1.5 px-4 rounded-md font-medium text-xs transition-all duration-300 flex items-center justify-center space-x-1 ${
-                        isClaiming
-                          ? "bg-gray-600/50 text-gray-400 cursor-not-allowed"
-                          : "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
-                      }`}
-                    >
-                      {isClaiming ? (
-                        <>
-                          <Loader2 className="w-3 h-3 animate-spin" />
-                          <span>{t.staking?.claiming || "Claiming..."}</span>
-                        </>
-                      ) : (
-                        <>
-                          <Gift className="w-3 h-3" />
-                          <span>{t.staking?.claim || "Claim"}</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </motion.div>
-
-                <div className="w-full max-w-md space-y-4">
-                  <div className="bg-gray-900/70 backdrop-blur-sm rounded-xl border border-gray-800/50 p-4">
-                    <h3 className="text-lg font-semibold text-white mb-3">
-                      {t.staking?.yourStats || "Your Staking Stats"}
-                    </h3>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">{t.staking?.yourPscBalance || "Your PSC Balance"}:</span>
-                        <span className="text-white font-medium">{Number(pscBalance).toLocaleString()} PSC</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">{t.staking?.pendingRewards || "Pending Rewards"}:</span>
-                        <span className="text-yellow-400 font-medium">
-                          {Number(pendingRewards).toLocaleString(undefined, {
-                            minimumFractionDigits: 4,
-                            maximumFractionDigits: 4,
-                          })}{" "}
-                          PSC
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">{t.staking?.totalClaimed || "Total Claimed"}:</span>
-                        <span className="text-green-400 font-medium">
-                          {Number(totalClaimedRewards).toLocaleString()} PSC
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-gray-900/70 backdrop-blur-sm rounded-xl border border-gray-800/50 p-4">
-                    <h3 className="text-lg font-semibold text-white mb-3">
-                      {t.staking?.contractStats || "Contract Stats"}
-                    </h3>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">{t.staking?.currentAPY || "Current APY"}:</span>
-                        <span className="text-white font-medium">{stakingAPY}%</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">
-                          {t.staking?.contractBalance || "Contract Reward Balance"}:
-                        </span>
-                        <span className="text-white font-medium">
-                          {Number(contractRewardBalance).toLocaleString()} PSC
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-        )
+      // Removed the "codestaking" case entirely
       case "projects":
         return (
           <div className="flex flex-col items-center justify-center text-xl font-semibold text-gray-300">
@@ -1637,16 +1458,7 @@ export default function PulseCodePage() {
 
       <footer className="fixed bottom-4 left-1/2 -translate-x-1/2 w-full max-w-xs bg-black/70 backdrop-blur-md border border-white/10 rounded-full p-2 z-50">
         <div className="flex justify-around items-center">
-          <Button
-            variant="ghost"
-            size="icon"
-            className={`flex flex-col items-center justify-center p-2 ${
-              activeFooterTab === "codestaking" ? "text-cyan-400" : "text-gray-400 hover:text-cyan-400"
-            }`}
-            onClick={() => setActiveFooterTab("codestaking")}
-          >
-            <Coins className="w-6 h-6" />
-          </Button>
+          {/* Removed the CodeStaking button */}
           <Button
             variant="ghost"
             size="icon"
