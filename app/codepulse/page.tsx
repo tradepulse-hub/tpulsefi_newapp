@@ -606,6 +606,9 @@ export default function PulseCodePage() {
   }
 
   const renderContent = () => {
+    // Add console logs here to check the state right before rendering
+    console.log("Rendering CodeStaking tab. isAuthenticated:", isAuthenticated, "userAddress:", userAddress)
+
     switch (activeFooterTab) {
       case "about":
         return (
