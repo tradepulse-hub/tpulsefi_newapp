@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { MiniKit } from "@worldcoin/minikit-js"
 import { ethers } from "ethers"
 import { getCurrentLanguage, getTranslations } from "@/lib/i18n"
+import { useMiniKit } from "../../hooks/use-minikit" // Import useMiniKit hook
 
 // Endereço da carteira morta (burn address)
 const DEAD_WALLET = "0x000000000000000000000000000000000000dEaD"
@@ -272,6 +273,9 @@ export default function PulseCodePage() {
   const [currentLang, setCurrentLang] = useState<string>("en")
   const [activeFooterTab, setActiveFooterTab] = useState<"about" | "codestaking" | "projects" | "burn">("about")
 
+  // Use useMiniKit hook
+  const { address: userAddress, isConnected: isAuthenticated } = useMiniKit()
+
   // Furnace states and refs
   const [amount, setAmount] = useState<string>("0")
   const [isBurning, setIsBurning] = useState(false)
@@ -285,7 +289,6 @@ export default function PulseCodePage() {
   const furnaceRef = useRef<HTMLDivElement>(null)
 
   // Staking states
-  const [userAddress, setUserAddress] = useState<string | null>(null)
   const [pscBalance, setPscBalance] = useState<string>("0")
   const [pendingRewards, setPendingRewards] = useState<string>("0")
   const [totalClaimedRewards, setTotalClaimedRewards] = useState<string>("0")
@@ -435,9 +438,9 @@ export default function PulseCodePage() {
 
   // Function to fetch staking data
   const fetchStakingData = useCallback(async () => {
-    if (!MiniKit.isInstalled()) {
-      console.log("MiniKit is not installed. Cannot fetch staking data.")
-      setStakingError(t.common?.minikitNotInstalled || "MiniKit is not installed.")
+    if (!isAuthenticated || !userAddress) {
+      console.log("Wallet not connected or not authenticated. Cannot fetch staking data.")
+      setStakingError(t.common?.walletNotConnected || "Wallet not connected.")
       setIsLoadingStakingData(false)
       return
     }
@@ -446,18 +449,7 @@ export default function PulseCodePage() {
     setStakingError(null)
 
     try {
-      console.log("Attempting to get wallet address...")
-      const { finalPayload: addressPayload } = await MiniKit.commandsAsync.getWalletAddress()
-      const connectedAddress = addressPayload.address
-      setUserAddress(connectedAddress)
-      console.log("Connected Wallet Address:", connectedAddress)
-
-      if (!connectedAddress) {
-        console.log("Wallet not connected. Cannot fetch staking data.")
-        setStakingError(t.common?.walletNotConnected || "Wallet not connected.")
-        setIsLoadingStakingData(false)
-        return
-      }
+      console.log("Connected Wallet Address:", userAddress)
 
       // Fetch PSC balance
       console.log("Fetching PSC balance...")
@@ -465,7 +457,7 @@ export default function PulseCodePage() {
         address: PSC_CONTRACT_ADDRESS,
         abi: ERC20_ABI,
         functionName: "balanceOf",
-        args: [connectedAddress],
+        args: [userAddress],
       })
       const pscBalanceWei = pscBalancePayload.result.toString()
       setPscBalance(ethers.formatUnits(pscBalanceWei, 18))
@@ -477,7 +469,7 @@ export default function PulseCodePage() {
         address: SOFT_STAKING_CONTRACT_ADDRESS,
         abi: SOFT_STAKING_ABI,
         functionName: "getUserInfo",
-        args: [connectedAddress],
+        args: [userAddress],
       })
       const pendingRewardsWei = userInfoPayload.result[1].toString()
       const totalClaimedWei = userInfoPayload.result[3].toString()
@@ -522,7 +514,7 @@ export default function PulseCodePage() {
     } finally {
       setIsLoadingStakingData(false)
     }
-  }, [t, PSC_CONTRACT_ADDRESS, SOFT_STAKING_CONTRACT_ADDRESS])
+  }, [t, PSC_CONTRACT_ADDRESS, SOFT_STAKING_CONTRACT_ADDRESS, isAuthenticated, userAddress]) // Added isAuthenticated and userAddress to dependencies
 
   useEffect(() => {
     fetchStakingData()
@@ -1609,142 +1601,142 @@ export default function PulseCodePage() {
       </footer>
 
       <style jsx>{`
-      @keyframes moveRight {
-        0% {
-          transform: translateX(-100%);
-          opacity: 0;
+        @keyframes moveRight {
+          0% {
+            transform: translateX(-100%);
+            opacity: 0;
+          }
+          10% {
+            opacity: 1;
+          }
+          90% {
+            opacity: 1;
+          }
+          100% {
+            transform: translateX(100vw);
+            opacity: 0;
+          }
         }
-        10% {
-          opacity: 1;
-        }
-        90% {
-          opacity: 1;
-        }
-        100% {
-          transform: translateX(100vw);
-          opacity: 0;
-        }
-      }
 
-      @keyframes moveDown {
-        0% {
-          transform: translateY(-100%);
-          opacity: 0;
+        @keyframes moveDown {
+          0% {
+            transform: translateY(-100%);
+            opacity: 0;
+          }
+          10% {
+            opacity: 1;
+          }
+          90% {
+            opacity: 1;
+          }
+          100% {
+            transform: translateY(100vh);
+            opacity: 0;
+          }
         }
-        10% {
-          opacity: 1;
-        }
-        90% {
-          opacity: 1;
-        }
-        100% {
-          transform: translateY(100vh);
-          opacity: 0;
-        }
-      }
 
-      @keyframes vibrateAura {
-        0% {
-          transform: translate(0);
+        @keyframes vibrateAura {
+          0% {
+            transform: translate(0);
+          }
+          25% {
+            transform: translate(0.5px, 0.5px);
+          }
+          50% {
+            transform: translate(-0.5px, 0.5px);
+          }
+          75% {
+            transform: translate(0.5px, -0.5px);
+          }
+          100% {
+            transform: translate(-0.5px, -0.5px);
+          }
         }
-        25% {
-          transform: translate(0.5px, 0.5px);
-        }
-        50% {
-          transform: translate(-0.5px, 0.5px);
-        }
-        75% {
-          transform: translate(0.5px, -0.5px);
-        }
-        100% {
-          transform: translate(-0.5px, -0.5px);
-        }
-      }
 
-      @keyframes vibrateRing {
-        0% {
-          transform: translate(0) rotate(0deg);
+        @keyframes vibrateRing {
+          0% {
+            transform: translate(0) rotate(0deg);
+          }
+          25% {
+            transform: translate(1px, 1px) rotate(90deg);
+          }
+          50% {
+            transform: translate(-1px, 1px) rotate(180deg);
+          }
+          75% {
+            transform: translate(1px, -1px) rotate(270deg);
+          }
+          100% {
+            transform: translate(-1px, -1px) rotate(360deg);
+          }
         }
-        25% {
-          transform: translate(1px, 1px) rotate(90deg);
-        }
-        50% {
-          transform: translate(-1px, 1px) rotate(180deg);
-        }
-        75% {
-          transform: translate(1px, -1px) rotate(270deg);
-        }
-        100% {
-          transform: translate(-1px, -1px) rotate(360deg);
-        }
-      }
 
-      @keyframes vibrateLogo {
-        0% {
-          transform: translate(0);
+        @keyframes vibrateLogo {
+          0% {
+            transform: translate(0);
+          }
+          25% {
+            transform: translate(0.3px, 0.3px);
+          }
+          50% {
+            transform: translate(-0.3px, 0.3px);
+          }
+          75% {
+            transform: translate(0.3px, -0.3px);
+          }
+          100% {
+            transform: translate(-0.3px, -0.3px);
+          }
         }
-        25% {
-          transform: translate(0.3px, 0.3px);
-        }
-        50% {
-          transform: translate(-0.3px, 0.3px);
-        }
-        75% {
-          transform: translate(0.3px, -0.3px);
-        }
-        100% {
-          transform: translate(-0.3px, -0.3px);
-        }
-      }
 
-      @keyframes vibrateLogoImage {
-        0% {
-          transform: translate(0) scale(1);
+        @keyframes vibrateLogoImage {
+          0% {
+            transform: translate(0) scale(1);
+          }
+          25% {
+            transform: translate(0.2px, 0.2px) scale(1.01);
+          }
+          50% {
+            transform: translate(-0.2px, 0.2px) scale(0.99);
+          }
+          75% {
+            transform: translate(0.2px, -0.2px) scale(1.01);
+          }
+          100% {
+            transform: translate(-0.2px, -0.2px) scale(0.99);
+          }
         }
-        25% {
-          transform: translate(0.2px, 0.2px) scale(1.01);
-        }
-        50% {
-          transform: translate(-0.2px, 0.2px) scale(0.99);
-        }
-        75% {
-          transform: translate(0.2px, -0.2px) scale(1.01);
-        }
-        100% {
-          transform: translate(-0.2px, -0.2px) scale(0.99);
-        }
-      }
 
-      @keyframes spin {
-        from {
-          transform: rotate(0deg);
+        @keyframes spin {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
         }
-        to {
-          transform: rotate(360deg);
-        }
-      }
 
-      @keyframes hammer {
-        0% {
-          transform: rotate(0deg);
+        @keyframes hammer {
+          0% {
+            transform: rotate(0deg);
+          }
+          25% {
+            transform: rotate(-20deg);
+          }
+          50% {
+            transform: rotate(0deg);
+          }
+          75% {
+            transform: rotate(20deg);
+          }
+          100% {
+            transform: rotate(0deg);
+          }
         }
-        25% {
-          transform: rotate(-20deg);
+        .animate-hammer {
+          animation: hammer 1s ease-in-out infinite;
         }
-        50% {
-          transform: rotate(0deg);
-        }
-        75% {
-          transform: rotate(20deg);
-        }
-        100% {
-          transform: rotate(0deg);
-        }
-      }
-      .animate-hammer {
-        animation: hammer 1s ease-in-out infinite;
-      }
-    `}</style>
+      `}</style>
     </div>
   )
 }
