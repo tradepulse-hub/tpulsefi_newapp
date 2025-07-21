@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { ArrowLeft, Coins, Info, Hammer, Flame } from "lucide-react"
+import { ArrowLeft, Coins, Info, Hammer, Flame, Loader2, CheckCircle, Gift } from "lucide-react" // Adicionados Loader2, CheckCircle, Gift
 import { useRouter } from "next/navigation"
 import { useEffect, useState, useRef, useCallback } from "react"
 import { Button } from "@/components/ui/button"
@@ -297,6 +297,8 @@ export default function PulseCodePage() {
   const [isClaiming, setIsClaiming] = useState(false)
   const [isLoadingStakingData, setIsLoadingStakingData] = useState(true)
   const [stakingError, setStakingError] = useState<string | null>(null)
+  const [claimSuccess, setClaimSuccess] = useState<string | null>(null) // Novo estado para mensagem de sucesso
+  const [claimError, setClaimError] = useState<string | null>(null) // Novo estado para mensagem de erro
 
   // Translations
   const [translations, setTranslations] = useState(getTranslations(getCurrentLanguage()))
@@ -553,6 +555,8 @@ export default function PulseCodePage() {
 
     setIsClaiming(true)
     setStakingError(null)
+    setClaimSuccess(null) // Clear previous success message
+    setClaimError(null) // Clear previous error message
 
     try {
       const { finalPayload } = await MiniKit.commandsAsync.sendTransaction({
@@ -571,12 +575,31 @@ export default function PulseCodePage() {
       }
 
       console.log("Rewards claimed successfully:", finalPayload)
-      // Show success message
-      console.log(t.staking?.claimSuccess || "Rewards claimed successfully!")
+      setClaimSuccess("PSC") // Set success for PSC token
       fetchStakingData() // Refetch data to update balances
+
+      // Reset success message after 3 seconds
+      setTimeout(() => {
+        setClaimSuccess(null)
+      }, 3000)
     } catch (err: any) {
       console.error("Error claiming rewards:", err)
-      setStakingError(t.staking?.claimFailed || `Failed to claim rewards: ${err.message || err.toString()}`)
+      let errorMessage = t.staking?.claimFailed || `Failed to claim rewards: ${err.message || err.toString()}`
+
+      if (errorMessage.includes("simulation_failed")) {
+        errorMessage = "Transaction simulation failed. You may not have enough tokens or rewards to claim."
+      } else if (errorMessage.includes("user_rejected")) {
+        errorMessage = "Transaction was rejected by user."
+      } else if (errorMessage.includes("No PSC tokens")) {
+        // Changed from TPF to PSC
+        errorMessage = "You need PSC tokens in your wallet to claim rewards."
+      } else if (errorMessage.includes("No rewards to claim")) {
+        errorMessage = "No rewards available to claim at this time."
+      } else if (errorMessage.includes("Insufficient reward balance")) {
+        errorMessage = "Contract has insufficient reward balance. Please try again later."
+      }
+
+      setClaimError(errorMessage)
     } finally {
       setIsClaiming(false)
     }
@@ -688,111 +711,197 @@ export default function PulseCodePage() {
               {t.pulsecode?.footer?.codestakingTitle || "CodeStaking"}
             </h2>
 
-            {isLoadingStakingData ? (
-              <div className="flex items-center justify-center h-48">
-                <svg
-                  className="animate-spin h-8 w-8 text-cyan-400"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
+            {/* Success Message */}
+            <AnimatePresence>
+              {claimSuccess && (
+                <motion.div
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 mb-3 w-full max-w-md"
                 >
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-                <span className="ml-3 text-lg">{t.common?.loading || "Loading..."}</span>
-              </div>
-            ) : stakingError ? (
-              <div className="text-red-500 text-center text-sm">
-                {stakingError}
-                <Button onClick={fetchStakingData} className="mt-2 bg-blue-600 hover:bg-blue-700 text-white">
-                  {t.common?.retry || "Retry"}
-                </Button>
-              </div>
-            ) : (
-              <div className="w-full max-w-md space-y-4">
-                <div className="bg-gray-900/70 backdrop-blur-sm rounded-xl border border-gray-800/50 p-4">
-                  <h3 className="text-lg font-semibold text-white mb-3">
-                    {t.staking?.yourStats || "Your Staking Stats"}
-                  </h3>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">{t.staking?.yourPscBalance || "Your PSC Balance"}:</span>
-                      <span className="text-white font-medium">{Number(pscBalance).toLocaleString()} PSC</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">{t.staking?.pendingRewards || "Pending Rewards"}:</span>
-                      <span className="text-yellow-400 font-medium">
-                        {Number(pendingRewards).toLocaleString(undefined, {
-                          minimumFractionDigits: 4,
-                          maximumFractionDigits: 4,
-                        })}{" "}
-                        PSC
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">{t.staking?.totalClaimed || "Total Claimed"}:</span>
-                      <span className="text-green-400 font-medium">
-                        {Number(totalClaimedRewards).toLocaleString()} PSC
-                      </span>
+                  <div className="flex items-start space-x-2">
+                    <CheckCircle className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-green-400 text-xs font-medium mb-1">
+                        {t.staking?.claimSuccess || "Claim Successful!"}
+                      </p>
+                      <p className="text-green-300 text-[10px]">PSC rewards claimed successfully</p>
                     </div>
                   </div>
-                  <Button
-                    onClick={handleClaimRewards}
-                    disabled={isClaiming || Number(pendingRewards) <= 0}
-                    className="w-full mt-4 py-2 rounded-md font-medium text-white text-sm relative overflow-hidden bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isClaiming ? (
-                      <div className="flex items-center justify-center">
-                        <svg
-                          className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          ></circle>
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                          ></path>
-                        </svg>
-                        {t.staking?.claiming || "Claiming..."}
-                      </div>
-                    ) : (
-                      t.staking?.claimRewards || "Claim Rewards"
-                    )}
-                  </Button>
-                </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-                <div className="bg-gray-900/70 backdrop-blur-sm rounded-xl border border-gray-800/50 p-4">
-                  <h3 className="text-lg font-semibold text-white mb-3">
-                    {t.staking?.contractStats || "Contract Stats"}
-                  </h3>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">{t.staking?.currentAPY || "Current APY"}:</span>
-                      <span className="text-white font-medium">{stakingAPY}%</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">{t.staking?.contractBalance || "Contract Reward Balance"}:</span>
-                      <span className="text-white font-medium">
-                        {Number(contractRewardBalance).toLocaleString()} PSC
-                      </span>
+            {/* Error Message */}
+            <AnimatePresence>
+              {claimError && (
+                <motion.div
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 mb-3 w-full max-w-md"
+                >
+                  <div className="flex items-start space-x-2">
+                    <div className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0">⚠️</div>
+                    <div>
+                      <p className="text-red-400 text-xs font-medium mb-1">
+                        {t.staking?.claimFailed || "Claim Failed"}
+                      </p>
+                      <p className="text-red-300 text-[10px]">{claimError}</p>
+                      <button
+                        onClick={() => setClaimError(null)}
+                        className="mt-1 text-red-400 text-[10px] hover:text-red-300"
+                      >
+                        {t.common?.dismiss || "Dismiss"}
+                      </button>
                     </div>
                   </div>
-                </div>
-              </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {!isAuthenticated ? (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 text-center w-full max-w-md"
+              >
+                <p className="text-blue-400 text-xs">{t.common?.connectWalletFirst || "Connect your wallet first"}</p>
+              </motion.div>
+            ) : (
+              <>
+                {/* PSC Staking Card - Adapted from FiStaking */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-lg p-3 w-full max-w-md mb-4" // Added mb-4 for spacing
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Image
+                        src="/images/codepulse-logo.png" // PSC logo
+                        alt="PulseCode Token"
+                        width={32}
+                        height={32}
+                        className="w-8 h-8 rounded-full"
+                      />
+                      <div>
+                        <h3 className="text-white font-medium text-sm">PSC</h3>
+                        <p className="text-gray-400 text-[10px]">PulseCode Token</p>
+                      </div>
+                    </div>
+
+                    {/* Claim Button - Compact */}
+                    <button
+                      onClick={handleClaimRewards}
+                      disabled={isClaiming || Number(pendingRewards) <= 0}
+                      className={`py-1.5 px-4 rounded-md font-medium text-xs transition-all duration-300 flex items-center justify-center space-x-1 ${
+                        isClaiming
+                          ? "bg-gray-600/50 text-gray-400 cursor-not-allowed"
+                          : "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+                      }`}
+                    >
+                      {isClaiming ? (
+                        <>
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                          <span>{t.staking?.claiming || "Claiming..."}</span>
+                        </>
+                      ) : (
+                        <>
+                          <Gift className="w-3 h-3" />
+                          <span>{t.staking?.claim || "Claim"}</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </motion.div>
+
+                {isLoadingStakingData ? (
+                  <div className="flex items-center justify-center h-48 w-full max-w-md">
+                    <svg
+                      className="animate-spin h-8 w-8 text-cyan-400"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    <span className="ml-3 text-lg">{t.common?.loading || "Loading..."}</span>
+                  </div>
+                ) : stakingError ? (
+                  <div className="text-red-500 text-center text-sm w-full max-w-md">
+                    {stakingError}
+                    <Button onClick={fetchStakingData} className="mt-2 bg-blue-600 hover:bg-blue-700 text-white">
+                      {t.common?.retry || "Retry"}
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="w-full max-w-md space-y-4">
+                    <div className="bg-gray-900/70 backdrop-blur-sm rounded-xl border border-gray-800/50 p-4">
+                      <h3 className="text-lg font-semibold text-white mb-3">
+                        {t.staking?.yourStats || "Your Staking Stats"}
+                      </h3>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">{t.staking?.yourPscBalance || "Your PSC Balance"}:</span>
+                          <span className="text-white font-medium">{Number(pscBalance).toLocaleString()} PSC</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">{t.staking?.pendingRewards || "Pending Rewards"}:</span>
+                          <span className="text-yellow-400 font-medium">
+                            {Number(pendingRewards).toLocaleString(undefined, {
+                              minimumFractionDigits: 4,
+                              maximumFractionDigits: 4,
+                            })}{" "}
+                            PSC
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">{t.staking?.totalClaimed || "Total Claimed"}:</span>
+                          <span className="text-green-400 font-medium">
+                            {Number(totalClaimedRewards).toLocaleString()} PSC
+                          </span>
+                        </div>
+                      </div>
+                      {/* The claim button is now above, in the PSC Staking Card */}
+                    </div>
+
+                    <div className="bg-gray-900/70 backdrop-blur-sm rounded-xl border border-gray-800/50 p-4">
+                      <h3 className="text-lg font-semibold text-white mb-3">
+                        {t.staking?.contractStats || "Contract Stats"}
+                      </h3>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">{t.staking?.currentAPY || "Current APY"}:</span>
+                          <span className="text-white font-medium">{stakingAPY}%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">
+                            {t.staking?.contractBalance || "Contract Reward Balance"}:
+                          </span>
+                          <span className="text-white font-medium">
+                            {Number(contractRewardBalance).toLocaleString()} PSC
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
         )
