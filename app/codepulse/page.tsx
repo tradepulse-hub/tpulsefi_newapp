@@ -35,8 +35,7 @@ const ERC20_ABI = [
 ]
 
 // Endereço do contrato PSC (Placeholder - Substitua pelo endereço real do seu token PSC)
-// **IMPORTANT: Replace "0xYourPSCContractAddressHere" with your actual PSC token contract address**
-const PSC_CONTRACT_ADDRESS = "0xYourPSCContractAddressHere"
+const PSC_CONTRACT_ADDRESS = "0x2e4e589aa22649a3c739Cc729E8C12918DD27B0E"
 
 // New constants for SoftStaking contract
 const SOFT_STAKING_CONTRACT_ADDRESS = "0xb2972f15e2665aF621c3B96E85397BDC99D7d231"
@@ -578,10 +577,10 @@ export default function PulseCodePage() {
                 className="absolute w-48 h-48 rounded-full"
                 style={{
                   background: `radial-gradient(circle,
-                  rgba(255,255,255,0.4) 0%,
-                  rgba(156,163,175,0.3) 30%,
-                  rgba(107,114,128,0.2) 60%,
-                  transparent 100%)`,
+                rgba(255,255,255,0.4) 0%,
+                rgba(156,163,175,0.3) 30%,
+                rgba(107,114,128,0.2) 60%,
+                transparent 100%)`,
                   animation: "vibrateAura 0.1s linear infinite, pulse 1s ease-in-out infinite",
                 }}
               />
@@ -589,9 +588,9 @@ export default function PulseCodePage() {
                 className="absolute w-40 h-40 rounded-full"
                 style={{
                   background: `radial-gradient(circle,
-                  rgba(255,255,255,0.6) 0%,
-                  rgba(229,231,235,0.4) 40%,
-                  transparent 100%)`,
+                rgba(255,255,255,0.6) 0%,
+                rgba(229,231,235,0.4) 40%,
+                transparent 100%)`,
                   animation: "vibrateAura 0.15s linear infinite, pulse 0.8s ease-in-out infinite",
                   animationDelay: "0.05s",
                 }}
@@ -600,9 +599,9 @@ export default function PulseCodePage() {
                 className="absolute w-32 h-32 rounded-full"
                 style={{
                   background: `radial-gradient(circle,
-                  rgba(243,244,246,0.5) 0%,
-                  rgba(209,213,219,0.4) 50%,
-                  transparent 100%)`,
+                rgba(243,244,246,0.5) 0%,
+                rgba(209,213,219,0.4) 50%,
+                transparent 100%)`,
                   animation: "vibrateAura 0.2s linear infinite, pulse 0.6s ease-in-out infinite",
                   animationDelay: "0.1s",
                 }}
@@ -633,11 +632,11 @@ export default function PulseCodePage() {
                   className="absolute inset-0 bg-white rounded-full shadow-2xl"
                   style={{
                     boxShadow: `
-                    0 0 25px rgba(255,255,255,1),
-                    0 0 50px rgba(229,231,235,0.8),
-                    0 0 75px rgba(209,213,219,0.6),
-                    0 0 100px rgba(156,163,175,0.4)
-                  `,
+                  0 0 25px rgba(255,255,255,1),
+                  0 0 50px rgba(229,231,235,0.8),
+                  0 0 75px rgba(209,213,219,0.6),
+                  0 0 100px rgba(156,163,175,0.4)
+                `,
                     animation: "pulse 0.5s ease-in-out infinite",
                   }}
                 />
@@ -1473,9 +1472,9 @@ export default function PulseCodePage() {
         className="absolute inset-0 opacity-10"
         style={{
           backgroundImage: `
-          linear-gradient(rgba(34,211,238,0.3) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(34,211,238,0.3) 1px, transparent 1px)
-        `,
+        linear-gradient(rgba(34,211,238,0.3) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(34,211,238,0.3) 1px, transparent 1px)
+      `,
           backgroundSize: "60px 60px",
         }}
       />
@@ -1610,142 +1609,142 @@ export default function PulseCodePage() {
       </footer>
 
       <style jsx>{`
-        @keyframes moveRight {
-          0% {
-            transform: translateX(-100%);
-            opacity: 0;
-          }
-          10% {
-            opacity: 1;
-          }
-          90% {
-            opacity: 1;
-          }
-          100% {
-            transform: translateX(100vw);
-            opacity: 0;
-          }
+      @keyframes moveRight {
+        0% {
+          transform: translateX(-100%);
+          opacity: 0;
         }
+        10% {
+          opacity: 1;
+        }
+        90% {
+          opacity: 1;
+        }
+        100% {
+          transform: translateX(100vw);
+          opacity: 0;
+        }
+      }
 
-        @keyframes moveDown {
-          0% {
-            transform: translateY(-100%);
-            opacity: 0;
-          }
-          10% {
-            opacity: 1;
-          }
-          90% {
-            opacity: 1;
-          }
-          100% {
-            transform: translateY(100vh);
-            opacity: 0;
-          }
+      @keyframes moveDown {
+        0% {
+          transform: translateY(-100%);
+          opacity: 0;
         }
+        10% {
+          opacity: 1;
+        }
+        90% {
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(100vh);
+          opacity: 0;
+        }
+      }
 
-        @keyframes vibrateAura {
-          0% {
-            transform: translate(0);
-          }
-          25% {
-            transform: translate(0.5px, 0.5px);
-          }
-          50% {
-            transform: translate(-0.5px, 0.5px);
-          }
-          75% {
-            transform: translate(0.5px, -0.5px);
-          }
-          100% {
-            transform: translate(-0.5px, -0.5px);
-          }
+      @keyframes vibrateAura {
+        0% {
+          transform: translate(0);
         }
+        25% {
+          transform: translate(0.5px, 0.5px);
+        }
+        50% {
+          transform: translate(-0.5px, 0.5px);
+        }
+        75% {
+          transform: translate(0.5px, -0.5px);
+        }
+        100% {
+          transform: translate(-0.5px, -0.5px);
+        }
+      }
 
-        @keyframes vibrateRing {
-          0% {
-            transform: translate(0) rotate(0deg);
-          }
-          25% {
-            transform: translate(1px, 1px) rotate(90deg);
-          }
-          50% {
-            transform: translate(-1px, 1px) rotate(180deg);
-          }
-          75% {
-            transform: translate(1px, -1px) rotate(270deg);
-          }
-          100% {
-            transform: translate(-1px, -1px) rotate(360deg);
-          }
+      @keyframes vibrateRing {
+        0% {
+          transform: translate(0) rotate(0deg);
         }
+        25% {
+          transform: translate(1px, 1px) rotate(90deg);
+        }
+        50% {
+          transform: translate(-1px, 1px) rotate(180deg);
+        }
+        75% {
+          transform: translate(1px, -1px) rotate(270deg);
+        }
+        100% {
+          transform: translate(-1px, -1px) rotate(360deg);
+        }
+      }
 
-        @keyframes vibrateLogo {
-          0% {
-            transform: translate(0);
-          }
-          25% {
-            transform: translate(0.3px, 0.3px);
-          }
-          50% {
-            transform: translate(-0.3px, 0.3px);
-          }
-          75% {
-            transform: translate(0.3px, -0.3px);
-          }
-          100% {
-            transform: translate(-0.3px, -0.3px);
-          }
+      @keyframes vibrateLogo {
+        0% {
+          transform: translate(0);
         }
+        25% {
+          transform: translate(0.3px, 0.3px);
+        }
+        50% {
+          transform: translate(-0.3px, 0.3px);
+        }
+        75% {
+          transform: translate(0.3px, -0.3px);
+        }
+        100% {
+          transform: translate(-0.3px, -0.3px);
+        }
+      }
 
-        @keyframes vibrateLogoImage {
-          0% {
-            transform: translate(0) scale(1);
-          }
-          25% {
-            transform: translate(0.2px, 0.2px) scale(1.01);
-          }
-          50% {
-            transform: translate(-0.2px, 0.2px) scale(0.99);
-          }
-          75% {
-            transform: translate(0.2px, -0.2px) scale(1.01);
-          }
-          100% {
-            transform: translate(-0.2px, -0.2px) scale(0.99);
-          }
+      @keyframes vibrateLogoImage {
+        0% {
+          transform: translate(0) scale(1);
         }
+        25% {
+          transform: translate(0.2px, 0.2px) scale(1.01);
+        }
+        50% {
+          transform: translate(-0.2px, 0.2px) scale(0.99);
+        }
+        75% {
+          transform: translate(0.2px, -0.2px) scale(1.01);
+        }
+        100% {
+          transform: translate(-0.2px, -0.2px) scale(0.99);
+        }
+      }
 
-        @keyframes spin {
-          from {
-            transform: rotate(0deg);
-          }
-          to {
-            transform: rotate(360deg);
-          }
+      @keyframes spin {
+        from {
+          transform: rotate(0deg);
         }
+        to {
+          transform: rotate(360deg);
+        }
+      }
 
-        @keyframes hammer {
-          0% {
-            transform: rotate(0deg);
-          }
-          25% {
-            transform: rotate(-20deg);
-          }
-          50% {
-            transform: rotate(0deg);
-          }
-          75% {
-            transform: rotate(20deg);
-          }
-          100% {
-            transform: rotate(0deg);
-          }
+      @keyframes hammer {
+        0% {
+          transform: rotate(0deg);
         }
-        .animate-hammer {
-          animation: hammer 1s ease-in-out infinite;
+        25% {
+          transform: rotate(-20deg);
         }
-      `}</style>
+        50% {
+          transform: rotate(0deg);
+        }
+        75% {
+          transform: rotate(20deg);
+        }
+        100% {
+          transform: rotate(0deg);
+        }
+      }
+      .animate-hammer {
+        animation: hammer 1s ease-in-out infinite;
+      }
+    `}</style>
     </div>
   )
 }
