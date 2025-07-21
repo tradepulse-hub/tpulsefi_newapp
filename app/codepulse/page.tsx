@@ -88,10 +88,100 @@ export default function CodePulsePage() {
     switch (activeFooterTab) {
       case "about":
         return (
-          <p className="text-lg text-gray-300 leading-relaxed">
-            {t.codepulse?.description ||
-              "A project focused on helping various projects get developed for a fee of 500 WLD. What do we do with this fee? 50% - Liquidity, 50% - Repurchase, continuously increasing the value of PulseCode (PSC)."}
-          </p>
+          <>
+            {/* CodePulse Logo - Only visible in About tab */}
+            <div className="relative mb-8 flex items-center justify-center">
+              <div
+                className="absolute w-48 h-48 rounded-full"
+                style={{
+                  background: `radial-gradient(circle,
+                    rgba(255,255,255,0.4) 0%,
+                    rgba(156,163,175,0.3) 30%,
+                    rgba(107,114,128,0.2) 60%,
+                    transparent 100%)`,
+                  animation: "vibrateAura 0.1s linear infinite, pulse 1s ease-in-out infinite",
+                }}
+              />
+              <div
+                className="absolute w-40 h-40 rounded-full"
+                style={{
+                  background: `radial-gradient(circle,
+                    rgba(255,255,255,0.6) 0%,
+                    rgba(229,231,235,0.4) 40%,
+                    transparent 100%)`,
+                  animation: "vibrateAura 0.15s linear infinite, pulse 0.8s ease-in-out infinite",
+                  animationDelay: "0.05s",
+                }}
+              />
+              <div
+                className="absolute w-32 h-32 rounded-full"
+                style={{
+                  background: `radial-gradient(circle,
+                    rgba(243,244,246,0.5) 0%,
+                    rgba(209,213,219,0.4) 50%,
+                    transparent 100%)`,
+                  animation: "vibrateAura 0.2s linear infinite, pulse 0.6s ease-in-out infinite",
+                  animationDelay: "0.1s",
+                }}
+              />
+
+              <div
+                className="absolute w-36 h-36 border-2 border-gray-300/60 rounded-full"
+                style={{
+                  animation: "vibrateRing 0.1s linear infinite, spin 8s linear infinite",
+                  boxShadow: "0 0 20px rgba(255,255,255,0.8), inset 0 0 20px rgba(229,231,235,0.5)",
+                }}
+              />
+              <div
+                className="absolute w-30 h-30 border border-gray-400/70 rounded-full"
+                style={{
+                  animation: "vibrateRing 0.12s linear infinite, spin 6s linear infinite reverse",
+                  boxShadow: "0 0 15px rgba(255,255,255,1)",
+                }}
+              />
+
+              <div
+                className="relative w-24 h-24 flex items-center justify-center"
+                style={{
+                  animation: "vibrateLogo 0.08s linear infinite",
+                }}
+              >
+                <div
+                  className="absolute inset-0 bg-white rounded-full shadow-2xl"
+                  style={{
+                    boxShadow: `
+                      0 0 25px rgba(255,255,255,1),
+                      0 0 50px rgba(229,231,235,0.8),
+                      0 0 75px rgba(209,213,219,0.6),
+                      0 0 100px rgba(156,163,175,0.4)
+                    `,
+                    animation: "pulse 0.5s ease-in-out infinite",
+                  }}
+                />
+                <div className="relative z-10 w-20 h-20 rounded-full overflow-hidden bg-white p-1">
+                  <Image
+                    src="/images/codepulse-logo.png"
+                    alt="CodePulse Logo"
+                    width={80}
+                    height={80}
+                    className="w-full h-full object-contain"
+                    style={{
+                      animation: "vibrateLogoImage 0.1s linear infinite",
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 tracking-wider">
+              <span className="bg-gradient-to-r from-white via-cyan-200 to-blue-200 bg-clip-text text-transparent">
+                {t.codepulse?.title || "CodePulse: The Project Unifier"}
+              </span>
+            </h1>
+            <p className="text-lg text-gray-300 leading-relaxed">
+              {t.codepulse?.description ||
+                "A project focused on helping various projects get developed for a fee of 500 WLD. What do we do with this fee? 50% - Liquidity, 50% - Repurchase, continuously increasing the value of PulseCode (PSC)."}
+            </p>
+          </>
         )
       case "codestaking":
         return (
@@ -101,9 +191,21 @@ export default function CodePulsePage() {
         )
       case "projects":
         return (
-          <div className="flex items-center justify-center text-xl font-semibold text-gray-300">
-            {t.codepulse?.footer?.keplerPay || "KeplerPay (KPP)"}
-            <Hammer className="w-6 h-6 ml-2 animate-hammer" />
+          <div className="flex flex-col items-center justify-center text-xl font-semibold text-gray-300">
+            <h2 className="text-2xl font-bold mb-4 text-cyan-300">
+              {t.codepulse?.footer?.projectsInDevelopment || "Projects in Development"}
+            </h2>
+            <div className="flex items-center gap-2">
+              <Image
+                src="/images/keplerpay-logo.png"
+                alt="KeplerPay Logo"
+                width={40}
+                height={40}
+                className="rounded-full"
+              />
+              <span>{t.codepulse?.footer?.keplerPay || "KeplerPay (KPP)"}</span>
+              <Hammer className="w-6 h-6 animate-hammer" />
+            </div>
           </div>
         )
       default:
@@ -218,94 +320,6 @@ export default function CodePulsePage() {
       <div className="relative z-10 bg-black/60 backdrop-blur-lg border border-white/10 rounded-xl p-8 max-w-2xl text-center shadow-2xl mb-20">
         {" "}
         {/* Added mb-20 for footer space */}
-        {/* CodePulse Logo */}
-        <div className="relative mb-8 flex items-center justify-center">
-          <div
-            className="absolute w-48 h-48 rounded-full"
-            style={{
-              background: `radial-gradient(circle,
-                rgba(255,255,255,0.4) 0%,
-                rgba(156,163,175,0.3) 30%,
-                rgba(107,114,128,0.2) 60%,
-                transparent 100%)`,
-              animation: "vibrateAura 0.1s linear infinite, pulse 1s ease-in-out infinite",
-            }}
-          />
-          <div
-            className="absolute w-40 h-40 rounded-full"
-            style={{
-              background: `radial-gradient(circle,
-                rgba(255,255,255,0.6) 0%,
-                rgba(229,231,235,0.4) 40%,
-                transparent 100%)`,
-              animation: "vibrateAura 0.15s linear infinite, pulse 0.8s ease-in-out infinite",
-              animationDelay: "0.05s",
-            }}
-          />
-          <div
-            className="absolute w-32 h-32 rounded-full"
-            style={{
-              background: `radial-gradient(circle,
-                rgba(243,244,246,0.5) 0%,
-                rgba(209,213,219,0.4) 50%,
-                transparent 100%)`,
-              animation: "vibrateAura 0.2s linear infinite, pulse 0.6s ease-in-out infinite",
-              animationDelay: "0.1s",
-            }}
-          />
-
-          <div
-            className="absolute w-36 h-36 border-2 border-gray-300/60 rounded-full"
-            style={{
-              animation: "vibrateRing 0.1s linear infinite, spin 8s linear infinite",
-              boxShadow: "0 0 20px rgba(255,255,255,0.8), inset 0 0 20px rgba(229,231,235,0.5)",
-            }}
-          />
-          <div
-            className="absolute w-30 h-30 border border-gray-400/70 rounded-full"
-            style={{
-              animation: "vibrateRing 0.12s linear infinite, spin 6s linear infinite reverse",
-              boxShadow: "0 0 15px rgba(255,255,255,1)",
-            }}
-          />
-
-          <div
-            className="relative w-24 h-24 flex items-center justify-center"
-            style={{
-              animation: "vibrateLogo 0.08s linear infinite",
-            }}
-          >
-            <div
-              className="absolute inset-0 bg-white rounded-full shadow-2xl"
-              style={{
-                boxShadow: `
-                  0 0 25px rgba(255,255,255,1),
-                  0 0 50px rgba(229,231,235,0.8),
-                  0 0 75px rgba(209,213,219,0.6),
-                  0 0 100px rgba(156,163,175,0.4)
-                `,
-                animation: "pulse 0.5s ease-in-out infinite",
-              }}
-            />
-            <div className="relative z-10 w-20 h-20 rounded-full overflow-hidden bg-white p-1">
-              <Image
-                src="/images/codepulse-logo.png"
-                alt="CodePulse Logo"
-                width={80}
-                height={80}
-                className="w-full h-full object-contain"
-                style={{
-                  animation: "vibrateLogoImage 0.1s linear infinite",
-                }}
-              />
-            </div>
-          </div>
-        </div>
-        <h1 className="text-4xl md:text-5xl font-bold mb-4 tracking-wider">
-          <span className="bg-gradient-to-r from-white via-cyan-200 to-blue-200 bg-clip-text text-transparent">
-            {t.codepulse?.title || "CodePulse: The Project Unifier"}
-          </span>
-        </h1>
         {renderContent()} {/* Render content based on active footer tab */}
       </div>
 
