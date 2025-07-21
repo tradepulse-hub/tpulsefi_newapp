@@ -3,18 +3,17 @@
 import Image from "next/image"
 import { ArrowLeft, Coins, Info, Hammer, Flame } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useEffect, useState, useRef } from "react" // Added useRef for furnace
+import { useEffect, useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
-import { motion, AnimatePresence } from "framer-motion" // Added for furnace animations
-import { MiniKit } from "@worldcoin/minikit-js" // Added for furnace logic
-import { ethers } from "ethers" // Added for furnace logic
-import { toast } from "sonner" // Added for furnace notifications
-import { getCurrentLanguage, getTranslations } from "@/lib/i18n" // Global i18n
+import { motion, AnimatePresence } from "framer-motion"
+import { MiniKit } from "@worldcoin/minikit-js"
+import { ethers } from "ethers"
+import { getCurrentLanguage, getTranslations } from "@/lib/i18n"
 
-// Endereço da carteira morta (burn address) - Moved from burn/page.tsx
+// Endereço da carteira morta (burn address)
 const DEAD_WALLET = "0x000000000000000000000000000000000000dEaD"
 
-// ABI simplificado para tokens ERC20 (apenas para a função transfer) - Moved from burn/page.tsx
+// ABI simplificado para tokens ERC20 (apenas para a função transfer)
 const ERC20_ABI = [
   {
     inputs: [
@@ -28,15 +27,15 @@ const ERC20_ABI = [
   },
 ]
 
-// Endereço do contrato PSC (Placeholder - Substitua pelo endereço real do seu token PSC) - Moved from burn/page.tsx
+// Endereço do contrato PSC (Placeholder - Substitua pelo endereço real do seu token PSC)
 const PSC_CONTRACT_ADDRESS = "0xYourPSCContractAddressHere" // **IMPORTANT: Replace with your actual PSC token contract address**
 
 export default function PulseCodePage() {
   const router = useRouter()
-  const [currentLang, setCurrentLang] = useState<string>("en") // Changed type to string
+  const [currentLang, setCurrentLang] = useState<string>("en")
   const [activeFooterTab, setActiveFooterTab] = useState<"about" | "codestaking" | "projects" | "burn">("about")
 
-  // Furnace states and refs - Moved from burn/page.tsx
+  // Furnace states and refs
   const [amount, setAmount] = useState<string>("0")
   const [isBurning, setIsBurning] = useState(false)
   const [burnComplete, setBurnComplete] = useState(false)
@@ -48,7 +47,7 @@ export default function PulseCodePage() {
   const [totalBurned, setTotalBurned] = useState<string>("0")
   const furnaceRef = useRef<HTMLDivElement>(null)
 
-  // Translations - Now using global i18n
+  // Translations
   const [translations, setTranslations] = useState(getTranslations(getCurrentLanguage()))
 
   useEffect(() => {
@@ -67,9 +66,9 @@ export default function PulseCodePage() {
     }
   }, [])
 
-  const t = translations // Use the state for translations
+  const t = translations
 
-  // Effect to increase fire intensity when the door is open - Moved from burn/page.tsx
+  // Effect to increase fire intensity when the door is open
   useEffect(() => {
     if (doorOpen) {
       const timer = setTimeout(() => {
@@ -81,7 +80,7 @@ export default function PulseCodePage() {
     }
   }, [doorOpen])
 
-  // Load total burned from localStorage - Moved from burn/page.tsx
+  // Load total burned from localStorage
   useEffect(() => {
     const savedTotal = localStorage.getItem("psc_total_burned")
     if (savedTotal) {
@@ -89,7 +88,7 @@ export default function PulseCodePage() {
     }
   }, [])
 
-  // Function to send tokens to the dead wallet - Moved from burn/page.tsx
+  // Function to send tokens to the dead wallet
   const sendTokensToBurnAddress = async (amountToBurn: string) => {
     try {
       if (!MiniKit.isInstalled()) {
@@ -140,7 +139,7 @@ export default function PulseCodePage() {
     }
   }
 
-  // Simulate burn process - Moved from burn/page.tsx
+  // Simulate burn process
   const handleBurn = async () => {
     if (Number(amount) <= 0 || isBurning || !doorOpen) return
 
@@ -163,13 +162,9 @@ export default function PulseCodePage() {
         setIsBurning(false)
         setBurnComplete(true)
 
-        toast.success(`${amount} PSC ${t.furnace?.burnCompleted || "queimados com sucesso!"}`, {
-          description: `${t.furnace?.lastTransaction || "Hash da transação"}: ${result.txHash.substring(0, 10)}...`,
-          action: {
-            label: t.wallet?.sendToken?.viewTx || "Ver TX",
-            onClick: () => window.open(`https://worldscan.org/tx/${result.txHash}`, "_blank"),
-          },
-        })
+        console.log(`${amount} PSC ${t.furnace?.burnCompleted || "queimados com sucesso!"}`)
+        console.log(`${t.furnace?.lastTransaction || "Hash da transação"}: ${result.txHash.substring(0, 10)}...`)
+        // You can add a more visible notification here if needed, e.g., a simple alert or a custom modal.
 
         setTimeout(() => {
           setDoorOpen(false)
@@ -182,9 +177,11 @@ export default function PulseCodePage() {
       console.error("Erro na queima:", error)
       setIsBurning(false)
 
-      toast.error(t.wallet?.sendToken?.transactionFailed || "Falha ao queimar tokens", {
-        description: error instanceof Error ? error.message : "Erro desconhecido",
-      })
+      console.error(
+        t.wallet?.sendToken?.transactionFailed || "Falha ao queimar tokens",
+        error instanceof Error ? error.message : "Erro desconhecido",
+      )
+      // You can add a more visible error notification here if needed.
     }
   }
 
@@ -264,7 +261,7 @@ export default function PulseCodePage() {
                 />
                 <div className="relative z-10 w-20 h-20 rounded-full overflow-hidden bg-white p-1">
                   <Image
-                    src="/images/codepulse-logo.png" // Corrected logo path
+                    src="/images/codepulse-logo.png"
                     alt="PulseCode Logo"
                     width={80}
                     height={80}
