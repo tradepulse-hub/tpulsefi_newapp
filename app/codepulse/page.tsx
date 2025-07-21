@@ -437,6 +437,7 @@ export default function PulseCodePage() {
   // Function to fetch staking data
   const fetchStakingData = useCallback(async () => {
     if (!MiniKit.isInstalled()) {
+      console.log("MiniKit is not installed. Cannot fetch staking data.")
       setStakingError(t.common?.minikitNotInstalled || "MiniKit is not installed.")
       setIsLoadingStakingData(false)
       return
@@ -446,35 +447,47 @@ export default function PulseCodePage() {
     setStakingError(null)
 
     try {
+      console.log("Attempting to get wallet address...")
       const { finalPayload: addressPayload } = await MiniKit.commandsAsync.getWalletAddress()
       const connectedAddress = addressPayload.address
       setUserAddress(connectedAddress)
+      console.log("Connected Wallet Address:", connectedAddress)
 
       if (!connectedAddress) {
+        console.log("Wallet not connected. Cannot fetch staking data.")
         setStakingError(t.common?.walletNotConnected || "Wallet not connected.")
         setIsLoadingStakingData(false)
         return
       }
 
       // Fetch PSC balance
+      console.log("Fetching PSC balance...")
       const { finalPayload: pscBalancePayload } = await MiniKit.commandsAsync.readContract({
         address: PSC_CONTRACT_ADDRESS,
         abi: ERC20_ABI,
         functionName: "balanceOf",
         args: [connectedAddress],
       })
-      setPscBalance(ethers.formatUnits(pscBalancePayload.result.toString(), 18))
+      const pscBalanceWei = pscBalancePayload.result.toString()
+      setPscBalance(ethers.formatUnits(pscBalanceWei, 18))
+      console.log("PSC Balance (Wei):", pscBalanceWei, "Formatted:", ethers.formatUnits(pscBalanceWei, 18))
 
       // Fetch staking contract data
+      console.log("Fetching user info from staking contract...")
       const { finalPayload: userInfoPayload } = await MiniKit.commandsAsync.readContract({
         address: SOFT_STAKING_CONTRACT_ADDRESS,
         abi: SOFT_STAKING_ABI,
         functionName: "getUserInfo",
         args: [connectedAddress],
       })
-      setPendingRewards(ethers.formatUnits(userInfoPayload.result[1].toString(), 18))
-      setTotalClaimedRewards(ethers.formatUnits(userInfoPayload.result[3].toString(), 18))
+      const pendingRewardsWei = userInfoPayload.result[1].toString()
+      const totalClaimedWei = userInfoPayload.result[3].toString()
+      setPendingRewards(ethers.formatUnits(pendingRewardsWei, 18))
+      setTotalClaimedRewards(ethers.formatUnits(totalClaimedWei, 18))
+      console.log("Pending Rewards (Wei):", pendingRewardsWei, "Formatted:", ethers.formatUnits(pendingRewardsWei, 18))
+      console.log("Total Claimed (Wei):", totalClaimedWei, "Formatted:", ethers.formatUnits(totalClaimedWei, 18))
 
+      console.log("Fetching current APY...")
       const { finalPayload: apyPayload } = await MiniKit.commandsAsync.readContract({
         address: SOFT_STAKING_CONTRACT_ADDRESS,
         abi: SOFT_STAKING_ABI,
@@ -482,17 +495,31 @@ export default function PulseCodePage() {
         args: [],
       })
       setStakingAPY((Number(apyPayload.result) / 100).toFixed(2)) // Convert basis points to percentage
+      console.log(
+        "Current APY (Basis Points):",
+        apyPayload.result,
+        "Formatted:",
+        (Number(apyPayload.result) / 100).toFixed(2),
+      )
 
+      console.log("Fetching contract reward balance...")
       const { finalPayload: contractBalancePayload } = await MiniKit.commandsAsync.readContract({
         address: SOFT_STAKING_CONTRACT_ADDRESS,
         abi: SOFT_STAKING_ABI,
         functionName: "getRewardBalance",
         args: [],
       })
-      setContractRewardBalance(ethers.formatUnits(contractBalancePayload.result.toString(), 18))
-    } catch (err) {
-      console.error("Error fetching staking data:", err)
-      setStakingError(t.common?.errorFetchingData || "Error fetching staking data.")
+      const contractRewardBalanceWei = contractBalancePayload.result.toString()
+      setContractRewardBalance(ethers.formatUnits(contractRewardBalanceWei, 18))
+      console.log(
+        "Contract Reward Balance (Wei):",
+        contractRewardBalanceWei,
+        "Formatted:",
+        ethers.formatUnits(contractRewardBalanceWei, 18),
+      )
+    } catch (err: any) {
+      console.error("Detailed Error fetching staking data:", err)
+      setStakingError(t.common?.errorFetchingData || `Error fetching staking data: ${err.message || err.toString()}`)
     } finally {
       setIsLoadingStakingData(false)
     }
@@ -532,9 +559,9 @@ export default function PulseCodePage() {
       // Show success message
       console.log(t.staking?.claimSuccess || "Rewards claimed successfully!")
       fetchStakingData() // Refetch data to update balances
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error claiming rewards:", err)
-      setStakingError(t.staking?.claimFailed || "Failed to claim rewards.")
+      setStakingError(t.staking?.claimFailed || `Failed to claim rewards: ${err.message || err.toString()}`)
     } finally {
       setIsClaiming(false)
     }
