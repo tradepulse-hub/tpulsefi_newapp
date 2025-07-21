@@ -345,8 +345,8 @@ export default function CodePulsePage() {
       ))}
 
       {/* Bottom Navigation Bar */}
-      <footer className="fixed bottom-0 left-0 w-full bg-black/70 backdrop-blur-md border-t border-white/10 p-2 z-50">
-        <div className="flex justify-around items-center max-w-md mx-auto">
+      <footer className="fixed bottom-4 left-1/2 -translate-x-1/2 w-full max-w-xs bg-black/70 backdrop-blur-md border border-white/10 rounded-full p-2 z-50">
+        <div className="flex justify-around items-center">
           <Button
             variant="ghost"
             size="icon"
@@ -356,7 +356,6 @@ export default function CodePulsePage() {
             onClick={() => setActiveFooterTab("codestaking")}
           >
             <Coins className="w-6 h-6" />
-            <span className="text-xs mt-1">{t.codepulse?.footer?.codeStaking || "CodeStaking"}</span>
           </Button>
           <Button
             variant="ghost"
@@ -367,7 +366,6 @@ export default function CodePulsePage() {
             onClick={() => setActiveFooterTab("about")}
           >
             <Info className="w-6 h-6" />
-            <span className="text-xs mt-1">{t.codepulse?.footer?.about || "About"}</span>
           </Button>
           <Button
             variant="ghost"
@@ -378,9 +376,6 @@ export default function CodePulsePage() {
             onClick={() => setActiveFooterTab("projects")}
           >
             <Hammer className="w-6 h-6" />
-            <span className="text-xs mt-1">
-              {t.codepulse?.footer?.projectsInDevelopment || "Projects in Development"}
-            </span>
           </Button>
         </div>
       </footer>
