@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { ArrowLeft, Coins, Info, Hammer, Flame, Loader2, CheckCircle, Gift } from "lucide-react" // Adicionados Loader2, CheckCircle, Gift
+import { ArrowLeft, Coins, Info, Hammer, Flame, Loader2, CheckCircle, Gift } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState, useRef, useCallback } from "react"
 import { Button } from "@/components/ui/button"
@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { MiniKit } from "@worldcoin/minikit-js"
 import { ethers } from "ethers"
 import { getCurrentLanguage, getTranslations } from "@/lib/i18n"
-import { useMiniKit } from "../../hooks/use-minikit" // Import useMiniKit hook
+import { useMiniKit } from "../../hooks/use-minikit"
 
 // Endereço da carteira morta (burn address)
 const DEAD_WALLET = "0x000000000000000000000000000000000000dEaD"
@@ -274,7 +274,7 @@ export default function PulseCodePage() {
   const [activeFooterTab, setActiveFooterTab] = useState<"about" | "codestaking" | "projects" | "burn">("about")
 
   // Use useMiniKit hook
-  const { address: userAddress, isConnected: isAuthenticated } = useMiniKit()
+  const { address: userAddress, isConnected: isAuthenticated, isConnecting } = useMiniKit()
 
   // Furnace states and refs
   const [amount, setAmount] = useState<string>("0")
@@ -297,8 +297,8 @@ export default function PulseCodePage() {
   const [isClaiming, setIsClaiming] = useState(false)
   const [isLoadingStakingData, setIsLoadingStakingData] = useState(true)
   const [stakingError, setStakingError] = useState<string | null>(null)
-  const [claimSuccess, setClaimSuccess] = useState<string | null>(null) // Novo estado para mensagem de sucesso
-  const [claimError, setClaimError] = useState<string | null>(null) // Novo estado para mensagem de erro
+  const [claimSuccess, setClaimSuccess] = useState<string | null>(null)
+  const [claimError, setClaimError] = useState<string | null>(null)
 
   // Translations
   const [translations, setTranslations] = useState(getTranslations(getCurrentLanguage()))
@@ -309,7 +309,6 @@ export default function PulseCodePage() {
       setCurrentLang(savedLanguage)
     }
 
-    // Update translations when the language changes
     const handleLanguageChange = () => {
       setTranslations(getTranslations(getCurrentLanguage()))
     }
@@ -321,7 +320,6 @@ export default function PulseCodePage() {
 
   const t = translations
 
-  // Effect to increase fire intensity when the door is open
   useEffect(() => {
     if (doorOpen) {
       const timer = setTimeout(() => {
@@ -333,7 +331,6 @@ export default function PulseCodePage() {
     }
   }, [doorOpen])
 
-  // Load total burned from localStorage
   useEffect(() => {
     const savedTotal = localStorage.getItem("psc_total_burned")
     if (savedTotal) {
@@ -341,7 +338,6 @@ export default function PulseCodePage() {
     }
   }, [])
 
-  // Function to send tokens to the dead wallet
   const sendTokensToBurnAddress = async (amountToBurn: string) => {
     try {
       if (!MiniKit.isInstalled()) {
@@ -392,7 +388,6 @@ export default function PulseCodePage() {
     }
   }
 
-  // Simulate burn process
   const handleBurn = async () => {
     if (Number(amount) <= 0 || isBurning || !doorOpen) return
 
@@ -417,7 +412,6 @@ export default function PulseCodePage() {
 
         console.log(`${amount} PSC ${t.furnace?.burnCompleted || "Burn Completed!"}`)
         console.log(`${t.furnace?.lastTransaction || "Last Transaction"}: ${result.txHash.substring(0, 10)}...`)
-        // You can add a more visible notification here if needed, e.g., a simple alert or a custom modal.
 
         setTimeout(() => {
           setDoorOpen(false)
@@ -434,16 +428,26 @@ export default function PulseCodePage() {
         t.wallet?.sendToken?.transactionFailed || "Falha ao queimar tokens",
         error instanceof Error ? error.message : "Erro desconhecido",
       )
-      // You can add a more visible error notification here if needed.
     }
   }
 
-  // Function to fetch staking data
   const fetchStakingData = useCallback(async () => {
-    setIsLoadingStakingData(true) // Set loading true immediately
-    setStakingError(null) // Clear any previous errors
+    setIsLoadingStakingData(true)
+    setStakingError(null)
 
-    console.log("fetchStakingData called. isAuthenticated:", isAuthenticated, "userAddress:", userAddress)
+    console.log(
+      "fetchStakingData called. isAuthenticated:",
+      isAuthenticated,
+      "userAddress:",
+      userAddress,
+      "isConnecting:",
+      isConnecting,
+    )
+
+    if (isConnecting) {
+      console.log("MiniKit is still connecting. Waiting to fetch staking data.")
+      return // Do not proceed if MiniKit is still connecting
+    }
 
     if (!MiniKit.isInstalled()) {
       console.log("MiniKit is NOT installed. Cannot fetch staking data.")
@@ -462,8 +466,6 @@ export default function PulseCodePage() {
     try {
       console.log("Attempting to fetch staking data for address:", userAddress)
 
-      // Fetch PSC balance
-      console.log("Fetching PSC balance...")
       const { finalPayload: pscBalancePayload } = await MiniKit.commandsAsync.readContract({
         address: PSC_CONTRACT_ADDRESS,
         abi: ERC20_ABI,
@@ -474,8 +476,6 @@ export default function PulseCodePage() {
       setPscBalance(ethers.formatUnits(pscBalanceWei, 18))
       console.log("PSC Balance (Wei):", pscBalanceWei, "Formatted:", ethers.formatUnits(pscBalanceWei, 18))
 
-      // Fetch staking contract data
-      console.log("Fetching user info from staking contract...")
       const { finalPayload: userInfoPayload } = await MiniKit.commandsAsync.readContract({
         address: SOFT_STAKING_CONTRACT_ADDRESS,
         abi: SOFT_STAKING_ABI,
@@ -489,14 +489,13 @@ export default function PulseCodePage() {
       console.log("Pending Rewards (Wei):", pendingRewardsWei, "Formatted:", ethers.formatUnits(pendingRewardsWei, 18))
       console.log("Total Claimed (Wei):", totalClaimedWei, "Formatted:", ethers.formatUnits(totalClaimedWei, 18))
 
-      console.log("Fetching current APY...")
       const { finalPayload: apyPayload } = await MiniKit.commandsAsync.readContract({
         address: SOFT_STAKING_CONTRACT_ADDRESS,
         abi: SOFT_STAKING_ABI,
         functionName: "getCurrentAPY",
         args: [],
       })
-      setStakingAPY((Number(apyPayload.result) / 100).toFixed(2)) // Convert basis points to percentage
+      setStakingAPY((Number(apyPayload.result) / 100).toFixed(2))
       console.log(
         "Current APY (Basis Points):",
         apyPayload.result,
@@ -504,7 +503,6 @@ export default function PulseCodePage() {
         (Number(apyPayload.result) / 100).toFixed(2),
       )
 
-      console.log("Fetching contract reward balance...")
       const { finalPayload: contractBalancePayload } = await MiniKit.commandsAsync.readContract({
         address: SOFT_STAKING_CONTRACT_ADDRESS,
         abi: SOFT_STAKING_ABI,
@@ -527,19 +525,33 @@ export default function PulseCodePage() {
       setIsLoadingStakingData(false)
       console.log("Finished fetching staking data. isLoadingStakingData set to false.")
     }
-  }, [t, PSC_CONTRACT_ADDRESS, SOFT_STAKING_CONTRACT_ADDRESS, isAuthenticated, userAddress]) // Added isAuthenticated and userAddress to dependencies
+  }, [t, PSC_CONTRACT_ADDRESS, SOFT_STAKING_CONTRACT_ADDRESS, isAuthenticated, userAddress, isConnecting])
 
   useEffect(() => {
-    console.log("Main useEffect running. isAuthenticated:", isAuthenticated, "userAddress:", userAddress)
+    console.log(
+      "Main useEffect running. isAuthenticated:",
+      isAuthenticated,
+      "userAddress:",
+      userAddress,
+      "isConnecting:",
+      isConnecting,
+    )
     let interval: NodeJS.Timeout | undefined
 
-    if (isAuthenticated && userAddress) {
-      fetchStakingData()
-      interval = setInterval(fetchStakingData, 15000) // Refetch every 15 seconds
+    // Only attempt to fetch data if MiniKit is not currently connecting
+    if (!isConnecting) {
+      if (isAuthenticated && userAddress) {
+        fetchStakingData()
+        interval = setInterval(fetchStakingData, 15000)
+      } else {
+        // If not authenticated and not connecting, set loading to false and error
+        setIsLoadingStakingData(false)
+        setStakingError(t.common?.walletNotConnected || "Wallet not connected.")
+      }
     } else {
-      // If not authenticated or address is null, ensure loading state is false and error is set
-      setIsLoadingStakingData(false)
-      setStakingError(t.common?.walletNotConnected || "Wallet not connected.")
+      // If MiniKit is connecting, ensure loading state is true
+      setIsLoadingStakingData(true)
+      setStakingError(null) // Clear error while connecting
     }
 
     return () => {
@@ -547,16 +559,15 @@ export default function PulseCodePage() {
         clearInterval(interval)
       }
     }
-  }, [fetchStakingData, activeFooterTab, isAuthenticated, userAddress, t]) // Refetch when tab changes or wallet status changes
+  }, [fetchStakingData, activeFooterTab, isAuthenticated, userAddress, isConnecting, t])
 
-  // Handle Claim Rewards
   const handleClaimRewards = async () => {
     if (!userAddress || Number(pendingRewards) <= 0 || isClaiming) return
 
     setIsClaiming(true)
     setStakingError(null)
-    setClaimSuccess(null) // Clear previous success message
-    setClaimError(null) // Clear previous error message
+    setClaimSuccess(null)
+    setClaimError(null)
 
     try {
       const { finalPayload } = await MiniKit.commandsAsync.sendTransaction({
@@ -575,10 +586,9 @@ export default function PulseCodePage() {
       }
 
       console.log("Rewards claimed successfully:", finalPayload)
-      setClaimSuccess("PSC") // Set success for PSC token
-      fetchStakingData() // Refetch data to update balances
+      setClaimSuccess("PSC")
+      fetchStakingData()
 
-      // Reset success message after 3 seconds
       setTimeout(() => {
         setClaimSuccess(null)
       }, 3000)
@@ -591,7 +601,6 @@ export default function PulseCodePage() {
       } else if (errorMessage.includes("user_rejected")) {
         errorMessage = "Transaction was rejected by user."
       } else if (errorMessage.includes("No PSC tokens")) {
-        // Changed from TPF to PSC
         errorMessage = "You need PSC tokens in your wallet to claim rewards."
       } else if (errorMessage.includes("No rewards to claim")) {
         errorMessage = "No rewards available to claim at this time."
@@ -606,12 +615,13 @@ export default function PulseCodePage() {
   }
 
   const renderContent = () => {
-    // Add console logs here to check the state right before rendering
     console.log(
       "Rendering CodeStaking tab. isAuthenticated:",
       isAuthenticated,
       "userAddress:",
       userAddress,
+      "isConnecting:",
+      isConnecting,
       "isLoadingStakingData:",
       isLoadingStakingData,
     )
@@ -620,7 +630,6 @@ export default function PulseCodePage() {
       case "about":
         return (
           <>
-            {/* PulseCode Logo - Only visible in About tab */}
             <div className="relative mb-8 flex items-center justify-center">
               <div
                 className="absolute w-48 h-48 rounded-full"
@@ -721,7 +730,6 @@ export default function PulseCodePage() {
               {t.pulsecode?.footer?.codestakingTitle || "CodeStaking"}
             </h2>
 
-            {/* Success Message */}
             <AnimatePresence>
               {claimSuccess && (
                 <motion.div
@@ -743,7 +751,6 @@ export default function PulseCodePage() {
               )}
             </AnimatePresence>
 
-            {/* Error Message */}
             <AnimatePresence>
               {claimError && (
                 <motion.div
@@ -805,17 +812,16 @@ export default function PulseCodePage() {
               </div>
             ) : (
               <>
-                {/* PSC Staking Card - Adapted from FiStaking */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3 }}
-                  className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-lg p-3 w-full max-w-md mb-4" // Added mb-4 for spacing
+                  className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-lg p-3 w-full max-w-md mb-4"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <Image
-                        src="/images/codepulse-logo.png" // PSC logo
+                        src="/images/codepulse-logo.png"
                         alt="PulseCode Token"
                         width={32}
                         height={32}
@@ -827,7 +833,6 @@ export default function PulseCodePage() {
                       </div>
                     </div>
 
-                    {/* Claim Button - Compact */}
                     <button
                       onClick={handleClaimRewards}
                       disabled={isClaiming || Number(pendingRewards) <= 0}
@@ -879,7 +884,6 @@ export default function PulseCodePage() {
                         </span>
                       </div>
                     </div>
-                    {/* The claim button is now above, in the PSC Staking Card */}
                   </div>
 
                   <div className="bg-gray-900/70 backdrop-blur-sm rounded-xl border border-gray-800/50 p-4">
@@ -925,11 +929,9 @@ export default function PulseCodePage() {
             </div>
           </div>
         )
-      case "burn": // Integrated Furnace content
+      case "burn":
         return (
           <main className="relative flex min-h-[600px] flex-col items-center pt-4 pb-20 overflow-hidden w-full">
-            {/* BackgroundEffect is handled by the main PulseCodePage */}
-
             <motion.div
               initial={{ y: -20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -946,7 +948,6 @@ export default function PulseCodePage() {
               </p>
             </motion.div>
 
-            {/* Estatísticas de queima */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -959,7 +960,6 @@ export default function PulseCodePage() {
               </p>{" "}
             </motion.div>
 
-            {/* Fornalha Compacta */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -967,9 +967,7 @@ export default function PulseCodePage() {
               className="w-full max-w-sm relative z-10 px-4"
             >
               <div className="bg-gray-900/70 backdrop-blur-sm rounded-xl border border-gray-800/50 overflow-hidden">
-                {/* Estrutura externa da fornalha */}
                 <div className="relative p-4 bg-gradient-to-b from-gray-800 to-gray-900 border-b border-gray-700/50">
-                  {/* Medidor de temperatura - mais compacto */}
                   <div className="absolute top-4 right-4 w-8 h-24 bg-gray-800 rounded-full border border-gray-700 overflow-hidden">
                     <motion.div
                       className="absolute bottom-0 w-full bg-gradient-to-t from-red-600 via-orange-500 to-yellow-400 rounded-b-full"
@@ -984,14 +982,11 @@ export default function PulseCodePage() {
                     <div className="absolute inset-0 border border-gray-700 rounded-full pointer-events-none" />
                   </div>
 
-                  {/* Fornalha 3D - mais compacta */}
                   <div
                     ref={furnaceRef}
                     className="relative w-full h-48 bg-gradient-to-b from-gray-700 via-gray-800 to-gray-900 rounded-lg overflow-hidden shadow-lg border border-gray-700/50"
                   >
-                    {/* Estrutura de tijolos */}
                     <div className="absolute inset-0">
-                      {/* Padrão de tijolos */}
                       <div className="absolute inset-0 grid grid-cols-6 grid-rows-8 gap-1 p-1 opacity-70">
                         {Array.from({ length: 48 }).map((_, i) => (
                           <div
@@ -1004,7 +999,6 @@ export default function PulseCodePage() {
                         ))}
                       </div>
 
-                      {/* Manchas e desgaste */}
                       {Array.from({ length: 5 }).map((_, i) => (
                         <div
                           key={`stain-${i}`}
@@ -1021,11 +1015,8 @@ export default function PulseCodePage() {
                       ))}
                     </div>
 
-                    {/* Porta da fornalha - mais compacta */}
                     <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32">
-                      {/* Moldura da porta */}
                       <div className="absolute inset-0 rounded-lg bg-gradient-to-b from-gray-600 to-gray-800 border-2 border-gray-700 shadow-inner">
-                        {/* Parafusos decorativos */}
                         {[
                           { top: "10%", left: "10%" },
                           { top: "10%", right: "10%" },
@@ -1040,7 +1031,6 @@ export default function PulseCodePage() {
                         ))}
                       </div>
 
-                      {/* Porta com animação */}
                       <motion.div
                         className="absolute inset-0 origin-left bg-gradient-to-br from-gray-700 via-gray-800 to-gray-900 rounded-lg border border-gray-700 shadow-md overflow-hidden"
                         animate={{
@@ -1048,16 +1038,13 @@ export default function PulseCodePage() {
                         }}
                         transition={{ type: "spring", stiffness: 100, damping: 15 }}
                       >
-                        {/* Visor da porta */}
                         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full overflow-hidden border-2 border-gray-700">
                           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm">
-                            {/* Grade do visor */}
                             <div className="absolute inset-0 flex items-center justify-center">
                               <div className="w-full h-0.5 bg-gray-700" />
                               <div className="h-full w-0.5 bg-gray-700" />
                             </div>
 
-                            {/* Brilho do fogo através do visor */}
                             <motion.div
                               className="absolute inset-0 bg-gradient-to-t from-orange-600/60 via-orange-500/40 to-yellow-400/20"
                               animate={{
@@ -1067,7 +1054,6 @@ export default function PulseCodePage() {
                           </div>
                         </div>
 
-                        {/* Puxador da porta */}
                         <div className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-12 bg-gradient-to-b from-gray-600 to-gray-700 rounded-full border border-gray-600">
                           <div className="absolute inset-0 flex flex-col justify-center items-center gap-1">
                             {[1, 2, 3].map((i) => (
@@ -1077,11 +1063,8 @@ export default function PulseCodePage() {
                         </div>
                       </motion.div>
 
-                      {/* Interior da fornalha (visível quando a porta está aberta) */}
                       <div className="absolute inset-0 -z-10 rounded-lg overflow-hidden">
-                        {/* Fundo da câmara */}
                         <div className="absolute inset-0 bg-gradient-to-b from-gray-900 via-gray-800 to-black">
-                          {/* Tijolos refratários */}
                           <div className="absolute inset-0 grid grid-cols-4 grid-rows-4 gap-1 p-2 opacity-40">
                             {Array.from({ length: 16 }).map((_, i) => (
                               <div
@@ -1096,7 +1079,6 @@ export default function PulseCodePage() {
                           </div>
                         </div>
 
-                        {/* Base de carvão/brasa */}
                         <div className="absolute bottom-0 left-0 right-0 h-1/3">
                           <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-red-900/50 to-transparent" />
                           <div className="absolute inset-0">
@@ -1125,9 +1107,7 @@ export default function PulseCodePage() {
                           </div>
                         </div>
 
-                        {/* Fogo animado */}
                         <div className="absolute bottom-0 left-0 right-0 h-2/3 overflow-hidden">
-                          {/* Base do fogo */}
                           <motion.div
                             className="absolute bottom-0 left-1/2 -translate-x-1/2 w-20 h-16 bg-orange-600 rounded-full blur-xl"
                             animate={{
@@ -1142,7 +1122,6 @@ export default function PulseCodePage() {
                             }}
                           />
 
-                          {/* Chamas principais */}
                           {Array.from({ length: 8 }).map((_, i) => (
                             <motion.div
                               key={i}
@@ -1176,7 +1155,6 @@ export default function PulseCodePage() {
                             />
                           ))}
 
-                          {/* Partículas de fogo */}
                           {Array.from({ length: 10 }).map((_, i) => (
                             <motion.div
                               key={`particle-${i}`}
@@ -1200,7 +1178,6 @@ export default function PulseCodePage() {
                             />
                           ))}
 
-                          {/* Fumaça */}
                           {Array.from({ length: 5 }).map((_, i) => (
                             <motion.div
                               key={`smoke-${i}`}
@@ -1223,7 +1200,6 @@ export default function PulseCodePage() {
                           ))}
                         </div>
 
-                        {/* Reflexo do fogo nas paredes */}
                         <motion.div
                           className="absolute inset-0 bg-gradient-to-t from-orange-600/0 via-orange-500/10 to-transparent mix-blend-overlay"
                           animate={{
@@ -1236,7 +1212,6 @@ export default function PulseCodePage() {
                           }}
                         />
 
-                        {/* Brilho pulsante */}
                         <motion.div
                           className="absolute inset-0 bg-orange-500/10"
                           animate={{
@@ -1251,7 +1226,6 @@ export default function PulseCodePage() {
                       </div>
                     </div>
 
-                    {/* Token sendo queimado */}
                     <AnimatePresence>
                       {isBurning && (
                         <motion.div
@@ -1271,7 +1245,7 @@ export default function PulseCodePage() {
                           }}
                         >
                           <Image
-                            src="/images/codepulse-logo.png" // Changed to codepulse-logo.png
+                            src="/images/codepulse-logo.png"
                             alt="PSC Token"
                             width={48}
                             height={48}
@@ -1292,7 +1266,6 @@ export default function PulseCodePage() {
                       )}
                     </AnimatePresence>
 
-                    {/* Efeito de iluminação ambiente */}
                     <motion.div
                       className="absolute inset-0 bg-gradient-to-t from-orange-600/0 via-orange-500/0 to-transparent mix-blend-overlay pointer-events-none"
                       animate={{
@@ -1301,7 +1274,6 @@ export default function PulseCodePage() {
                       transition={{ duration: 1 }}
                     />
 
-                    {/* Brilho da fornalha no ambiente */}
                     <motion.div
                       className="absolute -inset-10 bg-orange-500/0 rounded-full blur-3xl pointer-events-none"
                       animate={{
@@ -1311,9 +1283,7 @@ export default function PulseCodePage() {
                     />
                   </div>
 
-                  {/* Controles e medidores - mais compactos */}
                   <div className="flex justify-between mt-3 gap-2">
-                    {/* Botão de ignição */}
                     <motion.button
                       className={`flex-1 h-12 rounded-md relative ${
                         doorOpen ? "bg-red-600" : "bg-gradient-to-br from-red-600 to-red-800"
@@ -1340,7 +1310,6 @@ export default function PulseCodePage() {
                       />
                     </motion.button>
 
-                    {/* Medidor de temperatura */}
                     <div className="h-12 w-12 bg-gray-800 rounded-md border-2 border-gray-700 relative overflow-hidden">
                       <div className="absolute bottom-0 w-full bg-gradient-to-t from-red-600 via-orange-500 to-yellow-400 rounded-b-md transition-all duration-1000">
                         <motion.div
@@ -1358,7 +1327,6 @@ export default function PulseCodePage() {
                   </div>
                 </div>
 
-                {/* Controles da fornalha - mais compactos */}
                 <div className="p-3 bg-gray-800/50 border-t border-gray-700/30">
                   {doorOpen && !isBurning && !burnComplete ? (
                     <div className="mb-3">
@@ -1427,7 +1395,6 @@ export default function PulseCodePage() {
                     )}
                   </button>
 
-                  {/* Instruções */}
                   {!doorOpen && !isBurning && !burnComplete && (
                     <div className="mt-2 text-center text-xs text-gray-400">
                       {t.furnace?.instructions || "Clique no botão para abrir a fornalha"}
@@ -1442,7 +1409,6 @@ export default function PulseCodePage() {
                   )}
                 </div>
 
-                {/* Painel de informações - mais compacto */}
                 <div className="p-3 border-t border-gray-800/80 bg-gray-900/50">
                   <button
                     onClick={() => setShowInfo(!showInfo)}
@@ -1510,7 +1476,6 @@ export default function PulseCodePage() {
               </div>
             </motion.div>
 
-            {/* Histórico de queima */}
             {burnTxHash && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -1545,9 +1510,7 @@ export default function PulseCodePage() {
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4 relative overflow-hidden">
-      {/* Background effects (similar to presentation page) */}
       <div className="absolute inset-0">
-        {/* Horizontal Moving Lines */}
         {[...Array(12)].map((_, i) => (
           <div
             key={`h-line-${i}`}
@@ -1562,7 +1525,6 @@ export default function PulseCodePage() {
           />
         ))}
 
-        {/* Vertical Moving Lines */}
         {[...Array(10)].map((_, i) => (
           <div
             key={`v-line-${i}`}
@@ -1577,7 +1539,6 @@ export default function PulseCodePage() {
           />
         ))}
 
-        {/* Diagonal Moving Lines */}
         {[...Array(8)].map((_, i) => (
           <div
             key={`d-line-${i}`}
@@ -1593,19 +1554,17 @@ export default function PulseCodePage() {
         ))}
       </div>
 
-      {/* Static Grid for Reference */}
       <div
         className="absolute inset-0 opacity-10"
         style={{
           backgroundImage: `
-        linear-gradient(rgba(34,211,238,0.3) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(34,211,238,0.3) 1px, transparent 1px)
-      `,
+       linear-gradient(rgba(34,211,238,0.3) 1px, transparent 1px),
+       linear-gradient(90deg, rgba(34,211,238,0.3) 1px, transparent 1px)
+     `,
           backgroundSize: "60px 60px",
         }}
       />
 
-      {/* Central Glow Effect */}
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="w-96 h-96 bg-white/5 rounded-full blur-3xl animate-pulse" />
         <div
@@ -1622,7 +1581,6 @@ export default function PulseCodePage() {
         />
       </div>
 
-      {/* Rotating Rings */}
       <div className="absolute inset-0 flex items-center justify-center">
         <div
           className="w-72 h-72 border border-white/10 rounded-full animate-spin"
@@ -1638,7 +1596,6 @@ export default function PulseCodePage() {
         />
       </div>
 
-      {/* Back Button */}
       <button
         onClick={() => router.back()}
         className="absolute top-6 left-6 flex items-center space-x-2 text-gray-400 hover:text-white transition-colors z-50"
@@ -1652,7 +1609,6 @@ export default function PulseCodePage() {
         {renderContent()}
       </div>
 
-      {/* Enhanced Floating Particles */}
       {[...Array(25)].map((_, i) => (
         <div
           key={`particle-${i}`}
@@ -1670,7 +1626,6 @@ export default function PulseCodePage() {
         />
       ))}
 
-      {/* Energy Beams */}
       {[...Array(8)].map((_, i) => (
         <div
           key={`beam-${i}`}
@@ -1687,7 +1642,6 @@ export default function PulseCodePage() {
         />
       ))}
 
-      {/* Bottom Navigation Bar (local to PulseCodePage) */}
       <footer className="fixed bottom-4 left-1/2 -translate-x-1/2 w-full max-w-xs bg-black/70 backdrop-blur-md border border-white/10 rounded-full p-2 z-50">
         <div className="flex justify-around items-center">
           <Button
@@ -1720,7 +1674,6 @@ export default function PulseCodePage() {
           >
             <Hammer className="w-6 h-6" />
           </Button>
-          {/* New Burn Button */}
           <Button
             variant="ghost"
             size="icon"
