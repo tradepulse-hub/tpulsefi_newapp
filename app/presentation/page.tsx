@@ -1,19 +1,16 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import Image from "next/image"
-import { Home, Users, Newspaper, Handshake, Gamepad2, Info, Coins, Code } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { BackgroundEffect } from "@/components/background-effect"
-import { MiniWallet } from "@/components/mini-wallet"
 import type React from "react"
+import { useEffect, useState } from "react"
+import Image from "next/image"
 import {
   Menu,
   X,
   Wallet,
   Eye,
+  Newspaper,
+  Users,
+  Info,
   Gift,
   TrendingUp,
   Hand,
@@ -24,22 +21,13 @@ import {
   Clock,
   AlertTriangle,
   ArrowLeft,
-  Gamepad2Icon as Gamepad2Old,
+  Gamepad2,
+  Code,
 } from "lucide-react"
 import { useMiniKit } from "../../hooks/use-minikit"
+import MiniWallet from "../../components/mini-wallet"
 import { AnimatePresence, motion } from "framer-motion"
-
-// Define navigation items for the bottom bar (fixed)
-const navigationItemsFixedBottom = [
-  { name: "home", icon: Home, href: "/home", labelKey: "home" },
-  { name: "about", icon: Users, href: "/about", labelKey: "about" },
-  { name: "news", icon: Newspaper, href: "/news", labelKey: "news" },
-  { name: "partnerships", icon: Handshake, href: "/partnerships", labelKey: "partnerships" },
-  { name: "fistaking", icon: Coins, href: "/fistaking", labelKey: "fistaking" },
-  { name: "figames", icon: Gamepad2, href: "/figames", labelKey: "figames" },
-  { name: "pulsecode", icon: Code, href: "/pulsecode", labelKey: "pulsecode" }, // Changed from codepulse to pulsecode
-  { name: "airdrop", icon: Coins, href: "/airdrop", labelKey: "airdrop" },
-]
+import { useRouter } from "next/navigation"
 
 // Simplified language support
 const LANGUAGES = [
@@ -87,63 +75,15 @@ const PARTNERSHIPS = [
   },
 ]
 
-// Translations for the navigation items and other text
+// Translations
 const translations = {
   en: {
-    home: "Home",
-    about: "About",
-    news: "News",
-    partnerships: "Partnerships",
-    fistaking: "FiStaking",
-    figames: "FiGames",
-    pulsecode: "PulseCode", // Changed from codepulse
-    airdrop: "Airdrop",
-    welcome: "Welcome to TradePulseFi",
-    description: "Your gateway to decentralized finance and innovative blockchain solutions.",
-    learnMore: "Learn More",
-    connectWallet: "Connect Wallet",
-    disconnectWallet: "Disconnect Wallet",
-    walletConnected: "Wallet Connected",
-    walletAddress: "Wallet Address",
-    balance: "Balance",
-    swap: "Swap",
-    send: "Send",
-    receive: "Receive",
-    transactionHistory: "Transaction History",
-    noTransactions: "No transactions yet.",
-    from: "From",
-    to: "To",
-    amount: "Amount",
-    status: "Status",
-    date: "Date",
-    success: "Success",
-    failed: "Failed",
-    pending: "Pending",
-    swapSuccess: "Swap successful!",
-    swapFailed: "Swap failed.",
-    swapPending: "Swap pending...",
-    enterAmount: "Enter amount",
-    selectToken: "Select token",
-    youPay: "You Pay",
-    youReceive: "You Receive",
-    exchangeRate: "Exchange Rate",
-    fee: "Fee",
-    max: "Max",
-    insufficientFunds: "Insufficient funds",
-    invalidAmount: "Invalid amount",
-    confirmSwap: "Confirm Swap",
-    swapDetails: "Swap Details",
-    confirm: "Confirm",
-    cancel: "Cancel",
-    processing: "Processing...",
-    error: "Error",
-    close: "Close",
-    membership: "Membership",
     presentation: {
       tagline: "The Future of Decentralized Finance",
       connectWallet: "Connect Wallet",
     },
     navigation: {
+      codepulse: "CodePulse", // New translation key for CodePulse
       wallet: "Wallet",
       news: "News",
       airdrop: "Airdrop",
@@ -152,7 +92,6 @@ const translations = {
       membership: "Membership",
       partnerships: "Partnerships",
       about: "About",
-      pulsecode: "PulseCode", // Changed from codepulse
     },
     common: {
       wallet: "Wallet",
@@ -179,60 +118,12 @@ const translations = {
     },
   },
   pt: {
-    home: "Início",
-    about: "Sobre",
-    news: "Notícias",
-    partnerships: "Parcerias",
-    fistaking: "FiStaking",
-    figames: "FiGames",
-    pulsecode: "PulseCode", // Changed from codepulse
-    airdrop: "Airdrop",
-    welcome: "Bem-vindo à TradePulseFi",
-    description: "Sua porta de entrada para finanças descentralizadas e soluções inovadoras de blockchain.",
-    learnMore: "Saiba Mais",
-    connectWallet: "Conectar Carteira",
-    disconnectWallet: "Desconectar Carteira",
-    walletConnected: "Carteira Conectada",
-    walletAddress: "Endereço da Carteira",
-    balance: "Saldo",
-    swap: "Trocar",
-    send: "Enviar",
-    receive: "Receber",
-    transactionHistory: "Histórico de Transações",
-    noTransactions: "Nenhuma transação ainda.",
-    from: "De",
-    to: "Para",
-    amount: "Quantia",
-    status: "Status",
-    date: "Data",
-    success: "Sucesso",
-    failed: "Falhou",
-    pending: "Pendente",
-    swapSuccess: "Troca bem-sucedida!",
-    swapFailed: "Troca falhou.",
-    swapPending: "Troca pendente...",
-    enterAmount: "Inserir quantia",
-    selectToken: "Selecionar token",
-    youPay: "Você Paga",
-    youReceive: "Você Recebe",
-    exchangeRate: "Taxa de Câmbio",
-    fee: "Taxa",
-    max: "Máx",
-    insufficientFunds: "Fundos insuficientes",
-    invalidAmount: "Quantia inválida",
-    confirmSwap: "Confirmar Troca",
-    swapDetails: "Detalhes da Troca",
-    confirm: "Confirmar",
-    cancel: "Cancelar",
-    processing: "Processando...",
-    error: "Erro",
-    close: "Fechar",
-    membership: "Membros",
     presentation: {
       tagline: "O Futuro das Finanças Descentralizadas",
       connectWallet: "Conectar Carteira",
     },
     navigation: {
+      codepulse: "CodePulse", // New translation key for CodePulse
       wallet: "Carteira",
       news: "Notícias",
       airdrop: "Airdrop",
@@ -241,7 +132,6 @@ const translations = {
       membership: "Membros",
       partnerships: "Parcerias",
       about: "Sobre",
-      pulsecode: "PulseCode", // Changed from codepulse
     },
     common: {
       wallet: "Carteira",
@@ -268,60 +158,12 @@ const translations = {
     },
   },
   es: {
-    home: "Inicio",
-    about: "Acerca de",
-    news: "Noticias",
-    partnerships: "Asociaciones",
-    fistaking: "FiStaking",
-    figames: "FiGames",
-    pulsecode: "PulseCode", // Changed from codepulse
-    airdrop: "Airdrop",
-    welcome: "Bienvenido a TradePulseFi",
-    description: "Su puerta de entrada a las finanzas descentralizadas y soluciones innovadoras de blockchain.",
-    learnMore: "Saber Más",
-    connectWallet: "Conectar Billetera",
-    disconnectWallet: "Desconectar Billetera",
-    walletConnected: "Billetera Conectada",
-    walletAddress: "Dirección de la Billetera",
-    balance: "Saldo",
-    swap: "Intercambiar",
-    send: "Enviar",
-    receive: "Recibir",
-    transactionHistory: "Historial de Transacciones",
-    noTransactions: "Aún no hay transacciones.",
-    from: "De",
-    to: "Para",
-    amount: "Cantidad",
-    status: "Estado",
-    date: "Fecha",
-    success: "Éxito",
-    failed: "Fallido",
-    pending: "Pendiente",
-    swapSuccess: "¡Intercambio exitoso!",
-    swapFailed: "El intercambio falló.",
-    swapPending: "Intercambio pendiente...",
-    enterAmount: "Ingresar cantidad",
-    selectToken: "Seleccionar token",
-    youPay: "Usted Paga",
-    youReceive: "Usted Recibe",
-    exchangeRate: "Tasa de Cambio",
-    fee: "Tarifa",
-    max: "Máx",
-    insufficientFunds: "Fondos insuficientes",
-    invalidAmount: "Cantidad inválida",
-    confirmSwap: "Confirmar Intercambio",
-    swapDetails: "Detalles del Intercambio",
-    confirm: "Confirmar",
-    cancel: "Cancelar",
-    processing: "Procesando...",
-    error: "Error",
-    close: "Cerrar",
-    membership: "Membresía",
     presentation: {
       tagline: "El Futuro de las Finanzas Descentralizadas",
       connectWallet: "Conectar Billetera",
     },
     navigation: {
+      codepulse: "CodePulse", // New translation key for CodePulse
       wallet: "Billetera",
       news: "Noticias",
       airdrop: "Airdrop",
@@ -330,7 +172,6 @@ const translations = {
       membership: "Membresía",
       partnerships: "Asociaciones",
       about: "Acerca de",
-      pulsecode: "PulseCode", // Changed from codepulse
     },
     common: {
       wallet: "Billetera",
@@ -358,60 +199,12 @@ const translations = {
     },
   },
   id: {
-    home: "Beranda",
-    about: "Tentang",
-    news: "Berita",
-    partnerships: "Kemitraan",
-    fistaking: "FiStaking",
-    figames: "FiGames",
-    pulsecode: "PulseCode", // Changed from codepulse
-    airdrop: "Airdrop",
-    welcome: "Selamat Datang di TradePulseFi",
-    description: "Gerbang Anda menuju keuangan terdesentralisasi dan solusi blockchain inovatif.",
-    learnMore: "Pelajari Lebih Lanjut",
-    connectWallet: "Hubungkan Dompet",
-    disconnectWallet: "Putuskan Dompet",
-    walletConnected: "Dompet Terhubung",
-    walletAddress: "Alamat Dompet",
-    balance: "Saldo",
-    swap: "Tukar",
-    send: "Kirim",
-    receive: "Terima",
-    transactionHistory: "Riwayat Transaksi",
-    noTransactions: "Belum ada transaksi.",
-    from: "Dari",
-    to: "Ke",
-    amount: "Jumlah",
-    status: "Status",
-    date: "Tanggal",
-    success: "Berhasil",
-    failed: "Gagal",
-    pending: "Tertunda",
-    swapSuccess: "Penukaran berhasil!",
-    swapFailed: "Penukaran gagal.",
-    swapPending: "Penukaran tertunda...",
-    enterAmount: "Masukkan jumlah",
-    selectToken: "Pilih token",
-    youPay: "Anda Membayar",
-    youReceive: "Anda Menerima",
-    exchangeRate: "Nilai Tukar",
-    fee: "Biaya",
-    max: "Maks",
-    insufficientFunds: "Dana tidak mencukupi",
-    invalidAmount: "Jumlah tidak valid",
-    confirmSwap: "Konfirmasi Penukaran",
-    swapDetails: "Detail Penukaran",
-    confirm: "Konfirmasi",
-    cancel: "Batal",
-    processing: "Memproses...",
-    error: "Kesalahan",
-    close: "Tutup",
-    membership: "Keanggotaan",
     presentation: {
       tagline: "Masa Depan Keuangan Terdesentralisasi",
       connectWallet: "Hubungkan Dompet",
     },
     navigation: {
+      codepulse: "CodePulse", // New translation key for CodePulse
       wallet: "Dompet",
       news: "Berita",
       airdrop: "Airdrop",
@@ -420,7 +213,6 @@ const translations = {
       membership: "Keanggotaan",
       partnerships: "Kemitraan",
       about: "Tentang",
-      pulsecode: "PulseCode",
     },
     common: {
       wallet: "Dompet",
@@ -449,10 +241,10 @@ const translations = {
 }
 
 interface NavItem {
-  name: string // Changed from id to name for consistency with translations
-  labelKey: keyof typeof translations.en.navigation // Use labelKey for translation lookup
+  id: string
+  labelKey: keyof typeof translations.en.navigation
   icon: React.ComponentType<any>
-  href: string
+  href?: string
   action?: () => void
 }
 
@@ -461,59 +253,6 @@ interface PresentationProps {
   shortAddress?: string
   copy?: () => void
 }
-
-// This array is used for the sliding menu
-const navigationItems: NavItem[] = [
-  {
-    name: "pulsecode", // Changed from id to name
-    labelKey: "pulsecode",
-    icon: Code,
-    href: "/pulsecode",
-    action: () => {},
-  },
-  {
-    name: "news",
-    labelKey: "news",
-    icon: Newspaper,
-    href: "/news",
-  },
-  {
-    name: "airdrop",
-    labelKey: "airdrop",
-    icon: Gift,
-    href: "/airdrop",
-  },
-  {
-    name: "fistaking",
-    labelKey: "fistaking",
-    icon: TrendingUp,
-    href: "/fistaking",
-  },
-  {
-    name: "figames",
-    labelKey: "figames",
-    icon: Gamepad2Old,
-    href: "/figames",
-  },
-  {
-    name: "membership",
-    labelKey: "membership",
-    icon: Users,
-    href: "/membership",
-  },
-  {
-    name: "partnerships",
-    labelKey: "partnerships",
-    icon: Hand,
-    href: "/partnerships",
-  },
-  {
-    name: "about",
-    labelKey: "about",
-    icon: Info,
-    href: "/about",
-  },
-]
 
 const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy }) => {
   const [displayText, setDisplayText] = useState("")
@@ -525,7 +264,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
   const [currentLang, setCurrentLang] = useState<keyof typeof translations>("en")
   const [currentPartnerIndex, setCurrentPartnerIndex] = useState(0)
   const router = useRouter()
-  const [isWalletOpen, setIsWalletOpen] = useState(false)
 
   // Get translations for current language
   const t = translations[currentLang]
@@ -603,6 +341,13 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
     }
   }
 
+  // Handle wallet menu item click (now CodePulse)
+  const handleCodePulseMenuClick = () => {
+    // This action will navigate to the CodePulse page
+    router.push("/codepulse")
+    setIsMenuOpen(false)
+  }
+
   // Typewriter effect
   useEffect(() => {
     const typeSpeed = isDeleting ? 50 : 150
@@ -623,6 +368,58 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
     return () => clearTimeout(timeout)
   }, [displayText, isDeleting, fullText])
 
+  const navigationItems: NavItem[] = [
+    {
+      id: "pulsecode", // Changed from wallet
+      labelKey: "codepulse", // Changed label key
+      icon: Code, // Changed icon to Code
+      href: "/codepulse", // New href
+      action: handleCodePulseMenuClick, // Explicit action for clarity
+    },
+    {
+      id: "news",
+      labelKey: "news",
+      icon: Newspaper,
+      href: "/news",
+    },
+    {
+      id: "airdrop",
+      labelKey: "airdrop",
+      icon: Gift,
+      href: "/airdrop",
+    },
+    {
+      id: "fistaking",
+      labelKey: "fistaking",
+      icon: TrendingUp,
+      href: "/fistaking",
+    },
+    {
+      id: "figames",
+      labelKey: "figames",
+      icon: Gamepad2,
+      href: "/figames",
+    },
+    {
+      id: "membership",
+      labelKey: "membership",
+      icon: Users,
+      href: "/membership",
+    },
+    {
+      id: "partnerships",
+      labelKey: "partnerships",
+      icon: Hand,
+      href: "/partnerships",
+    },
+    {
+      id: "about",
+      labelKey: "about",
+      icon: Info,
+      href: "/about",
+    },
+  ]
+
   const handleLanguageChange = (newLanguage: keyof typeof translations) => {
     console.log("Changing language from", currentLang, "to", newLanguage)
     setCurrentLang(newLanguage)
@@ -638,50 +435,8 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
     window.open(currentPartner.url, "_blank")
   }
 
-  const handleLanguageChangeSimple = (lang: keyof typeof translations) => {
-    setCurrentLang(lang)
-    localStorage.setItem("preferred-language", lang)
-  }
-
   return (
     <div className="min-h-screen bg-black relative overflow-hidden flex items-center justify-center">
-      <BackgroundEffect />
-
-      {/* Language Selector */}
-      <div className="absolute top-4 right-4 z-50 flex space-x-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => handleLanguageChangeSimple("en")}
-          className={currentLang === "en" ? "text-cyan-400" : "text-gray-400"}
-        >
-          EN
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => handleLanguageChangeSimple("pt")}
-          className={currentLang === "pt" ? "text-cyan-400" : "text-gray-400"}
-        >
-          PT
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => handleLanguageChangeSimple("es")}
-          className={currentLang === "es" ? "text-cyan-400" : "text-gray-400"}
-        >
-          ES
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => handleLanguageChangeSimple("id")}
-          className={currentLang === "id" ? "text-cyan-400" : "text-gray-400"}
-        >
-          ID
-        </Button>
-      </div>
       {/* Top Navigation */}
       <div className="absolute top-0 left-0 right-0 z-50 p-6">
         <div className="flex items-center justify-between">
@@ -1073,7 +828,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                 <div className="relative z-10 grid grid-cols-2 gap-3 mb-4">
                   {navigationItems.map((item, index) => (
                     <motion.button
-                      key={item.name} // Use item.name as key
+                      key={item.id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1 }}
@@ -1344,33 +1099,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
           }}
         />
       ))}
-
-      {/* Navigation Menu */}
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-50">
-        <Card className="bg-black/70 backdrop-blur-md border border-white/10 rounded-full p-2 shadow-lg">
-          <CardContent className="flex space-x-4 p-0">
-            {navigationItemsFixedBottom.map((item) => (
-              <Button
-                key={item.name}
-                variant="ghost"
-                size="icon"
-                className="flex flex-col items-center justify-center text-gray-400 hover:text-cyan-400 transition-colors p-2"
-                onClick={() => router.push(item.href)}
-              >
-                <item.icon className="w-6 h-6" />
-                <span className="text-xs mt-1">{t[item.labelKey as keyof typeof t]}</span>
-              </Button>
-            ))}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* MiniWallet Modal */}
-      {isWalletOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[100]">
-          <MiniWallet onClose={() => setIsWalletOpen(false)} />
-        </div>
-      )}
 
       <style jsx>{`
         @keyframes moveRight {
