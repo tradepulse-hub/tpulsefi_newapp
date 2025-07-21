@@ -446,6 +446,7 @@ export default function PulseCodePage() {
 
     if (isConnecting) {
       console.log("MiniKit is still connecting. Waiting to fetch staking data.")
+      setIsLoadingStakingData(true) // Keep loading true while connecting
       return // Do not proceed if MiniKit is still connecting
     }
 
@@ -538,20 +539,19 @@ export default function PulseCodePage() {
     )
     let interval: NodeJS.Timeout | undefined
 
-    // Only attempt to fetch data if MiniKit is not currently connecting
-    if (!isConnecting) {
-      if (isAuthenticated && userAddress) {
-        fetchStakingData()
-        interval = setInterval(fetchStakingData, 15000)
-      } else {
-        // If not authenticated and not connecting, set loading to false and error
+    // Trigger fetchStakingData whenever connection status changes
+    // The fetchStakingData useCallback itself contains the logic to prevent fetching if not ready
+    fetchStakingData()
+
+    // Set up interval only if authenticated and userAddress is available
+    if (isAuthenticated && userAddress) {
+      interval = setInterval(fetchStakingData, 15000)
+    } else {
+      // If not authenticated, ensure loading is false and error is set, unless still connecting
+      if (!isConnecting) {
         setIsLoadingStakingData(false)
         setStakingError(t.common?.walletNotConnected || "Wallet not connected.")
       }
-    } else {
-      // If MiniKit is connecting, ensure loading state is true
-      setIsLoadingStakingData(true)
-      setStakingError(null) // Clear error while connecting
     }
 
     return () => {
@@ -778,22 +778,10 @@ export default function PulseCodePage() {
               )}
             </AnimatePresence>
 
-            {isLoadingStakingData ? (
+            {isConnecting ? (
               <div className="flex items-center justify-center h-48 w-full max-w-md">
-                <svg
-                  className="animate-spin h-8 w-8 text-cyan-400"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-                <span className="ml-3 text-lg">{t.common?.loading || "Loading..."}</span>
+                <Loader2 className="animate-spin h-8 w-8 text-cyan-400" />
+                <span className="ml-3 text-lg">{t.common?.connectingWallet || "Connecting wallet..."}</span>
               </div>
             ) : !isAuthenticated ? (
               <motion.div
@@ -803,6 +791,11 @@ export default function PulseCodePage() {
               >
                 <p className="text-blue-400 text-xs">{t.common?.connectWalletFirst || "Connect your wallet first"}</p>
               </motion.div>
+            ) : isLoadingStakingData ? (
+              <div className="flex items-center justify-center h-48 w-full max-w-md">
+                <Loader2 className="animate-spin h-8 w-8 text-cyan-400" />
+                <span className="ml-3 text-lg">{t.common?.loading || "Loading..."}</span>
+              </div>
             ) : stakingError ? (
               <div className="text-red-500 text-center text-sm w-full max-w-md">
                 {stakingError}
