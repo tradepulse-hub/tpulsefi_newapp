@@ -1,10 +1,10 @@
 "use client"
 
 import Image from "next/image"
-import { ArrowLeft, Coins, Info, Hammer } from "lucide-react" // Added Coins, Info, Hammer
+import { ArrowLeft, Coins, Info, Hammer } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
-import { Button } from "@/components/ui/button" // Assuming Button is available from shadcn/ui
+import { Button } from "@/components/ui/button"
 
 // Simplified language support (replicated from presentation page for consistency)
 const translations = {
