@@ -29,16 +29,16 @@ import {
 import { useMiniKit } from "../../hooks/use-minikit"
 import { AnimatePresence, motion } from "framer-motion"
 
-// Define navigation items
-const navigationItemsUpdated = [
-  { name: "home", icon: Home, href: "/home" },
-  { name: "about", icon: Users, href: "/about" },
-  { name: "news", icon: Newspaper, href: "/news" },
-  { name: "partnerships", icon: Handshake, href: "/partnerships" },
-  { name: "fistaking", icon: Coins, href: "/fistaking" },
-  { name: "figames", icon: Gamepad2, href: "/figames" },
-  { name: "pulsecode", icon: Code, href: "/pulsecode" }, // Changed from codepulse to pulsecode, icon changed to Code
-  { name: "airdrop", icon: Coins, href: "/airdrop" },
+// Define navigation items for the bottom bar (fixed)
+const navigationItemsFixedBottom = [
+  { name: "home", icon: Home, href: "/home", labelKey: "home" },
+  { name: "about", icon: Users, href: "/about", labelKey: "about" },
+  { name: "news", icon: Newspaper, href: "/news", labelKey: "news" },
+  { name: "partnerships", icon: Handshake, href: "/partnerships", labelKey: "partnerships" },
+  { name: "fistaking", icon: Coins, href: "/fistaking", labelKey: "fistaking" },
+  { name: "figames", icon: Gamepad2, href: "/figames", labelKey: "figames" },
+  { name: "pulsecode", icon: Code, href: "/pulsecode", labelKey: "pulsecode" }, // Changed from codepulse to pulsecode
+  { name: "airdrop", icon: Coins, href: "/airdrop", labelKey: "airdrop" },
 ]
 
 // Simplified language support
@@ -420,7 +420,7 @@ const translations = {
       membership: "Keanggotaan",
       partnerships: "Kemitraan",
       about: "Tentang",
-      pulsecode: "PulseCode", // Changed from codepulse
+      pulsecode: "PulseCode",
     },
     common: {
       wallet: "Dompet",
@@ -449,10 +449,10 @@ const translations = {
 }
 
 interface NavItem {
-  id: string
-  labelKey: keyof typeof translations.en.navigation
+  name: string // Changed from id to name for consistency with translations
+  labelKey: keyof typeof translations.en.navigation // Use labelKey for translation lookup
   icon: React.ComponentType<any>
-  href?: string
+  href: string
   action?: () => void
 }
 
@@ -462,52 +462,53 @@ interface PresentationProps {
   copy?: () => void
 }
 
+// This array is used for the sliding menu
 const navigationItems: NavItem[] = [
   {
-    id: "pulsecode", // Changed from codepulse
-    labelKey: "pulsecode", // Changed label key
-    icon: Code, // Changed icon to Code
-    href: "/pulsecode", // New href
-    action: () => {}, // Explicit action for clarity
+    name: "pulsecode", // Changed from id to name
+    labelKey: "pulsecode",
+    icon: Code,
+    href: "/pulsecode",
+    action: () => {},
   },
   {
-    id: "news",
+    name: "news",
     labelKey: "news",
     icon: Newspaper,
     href: "/news",
   },
   {
-    id: "airdrop",
+    name: "airdrop",
     labelKey: "airdrop",
     icon: Gift,
     href: "/airdrop",
   },
   {
-    id: "fistaking",
+    name: "fistaking",
     labelKey: "fistaking",
     icon: TrendingUp,
     href: "/fistaking",
   },
   {
-    id: "figames",
+    name: "figames",
     labelKey: "figames",
     icon: Gamepad2Old,
     href: "/figames",
   },
   {
-    id: "membership",
+    name: "membership",
     labelKey: "membership",
     icon: Users,
     href: "/membership",
   },
   {
-    id: "partnerships",
+    name: "partnerships",
     labelKey: "partnerships",
     icon: Hand,
     href: "/partnerships",
   },
   {
-    id: "about",
+    name: "about",
     labelKey: "about",
     icon: Info,
     href: "/about",
@@ -600,14 +601,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
     if (isAuthenticated) {
       setShowMiniWallet(true)
     }
-  }
-
-  // Handle PulseCode menu item click
-  const handlePulseCodeMenuClick = () => {
-    // Changed function name
-    // This action will navigate to the PulseCode page
-    router.push("/pulsecode") // Changed path
-    setIsMenuOpen(false)
   }
 
   // Typewriter effect
@@ -1080,7 +1073,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                 <div className="relative z-10 grid grid-cols-2 gap-3 mb-4">
                   {navigationItems.map((item, index) => (
                     <motion.button
-                      key={item.id}
+                      key={item.name} // Use item.name as key
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1 }}
@@ -1356,7 +1349,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-50">
         <Card className="bg-black/70 backdrop-blur-md border border-white/10 rounded-full p-2 shadow-lg">
           <CardContent className="flex space-x-4 p-0">
-            {navigationItemsUpdated.map((item) => (
+            {navigationItemsFixedBottom.map((item) => (
               <Button
                 key={item.name}
                 variant="ghost"
@@ -1365,7 +1358,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                 onClick={() => router.push(item.href)}
               >
                 <item.icon className="w-6 h-6" />
-                <span className="text-xs mt-1">{t[item.name as keyof typeof t]}</span>
+                <span className="text-xs mt-1">{t[item.labelKey as keyof typeof t]}</span>
               </Button>
             ))}
           </CardContent>
