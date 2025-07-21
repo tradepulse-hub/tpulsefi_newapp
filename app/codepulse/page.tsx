@@ -3,7 +3,7 @@
 import Image from "next/image"
 import { ArrowLeft, Coins, Info, Hammer, Flame } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState, useRef, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
 import { MiniKit } from "@worldcoin/minikit-js"
@@ -13,7 +13,7 @@ import { getCurrentLanguage, getTranslations } from "@/lib/i18n"
 // Endereço da carteira morta (burn address)
 const DEAD_WALLET = "0x000000000000000000000000000000000000dEaD"
 
-// ABI simplificado para tokens ERC20 (apenas para a função transfer)
+// ABI simplificado para tokens ERC20 (apenas para a função transfer e balanceOf)
 const ERC20_ABI = [
   {
     inputs: [
@@ -25,10 +25,248 @@ const ERC20_ABI = [
     stateMutability: "nonpayable",
     type: "function",
   },
+  {
+    inputs: [{ internalType: "address", name: "account", type: "address" }],
+    name: "balanceOf",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
 ]
 
 // Endereço do contrato PSC (Placeholder - Substitua pelo endereço real do seu token PSC)
-const PSC_CONTRACT_ADDRESS = "0xYourPSCContractAddressHere" // **IMPORTANT: Replace with your actual PSC token contract address**
+// **IMPORTANT: Replace "0xYourPSCContractAddressHere" with your actual PSC token contract address**
+const PSC_CONTRACT_ADDRESS = "0xYourPSCContractAddressHere"
+
+// New constants for SoftStaking contract
+const SOFT_STAKING_CONTRACT_ADDRESS = "0xb2972f15e2665aF621c3B96E85397BDC99D7d231"
+const SOFT_STAKING_ABI = [
+  {
+    inputs: [
+      { internalType: "address", name: "_pscToken", type: "address" },
+      { internalType: "address", name: "_rewardToken", type: "address" },
+    ],
+    stateMutability: "nonpayable",
+    type: "constructor",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: false, internalType: "uint256", name: "oldAPY", type: "uint256" },
+      { indexed: false, internalType: "uint256", name: "newAPY", type: "uint256" },
+    ],
+    name: "APYUpdated",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: true, internalType: "address", name: "user", type: "address" },
+      { indexed: false, internalType: "uint256", name: "amount", type: "uint256" },
+      { indexed: false, internalType: "uint256", name: "pscBalance", type: "uint256" },
+    ],
+    name: "RewardsClaimed",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: true, internalType: "address", name: "owner", type: "address" },
+      { indexed: false, internalType: "uint256", name: "amount", type: "uint256" },
+    ],
+    name: "RewardsDeposited",
+    type: "event",
+  },
+  {
+    inputs: [],
+    name: "BASIS_POINTS",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "SECONDS_PER_YEAR",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "apyRate",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "address", name: "_user", type: "address" }],
+    name: "calculatePendingRewards",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "address", name: "_user", type: "address" }],
+    name: "calculateRewardsPerDay",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "address", name: "_user", type: "address" }],
+    name: "calculateRewardsPerSecond",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "address", name: "_user", type: "address" }],
+    name: "canClaim",
+    outputs: [{ internalType: "bool", name: "", type: "bool" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  { inputs: [], name: "claimRewards", outputs: [], stateMutability: "nonpayable", type: "function" },
+  {
+    inputs: [{ internalType: "uint256", name: "_amount", type: "uint256" }],
+    name: "depositRewards",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  { inputs: [], name: "emergencyWithdraw", outputs: [], stateMutability: "nonpayable", type: "function" },
+  {
+    inputs: [{ internalType: "address", name: "_user", type: "address" }],
+    name: "getCalculationDetails",
+    outputs: [
+      { internalType: "uint256", name: "pscBalance", type: "uint256" },
+      { internalType: "uint256", name: "timeStaked", type: "uint256" },
+      { internalType: "uint256", name: "apyRateUsed", type: "uint256" },
+      { internalType: "uint256", name: "basisPoints", type: "uint256" },
+      { internalType: "uint256", name: "secondsPerYear", type: "uint256" },
+      { internalType: "uint256", name: "calculatedRewards", type: "uint256" },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getCurrentAPY",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getRewardBalance",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getStats",
+    outputs: [
+      { internalType: "uint256", name: "totalUsers", type: "uint256" },
+      { internalType: "uint256", name: "totalRewards", type: "uint256" },
+      { internalType: "uint256", name: "contractRewardBalance", type: "uint256" },
+      { internalType: "uint256", name: "currentAPY", type: "uint256" },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "address", name: "_user", type: "address" }],
+    name: "getTimeToNextClaim",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getTokenAddresses",
+    outputs: [
+      { internalType: "address", name: "pscTokenAddress", type: "address" },
+      { internalType: "address", name: "rewardTokenAddress", type: "address" },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "address", name: "_user", type: "address" }],
+    name: "getUserInfo",
+    outputs: [
+      { internalType: "uint256", name: "pscBalance", type: "uint256" },
+      { internalType: "uint256", name: "pendingRewards", type: "uint256" },
+      { internalType: "uint256", name: "lastClaimTime", type: "uint256" },
+      { internalType: "uint256", name: "totalClaimed", type: "uint256" },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "owner",
+    outputs: [{ internalType: "address", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "pscToken",
+    outputs: [{ internalType: "contract IERC20", name: "", type: "address" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "rewardToken",
+    outputs: [{ internalType: "contract IERC20", name: "", type: "address" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "uint256", name: "_newAPY", type: "uint256" }],
+    name: "setAPY",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      { internalType: "address", name: "_user", type: "address" },
+      { internalType: "uint256", name: "_days", type: "uint256" },
+    ],
+    name: "simulateRewards",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "totalRewardsClaimed",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "address", name: "_newOwner", type: "address" }],
+    name: "transferOwnership",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "address", name: "", type: "address" }],
+    name: "users",
+    outputs: [
+      { internalType: "uint256", name: "lastClaimTime", type: "uint256" },
+      { internalType: "uint256", name: "totalClaimed", type: "uint256" },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+]
 
 export default function PulseCodePage() {
   const router = useRouter()
@@ -46,6 +284,17 @@ export default function PulseCodePage() {
   const [burnTxHash, setBurnTxHash] = useState<string | null>(null)
   const [totalBurned, setTotalBurned] = useState<string>("0")
   const furnaceRef = useRef<HTMLDivElement>(null)
+
+  // Staking states
+  const [userAddress, setUserAddress] = useState<string | null>(null)
+  const [pscBalance, setPscBalance] = useState<string>("0")
+  const [pendingRewards, setPendingRewards] = useState<string>("0")
+  const [totalClaimedRewards, setTotalClaimedRewards] = useState<string>("0")
+  const [stakingAPY, setStakingAPY] = useState<string>("0")
+  const [contractRewardBalance, setContractRewardBalance] = useState<string>("0")
+  const [isClaiming, setIsClaiming] = useState(false)
+  const [isLoadingStakingData, setIsLoadingStakingData] = useState(true)
+  const [stakingError, setStakingError] = useState<string | null>(null)
 
   // Translations
   const [translations, setTranslations] = useState(getTranslations(getCurrentLanguage()))
@@ -92,12 +341,12 @@ export default function PulseCodePage() {
   const sendTokensToBurnAddress = async (amountToBurn: string) => {
     try {
       if (!MiniKit.isInstalled()) {
-        throw new Error("MiniKit não está instalado")
+        throw new Error(t.common?.minikitNotInstalled || "MiniKit is not installed")
       }
 
       const burnAmount = Number.parseFloat(amountToBurn)
       if (isNaN(burnAmount) || burnAmount <= 0) {
-        throw new Error("Valor inválido para queima")
+        throw new Error(t.furnace?.invalidBurnAmount || "Invalid amount for burning")
       }
 
       const amountInWei = ethers.parseUnits(amountToBurn, 18).toString()
@@ -118,7 +367,7 @@ export default function PulseCodePage() {
       })
 
       if (finalPayload.status === "error") {
-        throw new Error(finalPayload.message || "Falha no envio da transação")
+        throw new Error(finalPayload.message || t.common?.transactionFailed || "Transaction failed")
       }
 
       console.log("Transação enviada com sucesso:", finalPayload)
@@ -162,8 +411,8 @@ export default function PulseCodePage() {
         setIsBurning(false)
         setBurnComplete(true)
 
-        console.log(`${amount} PSC ${t.furnace?.burnCompleted || "queimados com sucesso!"}`)
-        console.log(`${t.furnace?.lastTransaction || "Hash da transação"}: ${result.txHash.substring(0, 10)}...`)
+        console.log(`${amount} PSC ${t.furnace?.burnCompleted || "Burn Completed!"}`)
+        console.log(`${t.furnace?.lastTransaction || "Last Transaction"}: ${result.txHash.substring(0, 10)}...`)
         // You can add a more visible notification here if needed, e.g., a simple alert or a custom modal.
 
         setTimeout(() => {
@@ -185,6 +434,112 @@ export default function PulseCodePage() {
     }
   }
 
+  // Function to fetch staking data
+  const fetchStakingData = useCallback(async () => {
+    if (!MiniKit.isInstalled()) {
+      setStakingError(t.common?.minikitNotInstalled || "MiniKit is not installed.")
+      setIsLoadingStakingData(false)
+      return
+    }
+
+    setIsLoadingStakingData(true)
+    setStakingError(null)
+
+    try {
+      const { finalPayload: addressPayload } = await MiniKit.commandsAsync.getWalletAddress()
+      const connectedAddress = addressPayload.address
+      setUserAddress(connectedAddress)
+
+      if (!connectedAddress) {
+        setStakingError(t.common?.walletNotConnected || "Wallet not connected.")
+        setIsLoadingStakingData(false)
+        return
+      }
+
+      // Fetch PSC balance
+      const { finalPayload: pscBalancePayload } = await MiniKit.commandsAsync.readContract({
+        address: PSC_CONTRACT_ADDRESS,
+        abi: ERC20_ABI,
+        functionName: "balanceOf",
+        args: [connectedAddress],
+      })
+      setPscBalance(ethers.formatUnits(pscBalancePayload.result.toString(), 18))
+
+      // Fetch staking contract data
+      const { finalPayload: userInfoPayload } = await MiniKit.commandsAsync.readContract({
+        address: SOFT_STAKING_CONTRACT_ADDRESS,
+        abi: SOFT_STAKING_ABI,
+        functionName: "getUserInfo",
+        args: [connectedAddress],
+      })
+      setPendingRewards(ethers.formatUnits(userInfoPayload.result[1].toString(), 18))
+      setTotalClaimedRewards(ethers.formatUnits(userInfoPayload.result[3].toString(), 18))
+
+      const { finalPayload: apyPayload } = await MiniKit.commandsAsync.readContract({
+        address: SOFT_STAKING_CONTRACT_ADDRESS,
+        abi: SOFT_STAKING_ABI,
+        functionName: "getCurrentAPY",
+        args: [],
+      })
+      setStakingAPY((Number(apyPayload.result) / 100).toFixed(2)) // Convert basis points to percentage
+
+      const { finalPayload: contractBalancePayload } = await MiniKit.commandsAsync.readContract({
+        address: SOFT_STAKING_CONTRACT_ADDRESS,
+        abi: SOFT_STAKING_ABI,
+        functionName: "getRewardBalance",
+        args: [],
+      })
+      setContractRewardBalance(ethers.formatUnits(contractBalancePayload.result.toString(), 18))
+    } catch (err) {
+      console.error("Error fetching staking data:", err)
+      setStakingError(t.common?.errorFetchingData || "Error fetching staking data.")
+    } finally {
+      setIsLoadingStakingData(false)
+    }
+  }, [t, PSC_CONTRACT_ADDRESS, SOFT_STAKING_CONTRACT_ADDRESS])
+
+  useEffect(() => {
+    fetchStakingData()
+    // Optionally, refetch data periodically or on tab change
+    const interval = setInterval(fetchStakingData, 15000) // Refetch every 15 seconds
+    return () => clearInterval(interval)
+  }, [fetchStakingData, activeFooterTab]) // Refetch when tab changes to ensure fresh data
+
+  // Handle Claim Rewards
+  const handleClaimRewards = async () => {
+    if (!userAddress || Number(pendingRewards) <= 0 || isClaiming) return
+
+    setIsClaiming(true)
+    setStakingError(null)
+
+    try {
+      const { finalPayload } = await MiniKit.commandsAsync.sendTransaction({
+        transaction: [
+          {
+            address: SOFT_STAKING_CONTRACT_ADDRESS,
+            abi: SOFT_STAKING_ABI,
+            functionName: "claimRewards",
+            args: [],
+          },
+        ],
+      })
+
+      if (finalPayload.status === "error") {
+        throw new Error(finalPayload.message || t.staking?.claimFailed || "Failed to claim rewards.")
+      }
+
+      console.log("Rewards claimed successfully:", finalPayload)
+      // Show success message
+      console.log(t.staking?.claimSuccess || "Rewards claimed successfully!")
+      fetchStakingData() // Refetch data to update balances
+    } catch (err) {
+      console.error("Error claiming rewards:", err)
+      setStakingError(t.staking?.claimFailed || "Failed to claim rewards.")
+    } finally {
+      setIsClaiming(false)
+    }
+  }
+
   const renderContent = () => {
     switch (activeFooterTab) {
       case "about":
@@ -196,10 +551,10 @@ export default function PulseCodePage() {
                 className="absolute w-48 h-48 rounded-full"
                 style={{
                   background: `radial-gradient(circle,
-                   rgba(255,255,255,0.4) 0%,
-                   rgba(156,163,175,0.3) 30%,
-                   rgba(107,114,128,0.2) 60%,
-                   transparent 100%)`,
+                  rgba(255,255,255,0.4) 0%,
+                  rgba(156,163,175,0.3) 30%,
+                  rgba(107,114,128,0.2) 60%,
+                  transparent 100%)`,
                   animation: "vibrateAura 0.1s linear infinite, pulse 1s ease-in-out infinite",
                 }}
               />
@@ -207,9 +562,9 @@ export default function PulseCodePage() {
                 className="absolute w-40 h-40 rounded-full"
                 style={{
                   background: `radial-gradient(circle,
-                   rgba(255,255,255,0.6) 0%,
-                   rgba(229,231,235,0.4) 40%,
-                   transparent 100%)`,
+                  rgba(255,255,255,0.6) 0%,
+                  rgba(229,231,235,0.4) 40%,
+                  transparent 100%)`,
                   animation: "vibrateAura 0.15s linear infinite, pulse 0.8s ease-in-out infinite",
                   animationDelay: "0.05s",
                 }}
@@ -218,9 +573,9 @@ export default function PulseCodePage() {
                 className="absolute w-32 h-32 rounded-full"
                 style={{
                   background: `radial-gradient(circle,
-                   rgba(243,244,246,0.5) 0%,
-                   rgba(209,213,219,0.4) 50%,
-                   transparent 100%)`,
+                  rgba(243,244,246,0.5) 0%,
+                  rgba(209,213,219,0.4) 50%,
+                  transparent 100%)`,
                   animation: "vibrateAura 0.2s linear infinite, pulse 0.6s ease-in-out infinite",
                   animationDelay: "0.1s",
                 }}
@@ -251,11 +606,11 @@ export default function PulseCodePage() {
                   className="absolute inset-0 bg-white rounded-full shadow-2xl"
                   style={{
                     boxShadow: `
-                     0 0 25px rgba(255,255,255,1),
-                     0 0 50px rgba(229,231,235,0.8),
-                     0 0 75px rgba(209,213,219,0.6),
-                     0 0 100px rgba(156,163,175,0.4)
-                   `,
+                    0 0 25px rgba(255,255,255,1),
+                    0 0 50px rgba(229,231,235,0.8),
+                    0 0 75px rgba(209,213,219,0.6),
+                    0 0 100px rgba(156,163,175,0.4)
+                  `,
                     animation: "pulse 0.5s ease-in-out infinite",
                   }}
                 />
@@ -286,8 +641,117 @@ export default function PulseCodePage() {
         )
       case "codestaking":
         return (
-          <div className="text-center text-xl font-semibold text-cyan-400">
-            {t.pulsecode?.footer?.underDevelopment || "Under Development"}
+          <div className="flex flex-col items-center justify-center text-gray-300 p-4">
+            <h2 className="text-2xl font-bold mb-6 text-cyan-300">
+              {t.pulsecode?.footer?.codestakingTitle || "CodeStaking"}
+            </h2>
+
+            {isLoadingStakingData ? (
+              <div className="flex items-center justify-center h-48">
+                <svg
+                  className="animate-spin h-8 w-8 text-cyan-400"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                <span className="ml-3 text-lg">{t.common?.loading || "Loading..."}</span>
+              </div>
+            ) : stakingError ? (
+              <div className="text-red-500 text-center text-sm">
+                {stakingError}
+                <Button onClick={fetchStakingData} className="mt-2 bg-blue-600 hover:bg-blue-700 text-white">
+                  {t.common?.retry || "Retry"}
+                </Button>
+              </div>
+            ) : (
+              <div className="w-full max-w-md space-y-4">
+                <div className="bg-gray-900/70 backdrop-blur-sm rounded-xl border border-gray-800/50 p-4">
+                  <h3 className="text-lg font-semibold text-white mb-3">
+                    {t.staking?.yourStats || "Your Staking Stats"}
+                  </h3>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">{t.staking?.yourPscBalance || "Your PSC Balance"}:</span>
+                      <span className="text-white font-medium">{Number(pscBalance).toLocaleString()} PSC</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">{t.staking?.pendingRewards || "Pending Rewards"}:</span>
+                      <span className="text-yellow-400 font-medium">
+                        {Number(pendingRewards).toLocaleString(undefined, {
+                          minimumFractionDigits: 4,
+                          maximumFractionDigits: 4,
+                        })}{" "}
+                        PSC
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">{t.staking?.totalClaimed || "Total Claimed"}:</span>
+                      <span className="text-green-400 font-medium">
+                        {Number(totalClaimedRewards).toLocaleString()} PSC
+                      </span>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={handleClaimRewards}
+                    disabled={isClaiming || Number(pendingRewards) <= 0}
+                    className="w-full mt-4 py-2 rounded-md font-medium text-white text-sm relative overflow-hidden bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isClaiming ? (
+                      <div className="flex items-center justify-center">
+                        <svg
+                          className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                        {t.staking?.claiming || "Claiming..."}
+                      </div>
+                    ) : (
+                      t.staking?.claimRewards || "Claim Rewards"
+                    )}
+                  </Button>
+                </div>
+
+                <div className="bg-gray-900/70 backdrop-blur-sm rounded-xl border border-gray-800/50 p-4">
+                  <h3 className="text-lg font-semibold text-white mb-3">
+                    {t.staking?.contractStats || "Contract Stats"}
+                  </h3>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">{t.staking?.currentAPY || "Current APY"}:</span>
+                      <span className="text-white font-medium">{stakingAPY}%</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">{t.staking?.contractBalance || "Contract Reward Balance"}:</span>
+                      <span className="text-white font-medium">
+                        {Number(contractRewardBalance).toLocaleString()} PSC
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )
       case "projects":
@@ -655,7 +1119,7 @@ export default function PulseCodePage() {
                           }}
                         >
                           <Image
-                            src="/images/burn-token.png"
+                            src="/images/codepulse-logo.png" // Changed to codepulse-logo.png
                             alt="PSC Token"
                             width={48}
                             height={48}
@@ -819,8 +1283,8 @@ export default function PulseCodePage() {
                   )}
                   {doorOpen && !isBurning && !burnComplete && (
                     <div className="mt-2 text-center text-xs text-gray-400">
-                      {t.furnace?.amountToBurn
-                        ? `${t.furnace.amountToBurn} e ${t.furnace.startBurn?.toLowerCase()}`
+                      {t.furnace?.amountToBurn && t.furnace?.startBurn
+                        ? `${t.furnace.amountToBurn} e ${t.furnace.startBurn.toLowerCase()}`
                         : 'Insira a quantidade e clique em "Iniciar Queima"'}
                     </div>
                   )}
@@ -907,7 +1371,7 @@ export default function PulseCodePage() {
                     {t.furnace?.lastTransaction || "Última Transação"}
                   </h3>
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-gray-400">Hash:</span>
+                    <span className="text-gray-400">{t.common?.hash || "Hash"}:</span>
                     <a
                       href={`https://worldscan.org/tx/${burnTxHash}`}
                       target="_blank"
@@ -982,9 +1446,9 @@ export default function PulseCodePage() {
         className="absolute inset-0 opacity-10"
         style={{
           backgroundImage: `
-           linear-gradient(rgba(34,211,238,0.3) 1px, transparent 1px),
-           linear-gradient(90deg, rgba(34,211,238,0.3) 1px, transparent 1px)
-         `,
+          linear-gradient(rgba(34,211,238,0.3) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(34,211,238,0.3) 1px, transparent 1px)
+        `,
           backgroundSize: "60px 60px",
         }}
       />
@@ -1235,11 +1699,21 @@ export default function PulseCodePage() {
         }
 
         @keyframes hammer {
-          0% { transform: rotate(0deg); }
-          25% { transform: rotate(-20deg); }
-          50% { transform: rotate(0deg); }
-          75% { transform: rotate(20deg); }
-          100% { transform: rotate(0deg); }
+          0% {
+            transform: rotate(0deg);
+          }
+          25% {
+            transform: rotate(-20deg);
+          }
+          50% {
+            transform: rotate(0deg);
+          }
+          75% {
+            transform: rotate(20deg);
+          }
+          100% {
+            transform: rotate(0deg);
+          }
         }
         .animate-hammer {
           animation: hammer 1s ease-in-out infinite;
