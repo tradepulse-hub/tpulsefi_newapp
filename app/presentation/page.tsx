@@ -22,6 +22,7 @@ import {
   AlertTriangle,
   ArrowLeft,
   Gamepad2,
+  Code,
 } from "lucide-react"
 import { useMiniKit } from "../../hooks/use-minikit"
 import MiniWallet from "../../components/mini-wallet"
@@ -82,6 +83,7 @@ const translations = {
       connectWallet: "Connect Wallet",
     },
     navigation: {
+      codepulse: "CodePulse", // New translation key for CodePulse
       wallet: "Wallet",
       news: "News",
       airdrop: "Airdrop",
@@ -121,6 +123,7 @@ const translations = {
       connectWallet: "Conectar Carteira",
     },
     navigation: {
+      codepulse: "CodePulse", // New translation key for CodePulse
       wallet: "Carteira",
       news: "Notícias",
       airdrop: "Airdrop",
@@ -160,6 +163,7 @@ const translations = {
       connectWallet: "Conectar Billetera",
     },
     navigation: {
+      codepulse: "CodePulse", // New translation key for CodePulse
       wallet: "Billetera",
       news: "Noticias",
       airdrop: "Airdrop",
@@ -200,6 +204,7 @@ const translations = {
       connectWallet: "Hubungkan Dompet",
     },
     navigation: {
+      codepulse: "CodePulse", // New translation key for CodePulse
       wallet: "Dompet",
       news: "Berita",
       airdrop: "Airdrop",
@@ -336,16 +341,11 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
     }
   }
 
-  // Handle wallet menu item click
-  const handleWalletMenuClick = () => {
-    if (isAuthenticated) {
-      setShowMiniWallet(true)
-      setIsMenuOpen(false)
-    } else {
-      // If not authenticated, try to connect
-      handleWalletConnect()
-      setIsMenuOpen(false)
-    }
+  // Handle wallet menu item click (now CodePulse)
+  const handleCodePulseMenuClick = () => {
+    // This action will navigate to the CodePulse page
+    router.push("/codepulse")
+    setIsMenuOpen(false)
   }
 
   // Typewriter effect
@@ -370,10 +370,11 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
 
   const navigationItems: NavItem[] = [
     {
-      id: "wallet",
-      labelKey: "wallet",
-      icon: Wallet,
-      href: "/",
+      id: "codepulse", // Changed from wallet
+      labelKey: "codepulse", // Changed label key
+      icon: Code, // Changed icon to Code
+      href: "/codepulse", // New href
+      action: handleCodePulseMenuClick, // Explicit action for clarity
     },
     {
       id: "news",
