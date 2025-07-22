@@ -28,6 +28,7 @@ const translations = {
     pendingRewards: "Pending Rewards",
     dismiss: "Dismiss",
     powerActivated: "Power Activated",
+    instructionText: "Blue button - TPF Holders, Green button - PSC Holders.",
   },
   pt: {
     title: "FiStaking",
@@ -43,6 +44,7 @@ const translations = {
     pendingRewards: "Recompensas Pendentes",
     dismiss: "Dispensar",
     powerActivated: "Energia Ativada",
+    instructionText: "Botão azul - Holders TPF, Botão verde - Holders PSC.",
   },
   es: {
     title: "FiStaking",
@@ -58,6 +60,7 @@ const translations = {
     pendingRewards: "Recompensas Pendientes",
     dismiss: "Descartar",
     powerActivated: "Energía Activada",
+    instructionText: "Botón azul - Holders TPF, Botón verde - Holders PSC.",
   },
   id: {
     title: "FiStaking",
@@ -73,53 +76,69 @@ const translations = {
     pendingRewards: "Hadiah Tertunda",
     dismiss: "Tutup",
     powerActivated: "Daya Diaktifkan",
+    instructionText: "Tombol biru - Pemegang TPF, Tombol hijau - Pemegang PSC.",
   },
 }
 
+interface StakingContract {
+  name: string
+  symbol: string
+  address: string
+  image: string
+  holderType: "tpf_holder" | "psc_holder" // Added to differentiate for styling
+}
+
 // Staking contracts configuration
-const STAKING_CONTRACTS = {
-  WDD: {
-    name: "Drachma",
-    symbol: "WDD",
-    address: "0xc4F3ae925E647aa2623200901a43BF65e8542c23",
-    image: "/images/drachma-token.png",
-  },
+const STAKING_CONTRACTS: Record<string, StakingContract> = {
   TPT: {
     name: "TradePulse Token",
     symbol: "TPT",
     address: "0x4c1f9CF3c5742c73a00864a32048988b87121e2f",
     image: "/images/logo-tpf.png",
+    holderType: "psc_holder", // Green button for PSC Holders
+  },
+  FIST: {
+    // New contract for TPF Holders
+    name: "FiStaking Token (TPF Holders)",
+    symbol: "FIST",
+    address: "0x1bF1fa24aCaa6b2D5e41827d5FaF2e68cCf17360",
+    image: "/placeholder.svg?height=32&width=32",
+    holderType: "tpf_holder", // Blue button for TPF Holders
+  },
+  WDD: {
+    name: "Drachma",
+    symbol: "WDD",
+    address: "0xc4F3ae925E647aa2623200901a43BF65e8542c23",
+    image: "/images/drachma-token.png",
+    holderType: "psc_holder",
   },
   RFX: {
     name: "Roflex MemeToken",
     symbol: "RFX",
     address: "0x9FA697Ece25F4e2A94d7dEb99418B2b0c4b96FE2",
     image: "/images/roflex-token.png",
+    holderType: "psc_holder",
   },
   RCC: {
     name: "RoseChana Coin",
     symbol: "RCC",
     address: "0xA8785DABbc9902173b819f488e5A6A0Dbc45A9dF",
     image: "/images/rosechana-coin.png",
+    holderType: "psc_holder",
   },
   EDEN: {
     name: "Project Eden Token",
     symbol: "EDEN",
     address: "0x6BAD88b93d67590656c83371d65DCB35d17deC87",
     image: "/images/eden-logo.png",
+    holderType: "psc_holder",
   },
   KPP: {
     name: "KeplerPay",
     symbol: "KPP",
     address: "0x2aaeC7df37AA5799a9E721A1B338aa2d591acd64",
     image: "/images/keplerpay-logo.png",
-  },
-  PSC: {
-    // Adicionado o token PSC
-    name: "PulseCode Token",
-    symbol: "PSC",
-    address: "0xb1a6165a91d44A1b835490F1cA2104421Cfe7c5E",
-    image: "/images/codepulse-logo.png",
+    holderType: "psc_holder",
   },
 }
 
@@ -682,6 +701,16 @@ export default function FiStakingPage() {
           </motion.div>
         ) : (
           <>
+            {/* Instruction Text */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.1 }}
+              className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-lg p-3 text-center text-xs text-gray-300 mb-4"
+            >
+              <p>{t.instructionText}</p>
+            </motion.div>
+
             {/* Staking Tokens - Compact */}
             {Object.entries(STAKING_CONTRACTS).map(([key, contract], index) => {
               const isClaimingThis = claiming === key
@@ -716,7 +745,9 @@ export default function FiStakingPage() {
                       className={`py-1.5 px-4 rounded-md font-medium text-xs transition-all duration-300 flex items-center justify-center space-x-1 ${
                         isClaimingThis
                           ? "bg-gray-600/50 text-gray-400 cursor-not-allowed"
-                          : "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+                          : contract.holderType === "tpf_holder"
+                            ? "bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white" // Blue for TPF holders
+                            : "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white" // Green for PSC holders (default)
                       }`}
                     >
                       {isClaimingThis ? (
