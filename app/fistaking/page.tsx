@@ -119,7 +119,7 @@ const STAKING_CONTRACTS = {
     name: "PulseCode Token",
     symbol: "PSC",
     address: "0xb1a6165a91d44A1b835490F1cA2104421Cfe7c5E",
-    image: "/images/pulsecode-logo.png",
+    image: "/images/codepulse-logo.png",
   },
 }
 
