@@ -80,6 +80,21 @@ const translations = {
   },
 }
 
+interface StakingButton {
+  key: string
+  name: string
+  address: string
+  holderType: "tpf_holder" | "psc_holder"
+}
+
+interface StakingGroup {
+  name: string
+  symbol: string
+  image: string
+  isGroup: true
+  buttons: StakingButton[]
+}
+
 interface StakingContract {
   name: string
   symbol: string
@@ -89,20 +104,26 @@ interface StakingContract {
 }
 
 // Staking contracts configuration
-const STAKING_CONTRACTS: Record<string, StakingContract> = {
-  PSC_TPF_HOLDERS: {
-    name: "PulseCode Token (TPF Holders)",
-    symbol: "PSC-TPF",
-    address: "0x1bF1fa24aCaa6b2D5e41827d5FaF2e68cCf17360",
-    image: "/images/logo-tpf.png",
-    holderType: "tpf_holder", // Blue button for TPF Holders
-  },
-  PSC_PSC_HOLDERS: {
-    name: "PulseCode Token (PSC Holders)",
-    symbol: "PSC-PSC",
-    address: "0xb1a6165a91d44A1b835490F1cA2104421Cfe7c5E",
-    image: "/images/logo-tpf.png",
-    holderType: "psc_holder", // Green button for PSC Holders
+const STAKING_CONTRACTS: Record<string, StakingContract | StakingGroup> = {
+  PSC_GROUP: {
+    name: "PulseCode Token",
+    symbol: "PSC",
+    image: "/images/codepulse-logo.png", // Assuming this is the PulseCode logo
+    isGroup: true,
+    buttons: [
+      {
+        key: "TPF_HOLDERS",
+        name: "TPF Holders",
+        address: "0x1bF1fa24aCaa6b2D5e41827d5FaF2e68cCf17360",
+        holderType: "tpf_holder", // Blue
+      },
+      {
+        key: "PSC_HOLDERS",
+        name: "PSC Holders",
+        address: "0xb1a6165a91d44A1b835490F1cA2104421Cfe7c5E",
+        holderType: "psc_holder", // Green
+      },
+    ],
   },
   WDD: {
     name: "Drachma",
@@ -446,16 +467,32 @@ export default function FiStakingPage() {
   // Get translations for current language
   const t = translations[currentLang]
 
-  const handleClaim = async (tokenKey: string) => {
-    const contract = STAKING_CONTRACTS[tokenKey as keyof typeof STAKING_CONTRACTS]
-    if (!contract.address || !user?.walletAddress) return
+  const handleClaim = async (tokenGroupKey: string, buttonKey?: string) => {
+    let contractAddress: string
+    let contractName: string
 
-    setClaiming(tokenKey)
+    const entry = STAKING_CONTRACTS[tokenGroupKey]
+
+    if ("isGroup" in entry && entry.isGroup && buttonKey) {
+      const button = entry.buttons.find((b) => b.key === buttonKey)
+      if (!button) return
+      contractAddress = button.address
+      contractName = `${entry.symbol} (${button.name})`
+    } else if (!("isGroup" in entry)) {
+      contractAddress = entry.address
+      contractName = entry.symbol
+    } else {
+      return // Should not happen if logic is correct
+    }
+
+    if (!contractAddress || !user?.walletAddress) return
+
+    setClaiming(`${tokenGroupKey}-${buttonKey || ""}`) // Use combined key for claiming state
     setClaimError(null)
 
     try {
-      console.log(`🎁 Claiming ${contract.symbol} rewards...`)
-      console.log(`Contract address: ${contract.address}`)
+      console.log(`🎁 Claiming ${contractName} rewards...`)
+      console.log(`Contract address: ${contractAddress}`)
       console.log(`User wallet: ${user.walletAddress}`)
 
       if (!MiniKit.isInstalled()) {
@@ -465,7 +502,7 @@ export default function FiStakingPage() {
       const { finalPayload } = await MiniKit.commandsAsync.sendTransaction({
         transaction: [
           {
-            address: contract.address,
+            address: contractAddress,
             abi: STAKING_ABI,
             functionName: "claimRewards",
             args: [],
@@ -480,8 +517,8 @@ export default function FiStakingPage() {
       }
 
       if (finalPayload.status === "success") {
-        console.log(`✅ ${contract.symbol} rewards claimed successfully!`)
-        setClaimSuccess(tokenKey)
+        console.log(`✅ ${contractName} rewards claimed successfully!`)
+        setClaimSuccess(`${tokenGroupKey}-${buttonKey || ""}`)
 
         // Reset success message after 3 seconds
         setTimeout(() => {
@@ -489,7 +526,7 @@ export default function FiStakingPage() {
         }, 3000)
       }
     } catch (error) {
-      console.error(`❌ ${contract.symbol} claim failed:`, error)
+      console.error(`❌ ${contractName} claim failed:`, error)
       let errorMessage = t.claimFailed
 
       if (error instanceof Error) {
@@ -655,8 +692,10 @@ export default function FiStakingPage() {
                 <div>
                   <p className="text-green-400 text-xs font-medium mb-1">{t.claimSuccess}</p>
                   <p className="text-green-300 text-[10px]">
-                    {STAKING_CONTRACTS[claimSuccess as keyof typeof STAKING_CONTRACTS]?.symbol} rewards claimed
-                    successfully
+                    {claimSuccess.includes("PSC_GROUP")
+                      ? `PSC (${claimSuccess.split("-")[1]})`
+                      : STAKING_CONTRACTS[claimSuccess as keyof typeof STAKING_CONTRACTS]?.symbol}{" "}
+                    rewards claimed successfully
                   </p>
                 </div>
               </div>
@@ -711,59 +750,117 @@ export default function FiStakingPage() {
             </motion.div>
 
             {/* Staking Tokens - Compact */}
-            {Object.entries(STAKING_CONTRACTS).map(([key, contract], index) => {
-              const isClaimingThis = claiming === key
-
-              return (
-                <motion.div
-                  key={key}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.05 }}
-                  className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-lg p-3"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
+            {Object.entries(STAKING_CONTRACTS).map(([key, entry], index) => {
+              if ("isGroup" in entry && entry.isGroup) {
+                const group = entry as StakingGroup
+                return (
+                  <motion.div
+                    key={key}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                    className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-lg p-3"
+                  >
+                    <div className="flex items-center space-x-2 mb-3">
                       <Image
-                        src={contract.image || "/placeholder.svg"}
-                        alt={contract.name}
+                        src={group.image || "/placeholder.svg"}
+                        alt={group.name}
                         width={32}
                         height={32}
                         className="w-8 h-8 rounded-full"
                       />
                       <div>
-                        <h3 className="text-white font-medium text-sm">{contract.symbol}</h3>
-                        <p className="text-gray-400 text-[10px]">{contract.name}</p>
+                        <h3 className="text-white font-medium text-sm">{group.symbol}</h3>
+                        <p className="text-gray-400 text-[10px]">{group.name}</p>
                       </div>
                     </div>
+                    <div className="flex flex-col gap-2">
+                      {group.buttons.map((button) => {
+                        const isClaimingThis = claiming === `${key}-${button.key}`
+                        return (
+                          <button
+                            key={button.key}
+                            onClick={() => handleClaim(key, button.key)}
+                            disabled={isClaimingThis}
+                            className={`py-1.5 px-4 rounded-md font-medium text-xs transition-all duration-300 flex items-center justify-center space-x-1 ${
+                              isClaimingThis
+                                ? "bg-gray-600/50 text-gray-400 cursor-not-allowed"
+                                : button.holderType === "tpf_holder"
+                                  ? "bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white" // Blue for TPF holders
+                                  : "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white" // Green for PSC holders
+                            }`}
+                          >
+                            {isClaimingThis ? (
+                              <>
+                                <Loader2 className="w-3 h-3 animate-spin" />
+                                <span>{t.claiming}</span>
+                              </>
+                            ) : (
+                              <>
+                                <Gift className="w-3 h-3" />
+                                <span>
+                                  {t.claim} {button.name}
+                                </span>
+                              </>
+                            )}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </motion.div>
+                )
+              } else {
+                const contract = entry as StakingContract
+                const isClaimingThis = claiming === key
+                return (
+                  <motion.div
+                    key={key}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                    className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-lg p-3"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <Image
+                          src={contract.image || "/placeholder.svg"}
+                          alt={contract.name}
+                          width={32}
+                          height={32}
+                          className="w-8 h-8 rounded-full"
+                        />
+                        <div>
+                          <h3 className="text-white font-medium text-sm">{contract.symbol}</h3>
+                          <p className="text-gray-400 text-[10px]">{contract.name}</p>
+                        </div>
+                      </div>
 
-                    {/* Claim Button - Compact */}
-                    <button
-                      onClick={() => handleClaim(key)}
-                      disabled={isClaimingThis}
-                      className={`py-1.5 px-4 rounded-md font-medium text-xs transition-all duration-300 flex items-center justify-center space-x-1 ${
-                        isClaimingThis
-                          ? "bg-gray-600/50 text-gray-400 cursor-not-allowed"
-                          : contract.holderType === "tpf_holder"
-                            ? "bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white" // Blue for TPF holders
-                            : "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white" // Green for PSC holders (default)
-                      }`}
-                    >
-                      {isClaimingThis ? (
-                        <>
-                          <Loader2 className="w-3 h-3 animate-spin" />
-                          <span>{t.claiming}</span>
-                        </>
-                      ) : (
-                        <>
-                          <Gift className="w-3 h-3" />
-                          <span>{t.claim}</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </motion.div>
-              )
+                      {/* Claim Button - Compact */}
+                      <button
+                        onClick={() => handleClaim(key)}
+                        disabled={isClaimingThis}
+                        className={`py-1.5 px-4 rounded-md font-medium text-xs transition-all duration-300 flex items-center justify-center space-x-1 ${
+                          isClaimingThis
+                            ? "bg-gray-600/50 text-gray-400 cursor-not-allowed"
+                            : "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+                        }`}
+                      >
+                        {isClaimingThis ? (
+                          <>
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                            <span>{t.claiming}</span>
+                          </>
+                        ) : (
+                          <>
+                            <Gift className="w-3 h-3" />
+                            <span>{t.claim}</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </motion.div>
+                )
+              }
             })}
           </>
         )}
