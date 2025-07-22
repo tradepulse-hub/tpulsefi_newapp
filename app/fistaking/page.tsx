@@ -90,20 +90,19 @@ interface StakingContract {
 
 // Staking contracts configuration
 const STAKING_CONTRACTS: Record<string, StakingContract> = {
-  TPT: {
-    name: "TradePulse Token",
-    symbol: "TPT",
-    address: "0x4c1f9CF3c5742c73a00864a32048988b87121e2f",
+  PSC_TPF_HOLDERS: {
+    name: "PulseCode Token (TPF Holders)",
+    symbol: "PSC-TPF",
+    address: "0x1bF1fa24aCaa6b2D5e41827d5FaF2e68cCf17360",
+    image: "/images/logo-tpf.png",
+    holderType: "tpf_holder", // Blue button for TPF Holders
+  },
+  PSC_PSC_HOLDERS: {
+    name: "PulseCode Token (PSC Holders)",
+    symbol: "PSC-PSC",
+    address: "0xb1a6165a91d44A1b835490F1cA2104421Cfe7c5E",
     image: "/images/logo-tpf.png",
     holderType: "psc_holder", // Green button for PSC Holders
-  },
-  FIST: {
-    // New contract for TPF Holders
-    name: "FiStaking Token (TPF Holders)",
-    symbol: "FIST",
-    address: "0x1bF1fa24aCaa6b2D5e41827d5FaF2e68cCf17360",
-    image: "/placeholder.svg?height=32&width=32",
-    holderType: "tpf_holder", // Blue button for TPF Holders
   },
   WDD: {
     name: "Drachma",
@@ -322,7 +321,7 @@ const STAKING_ABI = [
   {
     inputs: [],
     name: "owner",
-    outputs: [{ internalType: "address", name: "", type: "address" }],
+    outputs: [{ internalType: "address", name: "", type: "uint256" }],
     stateMutability: "view",
     type: "function",
   },
