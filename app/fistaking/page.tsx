@@ -114,6 +114,13 @@ const STAKING_CONTRACTS = {
     address: "0x2aaeC7df37AA5799a9E721A1B338aa2d591acd64",
     image: "/images/keplerpay-logo.png",
   },
+  PSC: {
+    // Adicionado o token PSC
+    name: "PulseCode Token",
+    symbol: "PSC",
+    address: "0xb1a6165a91d44A1b835490F1cA2104421Cfe7c5E",
+    image: "/images/pulsecode-logo.png",
+  },
 }
 
 // Standard ABI for all contracts (including RCC)
