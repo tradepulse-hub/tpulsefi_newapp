@@ -13,9 +13,9 @@ export async function GET(req: NextRequest) {
     cookies().set("siwe", nonce, {
       secure: process.env.NODE_ENV === "production", // Use secure only in production
       httpOnly: true,
-      sameSite: "lax", // CORRIGIDO: Alterado de "strict" para "lax"
+      sameSite: "lax",
       maxAge: 60 * 10, // 10 minutes
-      path: "/", // CORRIGIDO: Adicionado path: "/"
+      path: "/",
     })
 
     return NextResponse.json({ nonce })
