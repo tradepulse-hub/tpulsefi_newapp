@@ -36,8 +36,8 @@ export async function POST(req: NextRequest) {
           secure: true,
           httpOnly: true,
           sameSite: "lax", // Alterado de 'strict' para 'lax'
-          maxAge: 60 * 60 * 24 * 7, // 7 dias
-          path: "/", // Adicionado
+          maxAge: 60 * 60 * 24 * 7, // 7 days
+          path: "/", // Adicionado para garantir que o cookie esteja disponível em toda a aplicação
         },
       )
     }
