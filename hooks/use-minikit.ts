@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { MiniKit } from "@worldcoin/minikit-js"
-import { useToast } from "./use-toast" // Import useToast
+import { useToast } from "./use-toast"
 
 interface MiniKitUser {
   walletAddress: string
@@ -22,9 +22,8 @@ export function useMiniKit(): MiniKitContext {
   const [user, setUser] = useState<MiniKitUser | null>(null)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const { toast } = useToast() // Usar o hook useToast
+  const { toast } = useToast()
 
-  // Função para verificar a sessão no backend
   const checkSession = useCallback(async () => {
     console.log("[MiniKit] Checking session...")
     try {
@@ -60,7 +59,7 @@ export function useMiniKit(): MiniKitContext {
       if (!MiniKit.isInstalled()) {
         console.log("[MiniKit] MiniKit not installed. Attempting to install...")
         MiniKit.install({
-          appId: process.env.NEXT_PUBLIC_APP_ID || "app_staging_b8e2b5b5c6b8e2b5b5c6b8e2", // Use env var
+          appId: process.env.NEXT_PUBLIC_APP_ID || "app_staging_b8e2b5b5c6b8e2b5b5c6b8e2",
           enableTelemetry: true,
         })
         console.log("[MiniKit] MiniKit installed.")
@@ -113,7 +112,7 @@ export function useMiniKit(): MiniKitContext {
           description: "A sua carteira foi conectada com sucesso.",
           variant: "default",
         })
-        await checkSession() // Re-check session to update user state
+        await checkSession()
       } else {
         throw new Error(`SIWE verification failed: ${completeSiweData.message || "Invalid message"}`)
       }
