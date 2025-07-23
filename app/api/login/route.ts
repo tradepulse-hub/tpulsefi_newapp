@@ -28,9 +28,10 @@ export async function POST(request: Request) {
       name: "tpulsefi_session",
       value: JSON.stringify(user),
       httpOnly: true,
-      path: "/",
+      path: "/", // Adicionado
       secure: process.env.NODE_ENV === "production",
       maxAge: 60 * 60 * 24 * 7, // 7 dias
+      sameSite: "lax", // Alterado
     })
 
     return NextResponse.json({ success: true, user })
