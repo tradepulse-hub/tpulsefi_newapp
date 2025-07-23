@@ -1,25 +1,18 @@
+import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
-import { type NextRequest, NextResponse } from "next/server"
 
-// This route **must** be treated as dynamic because it writes a secure cookie.
-export const dynamic = "force-dynamic"
+export function GET() {
+  // Expects only alphanumeric characters
+  const nonce: string = crypto.randomUUID().replace(/-/g, "")
 
-export async function GET(req: NextRequest) {
-  try {
-    // Generate a secure nonce (at least 8 alphanumeric characters)
-    const nonce = crypto.randomUUID().replace(/-/g, "")
+  // The nonce should be stored somewhere that is not tamperable by the client
+  // Optionally you can HMAC the nonce with a secret key stored in your environment
+  cookies().set("siwe", nonce, {
+    secure: process.env.NODE_ENV === "production", // Use secure only in production
+    httpOnly: true, // Boa prática para cookies de nonce
+    sameSite: "lax", // CORRIGIDO: Garante que o cookie seja enviado em navegações de nível superior
+    path: "/", // CORRIGIDO: Garante que o cookie esteja disponível em toda a aplicação
+  })
 
-    // Store nonce in secure cookie
-    cookies().set("siwe", nonce, {
-      secure: true,
-      httpOnly: true,
-      sameSite: "strict",
-      maxAge: 60 * 10, // 10 minutes
-    })
-
-    return NextResponse.json({ nonce })
-  } catch (error) {
-    console.error("Error generating nonce:", error)
-    return NextResponse.json({ error: "Failed to generate nonce" }, { status: 500 })
-  }
+  return NextResponse.json({ nonce })
 }
