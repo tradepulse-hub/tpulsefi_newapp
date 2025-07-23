@@ -5,7 +5,8 @@ import { type NextRequest, NextResponse } from "next/server"
 
 export async function GET(req: NextRequest) {
   try {
-    const sessionCookie = cookies().get("session")
+    // CORRIGIDO: Ler o cookie 'tpulsefi_session' para consistência
+    const sessionCookie = cookies().get("tpulsefi_session")
 
     if (!sessionCookie) {
       return NextResponse.json({ authenticated: false })
@@ -16,7 +17,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       authenticated: true,
       user: {
-        walletAddress: session.address,
+        walletAddress: session.walletAddress, // CORRIGIDO: Usar walletAddress do objeto user
       },
     })
   } catch (error) {
