@@ -24,12 +24,14 @@ export const POST = async (req: NextRequest) => {
     const validMessage = await verifySiweMessage(payload, nonce)
 
     if (validMessage.isValid) {
-      // CORRIGIDO: Re-adicionado a criação do cookie de sessão após a verificação SIWE
+      // CORRIGIDO: Adicionado a criação do cookie de sessão 'tpulsefi_session'
       cookies().set(
-        "session", // Nome do cookie de sessão
+        "tpulsefi_session", // Nome do cookie de sessão consistente com a rota de login
         JSON.stringify({
-          address: payload.address,
-          timestamp: Date.now(),
+          id: payload.address, // Usar o endereço como ID
+          walletAddress: payload.address,
+          authenticated: true,
+          authTime: new Date().toISOString(),
         }),
         {
           secure: process.env.NODE_ENV === "production", // Use secure only in production
