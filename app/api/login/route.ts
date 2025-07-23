@@ -31,7 +31,7 @@ export async function POST(request: Request) {
       path: "/",
       secure: process.env.NODE_ENV === "production",
       maxAge: 60 * 60 * 24 * 7, // 7 dias
-      sameSite: "lax", // CORRIGIDO: Permite que o cookie seja enviado em navegações de nível superior
+      sameSite: "lax", // CORRIGIDO: Adicionado sameSite: "lax"
     })
 
     return NextResponse.json({ success: true, user })
