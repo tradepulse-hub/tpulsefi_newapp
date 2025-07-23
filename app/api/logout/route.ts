@@ -2,7 +2,7 @@ import { cookies } from "next/headers"
 import { NextResponse } from "next/server"
 
 export async function POST(request: Request) {
-  cookies().delete("token")
+  cookies().delete("tpulsefi_session") // CORRIGIDO: Apaga o cookie de sessão correto
 
   // Adicionar esta linha para garantir que o localStorage também seja limpo no lado do cliente
   // Isso será executado via script no lado do cliente
