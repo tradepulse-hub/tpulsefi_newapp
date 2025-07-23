@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react"
 import { MiniKit } from "@worldcoin/minikit-js"
+import { useToast } from "@/hooks/use-toast" // Importar o useToast
 
 interface UseMiniKitResult {
   isConnecting: boolean
@@ -23,6 +24,7 @@ export function useMiniKit(): UseMiniKitResult {
     if (typeof window === "undefined") return undefined
     return (MiniKit as any)?.walletAddress
   })
+  const { toast } = useToast() // Inicializar o useToast
 
   const isConnected = !!address
 
@@ -35,7 +37,11 @@ export function useMiniKit(): UseMiniKitResult {
   const connect = useCallback(async () => {
     if (isConnecting || typeof window === "undefined") return
     if (!MiniKit.isInstalled()) {
-      alert("MiniKit is not installed in World App")
+      toast({
+        title: "Erro de Conexão",
+        description: "MiniKit não está instalado na World App.",
+        variant: "destructive",
+      })
       return
     }
 
@@ -53,7 +59,7 @@ export function useMiniKit(): UseMiniKitResult {
       })
 
       if (finalPayload.status === "error") {
-        throw new Error(finalPayload.message || "User rejected signature")
+        throw new Error(finalPayload.message || "Utilizador rejeitou a assinatura.")
       }
 
       // 3. send the signed message back to our backend
@@ -65,17 +71,26 @@ export function useMiniKit(): UseMiniKitResult {
 
       const verifyJson = await verifyRes.json()
       if (!verifyJson.isValid) {
-        throw new Error("SIWE signature verification failed")
+        throw new Error("Verificação da assinatura SIWE falhou.")
       }
 
       // success 🎉
       setAddress(finalPayload.address)
-    } catch (err) {
-      console.error("Wallet connect error:", err)
+      toast({
+        title: "Conectado!",
+        description: `Carteira conectada com sucesso: ${finalPayload.address.slice(0, 6)}...${finalPayload.address.slice(-4)}`,
+      })
+    } catch (err: any) {
+      console.error("Erro ao conectar carteira:", err)
+      toast({
+        title: "Erro ao Conectar",
+        description: err.message || "Ocorreu um erro ao conectar a carteira.",
+        variant: "destructive",
+      })
     } finally {
       setIsConnecting(false)
     }
-  }, [isConnecting])
+  }, [isConnecting, toast])
 
   /**
    * Logs out: clears cookie on the backend and local MiniKit state.
@@ -83,13 +98,22 @@ export function useMiniKit(): UseMiniKitResult {
   const disconnect = useCallback(async () => {
     try {
       await fetch("/api/logout", { method: "POST" })
-    } catch (e) {
-      console.warn("Logout API failed:", e)
+      // MiniKit exposes disconnect only inside World App
+      ;(MiniKit as any)?.disconnect?.()
+      setAddress(undefined)
+      toast({
+        title: "Desconectado",
+        description: "Sessão da carteira encerrada.",
+      })
+    } catch (e: any) {
+      console.warn("Erro ao desconectar:", e)
+      toast({
+        title: "Erro ao Desconectar",
+        description: e.message || "Ocorreu um erro ao desconectar a carteira.",
+        variant: "destructive",
+      })
     }
-    // MiniKit exposes disconnect only inside World App
-    ;(MiniKit as any)?.disconnect?.()
-    setAddress(undefined)
-  }, [])
+  }, [toast])
 
   /**
    * Closes any open MiniKit drawer (if available)
