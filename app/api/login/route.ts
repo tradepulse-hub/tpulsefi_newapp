@@ -28,10 +28,9 @@ export async function POST(request: Request) {
       name: "tpulsefi_session",
       value: JSON.stringify(user),
       httpOnly: true,
-      path: "/", // Garante que o cookie esteja disponível em toda a aplicação
+      path: "/",
       secure: process.env.NODE_ENV === "production",
       maxAge: 60 * 60 * 24 * 7, // 7 dias
-      sameSite: "lax", // CORRIGIDO: Permite que o cookie seja enviado em navegações de nível superior
     })
 
     return NextResponse.json({ success: true, user })
