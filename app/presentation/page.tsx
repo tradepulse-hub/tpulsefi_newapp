@@ -278,8 +278,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
     isLoading = false,
     connectWallet = async () => {},
     disconnectWallet = async () => {},
-    logs, // Destructure logs
-    clearLogs, // Destructure clearLogs
   } = miniKitContext || {}
 
   // Load saved language
@@ -1221,7 +1219,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
       `}</style>
 
       {/* Debug Console */}
-      <DebugConsole logs={logs} clearLogs={clearLogs} />
+      <DebugConsole />
     </div>
   )
 }
