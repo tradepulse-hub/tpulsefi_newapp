@@ -16,29 +16,17 @@ interface MiniKitContext {
   connectWallet: () => Promise<void>
   disconnectWallet: () => Promise<void>
   closeMiniKitUI: () => void
-  logs: string[] // Adicionado para depuração
-  clearLogs: () => void // Adicionado para depuração
 }
 
 export function useMiniKit(): MiniKitContext {
   const [user, setUser] = useState<MiniKitUser | null>(null)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const [logs, setLogs] = useState<string[]>([]) // Estado para logs
   const { toast } = useToast() // Usar o hook useToast
-
-  const addLog = useCallback((message: string, type: "info" | "error" = "info") => {
-    const timestamp = new Date().toLocaleTimeString()
-    setLogs((prevLogs) => [`[${timestamp}] [${type.toUpperCase()}] ${message}`, ...prevLogs].slice(0, 50)) // Limita a 50 logs
-  }, [])
-
-  const clearLogs = useCallback(() => {
-    setLogs([])
-  }, [])
 
   // Função para verificar a sessão no backend
   const checkSession = useCallback(async () => {
-    addLog("Checking session...")
+    console.log("[MiniKit] Checking session...")
     try {
       const res = await fetch("/api/session")
       const data = await res.json()
@@ -46,47 +34,47 @@ export function useMiniKit(): MiniKitContext {
       if (data.authenticated && data.user) {
         setUser(data.user)
         setIsAuthenticated(true)
-        addLog(`Session active for: ${data.user.walletAddress}`)
+        console.log(`[MiniKit] Session active for: ${data.user.walletAddress}`)
       } else {
         setUser(null)
         setIsAuthenticated(false)
-        addLog("No active session found.")
+        console.log("[MiniKit] No active session found.")
       }
     } catch (error) {
-      addLog(`Error checking session: ${error instanceof Error ? error.message : String(error)}`, "error")
+      console.error(`[MiniKit] Error checking session: ${error instanceof Error ? error.message : String(error)}`)
       setUser(null)
       setIsAuthenticated(false)
     } finally {
       setIsLoading(false)
     }
-  }, [addLog])
+  }, [])
 
   useEffect(() => {
     checkSession()
   }, [checkSession])
 
   const connectWallet = useCallback(async () => {
-    addLog("Connect wallet initiated...")
+    console.log("[MiniKit] Connect wallet initiated...")
     setIsLoading(true)
     try {
       if (!MiniKit.isInstalled()) {
-        addLog("MiniKit not installed. Attempting to install...")
+        console.log("[MiniKit] MiniKit not installed. Attempting to install...")
         MiniKit.install({
-          appId: process.env.NEXT_PUBLIC_APP_ID || "app_staging_b8e2b5b5c6b8e2b5b5c6b8e2",
+          appId: process.env.NEXT_PUBLIC_APP_ID || "app_staging_b8e2b5b5c6b8e2b5b5c6b8e2", // Use env var
           enableTelemetry: true,
         })
-        addLog("MiniKit installed.")
+        console.log("[MiniKit] MiniKit installed.")
       }
 
-      addLog("Fetching nonce from /api/nonce...")
+      console.log("[MiniKit] Fetching nonce from /api/nonce...")
       const nonceRes = await fetch("/api/nonce")
       if (!nonceRes.ok) {
         throw new Error(`Failed to fetch nonce: ${nonceRes.statusText}`)
       }
       const { nonce } = await nonceRes.json()
-      addLog(`Nonce received: ${nonce}`)
+      console.log(`[MiniKit] Nonce received: ${nonce}`)
 
-      addLog("Calling MiniKit.commandsAsync.walletAuth...")
+      console.log("[MiniKit] Calling MiniKit.commandsAsync.walletAuth...")
       const { finalPayload } = await MiniKit.commandsAsync.walletAuth({
         nonce: nonce,
         requestId: "0",
@@ -94,13 +82,13 @@ export function useMiniKit(): MiniKitContext {
         notBefore: new Date(new Date().getTime() - 24 * 60 * 60 * 1000),
         statement: "This is my statement and here is a link https://worldcoin.com/apps",
       })
-      addLog(`WalletAuth finalPayload status: ${finalPayload.status}`)
+      console.log(`[MiniKit] WalletAuth finalPayload status: ${finalPayload.status}`)
 
       if (finalPayload.status === "error") {
         throw new Error(`WalletAuth failed: ${finalPayload.message || "Unknown error"}`)
       }
 
-      addLog("Sending payload to /api/complete-siwe...")
+      console.log("[MiniKit] Sending payload to /api/complete-siwe...")
       const completeSiweRes = await fetch("/api/complete-siwe", {
         method: "POST",
         headers: {
@@ -119,7 +107,7 @@ export function useMiniKit(): MiniKitContext {
 
       const completeSiweData = await completeSiweRes.json()
       if (completeSiweData.isValid) {
-        addLog("SIWE verification successful. Session established.")
+        console.log("[MiniKit] SIWE verification successful. Session established.")
         toast({
           title: "Conectado!",
           description: "A sua carteira foi conectada com sucesso.",
@@ -130,7 +118,7 @@ export function useMiniKit(): MiniKitContext {
         throw new Error(`SIWE verification failed: ${completeSiweData.message || "Invalid message"}`)
       }
     } catch (error) {
-      addLog(`Connect wallet error: ${error instanceof Error ? error.message : String(error)}`, "error")
+      console.error(`[MiniKit] Connect wallet error: ${error instanceof Error ? error.message : String(error)}`)
       toast({
         title: "Erro na Conexão",
         description: error instanceof Error ? error.message : "Não foi possível conectar a carteira.",
@@ -141,17 +129,17 @@ export function useMiniKit(): MiniKitContext {
     } finally {
       setIsLoading(false)
     }
-  }, [addLog, checkSession, toast])
+  }, [checkSession, toast])
 
   const disconnectWallet = useCallback(async () => {
-    addLog("Disconnect wallet initiated...")
+    console.log("[MiniKit] Disconnect wallet initiated...")
     setIsLoading(true)
     try {
       const res = await fetch("/api/logout", { method: "POST" })
       if (!res.ok) {
         throw new Error(`Logout failed: ${res.statusText}`)
       }
-      addLog("Logout successful.")
+      console.log("[MiniKit] Logout successful.")
       toast({
         title: "Desconectado!",
         description: "A sua carteira foi desconectada.",
@@ -161,10 +149,10 @@ export function useMiniKit(): MiniKitContext {
       setIsAuthenticated(false)
       if (MiniKit.isInstalled()) {
         MiniKit.disconnect()
-        addLog("MiniKit disconnected.")
+        console.log("[MiniKit] MiniKit disconnected.")
       }
     } catch (error) {
-      addLog(`Disconnect wallet error: ${error instanceof Error ? error.message : String(error)}`, "error")
+      console.error(`[MiniKit] Disconnect wallet error: ${error instanceof Error ? error.message : String(error)}`)
       toast({
         title: "Erro ao Desconectar",
         description: error instanceof Error ? error.message : "Não foi possível desconectar a carteira.",
@@ -173,14 +161,14 @@ export function useMiniKit(): MiniKitContext {
     } finally {
       setIsLoading(false)
     }
-  }, [addLog, toast])
+  }, [toast])
 
   const closeMiniKitUI = useCallback(() => {
     if (MiniKit.isInstalled()) {
       MiniKit.close()
-      addLog("MiniKit UI closed.")
+      console.log("[MiniKit] MiniKit UI closed.")
     }
-  }, [addLog])
+  }, [])
 
   return {
     user,
@@ -189,7 +177,5 @@ export function useMiniKit(): MiniKitContext {
     connectWallet,
     disconnectWallet,
     closeMiniKitUI,
-    logs,
-    clearLogs,
   }
 }
