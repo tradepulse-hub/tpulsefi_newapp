@@ -3,6 +3,8 @@
 import type React from "react"
 import { useEffect, useState } from "react"
 import Image from "next/image"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Menu,
   X,
@@ -29,6 +31,7 @@ import MiniWallet from "../../components/mini-wallet"
 import { AnimatePresence, motion } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { DebugConsole } from "../../components/debug-console" // Import DebugConsole
+import { useMobile } from "@/hooks/use-mobile"
 
 // Simplified language support
 const LANGUAGES = [
@@ -265,6 +268,8 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
   const [currentLang, setCurrentLang] = useState<keyof typeof translations>("en")
   const [currentPartnerIndex, setCurrentPartnerIndex] = useState(0)
   const router = useRouter()
+  const isMobile = useMobile()
+  const [showDebug, setShowDebug] = useState(false)
 
   // Get translations for current language
   const t = translations[currentLang]
@@ -435,6 +440,15 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
   const handlePartnerClick = () => {
     window.open(currentPartner.url, "_blank")
   }
+
+  useEffect(() => {
+    // Only show debug console on mobile for now, or if explicitly toggled
+    if (isMobile) {
+      setShowDebug(true)
+    } else {
+      setShowDebug(false)
+    }
+  }, [isMobile])
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden flex items-center justify-center">
@@ -1101,125 +1115,52 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
         />
       ))}
 
-      <style jsx>{`
-        @keyframes moveRight {
-          0% {
-            transform: translateX(-100%);
-            opacity: 0;
-          }
-          10% {
-            opacity: 1;
-          }
-          90% {
-            opacity: 1;
-          }
-          100% {
-            transform: translateX(100vw);
-            opacity: 0;
-          }
-        }
-
-        @keyframes moveDown {
-          0% {
-            transform: translateY(-100%);
-            opacity: 0;
-          }
-          10% {
-            opacity: 1;
-          }
-          90% {
-            opacity: 1;
-          }
-          100% {
-            transform: translateY(100vh);
-            opacity: 0;
-          }
-        }
-
-        @keyframes vibrateAura {
-          0% {
-            transform: translate(0);
-          }
-          25% {
-            transform: translate(0.5px, 0.5px);
-          }
-          50% {
-            transform: translate(-0.5px, 0.5px);
-          }
-          75% {
-            transform: translate(0.5px, -0.5px);
-          }
-          100% {
-            transform: translate(-0.5px, -0.5px);
-          }
-        }
-
-        @keyframes vibrateRing {
-          0% {
-            transform: translate(0) rotate(0deg);
-          }
-          25% {
-            transform: translate(1px, 1px) rotate(90deg);
-          }
-          50% {
-            transform: translate(-1px, 1px) rotate(180deg);
-          }
-          75% {
-            transform: translate(1px, -1px) rotate(270deg);
-          }
-          100% {
-            transform: translate(-1px, -1px) rotate(360deg);
-          }
-        }
-
-        @keyframes vibrateLogo {
-          0% {
-            transform: translate(0);
-          }
-          25% {
-            transform: translate(0.3px, 0.3px);
-          }
-          50% {
-            transform: translate(-0.3px, 0.3px);
-          }
-          75% {
-            transform: translate(0.3px, -0.3px);
-          }
-          100% {
-            transform: translate(-0.3px, -0.3px);
-          }
-        }
-
-        @keyframes vibrateLogoImage {
-          0% {
-            transform: translate(0) scale(1);
-          }
-          25% {
-            transform: translate(0.2px, 0.2px) scale(1.01);
-          }
-          50% {
-            transform: translate(-0.2px, 0.2px) scale(0.99);
-          }
-          75% {
-            transform: translate(0.2px, -0.2px) scale(1.01);
-          }
-          100% {
-            transform: translate(-0.2px, -0.2px) scale(0.99);
-          }
-        }
-
-        @keyframes spin {
-          from {
-            transform: rotate(0deg);
-          }
-          to {
-            transform: rotate(360deg);
-          }
-        }
-      `}</style>
+      {/* Mobile Card */}
+      {isMobile && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 p-4">
+          <Card className="w-full max-w-md bg-gray-800 text-white shadow-lg">
+            <CardHeader className="text-center">
+              <Image
+                src="/public/images/logo-tpf.png"
+                alt="PulseCode Token Logo"
+                width={100}
+                height={100}
+                className="mx-auto mb-4"
+              />
+              <CardTitle className="text-3xl font-bold">PulseCode Token</CardTitle>
+              <CardDescription className="text-gray-400">Conecte sua carteira Worldcoin</CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col items-center space-y-4">
+              {isLoading ? (
+                <p className="text-lg">Carregando...</p>
+              ) : isAuthenticated ? (
+                <>
+                  <p className="text-lg font-semibold">
+                    Conectado como:{" "}
+                    {user?.walletAddress
+                      ? `${user.walletAddress.slice(0, 6)}...${user.walletAddress.slice(-4)}`
+                      : "N/A"}
+                  </p>
+                  <Button onClick={disconnectWallet} className="w-full bg-red-600 hover:bg-red-700">
+                    Desconectar Carteira
+                  </Button>
+                </>
+              ) : (
+                <Button onClick={connectWallet} className="w-full bg-blue-600 hover:bg-blue-700">
+                  Conectar Carteira Worldcoin
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Debug Console */}
-      <DebugConsole />
+      {showDebug && (
+        <div className="mt-8 w-full max-w-md">
+          <DebugConsole />
+        </div>
+      )}
     </div>
   )
 }
