@@ -1,20 +1,20 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { cookies } from "next/headers" // Importar cookies para usar cookies().delete()
+import { cookies } from "next/headers"
 
 export async function POST(request: NextRequest) {
   try {
     console.log("🔌 Logout API called")
 
     // Clear all authentication cookies directly using cookies().delete()
-    cookies().delete("tpulsefi_session") // CORRIGIDO: Limpa o cookie de sessão principal
-    cookies().delete("session") // Limpa o cookie 'session' se ainda estiver a ser usado
-    cookies().delete("siwe") // Limpa o cookie 'siwe'
-    cookies().delete("minikit-auth") // Limpa cookies específicos do minikit
-    cookies().delete("worldcoin-auth") // Limpa cookies específicos da worldcoin
+    cookies().delete("tpulsefi_session")
+    cookies().delete("session")
+    cookies().delete("siwe")
+    cookies().delete("minikit-auth")
+    cookies().delete("worldcoin-auth")
 
     // Sinaliza ao cliente para limpar o localStorage, se necessário
     cookies().set("clear_local_storage", "true", {
-      maxAge: 1, // Curta duração, apenas para sinalizar ao cliente
+      maxAge: 1,
       path: "/",
       secure: process.env.NODE_ENV === "production",
       httpOnly: true,
