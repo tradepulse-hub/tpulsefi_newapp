@@ -2,25 +2,26 @@ import { cookies } from "next/headers"
 import { type NextRequest, NextResponse } from "next/server"
 import { type MiniAppWalletAuthSuccessPayload, verifySiweMessage } from "@worldcoin/minikit-js"
 
-interface IRequestPayload {
+interface RequestPayload {
   payload: MiniAppWalletAuthSuccessPayload
   nonce: string
 }
 
-export const POST = async (req: NextRequest) => {
-  const { payload, nonce }: IRequestPayload = await req.json()
-
-  const siweCookie = cookies().get("siwe")?.value
-
-  if (nonce !== siweCookie) {
-    return NextResponse.json({
-      status: "error",
-      isValid: false,
-      message: "Invalid nonce",
-    })
-  }
-
+export async function POST(req: NextRequest) {
   try {
+    const { payload, nonce } = (await req.json()) as RequestPayload
+
+    // Verify nonce matches the one we created
+    const storedNonce = cookies().get("siwe")?.value
+    if (nonce !== storedNonce) {
+      return NextResponse.json({
+        status: "error",
+        isValid: false,
+        message: "Invalid nonce",
+      })
+    }
+
+    // Verify the SIWE message
     const validMessage = await verifySiweMessage(payload, nonce)
 
     if (validMessage.isValid) {
@@ -47,12 +48,12 @@ export const POST = async (req: NextRequest) => {
       status: "success",
       isValid: validMessage.isValid,
     })
-  } catch (error) {
-    const err = error as Error
+  } catch (error: any) {
+    console.error("SIWE verification error:", error)
     return NextResponse.json({
       status: "error",
       isValid: false,
-      message: err.message,
+      message: error.message || "Verification failed",
     })
   }
 }
