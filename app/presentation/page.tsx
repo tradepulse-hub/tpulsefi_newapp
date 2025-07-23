@@ -28,6 +28,7 @@ import { useMiniKit } from "../../hooks/use-minikit"
 import MiniWallet from "../../components/mini-wallet"
 import { AnimatePresence, motion } from "framer-motion"
 import { useRouter } from "next/navigation"
+import { DebugConsole } from "../../components/debug-console" // Import DebugConsole
 
 // Simplified language support
 const LANGUAGES = [
@@ -159,7 +160,7 @@ const translations = {
   },
   es: {
     presentation: {
-      tagline: "El Futuro de las Finanzas Descentralizadas",
+      tagline: "El Futuro de las Finanças Descentralizadas",
       connectWallet: "Conectar Billetera",
     },
     navigation: {
@@ -277,6 +278,8 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
     isLoading = false,
     connectWallet = async () => {},
     disconnectWallet = async () => {},
+    logs, // Destructure logs
+    clearLogs, // Destructure clearLogs
   } = miniKitContext || {}
 
   // Load saved language
@@ -1216,6 +1219,9 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
           }
         }
       `}</style>
+
+      {/* Debug Console */}
+      <DebugConsole logs={logs} clearLogs={clearLogs} />
     </div>
   )
 }
