@@ -1,20 +1,9 @@
-// doSwap.ts
-// This file contains a standalone version of the doSwap function from the AniPage.
-// It is designed to be self-contained and ready to share with others for demonstration purposes.
-
-import { ethers } from "ethers"
-import {
-  config,
-  HoldSo,
-  SwapHelper,
-  TokenProvider,
-  ZeroX,
-  inmemoryTokenStorage,
-  type SwapParams,
-} from "@holdstation/worldchain-sdk"
+import { walletService } from "@/services/wallet-service"
 import { Client, Multicall3 } from "@holdstation/worldchain-ethers-v6"
+import { config, HoldSo, inmemoryTokenStorage, SwapHelper, TokenProvider, ZeroX } from "@holdstation/worldchain-sdk"
+import { ethers } from "ethers"
 
-// --- Token definitions ---
+// Definindo TOKENS para corresponder ao serviço de swap
 const TOKENS = [
   {
     address: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003",
@@ -50,112 +39,96 @@ const TOKENS = [
   },
   {
     address: "0x5fa570E9c8514cdFaD81DB6ce0A327D55251fBD4",
-    symbol: "KPP", // Corrected symbol to KPP
+    symbol: "KPP", // Assuming KPP as symbol for KeplerPay
     name: "KeplerPay",
     decimals: 18, // Assuming 18 decimals
     logo: "/images/keplerpay-logo.png",
     color: "#6A0DAD", // Deep purple color
   },
+  {
+    address: "0xbF0B23Ec1b8F8505b4F1772517151B2df4A27703",
+    symbol: "EDEN",
+    name: "Project Eden Token",
+    decimals: 18, // Assuming 18 decimals based on common ERC-20 tokens
+    logo: "/images/eden-logo.png",
+    color: "#4CAF50", // A green color for Eden
+  },
 ]
 
-// --- Provider and SDK setup ---
+// Configuração do SDK Holdstation (mantida aqui para a função de cotação)
 const RPC_URL = "https://worldchain-mainnet.g.alchemy.com/public"
 const provider = new ethers.JsonRpcProvider(RPC_URL, { chainId: 480, name: "worldchain" }, { staticNetwork: true })
 const client = new Client(provider)
 config.client = client
 config.multicall3 = new Multicall3(provider)
-const swapHelper = new SwapHelper(client, { tokenStorage: inmemoryTokenStorage })
-const tokenProvider = new TokenProvider({ client, multicall3: config.multicall3 })
+const swapHelper = new SwapHelper(client, {
+  tokenStorage: inmemoryTokenStorage,
+})
+const tokenProvider = new TokenProvider({
+  client,
+  multicall3: config.multicall3,
+})
 const zeroX = new ZeroX(tokenProvider, inmemoryTokenStorage)
 const worldSwap = new HoldSo(tokenProvider, inmemoryTokenStorage)
 swapHelper.load(zeroX)
 swapHelper.load(worldSwap)
 
-// --- Mocked helper functions (replace with real implementations as needed) ---
-async function updateUserData(address: string) {
-  // Placeholder for updating user data after swap
-  console.log(`User data updated for address: ${address}`)
-}
-async function loadTokenBalances(address: string) {
-  // Placeholder for reloading token balances after swap
-  console.log(`Token balances loaded for address: ${address}`)
-}
-async function loadTpfBalance(address: string) {
-  // Placeholder for reloading ANI balance after swap
-  console.log(`TPF balance loaded for address: ${address}`)
-}
-
-// --- The doSwap function ---
-/**
- * Executes a token swap using the Worldchain SDK.
- * @param walletAddress The user's wallet address
- * @param quote The quote object returned from swapHelper.estimate.quote
- * @param amountIn The amount of tokenIn to swap (as a string)
- * @param tokenInSymbol The symbol of the input token (e.g., "WLD")
- * @param tokenOutSymbol The symbol of the output token (e.g., "TPF")
- * @returns A result object indicating success or failure.
- */
-export async function doSwap({
-  walletAddress,
-  quote,
-  amountIn,
-  tokenInSymbol,
-  tokenOutSymbol,
-}: {
+interface SwapParams {
   walletAddress: string
   quote: any
   amountIn: string
   tokenInSymbol: string
   tokenOutSymbol: string
-}) {
-  if (!walletAddress || !quote || !amountIn || !tokenInSymbol || !tokenOutSymbol) {
-    console.warn("doSwap called with missing parameters.")
-    return { success: false, errorCode: "MISSING_PARAMETERS" }
-  }
-
-  const tokenIn = TOKENS.find((t) => t.symbol === tokenInSymbol)
-  const tokenOut = TOKENS.find((t) => t.symbol === tokenOutSymbol)
-
-  if (!tokenIn || !tokenOut) {
-    console.error("Invalid token symbols provided for swap.")
-    return { success: false, errorCode: "INVALID_TOKEN_SYMBOLS" }
-  }
-
-  try {
-    const swapParams: SwapParams["input"] = {
-      tokenIn: tokenIn.address,
-      tokenOut: tokenOut.address,
-      amountIn,
-      tx: {
-        data: quote.data,
-        to: quote.to,
-        value: quote.value,
-      },
-      partnerCode: "24568",
-      feeAmountOut: quote.addons?.feeAmountOut,
-      fee: "0.2", // Fee from the attached file
-      feeReceiver: "0xf04a78df4cc3017c0c23f37528d7b6cbbeea6677", // Fee receiver from the attached file
-    }
-    console.log("Swapping with params:", swapParams)
-    const result = await swapHelper.swap(swapParams)
-    if (result.success) {
-      // Wait for transaction to be confirmed
-      await new Promise((res) => setTimeout(res, 2500))
-      await provider.getBlockNumber()
-      await updateUserData(walletAddress)
-      await loadTokenBalances(walletAddress)
-      await loadTpfBalance(walletAddress) // Considerar tornar isto dinâmico com base em tokenOut
-      console.log("Swap successful!")
-      return { success: true } // Explicitamente retornar sucesso
-    } else {
-      console.error("Swap failed: ", result)
-      return { success: false, errorCode: result.errorCode || "UNKNOWN_SWAP_ERROR", error: result }
-    }
-  } catch (error: any) {
-    console.error("Swap failed:", error)
-    return { success: false, errorCode: error.message || "EXCEPTION_CAUGHT", error: error }
-  }
 }
 
-// Example usage (uncomment and fill in real values to test):
-// doSwap({ walletAddress: "0x...", quote: { ... }, amountIn: "1.0", tokenInSymbol: "WLD", tokenOutSymbol: "TPF" })
+export async function doSwap(params: SwapParams): Promise<{ success: boolean; error?: any; errorCode?: string }> {
+  try {
+    const { walletAddress, quote, amountIn, tokenInSymbol, tokenOutSymbol } = params
+
+    const tokenInObj = TOKENS.find((t) => t.symbol === tokenInSymbol)
+    const tokenOutObj = TOKENS.find((t) => t.symbol === tokenOutSymbol)
+
+    if (!tokenInObj || !tokenOutObj) {
+      throw new Error("Invalid token selection.")
+    }
+
+    const signer = await walletService.getSigner()
+
+    if (!signer) {
+      throw new Error("Signer not available.")
+    }
+
+    const tx = await signer.sendTransaction({
+      to: quote.to,
+      data: quote.data,
+      value: quote.value,
+      gasLimit: quote.gas,
+    })
+
+    if (!tx) {
+      throw new Error("Transaction failed to send.")
+    }
+
+    await tx.wait()
+
+    return { success: true }
+  } catch (error: any) {
+    console.error("❌ Swap execution error:", error)
+
+    let errorCode = "UNKNOWN_ERROR"
+
+    if (error.message?.includes("user rejected transaction")) {
+      errorCode = "USER_REJECTED"
+    } else if (error.message?.includes("insufficient funds")) {
+      errorCode = "INSUFFICIENT_FUNDS"
+    } else if (error.message?.includes("gas required exceeds allowance")) {
+      errorCode = "GAS_LIMIT_REACHED"
+    } else if (error.message?.includes("Network")) {
+      errorCode = "NETWORK_ERROR"
+    } else if (error.message?.includes("timeout")) {
+      errorCode = "TIMEOUT_ERROR"
+    }
+
+    return { success: false, error, errorCode }
+  }
+}
