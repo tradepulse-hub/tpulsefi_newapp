@@ -414,6 +414,9 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
   const [error, setError] = useState<string | null>(null)
   const [isMinimized, setIsMinimized] = useState(false)
 
+  // Removido: const [tokenUnitPrices, setTokenUnitPrices] = useState<Record<string, number>>({})
+  // Removido: const [loadingPrices, setLoadingPrices] = useState(true)
+
   const TRANSACTIONS_PER_PAGE = 5
 
   // Load saved language
@@ -436,6 +439,9 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }, [walletAddress])
+
+  // Removido: loadTokenUnitPrices function
+  // const loadTokenUnitPrices = useCallback(async () => { ... }, [USDC_ADDRESS])
 
   const loadBalances = useCallback(async () => {
     try {
@@ -499,8 +505,9 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
   const refreshBalances = useCallback(async () => {
     setRefreshing(true)
     await loadBalances()
+    // Removido: await loadTokenUnitPrices() // Refresh unit prices as well
     setRefreshing(false)
-  }, [loadBalances])
+  }, [loadBalances]) // Removido loadTokenUnitPrices da dependência
 
   const handleSend = useCallback(async () => {
     if (!sendForm.amount || !sendForm.recipient) return
@@ -771,7 +778,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       loadBalances()
       loadTransactionHistory(true)
     }
-  }, [walletAddress, loadBalances, loadTransactionHistory])
+  }, [walletAddress]) // Removido loadBalances e loadTransactionHistory das dependências
 
   const formatBalance = useCallback((balance: string): string => {
     const num = Number.parseFloat(balance)
