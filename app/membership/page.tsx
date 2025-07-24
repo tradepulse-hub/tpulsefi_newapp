@@ -1,7 +1,7 @@
 "use client"
 import { useEffect, useState } from "react"
 import { ArrowLeft, Crown, Loader2, CheckCircle, Copy } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
+import { BackgroundEffect } from "@/components/background-effect" // Import BackgroundEffect
 import { useRouter } from "next/navigation"
 import { MiniKit } from "@worldcoin/minikit-js"
 import { useMiniKit } from "../../hooks/use-minikit"
