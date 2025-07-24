@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation"
 import { MiniKit } from "@worldcoin/minikit-js"
 import { useMiniKit } from "../../hooks/use-minikit"
 import Image from "next/image"
+import { BackgroundEffect } from "@/components/background-effect" // Import BackgroundEffect
 
 // Supported languages
 const SUPPORTED_LANGUAGES = ["en", "pt", "es", "id"] as const
@@ -553,89 +554,7 @@ export default function FiStakingPage() {
 
   return (
     <main className="min-h-screen bg-black relative overflow-hidden flex flex-col items-center pt-4 pb-6">
-      {/* Background Effects - Reduced */}
-      <div className="absolute inset-0">
-        {[...Array(8)].map((_, i) => (
-          <div
-            key={`h-line-${i}`}
-            className="absolute h-px bg-gradient-to-r from-transparent via-cyan-400/40 to-transparent animate-pulse"
-            style={{
-              top: `${10 + i * 10}%`,
-              left: "-100%",
-              width: "200%",
-              animation: `moveRight 5s linear infinite`,
-              animationDelay: `${i * 0.4}s`,
-            }}
-          />
-        ))}
-        {[...Array(6)].map((_, i) => (
-          <div
-            key={`v-line-${i}`}
-            className="absolute w-px bg-gradient-to-b from-transparent via-blue-400/30 to-transparent"
-            style={{
-              left: `${15 + i * 15}%`,
-              top: "-100%",
-              height: "200%",
-              animation: `moveDown 6s linear infinite`,
-              animationDelay: `${i * 0.5}s`,
-            }}
-          />
-        ))}
-      </div>
-
-      <div
-        className="absolute inset-0 opacity-5"
-        style={{
-          backgroundImage: `
-            linear-gradient(rgba(34,211,238,0.2) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(34,211,238,0.2) 1px, transparent 1px)
-          `,
-          backgroundSize: "80px 80px",
-        }}
-      />
-
-      {/* Reduced background effects */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="w-64 h-64 bg-white/3 rounded-full blur-3xl animate-pulse" />
-        <div
-          className="absolute w-48 h-48 bg-cyan-400/5 rounded-full blur-2xl animate-pulse"
-          style={{ animationDelay: "0.5s" }}
-        />
-      </div>
-
-      {[...Array(15)].map((_, i) => (
-        <div
-          key={`particle-${i}`}
-          className="absolute rounded-full animate-ping"
-          style={{
-            width: `${1 + Math.random() * 2}px`,
-            height: `${1 + Math.random() * 2}px`,
-            backgroundColor:
-              i % 3 === 0 ? "rgba(255,255,255,0.4)" : i % 3 === 1 ? "rgba(34,211,238,0.3)" : "rgba(59,130,246,0.2)",
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-            animationDelay: `${Math.random() * 4}s`,
-            animationDuration: `${2 + Math.random() * 3}s`,
-          }}
-        />
-      ))}
-
-      <style jsx>{`
-        @keyframes moveRight {
-          0% { transform: translateX(-100%); opacity: 0; }
-          10% { opacity: 1; }
-          90% { opacity: 1; }
-          100% { transform: translateX(100vw); opacity: 0; }
-        }
-        
-        @keyframes moveDown {
-          0% { transform: translateY(-100%); opacity: 0; }
-          10% { opacity: 1; }
-          90% { opacity: 1; }
-          100% { transform: translateY(100vh); opacity: 0; }
-        }
-      `}</style>
-
+      <BackgroundEffect /> {/* Adicionado BackgroundEffect component */}
       {/* Battery Indicator - Top Right */}
       <motion.div
         initial={{ opacity: 0, x: 20 }}
@@ -645,7 +564,6 @@ export default function FiStakingPage() {
       >
         <BatteryIndicator currentLang={currentLang} />
       </motion.div>
-
       {/* Back Button */}
       <motion.div
         initial={{ opacity: 0, x: -20 }}
@@ -661,12 +579,11 @@ export default function FiStakingPage() {
           <span className="text-xs">{t.back}</span>
         </button>
       </motion.div>
-
       <motion.div
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="text-center mb-4 relative z-10"
+        className="text-center mb-4 relative z-10 pt-20" // Adjusted pt-20 here
       >
         <h1 className="text-2xl font-bold tracking-tighter flex items-center justify-center">
           <TrendingUp className="w-5 h-5 mr-2 text-purple-400" />
@@ -676,7 +593,6 @@ export default function FiStakingPage() {
         </h1>
         <p className="text-gray-400 text-xs mt-1 leading-relaxed px-4">{t.subtitle}</p>
       </motion.div>
-
       <div className="w-full max-w-sm px-4 relative z-10 space-y-3">
         {/* Success Message */}
         <AnimatePresence>
