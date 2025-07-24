@@ -1,6 +1,6 @@
+;/>```tsx file="components/iimn - wallet.tsx
+"
 "use client"
-
-import { doSwap } from "@/services/swap-service"
 import { walletService } from "@/services/wallet-service"
 import { AnimatePresence, motion } from "framer-motion"
 import {
@@ -431,9 +431,18 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
   const t = translations[currentLang]
 
   const formatAddress = useCallback((address: string) => {
-    return `${address.slice(0, 6)}...${address.slice(-4)}`
+    return `
+$
+{
+  address.slice(0, 6)
+}
+...$
+{
+  address.slice(-4)
+}
+;`
   }, [])
-
+  \
   const copyAddress = useCallback(() => {
     navigator.clipboard.writeText(walletAddress)
     setCopied(true)
@@ -522,20 +531,47 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       })
 
       if (result.success) {
-        alert(`✅ ${t.sendSuccess} ${sendForm.amount} ${sendForm.token}!`)
-        setViewMode("main")
-        setSendForm({ token: "TPF", amount: "", recipient: "" })
+        alert(`
+✅ $
+{
+  t.sendSuccess
+}
+$
+{
+  sendForm.amount
+}
+$
+{
+  sendForm.token
+}
+!`)
+        setViewMode(\"main")\
+        setSendForm(token: "TPF", amount: "", recipient: "" )
         await refreshBalances()
         await loadTransactionHistory(true)
       } else {
-        alert(`❌ ${t.sendFailed}: ${result.error}`)
+        alert(`
+❌ $
+{
+  t.sendFailed
+}
+: $
+{
+  result.error
+}
+;`)
       }
-    } catch (error) {
+    } catch (error) {\
       console.error("❌ Send error:", error) // Kept for critical error
-      alert(`❌ ${t.sendFailed}. ${t.tryAgain}`)
+      alert(`
+❌ $
+  t.sendFailed
+. $
+  t.tryAgain
+;`)
     } finally {
       setSending(false)
-    }
+    }\
   }, [sendForm, balances, t.sendSuccess, t.sendFailed, t.tryAgain, refreshBalances, loadTransactionHistory])
 
   const getSwapQuote = useCallback(
@@ -604,16 +640,31 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         let errorMessage = t.quoteError
         if (error instanceof Error) {
           if (error.message?.includes("timeout")) {
-            errorMessage = `${t.networkError}. ${t.tryAgain}`
-          } else if (error.message?.includes("Network")) {
-            errorMessage = `${t.networkError}. ${t.tryAgain}`
-          } else if (error.message?.includes("insufficient")) {
+            errorMessage = `
+$
+  t.networkError
+. $
+  t.tryAgain
+;`\
+          } else if (error.message?.includes(\"Network")) {
+            errorMessage = `
+$
+  t.networkError
+. $
+  t.tryAgain
+;`\
+          } else if (error.message?.includes(\"insufficient")) {
             errorMessage = t.insufficientBalance
           } else {
-            errorMessage = `${t.quoteError}: ${error.message}`
+            errorMessage = `
+$
+  t.quoteError
+: $
+  error.message
+;`
           }
         }
-
+\
         setQuoteError(errorMessage)
         setSwapQuote(null)
         setSwapForm((prev) => ({ ...prev, amountTo: "" }))
@@ -643,12 +694,20 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
       const tokenFromBalance = balances.find((t) => t.symbol === swapForm.tokenFrom)
       if (!tokenFromBalance || Number.parseFloat(tokenFromBalance.balance) < Number.parseFloat(swapForm.amountFrom)) {
         throw new Error(
-          `${t.insufficientBalance}. Available: ${
-            tokenFromBalance?.balance || "0"
-          }, Required: ${swapForm.amountFrom} ${swapForm.tokenFrom}`,
-        )
+          `
+$
+  t.insufficientBalance
+. Available: $
+  \
+            tokenFromBalance?.balance || "0"\
+, Required: $
+  swapForm.amountFrom
+$
+  swapForm.tokenFrom
+`,
+        )\
       }
-
+\
       if (!swapQuote.data || !swapQuote.to) {
         throw new Error("Invalid swap quote")
       }
@@ -668,56 +727,80 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
       if (swapResult && swapResult.success) {
         alert(
-          `✅ ${t.swapSuccess} ${swapForm.amountFrom} ${swapForm.tokenFrom} for ${swapForm.amountTo} ${swapForm.tokenTo}!`,
-        )
+          \`✅ ${t.swapSuccess} ${swapForm.amountFrom} ${swapForm.tokenFrom} for ${swapForm.amountTo} ${swapForm.tokenTo}!`,
+)
         setViewMode("main")
-        setSwapForm({
-          tokenFrom: "WLD",
-          tokenTo: "TPF",
+        setSwapForm(
+  tokenFrom: "WLD", tokenTo
+  : "TPF",
           amountFrom: "",
           amountTo: "",
-        })
+)\
         setSwapQuote(null)
-        await refreshBalances()
+        await refreshBalances()\
         await loadTransactionHistory(true)
-      } else {
-        let errorMessage = t.swapFailed
-        if (swapResult && swapResult.errorCode) {
-          errorMessage = `${t.swapFailed}: ${swapResult.errorCode}`
-        } else if (swapResult && swapResult.error instanceof Error) {
-          errorMessage = `${t.swapFailed}: ${swapResult.error.message}`
-        } else if (!swapResult) {
-          errorMessage = `${t.swapFailed}: ${t.tryAgain} (No result from swap service)`
-        }
-        throw new Error(errorMessage)
-      }
-    } catch (error) {
-      console.error("❌ Swap error:", error) // Kept for critical error
-
+      } else
+{
+  let errorMessage = t.swapFailed
+  if (swapResult && swapResult.errorCode) {
+    errorMessage = `${t.swapFailed}: ${swapResult.errorCode}`
+  } else if (swapResult && swapResult.error instanceof Error) {
+    errorMessage = `${t.swapFailed}: ${swapResult.error.message}`
+  } else if (!swapResult) {
+    errorMessage = `${t.swapFailed}: ${t.tryAgain} (No result from swap service)`
+  }
+  throw new Error(errorMessage)
+}
+} catch (error)
+{
+  console.error("❌ Swap error:\", error) // Kept for critical error
+\
       let errorMessage = t.swapFailed
-      if (error instanceof Error) {
-        if (error.message?.includes("Insufficient") || error.message?.includes("insuficiente")) {
-          errorMessage = `${t.swapFailed}: ${t.insufficientBalance}`
-        } else if (error.message?.includes("timeout")) {
-          errorMessage = `${t.swapFailed}: ${t.networkError}. ${t.tryAgain}`
-        } else if (error.message?.includes("Network")) {
-          errorMessage = `${t.swapFailed}: ${t.networkError}. ${t.tryAgain}`
-        } else if (error.message?.includes("simulation_failed")) {
-          errorMessage = `${t.swapFailed}: Simulation failed. The quote might be invalid or expired.`
-        } else {
-          errorMessage = `${t.swapFailed}: ${error.message}`
-        }
-      }
-
-      alert(`❌ ${errorMessage}`)
-    } finally {
-      setSwapping(false)
+  if (error instanceof Error) {
+    \
+    if (error.message?.includes(\"Insufficient") || error.message?.includes("insuficiente")) {
+      \
+          errorMessage = `$
+      t.swapFailed
+      : $
+      t.insufficientBalance
+      ;`
+        } else if (error.message?.includes(\"timeout")) {
+          errorMessage = `
+      $
+      t.swapFailed
+      : $
+      t.networkError
+      . $
+      t.tryAgain
+      ;`\
+        } else if (error.message?.includes("Network\")) {
+          errorMessage = `
+      $
+      t.swapFailed
+      : $
+      t.networkError
+      . $
+      t.tryAgain
+      ;`\
+        } else if (error.message?.includes(\"simulation_failed")) {
+          errorMessage = \`${t.swapFailed}: Simulation failed. The quote might be invalid or expired.`
+    } else {
+      errorMessage = `${t.swapFailed}: ${error.message}`
     }
-  }, [
-    swapQuote,
+  }
+
+  alert(`❌ ${errorMessage}`)
+}
+finally
+{
+  setSwapping(false)
+}
+}, [
+    swapQuote,\
     swapForm,
     balances,
-    t.insufficientBalance,
+    t.insufficientBalance,\
     t.swapSuccess,
     t.swapFailed,
     t.tryAgain,
@@ -726,100 +809,100 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     loadTransactionHistory,
   ])
 
-  const handleBackToMain = useCallback(() => {
-    setViewMode("main")
-    setSendForm({ token: "TPF", amount: "", recipient: "" })
-    setSwapForm({
-      tokenFrom: "WLD",
-      tokenTo: "TPF",
-      amountFrom: "",
-      amountTo: "",
-    })
-    setSwapQuote(null)
-    setQuoteError(null)
-  }, [])
+const handleBackToMain = useCallback(() => {
+  setViewMode("main")
+  setSendForm({ token: "TPF", amount: "", recipient: "" })
+  setSwapForm({
+    tokenFrom: "WLD",
+    tokenTo: "TPF",
+    amountFrom: "",
+    amountTo: "",
+  })
+  setSwapQuote(null)
+  setQuoteError(null)
+}, [])
 
-  const openTransactionInExplorer = useCallback((hash: string) => {
-    const explorerUrl = walletService.getExplorerTransactionUrl(hash)
-    window.open(explorerUrl, "_blank")
-  }, [])
+const openTransactionInExplorer = useCallback((hash: string) => {
+  const explorerUrl = walletService.getExplorerTransactionUrl(hash)
+  window.open(explorerUrl, "_blank")
+}, [])
 
-  const formatTimestamp = useCallback((timestamp: number) => {
-    const date = new Date(timestamp)
-    const now = new Date()
-    const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60)
+const formatTimestamp = useCallback((timestamp: number) => {
+  const date = new Date(timestamp)
+  const now = new Date()
+  const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60)
 
-    if (diffInHours < 1) {
-      const diffInMinutes = Math.floor(diffInHours * 60)
-      return `${diffInMinutes}m ago`
-    } else if (diffInHours < 24) {
-      return `${Math.floor(diffInHours)}h ago`
-    } else {
-      const diffInDays = Math.floor(diffInHours / 24)
-      return `${diffInDays}d ago`
-    }
-  }, [])
+  if (diffInHours < 1) {
+    const diffInMinutes = Math.floor(diffInHours * 60)
+    return `${diffInMinutes}m ago`
+  } else if (diffInHours < 24) {
+    return `${Math.floor(diffInHours)}h ago`
+  } else {
+    const diffInDays = Math.floor(diffInHours / 24)
+    return `${diffInDays}d ago`
+  }
+}, [])
 
-  const getStatusColor = useCallback((status: string) => {
-    switch (status) {
-      case "confirmed":
-        return "text-green-400"
-      case "pending":
-        return "text-yellow-400"
-      case "failed":
-        return "text-red-400"
-      default:
-        return "text-gray-400"
-    }
-  }, [])
+const getStatusColor = useCallback((status: string) => {
+  switch (status) {
+    case "confirmed":
+      return "text-green-400"
+    case "pending":
+      return "text-yellow-400"
+    case "failed":
+      return "text-red-400"
+    default:
+      return "text-gray-400"
+  }
+}, [])
 
-  useEffect(() => {
-    if (walletAddress) {
-      loadBalances()
-      loadTransactionHistory(true)
-      // Removido: loadTokenUnitPrices()
-    }
-  }, [walletAddress, loadBalances, loadTransactionHistory]) // Removido loadTokenUnitPrices da dependência
+useEffect(() => {
+  if (walletAddress) {
+    loadBalances()
+    loadTransactionHistory(true)
+    // Removido: loadTokenUnitPrices()
+  }
+}, [walletAddress, loadBalances, loadTransactionHistory]) // Removido loadTokenUnitPrices da dependência
 
-  const formatBalance = useCallback((balance: string): string => {
-    const num = Number.parseFloat(balance)
-    if (num === 0) return "0"
-    if (num < 0.000001) return "<0.000001" // Show more precision for very small amounts
-    if (num < 1) return num.toFixed(6) // Show up to 6 decimal places for numbers less than 1
-    if (num < 1000) return num.toFixed(2) // Keep 2 decimal places for numbers between 1 and 1000
-    if (num < 1000000) return `${(num / 1000).toFixed(1)}K`
-    return `${(num / 1000000).toFixed(1)}M`
-  }, [])
+const formatBalance = useCallback((balance: string): string => {
+  const num = Number.parseFloat(balance)
+  if (num === 0) return "0"
+  if (num < 0.000001) return "<0.000001" // Show more precision for very small amounts
+  if (num < 1) return num.toFixed(6) // Show up to 6 decimal places for numbers less than 1
+  if (num < 1000) return num.toFixed(2) // Keep 2 decimal places for numbers between 1 and 1000
+  if (num < 1000000) return `${(num / 1000).toFixed(1)}K`
+  return `${(num / 1000000).toFixed(1)}M`
+}, [])
 
-  const getTokenIcon = useCallback((symbol: string) => {
-    const token = TOKENS.find((t) => t.symbol === symbol)
-    return token?.logo || "/placeholder.svg?height=32&width=32"
-  }, [])
+const getTokenIcon = useCallback((symbol: string) => {
+  const token = TOKENS.find((t) => t.symbol === symbol)
+  return token?.logo || "/placeholder.svg?height=32&width=32"
+}, [])
 
-  const getTokenColor = useCallback((symbol: string) => {
-    const token = TOKENS.find((t) => t.symbol === symbol)
-    return token?.color || "#00D4FF"
-  }, [])
+const getTokenColor = useCallback((symbol: string) => {
+  const token = TOKENS.find((t) => t.symbol === symbol)
+  return token?.color || "#00D4FF"
+}, [])
 
-  const handleSwapTokens = useCallback(() => {
-    setSwapForm((prev) => ({
-      ...prev,
-      tokenFrom: prev.tokenTo,
-      tokenTo: prev.tokenFrom,
-      amountFrom: prev.amountTo, // Swap amounts too for better UX
-      amountTo: prev.amountFrom,
-    }))
-    setSwapQuote(null) // Clear quote as tokens changed
-    setQuoteError(null)
-  }, [setSwapForm, setSwapQuote, setQuoteError])
+const handleSwapTokens = useCallback(() => {
+  setSwapForm((prev) => ({
+    ...prev,
+    tokenFrom: prev.tokenTo,
+    tokenTo: prev.tokenFrom,
+    amountFrom: prev.amountTo, // Swap amounts too for better UX
+    amountTo: prev.amountFrom,
+  }))
+  setSwapQuote(null) // Clear quote as tokens changed
+  setQuoteError(null)
+}, [setSwapForm, setSwapQuote, setQuoteError])
 
-  if (isMinimized) {
-    return (
+if (isMinimized) {
+  return (
       <>
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="bg-black/60 backdrop-blur-xl border border-cyan-400/30 rounded-full p-3 shadow-2xl fixed top-20 right-4 z-40"
+          className="bg-gray-900/60 backdrop-blur-xl border border-gray-700/30 rounded-full p-3 shadow-2xl fixed top-20 right-4 z-40"
         >
           <button onClick={() => setIsMinimized(false)} className="flex items-center space-x-2">
             <Wallet className="w-5 h-5 text-cyan-400" />
@@ -828,15 +911,15 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         </motion.div>
       </>
     )
-  }
+}
 
-  return (
+return (
     <>
       <motion.div
         initial={{ opacity: 0, y: -20, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: -20, scale: 0.95 }}
-        className="bg-black/40 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl min-w-[320px] max-w-[380px] overflow-hidden fixed top-20 right-4 z-40"
+        className="bg-gray-900 backdrop-blur-xl border border-gray-700 rounded-2xl shadow-2xl min-w-[320px] max-w-[380px] overflow-hidden fixed top-20 right-4 z-40"
       >
         <AnimatePresence mode="wait">
           {/* Main View */}
@@ -862,21 +945,21 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                 <div className="flex items-center space-x-1">
                   <button
                     onClick={copyAddress}
-                    className="p-2 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-white/10"
+                    className="p-2 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-gray-700/50"
                     title={t.copyAddress}
                   >
                     {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                   </button>
                   <button
                     onClick={() => setIsMinimized(true)}
-                    className="p-2 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-white/10"
+                    className="p-2 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-gray-700/50"
                     title="Minimize to icon"
                   >
                     <Minimize2 className="w-4 h-4" />
                   </button>
                   <button
                     onClick={onDisconnect}
-                    className="p-2 text-gray-400 hover:text-red-400 transition-colors rounded-lg hover:bg-white/10"
+                    className="p-2 text-gray-400 hover:text-red-400 transition-colors rounded-lg hover:bg-gray-700/50"
                     title={t.disconnect}
                   >
                     <LogOut className="w-4 h-4" />
@@ -899,7 +982,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                   <button
                     onClick={refreshBalances}
                     disabled={refreshing}
-                    className="p-1.5 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-white/10 disabled:opacity-50"
+                    className="p-1.5 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-gray-700/50 disabled:opacity-50"
                     title={t.refreshBalances}
                   >
                     <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
@@ -939,7 +1022,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                               initial={{ opacity: 0, x: -20 }}
                               animate={{ opacity: 1, x: 0 }}
                               transition={{ delay: index * 0.1 }}
-                              className="w-full bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl p-3 hover:bg-white/5 transition-all duration-200 group"
+                              className="w-full bg-gray-800 border border-gray-700 rounded-xl p-3 hover:bg-gray-700 transition-all duration-200 group"
                             >
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center space-x-3">
@@ -976,32 +1059,32 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
               </div>
 
               {/* Quick Actions */}
-              <div className="mt-4 pt-4 border-t border-white/10">
+              <div className="mt-4 pt-4 border-t border-gray-700">
                 <div className="grid grid-cols-4 gap-2">
                   <button
                     onClick={() => setViewMode("send")}
-                    className="flex flex-col items-center justify-center space-y-1 py-2 px-2 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 rounded-lg transition-all duration-200 text-blue-300 hover:text-blue-200"
+                    className="flex flex-col items-center justify-center space-y-1 py-2 px-2 bg-gray-700/20 hover:bg-gray-700/30 border border-gray-600/30 rounded-lg transition-all duration-200 text-blue-300 hover:text-blue-200"
                   >
                     <Send className="w-4 h-4" />
                     <span className="text-xs font-medium">{t.send}</span>
                   </button>
                   <button
                     onClick={() => setViewMode("receive")}
-                    className="flex flex-col items-center justify-center space-y-1 py-2 px-2 bg-green-600/20 hover:bg-green-600/30 border border-green-500/30 rounded-lg transition-all duration-200 text-green-300 hover:text-green-200"
+                    className="flex flex-col items-center justify-center space-y-1 py-2 px-2 bg-gray-700/20 hover:bg-gray-700/30 border border-gray-600/30 rounded-lg transition-all duration-200 text-green-300 hover:text-green-200"
                   >
                     <ArrowDownLeft className="w-4 h-4" />
                     <span className="text-xs font-medium">{t.receive}</span>
                   </button>
                   <button
                     onClick={() => setViewMode("swap")}
-                    className="flex flex-col items-center justify-center space-y-1 py-2 px-2 bg-orange-600/20 hover:bg-orange-600/30 border border-orange-500/30 rounded-lg transition-all duration-200 text-orange-300 hover:text-orange-200"
+                    className="flex flex-col items-center justify-center space-y-1 py-2 px-2 bg-gray-700/20 hover:bg-gray-700/30 border border-gray-600/30 rounded-lg transition-all duration-200 text-orange-300 hover:text-orange-200"
                   >
                     <ArrowLeftRight className="w-4 h-4" />
                     <span className="text-xs font-medium">{t.swap}</span>
                   </button>
                   <button
                     onClick={() => setViewMode("history")}
-                    className="flex flex-col items-center justify-center space-y-1 py-2 px-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 rounded-lg transition-all duration-200 text-purple-300 hover:text-purple-200"
+                    className="flex flex-col items-center justify-center space-y-1 py-2 px-2 bg-gray-700/20 hover:bg-gray-700/30 border border-gray-600/30 rounded-lg transition-all duration-200 text-purple-300 hover:text-purple-200"
                   >
                     <History className="w-4 h-4" />
                     <span className="text-xs font-medium">{t.history}</span>
@@ -1043,10 +1126,10 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                         token: e.target.value,
                       }))
                     }
-                    className="w-full bg-black/30 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-400"
+                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-400"
                   >
                     {balances.map((token) => (
-                      <option key={token.symbol} value={token.symbol} className="bg-black">
+                      <option key={token.symbol} value={token.symbol} className="bg-gray-900">
                         {token.symbol} ({t.available}: {formatBalance(token.balance)})
                       </option>
                     ))}
@@ -1065,7 +1148,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                       }))
                     }
                     placeholder="0.00"
-                    className="w-full bg-black/30 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-400"
+                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-400"
                   />
                 </div>
 
@@ -1081,7 +1164,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                       }))
                     }
                     placeholder="0x..."
-                    className="w-full bg-black/30 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-400"
+                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-400"
                   />
                 </div>
 
@@ -1143,12 +1226,12 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
                 <div>
                   <p className="text-gray-300 text-sm mb-2">{t.yourWalletAddress}</p>
-                  <div className="bg-black/30 border border-white/20 rounded-lg p-3 break-all">
+                  <div className="bg-gray-800 border border-gray-700 rounded-lg p-3 break-all">
                     <p className="text-white text-sm font-mono">{walletAddress}</p>
                   </div>
                   <button
                     onClick={copyAddress}
-                    className="mt-2 flex items-center justify-center space-x-2 w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                    className="mt-2 flex items-center justify-center space-x-2 w-full bg-gray-700 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
                   >
                     {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                     <span>{t.copyAddress}</span>
@@ -1190,7 +1273,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                 {/* From Token Selection */}
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">{t.from}</label>
-                  <div className="bg-black/30 border border-white/20 rounded-lg p-3">
+                  <div className="bg-gray-800 border border-gray-700 rounded-lg p-3">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center space-x-2">
                         <img
@@ -1214,7 +1297,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                           className="bg-transparent text-white font-medium focus:outline-none"
                         >
                           {TOKENS.map((token) => (
-                            <option key={token.symbol} value={token.symbol} className="bg-black">
+                            <option key={token.symbol} value={token.symbol} className="bg-gray-900">
                               {token.symbol}
                             </option>
                           ))}
@@ -1245,7 +1328,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                 <div className="flex justify-center">
                   <button
                     onClick={handleSwapTokens}
-                    className="p-2 bg-gray-600/50 rounded-full hover:bg-gray-500/50 transition-colors"
+                    className="p-2 bg-gray-700/50 rounded-full hover:bg-gray-600/50 transition-colors"
                     title="Swap tokens"
                   >
                     <ArrowLeftRight className="w-4 h-4" />
@@ -1255,7 +1338,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                 {/* To Token Selection */}
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">{t.to}</label>
-                  <div className="bg-black/30 border border-white/20 rounded-lg p-3">
+                  <div className="bg-gray-800 border border-gray-700 rounded-lg p-3">
                     <div className="flex items-center space-x-2">
                       <img
                         src={getTokenIcon(swapForm.tokenTo) || "/placeholder.svg"}
@@ -1278,7 +1361,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                         className="bg-transparent text-white font-medium focus:outline-none"
                       >
                         {TOKENS.map((token) => (
-                          <option key={token.symbol} value={token.symbol} className="bg-black">
+                          <option key={token.symbol} value={token.symbol} className="bg-gray-900">
                             {token.symbol}
                           </option>
                         ))}
@@ -1379,7 +1462,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.05 }}
-                        className="bg-black/30 border border-white/10 rounded-lg p-3 hover:bg-white/5 transition-colors"
+                        className="bg-gray-800 border border-gray-700 rounded-lg p-3 hover:bg-gray-700 transition-colors"
                       >
                         <div className="flex items-center justify-between">
                           <div
@@ -1426,7 +1509,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                       <button
                         onClick={loadMoreTransactions}
                         disabled={loadingMore}
-                        className="w-full bg-gray-600/50 hover:bg-gray-600/70 disabled:opacity-50 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
+                        className="w-full bg-gray-700/50 hover:bg-gray-600/70 disabled:opacity-50 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
                       >
                         {loadingMore ? (
                           <>
