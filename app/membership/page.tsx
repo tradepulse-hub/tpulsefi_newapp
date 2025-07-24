@@ -1,6 +1,6 @@
 "use client"
 import { useEffect, useState } from "react"
-import { ArrowLeft, Crown, Loader2, CheckCircle, Copy } from "lucide-react"
+import { ArrowLeft, Crown, CheckCircle, Copy } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { BackgroundEffect } from "@/components/background-effect" // Import BackgroundEffect
