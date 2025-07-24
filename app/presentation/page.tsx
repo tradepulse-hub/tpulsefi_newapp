@@ -23,6 +23,7 @@ import {
   ArrowLeft,
   Gamepad2,
   Code,
+  Send,
 } from "lucide-react"
 import { useMiniKit } from "../../hooks/use-minikit"
 import MiniWallet from "../../components/mini-wallet"
@@ -444,46 +445,62 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
       <BackgroundEffect />
 
       {/* Top Navigation */}
-      <div className="absolute top-0 left-0 right-0 z-50 p-6">
+      <div className="absolute top-0 left-0 right-0 z-50 p-4">
+        {" "}
+        {/* Reduced padding from p-6 to p-4 */}
         <div className="flex items-center justify-between">
           {/* Left Side - Events Icon */}
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2">
+            {" "}
+            {/* Reduced space-x-3 to space-x-2 */}
             {/* Events Icon */}
             <button onClick={() => setShowEventsModal(true)} className="relative group">
-              <div className="px-3 py-2 bg-black/20 backdrop-blur-md border border-orange-400/30 rounded-full flex items-center space-x-2 hover:bg-orange-500/10 transition-all duration-300">
+              <div className="px-2 py-1.5 bg-black/20 backdrop-blur-md border border-orange-400/30 rounded-full flex items-center space-x-1 hover:bg-orange-500/10 transition-all duration-300">
+                {" "}
+                {/* Reduced padding and space-x */}
                 <div className="absolute inset-0 bg-gradient-to-r from-orange-400/10 to-red-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <Calendar className="w-4 h-4 text-orange-300 relative z-10" />
-                <span className="text-orange-300 text-sm font-medium relative z-10">
+                <Calendar className="w-3 h-3 text-orange-300 relative z-10" /> {/* Reduced icon size */}
+                <span className="text-xs font-medium relative z-10">
+                  {" "}
+                  {/* Reduced text size */}
                   {t.events?.eventButton || "Evento"}
                 </span>
                 {/* Live Indicator */}
-                <div className="flex items-center space-x-1">
-                  <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                  <span className="text-red-400 text-xs font-bold">LIVE</span>
+                <div className="flex items-center space-x-0.5">
+                  {" "}
+                  {/* Reduced space-x */}
+                  <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" /> {/* Reduced indicator size */}
+                  <span className="text-xs font-bold">LIVE</span>
                 </div>
               </div>
             </button>
-
             {/* Wallet Button (when wallet is connected but hidden) */}
             {isAuthenticated && !showMiniWallet && (
               <button onClick={handleShowWallet} className="relative group">
-                <div className="px-3 py-2 bg-black/20 backdrop-blur-md border border-green-400/30 rounded-full flex items-center space-x-2 hover:bg-green-500/10 transition-all duration-300">
+                <div className="px-2 py-1.5 bg-black/20 backdrop-blur-md border border-green-400/30 rounded-full flex items-center space-x-1 hover:bg-green-500/10 transition-all duration-300">
+                  {" "}
+                  {/* Reduced padding and space-x */}
                   <div className="absolute inset-0 bg-gradient-to-r from-green-400/10 to-emerald-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <Eye className="w-4 h-4 text-green-300 relative z-10" />
-                  <span className="text-green-300 text-sm font-medium relative z-10">
+                  <Eye className="w-3 h-3 text-green-300 relative z-10" /> {/* Reduced icon size */}
+                  <span className="text-xs font-medium relative z-10">
+                    {" "}
+                    {/* Reduced text size */}
                     {t.common?.wallet || "Wallet"}
                   </span>
                 </div>
               </button>
             )}
-
             {/* Connect Wallet Button (only when not connected) */}
             {!isAuthenticated && (
               <button onClick={handleWalletConnect} disabled={isLoading} className="relative group">
-                <div className="px-6 py-3 bg-black/20 backdrop-blur-md border border-cyan-400/30 rounded-full flex items-center space-x-2 hover:bg-cyan-500/10 transition-all duration-300 disabled:opacity-50">
+                <div className="px-4 py-2 bg-black/20 backdrop-blur-md border border-cyan-400/30 rounded-full flex items-center space-x-1.5 hover:bg-cyan-500/10 transition-all duration-300 disabled:opacity-50">
+                  {" "}
+                  {/* Reduced padding and space-x */}
                   <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/10 to-blue-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <Wallet className="w-5 h-5 text-cyan-300 relative z-10" />
-                  <span className="text-white font-medium relative z-10">
+                  <Wallet className="w-4 h-4 text-cyan-300 relative z-10" /> {/* Reduced icon size */}
+                  <span className="text-sm font-medium relative z-10">
+                    {" "}
+                    {/* Reduced text size */}
                     {isLoading ? t.common?.loading || "Loading..." : t.presentation?.connectWallet || "Connect Wallet"}
                   </span>
                 </div>
@@ -494,10 +511,14 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
           {/* Right Side - Language Selector */}
           <div className="relative">
             <button onClick={() => setShowLanguageMenu(!showLanguageMenu)} className="relative group">
-              <div className="px-3 py-2 bg-black/20 backdrop-blur-md border border-white/10 rounded-full flex items-center space-x-2 hover:bg-white/10 transition-all duration-300">
+              <div className="px-2 py-1.5 bg-black/20 backdrop-blur-md border border-white/10 rounded-full flex items-center space-x-1 hover:bg-white/10 transition-all duration-300">
+                {" "}
+                {/* Reduced padding and space-x */}
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-400/10 to-pink-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <Globe className="w-4 h-4 text-purple-300 relative z-10" />
-                <span className="text-purple-300 text-sm font-medium relative z-10">
+                <Globe className="w-3 h-3 text-purple-300 relative z-10" /> {/* Reduced icon size */}
+                <span className="text-xs font-medium relative z-10">
+                  {" "}
+                  {/* Reduced text size */}
                   {currentLanguage?.flag} {currentLanguage?.code.toUpperCase()}
                 </span>
               </div>
@@ -510,24 +531,26 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                   initial={{ opacity: 0, y: -10, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                  className="absolute top-12 right-0 bg-black/90 backdrop-blur-xl border border-white/10 rounded-xl p-2 min-w-[200px] shadow-2xl"
+                  className="absolute top-10 right-0 bg-black/90 backdrop-blur-xl border border-white/10 rounded-xl p-2 min-w-[180px] shadow-2xl" // Adjusted top and min-width
                 >
                   {LANGUAGES.map((lang) => (
                     <button
                       key={lang.code}
                       onClick={() => handleLanguageChange(lang.code as keyof typeof translations)}
-                      className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-all duration-200 ${
+                      className={`w-full flex items-center space-x-2 p-2 rounded-lg transition-all duration-200 ${
+                        // Adjusted padding and space-x
                         currentLang === lang.code
                           ? `bg-gradient-to-r ${lang.gradient} bg-opacity-20 text-white`
                           : "hover:bg-white/5 text-gray-300 hover:text-white"
                       }`}
                     >
-                      <span className="text-lg">{lang.flag}</span>
+                      <span className="text-base">{lang.flag}</span> {/* Adjusted text size */}
                       <div className="text-left">
-                        <div className="text-sm font-medium">{lang.nativeName}</div>
-                        <div className="text-xs opacity-70">{lang.name}</div>
+                        <div className="text-xs font-medium">{lang.nativeName}</div> {/* Adjusted text size */}
+                        <div className="text-xs opacity-70">{lang.name}</div> {/* Adjusted text size */}
                       </div>
-                      {currentLang === lang.code && <div className="ml-auto text-green-400">✓</div>}
+                      {currentLang === lang.code && <div className="ml-auto text-green-400 text-xs">✓</div>}{" "}
+                      {/* Adjusted text size */}
                     </button>
                   ))}
                 </motion.div>
@@ -540,7 +563,9 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
       {/* Mini Wallet - Positioned with safe spacing from top navigation */}
       <AnimatePresence>
         {showMiniWallet && user && (
-          <div className="absolute top-6 left-6 z-40">
+          <div className="absolute top-4 left-4 z-40">
+            {" "}
+            {/* Adjusted top and left */}
             <MiniWallet
               walletAddress={user.walletAddress}
               onMinimize={handleMinimizeWallet}
@@ -975,6 +1000,34 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             </p>
             <div className="h-px w-12 bg-gradient-to-l from-transparent to-white/50" />
           </div>
+        </div>
+
+        {/* New Social Media Icons */}
+        <div className="flex items-center justify-center gap-4 mb-12 z-20 relative">
+          <a
+            href="https://x.com/TradePulseToken?t=N-8tJuaN9E4asIH0A-gGEg&s=09"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="relative group"
+          >
+            <div className="px-4 py-2 bg-black/20 backdrop-blur-md border border-white/10 rounded-full flex items-center space-x-2 hover:bg-white/10 transition-all duration-300">
+              <div className="absolute inset-0 bg-gradient-to-r from-gray-400/10 to-gray-600/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <X className="w-4 h-4 text-gray-300 relative z-10" />
+              <span className="text-white text-sm font-medium relative z-10">Follow Us</span>
+            </div>
+          </a>
+          <a
+            href="https://t.me/yourtelegramchannel" // Placeholder for Telegram link
+            target="_blank"
+            rel="noopener noreferrer"
+            className="relative group"
+          >
+            <div className="px-4 py-2 bg-black/20 backdrop-blur-md border border-white/10 rounded-full flex items-center space-x-2 hover:bg-white/10 transition-all duration-300">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-400/10 to-cyan-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <Send className="w-4 h-4 text-blue-300 relative z-10" />
+              <span className="text-white text-sm font-medium relative z-10">Join Telegram</span>
+            </div>
+          </a>
         </div>
       </div>
     </div>
