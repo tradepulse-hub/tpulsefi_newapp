@@ -85,7 +85,7 @@ const translations = {
       connectWallet: "Connect Wallet",
     },
     navigation: {
-      codepulse: "CodePulse", // New translation key for CodePulse
+      codepulse: "PulseCode", // Changed from CodePulse
       wallet: "Wallet",
       news: "News",
       airdrop: "Airdrop",
@@ -125,7 +125,7 @@ const translations = {
       connectWallet: "Conectar Carteira",
     },
     navigation: {
-      codepulse: "CodePulse", // New translation key for CodePulse
+      codepulse: "PulseCode", // Changed from CodePulse
       wallet: "Carteira",
       news: "Notícias",
       airdrop: "Airdrop",
@@ -165,7 +165,7 @@ const translations = {
       connectWallet: "Conectar Billetera",
     },
     navigation: {
-      codepulse: "CodePulse", // New translation key for CodePulse
+      codepulse: "PulseCode", // Changed from CodePulse
       wallet: "Billetera",
       news: "Noticias",
       airdrop: "Airdrop",
@@ -206,7 +206,7 @@ const translations = {
       connectWallet: "Hubungkan Dompet",
     },
     navigation: {
-      codepulse: "CodePulse", // New translation key for CodePulse
+      codepulse: "PulseCode", // Changed from CodePulse
       wallet: "Dompet",
       news: "Berita",
       airdrop: "Airdrop",
@@ -773,7 +773,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
         {/* Futuristic Bottom Bar */}
         <div className="relative">
           {/* Glow Effect */}
-          <div className="absolute inset-0 bg-gradient-to-t from-cyan-400/20 via-blue-400/10 to-transparent blur-lg" />
+          <div className="absolute inset-0 bg-gradient-to-t from-gray-400/20 via-gray-300/10 to-transparent blur-lg" />
           {/* Main Bar */}
           <div className="relative bg-black/40 backdrop-blur-xl border border-white/10 rounded-xl">
             <div className="flex items-center justify-center py-2 px-4 space-x-4">
@@ -791,9 +791,9 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
 
               {/* Central Menu Button */}
               <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="relative group">
-                <div className="w-8 h-8 bg-gradient-to-r from-cyan-400/20 to-blue-400/20 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center hover:from-cyan-400/30 hover:to-blue-400/30 transition-all duration-300 shadow-xl">
+                <div className="w-8 h-8 bg-gradient-to-r from-gray-400/20 to-gray-600/20 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center hover:from-gray-400/30 hover:to-gray-600/30 transition-all duration-300 shadow-xl">
                   {/* Pulsing Ring */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/30 to-blue-400/30 rounded-full animate-ping opacity-75" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-gray-400/30 to-gray-600/30 rounded-full animate-ping opacity-75" />
                   {/* Inner Glow */}
                   <div className="absolute inset-1 bg-gradient-to-r from-white/10 to-white/5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   {/* Icon */}
@@ -804,7 +804,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                   )}
                 </div>
                 {/* Button Glow */}
-                <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/20 to-blue-400/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="absolute inset-0 bg-gradient-to-r from-gray-400/20 to-gray-600/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </button>
             </div>
           </div>
@@ -829,7 +829,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
               {/* Menu Content */}
               <div className="p-4 pb-4">
                 {/* Menu Glow Effect */}
-                <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/5 to-blue-400/5 rounded-2xl" />
+                <div className="absolute inset-0 bg-gradient-to-br from-gray-400/5 to-gray-600/5 rounded-2xl" />
                 {/* Menu Items Grid */}
                 <div className="relative z-10 grid grid-cols-2 gap-3 mb-4">
                   {navigationItems.map((item, index) => (
@@ -850,8 +850,8 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                       className="group p-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg hover:bg-white/10 transition-all duration-300"
                     >
                       <div className="flex flex-col items-center space-y-1">
-                        <div className="w-6 h-6 bg-gradient-to-r from-cyan-400/20 to-blue-400/20 rounded-full flex items-center justify-center group-hover:from-cyan-400/30 group-hover:to-blue-400/30 transition-all duration-300">
-                          <item.icon className="w-3 h-3 text-cyan-400 group-hover:text-white transition-colors" />
+                        <div className="w-6 h-6 bg-gradient-to-r from-gray-400/20 to-gray-600/20 rounded-full flex items-center justify-center group-hover:from-gray-400/30 group-hover:to-gray-600/30 transition-all duration-300">
+                          <item.icon className="w-3 h-3 text-gray-400 group-hover:text-white transition-colors" />
                         </div>
                         <span className="text-white/80 group-hover:text-white font-medium text-xs tracking-wide">
                           {t.navigation?.[item.labelKey] || item.labelKey}
@@ -861,7 +861,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                   ))}
                 </div>
                 {/* Menu Bottom Glow */}
-                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-12 h-0.5 bg-gradient-to-r from-cyan-400/50 to-blue-400/50 rounded-full" />
+                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-12 h-0.5 bg-gradient-to-r from-gray-400/50 to-gray-600/50 rounded-full" />
               </div>
             </div>
           </motion.div>
