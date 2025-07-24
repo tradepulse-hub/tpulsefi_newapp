@@ -3,6 +3,7 @@ import { motion } from "framer-motion"
 import { ArrowLeft, ExternalLink } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
+import { BackgroundEffect } from "@/components/background-effect" // Import BackgroundEffect
 
 export default function PartnershipsPage() {
   const router = useRouter()
@@ -40,64 +41,7 @@ export default function PartnershipsPage() {
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">
-      {/* Animated Background */}
-      <div className="absolute inset-0">
-        {/* Moving Light Lines */}
-        {[...Array(15)].map((_, i) => (
-          <div
-            key={`line-${i}`}
-            className="absolute h-px bg-gradient-to-r from-transparent via-cyan-400/40 to-transparent"
-            style={{
-              top: `${5 + i * 6}%`,
-              left: "-100%",
-              width: "200%",
-              animation: `moveRight ${3 + (i % 3)}s linear infinite`,
-              animationDelay: `${i * 0.2}s`,
-            }}
-          />
-        ))}
-
-        {/* Vertical Lines */}
-        {[...Array(12)].map((_, i) => (
-          <div
-            key={`v-line-${i}`}
-            className="absolute w-px bg-gradient-to-b from-transparent via-blue-400/30 to-transparent"
-            style={{
-              left: `${8 + i * 8}%`,
-              top: "-100%",
-              height: "200%",
-              animation: `moveDown ${4 + (i % 2)}s linear infinite`,
-              animationDelay: `${i * 0.3}s`,
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Grid Background */}
-      <div
-        className="absolute inset-0 opacity-5"
-        style={{
-          backgroundImage: `
-            linear-gradient(rgba(34,211,238,0.3) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(34,211,238,0.3) 1px, transparent 1px)
-          `,
-          backgroundSize: "50px 50px",
-        }}
-      />
-
-      {/* Central Glow */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="w-96 h-96 bg-white/3 rounded-full blur-3xl animate-pulse" />
-        <div
-          className="absolute w-80 h-80 bg-cyan-400/5 rounded-full blur-2xl animate-pulse"
-          style={{ animationDelay: "0.5s" }}
-        />
-        <div
-          className="absolute w-64 h-64 bg-blue-400/8 rounded-full blur-xl animate-pulse"
-          style={{ animationDelay: "1s" }}
-        />
-      </div>
-
+      <BackgroundEffect /> {/* Added BackgroundEffect component */}
       {/* Header */}
       <header className="relative z-50 flex items-center justify-between p-6">
         <motion.button
@@ -110,7 +54,6 @@ export default function PartnershipsPage() {
           <span className="text-sm">Back</span>
         </motion.button>
       </header>
-
       {/* Main Content */}
       <main className="relative z-10 px-6 pb-24">
         <div className="max-w-4xl mx-auto">
@@ -119,7 +62,7 @@ export default function PartnershipsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="text-center mb-12"
+            className="text-center mb-12 pt-20"
           >
             <h1 className="text-4xl font-bold mb-4">
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-white to-blue-400">
@@ -199,42 +142,6 @@ export default function PartnershipsPage() {
           </motion.div>
         </div>
       </main>
-
-      <style jsx>{`
-        @keyframes moveRight {
-          0% {
-            transform: translateX(-100%);
-            opacity: 0;
-          }
-          10% {
-            opacity: 1;
-          }
-          90% {
-            opacity: 1;
-          }
-          100% {
-            transform: translateX(100vw);
-            opacity: 0;
-          }
-        }
-
-        @keyframes moveDown {
-          0% {
-            transform: translateY(-100%);
-            opacity: 0;
-          }
-          10% {
-            opacity: 1;
-          }
-          90% {
-            opacity: 1;
-          }
-          100% {
-            transform: translateY(100vh);
-            opacity: 0;
-          }
-        }
-      `}</style>
     </div>
   )
 }
