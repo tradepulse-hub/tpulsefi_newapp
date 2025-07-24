@@ -1,5 +1,3 @@
-;/>```tsx file="components/iimn - wallet.tsx
-"
 "use client"
 import { walletService } from "@/services/wallet-service"
 import { AnimatePresence, motion } from "framer-motion"
@@ -380,6 +378,66 @@ interface Token {
 
 type ViewMode = "main" | "send" | "receive" | "history" | "swap"
 
+interface SwapParams {
+  walletAddress: string
+  quote: any
+  amountIn: string
+  tokenInSymbol: string
+  tokenOutSymbol: string
+}
+
+async function doSwap(params: SwapParams): Promise<{ success: boolean; error?: any; errorCode?: string }> {
+  try {
+    const { walletAddress, quote, amountIn, tokenInSymbol, tokenOutSymbol } = params
+
+    const tokenInObj = TOKENS.find((t) => t.symbol === tokenInSymbol)
+    const tokenOutObj = TOKENS.find((t) => t.symbol === tokenOutSymbol)
+
+    if (!tokenInObj || !tokenOutObj) {
+      throw new Error("Invalid token selection.")
+    }
+
+    const signer = await walletService.getSigner()
+
+    if (!signer) {
+      throw new Error("Signer not available.")
+    }
+
+    const tx = await signer.sendTransaction({
+      to: quote.to,
+      data: quote.data,
+      value: quote.value,
+      gasLimit: quote.gas,
+    })
+
+    if (!tx) {
+      throw new Error("Transaction failed to send.")
+    }
+
+    await tx.wait()
+
+    return { success: true }
+  } catch (error: any) {
+    console.error("❌ Swap execution error:", error)
+
+    let errorCode = "UNKNOWN_ERROR"
+
+    if (error.message?.includes("user rejected transaction")) {
+      errorCode = "USER_REJECTED"
+    } else if (error.message?.includes("insufficient funds")) {
+      errorCode = "INSUFFICIENT_FUNDS"
+    } else if (error.message?.includes("gas required exceeds allowance")) {
+      errorCode = "GAS_LIMIT_REACHED"
+    } else if (error.message?.includes("Network")) {
+      errorCode = "NETWORK_ERROR"
+    } else if (error.message?.includes("timeout")) {
+      errorCode = "TIMEOUT_ERROR"
+    }
+
+    return { success: false, error, errorCode }
+  }
+}
+
 export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: MiniWalletProps) {
   const [currentLang, setCurrentLang] = useState<SupportedLanguage>("en")
   const [viewMode, setViewMode] = useState<ViewMode>("main")
@@ -431,18 +489,9 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
   const t = translations[currentLang]
 
   const formatAddress = useCallback((address: string) => {
-    return `
-$
-{
-  address.slice(0, 6)
-}
-...$
-{
-  address.slice(-4)
-}
-;`
+    return `${address.slice(0, 6)}...${address.slice(-4)}`
   }, [])
-  \
+
   const copyAddress = useCallback(() => {
     navigator.clipboard.writeText(walletAddress)
     setCopied(true)
@@ -531,47 +580,20 @@ $
       })
 
       if (result.success) {
-        alert(`
-✅ $
-{
-  t.sendSuccess
-}
-$
-{
-  sendForm.amount
-}
-$
-{
-  sendForm.token
-}
-!`)
-        setViewMode(\"main")\
-        setSendForm(token: "TPF", amount: "", recipient: "" )
+        alert(`✅ ${t.sendSuccess} ${sendForm.amount} ${sendForm.token}!`)
+        setViewMode("main")
+        setSendForm({ token: "TPF", amount: "", recipient: "" })
         await refreshBalances()
         await loadTransactionHistory(true)
       } else {
-        alert(`
-❌ $
-{
-  t.sendFailed
-}
-: $
-{
-  result.error
-}
-;`)
+        alert(`❌ ${t.sendFailed}: ${result.error}`)
       }
-    } catch (error) {\
+    } catch (error) {
       console.error("❌ Send error:", error) // Kept for critical error
-      alert(`
-❌ $
-  t.sendFailed
-. $
-  t.tryAgain
-;`)
+      alert(`❌ ${t.sendFailed}. ${t.tryAgain}`)
     } finally {
       setSending(false)
-    }\
+    }
   }, [sendForm, balances, t.sendSuccess, t.sendFailed, t.tryAgain, refreshBalances, loadTransactionHistory])
 
   const getSwapQuote = useCallback(
@@ -640,31 +662,16 @@ $
         let errorMessage = t.quoteError
         if (error instanceof Error) {
           if (error.message?.includes("timeout")) {
-            errorMessage = `
-$
-  t.networkError
-. $
-  t.tryAgain
-;`\
-          } else if (error.message?.includes(\"Network")) {
-            errorMessage = `
-$
-  t.networkError
-. $
-  t.tryAgain
-;`\
-          } else if (error.message?.includes(\"insufficient")) {
+            errorMessage = `${t.networkError}. ${t.tryAgain}`
+          } else if (error.message?.includes("Network")) {
+            errorMessage = `${t.networkError}. ${t.tryAgain}`
+          } else if (error.message?.includes("insufficient")) {
             errorMessage = t.insufficientBalance
           } else {
-            errorMessage = `
-$
-  t.quoteError
-: $
-  error.message
-;`
+            errorMessage = `${t.quoteError}: ${error.message}`
           }
         }
-\
+
         setQuoteError(errorMessage)
         setSwapQuote(null)
         setSwapForm((prev) => ({ ...prev, amountTo: "" }))
@@ -694,20 +701,12 @@ $
       const tokenFromBalance = balances.find((t) => t.symbol === swapForm.tokenFrom)
       if (!tokenFromBalance || Number.parseFloat(tokenFromBalance.balance) < Number.parseFloat(swapForm.amountFrom)) {
         throw new Error(
-          `
-$
-  t.insufficientBalance
-. Available: $
-  \
-            tokenFromBalance?.balance || "0"\
-, Required: $
-  swapForm.amountFrom
-$
-  swapForm.tokenFrom
-`,
-        )\
+          `${t.insufficientBalance}. Available: ${
+            tokenFromBalance?.balance || "0"
+          }, Required: ${swapForm.amountFrom} ${swapForm.tokenFrom}`,
+        )
       }
-\
+
       if (!swapQuote.data || !swapQuote.to) {
         throw new Error("Invalid swap quote")
       }
@@ -727,80 +726,56 @@ $
 
       if (swapResult && swapResult.success) {
         alert(
-          \`✅ ${t.swapSuccess} ${swapForm.amountFrom} ${swapForm.tokenFrom} for ${swapForm.amountTo} ${swapForm.tokenTo}!`,
-)
+          `✅ ${t.swapSuccess} ${swapForm.amountFrom} ${swapForm.tokenFrom} for ${swapForm.amountTo} ${swapForm.tokenTo}!`,
+        )
         setViewMode("main")
-        setSwapForm(
-  tokenFrom: "WLD", tokenTo
-  : "TPF",
+        setSwapForm({
+          tokenFrom: "WLD",
+          tokenTo: "TPF",
           amountFrom: "",
           amountTo: "",
-)\
+        })
         setSwapQuote(null)
-        await refreshBalances()\
+        await refreshBalances()
         await loadTransactionHistory(true)
-      } else
-{
-  let errorMessage = t.swapFailed
-  if (swapResult && swapResult.errorCode) {
-    errorMessage = `${t.swapFailed}: ${swapResult.errorCode}`
-  } else if (swapResult && swapResult.error instanceof Error) {
-    errorMessage = `${t.swapFailed}: ${swapResult.error.message}`
-  } else if (!swapResult) {
-    errorMessage = `${t.swapFailed}: ${t.tryAgain} (No result from swap service)`
-  }
-  throw new Error(errorMessage)
-}
-} catch (error)
-{
-  console.error("❌ Swap error:\", error) // Kept for critical error
-\
-      let errorMessage = t.swapFailed
-  if (error instanceof Error) {
-    \
-    if (error.message?.includes(\"Insufficient") || error.message?.includes("insuficiente")) {
-      \
-          errorMessage = `$
-      t.swapFailed
-      : $
-      t.insufficientBalance
-      ;`
-        } else if (error.message?.includes(\"timeout")) {
-          errorMessage = `
-      $
-      t.swapFailed
-      : $
-      t.networkError
-      . $
-      t.tryAgain
-      ;`\
-        } else if (error.message?.includes("Network\")) {
-          errorMessage = `
-      $
-      t.swapFailed
-      : $
-      t.networkError
-      . $
-      t.tryAgain
-      ;`\
-        } else if (error.message?.includes(\"simulation_failed")) {
-          errorMessage = \`${t.swapFailed}: Simulation failed. The quote might be invalid or expired.`
-    } else {
-      errorMessage = `${t.swapFailed}: ${error.message}`
-    }
-  }
+      } else {
+        let errorMessage = t.swapFailed
+        if (swapResult && swapResult.errorCode) {
+          errorMessage = `${t.swapFailed}: ${swapResult.errorCode}`
+        } else if (swapResult && swapResult.error instanceof Error) {
+          errorMessage = `${t.swapFailed}: ${swapResult.error.message}`
+        } else if (!swapResult) {
+          errorMessage = `${t.swapFailed}: ${t.tryAgain} (No result from swap service)`
+        }
+        throw new Error(errorMessage)
+      }
+    } catch (error) {
+      console.error("❌ Swap error:", error) // Kept for critical error
 
-  alert(`❌ ${errorMessage}`)
-}
-finally
-{
-  setSwapping(false)
-}
-}, [
-    swapQuote,\
+      let errorMessage = t.swapFailed
+      if (error instanceof Error) {
+        if (error.message?.includes("Insufficient") || error.message?.includes("insuficiente")) {
+          errorMessage = `${t.swapFailed}: ${t.insufficientBalance}`
+        } else if (error.message?.includes("timeout")) {
+          errorMessage = `${t.swapFailed}: ${t.networkError}. ${t.tryAgain}`
+        } else if (error.message?.includes("Network")) {
+          errorMessage = `${t.swapFailed}: ${t.networkError}. ${t.tryAgain}`
+        } else if (error.message?.includes("simulation_failed")) {
+          errorMessage = `${t.swapFailed}: Simulation failed. The quote might be invalid or expired.`
+        } else {
+          errorMessage = `${t.swapFailed}: ${error.message}`
+        }
+      }
+
+      alert(`❌ ${errorMessage}`)
+    } finally {
+      setSwapping(false)
+    }
+  }, [
+    swapQuote,
     swapForm,
     balances,
-    t.insufficientBalance,\
+    t.insufficientBalance,
     t.swapSuccess,
     t.swapFailed,
     t.tryAgain,
@@ -809,95 +784,95 @@ finally
     loadTransactionHistory,
   ])
 
-const handleBackToMain = useCallback(() => {
-  setViewMode("main")
-  setSendForm({ token: "TPF", amount: "", recipient: "" })
-  setSwapForm({
-    tokenFrom: "WLD",
-    tokenTo: "TPF",
-    amountFrom: "",
-    amountTo: "",
-  })
-  setSwapQuote(null)
-  setQuoteError(null)
-}, [])
+  const handleBackToMain = useCallback(() => {
+    setViewMode("main")
+    setSendForm({ token: "TPF", amount: "", recipient: "" })
+    setSwapForm({
+      tokenFrom: "WLD",
+      tokenTo: "TPF",
+      amountFrom: "",
+      amountTo: "",
+    })
+    setSwapQuote(null)
+    setQuoteError(null)
+  }, [])
 
-const openTransactionInExplorer = useCallback((hash: string) => {
-  const explorerUrl = walletService.getExplorerTransactionUrl(hash)
-  window.open(explorerUrl, "_blank")
-}, [])
+  const openTransactionInExplorer = useCallback((hash: string) => {
+    const explorerUrl = walletService.getExplorerTransactionUrl(hash)
+    window.open(explorerUrl, "_blank")
+  }, [])
 
-const formatTimestamp = useCallback((timestamp: number) => {
-  const date = new Date(timestamp)
-  const now = new Date()
-  const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60)
+  const formatTimestamp = useCallback((timestamp: number) => {
+    const date = new Date(timestamp)
+    const now = new Date()
+    const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60)
 
-  if (diffInHours < 1) {
-    const diffInMinutes = Math.floor(diffInHours * 60)
-    return `${diffInMinutes}m ago`
-  } else if (diffInHours < 24) {
-    return `${Math.floor(diffInHours)}h ago`
-  } else {
-    const diffInDays = Math.floor(diffInHours / 24)
-    return `${diffInDays}d ago`
-  }
-}, [])
+    if (diffInHours < 1) {
+      const diffInMinutes = Math.floor(diffInHours * 60)
+      return `${diffInMinutes}m ago`
+    } else if (diffInHours < 24) {
+      return `${Math.floor(diffInHours)}h ago`
+    } else {
+      const diffInDays = Math.floor(diffInHours / 24)
+      return `${diffInDays}d ago`
+    }
+  }, [])
 
-const getStatusColor = useCallback((status: string) => {
-  switch (status) {
-    case "confirmed":
-      return "text-green-400"
-    case "pending":
-      return "text-yellow-400"
-    case "failed":
-      return "text-red-400"
-    default:
-      return "text-gray-400"
-  }
-}, [])
+  const getStatusColor = useCallback((status: string) => {
+    switch (status) {
+      case "confirmed":
+        return "text-green-400"
+      case "pending":
+        return "text-yellow-400"
+      case "failed":
+        return "text-red-400"
+      default:
+        return "text-gray-400"
+    }
+  }, [])
 
-useEffect(() => {
-  if (walletAddress) {
-    loadBalances()
-    loadTransactionHistory(true)
-    // Removido: loadTokenUnitPrices()
-  }
-}, [walletAddress, loadBalances, loadTransactionHistory]) // Removido loadTokenUnitPrices da dependência
+  useEffect(() => {
+    if (walletAddress) {
+      loadBalances()
+      loadTransactionHistory(true)
+      // Removido: loadTokenUnitPrices()
+    }
+  }, [walletAddress, loadBalances, loadTransactionHistory]) // Removido loadTokenUnitPrices da dependência
 
-const formatBalance = useCallback((balance: string): string => {
-  const num = Number.parseFloat(balance)
-  if (num === 0) return "0"
-  if (num < 0.000001) return "<0.000001" // Show more precision for very small amounts
-  if (num < 1) return num.toFixed(6) // Show up to 6 decimal places for numbers less than 1
-  if (num < 1000) return num.toFixed(2) // Keep 2 decimal places for numbers between 1 and 1000
-  if (num < 1000000) return `${(num / 1000).toFixed(1)}K`
-  return `${(num / 1000000).toFixed(1)}M`
-}, [])
+  const formatBalance = useCallback((balance: string): string => {
+    const num = Number.parseFloat(balance)
+    if (num === 0) return "0"
+    if (num < 0.000001) return "<0.000001" // Show more precision for very small amounts
+    if (num < 1) return num.toFixed(6) // Show up to 6 decimal places for numbers less than 1
+    if (num < 1000) return num.toFixed(2) // Keep 2 decimal places for numbers between 1 and 1000
+    if (num < 1000000) return `${(num / 1000).toFixed(1)}K`
+    return `${(num / 1000000).toFixed(1)}M`
+  }, [])
 
-const getTokenIcon = useCallback((symbol: string) => {
-  const token = TOKENS.find((t) => t.symbol === symbol)
-  return token?.logo || "/placeholder.svg?height=32&width=32"
-}, [])
+  const getTokenIcon = useCallback((symbol: string) => {
+    const token = TOKENS.find((t) => t.symbol === symbol)
+    return token?.logo || "/placeholder.svg?height=32&width=32"
+  }, [])
 
-const getTokenColor = useCallback((symbol: string) => {
-  const token = TOKENS.find((t) => t.symbol === symbol)
-  return token?.color || "#00D4FF"
-}, [])
+  const getTokenColor = useCallback((symbol: string) => {
+    const token = TOKENS.find((t) => t.symbol === symbol)
+    return token?.color || "#00D4FF"
+  }, [])
 
-const handleSwapTokens = useCallback(() => {
-  setSwapForm((prev) => ({
-    ...prev,
-    tokenFrom: prev.tokenTo,
-    tokenTo: prev.tokenFrom,
-    amountFrom: prev.amountTo, // Swap amounts too for better UX
-    amountTo: prev.amountFrom,
-  }))
-  setSwapQuote(null) // Clear quote as tokens changed
-  setQuoteError(null)
-}, [setSwapForm, setSwapQuote, setQuoteError])
+  const handleSwapTokens = useCallback(() => {
+    setSwapForm((prev) => ({
+      ...prev,
+      tokenFrom: prev.tokenTo,
+      tokenTo: prev.tokenFrom,
+      amountFrom: prev.amountTo, // Swap amounts too for better UX
+      amountTo: prev.amountFrom,
+    }))
+    setSwapQuote(null) // Clear quote as tokens changed
+    setQuoteError(null)
+  }, [setSwapForm, setSwapQuote, setQuoteError])
 
-if (isMinimized) {
-  return (
+  if (isMinimized) {
+    return (
       <>
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
@@ -911,9 +886,9 @@ if (isMinimized) {
         </motion.div>
       </>
     )
-}
+  }
 
-return (
+  return (
     <>
       <motion.div
         initial={{ opacity: 0, y: -20, scale: 0.95 }}
