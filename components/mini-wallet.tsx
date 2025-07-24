@@ -819,7 +819,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="bg-gray-900/60 backdrop-blur-xl border border-gray-700/30 rounded-full p-3 shadow-2xl fixed top-20 right-4 z-40"
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-xl border border-gray-600/50 rounded-full p-3 shadow-2xl fixed top-20 right-4 z-40"
         >
           <button onClick={() => setIsMinimized(false)} className="flex items-center space-x-2">
             <Wallet className="w-5 h-5 text-cyan-400" />
@@ -836,7 +836,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         initial={{ opacity: 0, y: -20, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: -20, scale: 0.95 }}
-        className="bg-gray-900 backdrop-blur-xl border border-gray-700 rounded-2xl shadow-2xl min-w-[320px] max-w-[380px] overflow-hidden fixed top-20 right-4 z-40"
+        className="bg-gradient-to-br from-gray-800 to-gray-900 backdrop-blur-xl border border-gray-600 rounded-2xl shadow-2xl ring-1 ring-gray-700 min-w-[320px] max-w-[380px] overflow-hidden fixed top-20 right-4 z-40"
       >
         <AnimatePresence mode="wait">
           {/* Main View */}
@@ -862,21 +862,21 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                 <div className="flex items-center space-x-1">
                   <button
                     onClick={copyAddress}
-                    className="p-2 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-gray-700/50"
+                    className="p-2 text-gray-300 hover:text-white transition-colors rounded-lg hover:bg-gray-600/50"
                     title={t.copyAddress}
                   >
                     {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                   </button>
                   <button
                     onClick={() => setIsMinimized(true)}
-                    className="p-2 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-gray-700/50"
+                    className="p-2 text-gray-300 hover:text-white transition-colors rounded-lg hover:bg-gray-600/50"
                     title="Minimize to icon"
                   >
                     <Minimize2 className="w-4 h-4" />
                   </button>
                   <button
                     onClick={onDisconnect}
-                    className="p-2 text-gray-400 hover:text-red-400 transition-colors rounded-lg hover:bg-gray-700/50"
+                    className="p-2 text-gray-300 hover:text-red-400 transition-colors rounded-lg hover:bg-gray-600/50"
                     title={t.disconnect}
                   >
                     <LogOut className="w-4 h-4" />
@@ -939,7 +939,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                               initial={{ opacity: 0, x: -20 }}
                               animate={{ opacity: 1, x: 0 }}
                               transition={{ delay: index * 0.1 }}
-                              className="w-full bg-gray-800 border border-gray-700 rounded-xl p-3 hover:bg-gray-700 transition-all duration-200 group"
+                              className="w-full bg-gray-700 border border-gray-600 rounded-xl p-3 hover:bg-gray-600 transition-all duration-200 group"
                             >
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center space-x-3">
@@ -976,32 +976,32 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
               </div>
 
               {/* Quick Actions */}
-              <div className="mt-4 pt-4 border-t border-gray-700">
+              <div className="mt-4 pt-4 border-t border-gray-600">
                 <div className="grid grid-cols-4 gap-2">
                   <button
                     onClick={() => setViewMode("send")}
-                    className="flex flex-col items-center justify-center space-y-1 py-2 px-2 bg-gray-700/20 hover:bg-gray-700/30 border border-gray-600/30 rounded-lg transition-all duration-200 text-blue-300 hover:text-blue-200"
+                    className="flex flex-col items-center justify-center space-y-1 py-2 px-2 bg-gray-600/30 hover:bg-gray-500/30 border border-gray-500/30 rounded-lg transition-all duration-200 text-blue-300 hover:text-blue-200"
                   >
                     <Send className="w-4 h-4" />
                     <span className="text-xs font-medium">{t.send}</span>
                   </button>
                   <button
                     onClick={() => setViewMode("receive")}
-                    className="flex flex-col items-center justify-center space-y-1 py-2 px-2 bg-gray-700/20 hover:bg-gray-700/30 border border-gray-600/30 rounded-lg transition-all duration-200 text-green-300 hover:text-green-200"
+                    className="flex flex-col items-center justify-center space-y-1 py-2 px-2 bg-gray-600/30 hover:bg-gray-500/30 border border-gray-500/30 rounded-lg transition-all duration-200 text-green-300 hover:text-green-200"
                   >
                     <ArrowDownLeft className="w-4 h-4" />
                     <span className="text-xs font-medium">{t.receive}</span>
                   </button>
                   <button
                     onClick={() => setViewMode("swap")}
-                    className="flex flex-col items-center justify-center space-y-1 py-2 px-2 bg-gray-700/20 hover:bg-gray-700/30 border border-gray-600/30 rounded-lg transition-all duration-200 text-orange-300 hover:text-orange-200"
+                    className="flex flex-col items-center justify-center space-y-1 py-2 px-2 bg-gray-600/30 hover:bg-gray-500/30 border border-gray-500/30 rounded-lg transition-all duration-200 text-orange-300 hover:text-orange-200"
                   >
                     <ArrowLeftRight className="w-4 h-4" />
                     <span className="text-xs font-medium">{t.swap}</span>
                   </button>
                   <button
                     onClick={() => setViewMode("history")}
-                    className="flex flex-col items-center justify-center space-y-1 py-2 px-2 bg-gray-700/20 hover:bg-gray-700/30 border border-gray-600/30 rounded-lg transition-all duration-200 text-purple-300 hover:text-purple-200"
+                    className="flex flex-col items-center justify-center space-y-1 py-2 px-2 bg-gray-600/30 hover:bg-gray-500/30 border border-gray-500/30 rounded-lg transition-all duration-200 text-purple-300 hover:text-purple-200"
                   >
                     <History className="w-4 h-4" />
                     <span className="text-xs font-medium">{t.history}</span>
@@ -1043,7 +1043,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                         token: e.target.value,
                       }))
                     }
-                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-400"
+                    className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-400"
                   >
                     {balances.map((token) => (
                       <option key={token.symbol} value={token.symbol} className="bg-gray-900">
@@ -1065,7 +1065,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                       }))
                     }
                     placeholder="0.00"
-                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-400"
+                    className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-400"
                   />
                 </div>
 
@@ -1081,7 +1081,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                       }))
                     }
                     placeholder="0x..."
-                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-400"
+                    className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-400"
                   />
                 </div>
 
@@ -1095,7 +1095,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                 <button
                   onClick={handleSend}
                   disabled={sending || !sendForm.amount || !sendForm.recipient}
-                  className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:opacity-50 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
+                  className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-600 disabled:opacity-50 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
                 >
                   {sending ? (
                     <>
@@ -1143,12 +1143,12 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
                 <div>
                   <p className="text-gray-300 text-sm mb-2">{t.yourWalletAddress}</p>
-                  <div className="bg-gray-800 border border-gray-700 rounded-lg p-3 break-all">
+                  <div className="bg-gray-700 border border-gray-600 rounded-lg p-3 break-all">
                     <p className="text-white text-sm font-mono">{walletAddress}</p>
                   </div>
                   <button
                     onClick={copyAddress}
-                    className="mt-2 flex items-center justify-center space-x-2 w-full bg-gray-700 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                    className="mt-2 flex items-center justify-center space-x-2 w-full bg-gray-600 hover:bg-gray-500 text-white font-medium py-2 px-4 rounded-lg transition-colors"
                   >
                     {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                     <span>{t.copyAddress}</span>
@@ -1190,7 +1190,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                 {/* From Token Selection */}
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">{t.from}</label>
-                  <div className="bg-gray-800 border border-gray-700 rounded-lg p-3">
+                  <div className="bg-gray-700 border border-gray-600 rounded-lg p-3">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center space-x-2">
                         <img
@@ -1245,7 +1245,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                 <div className="flex justify-center">
                   <button
                     onClick={handleSwapTokens}
-                    className="p-2 bg-gray-700/50 rounded-full hover:bg-gray-600/50 transition-colors"
+                    className="p-2 bg-gray-600/50 rounded-full hover:bg-gray-500/50 transition-colors"
                     title="Swap tokens"
                   >
                     <ArrowLeftRight className="w-4 h-4" />
@@ -1255,7 +1255,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                 {/* To Token Selection */}
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">{t.to}</label>
-                  <div className="bg-gray-800 border border-gray-700 rounded-lg p-3">
+                  <div className="bg-gray-700 border border-gray-600 rounded-lg p-3">
                     <div className="flex items-center space-x-2">
                       <img
                         src={getTokenIcon(swapForm.tokenTo) || "/placeholder.svg"}
@@ -1321,7 +1321,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                     !!quoteError ||
                     swapForm.tokenFrom === swapForm.tokenTo
                   }
-                  className="w-full bg-orange-600 hover:bg-orange-700 disabled:bg-gray-600 disabled:opacity-50 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
+                  className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-gray-600 disabled:opacity-50 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
                 >
                   {swapping ? (
                     <>
@@ -1379,7 +1379,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.05 }}
-                        className="bg-gray-800 border border-gray-700 rounded-lg p-3 hover:bg-gray-700 transition-colors"
+                        className="bg-gray-700 border border-gray-600 rounded-lg p-3 hover:bg-gray-600 transition-colors"
                       >
                         <div className="flex items-center justify-between">
                           <div
@@ -1426,7 +1426,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                       <button
                         onClick={loadMoreTransactions}
                         disabled={loadingMore}
-                        className="w-full bg-gray-700/50 hover:bg-gray-600/70 disabled:opacity-50 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
+                        className="w-full bg-gray-600/50 hover:bg-gray-500/70 disabled:opacity-50 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
                       >
                         {loadingMore ? (
                           <>
