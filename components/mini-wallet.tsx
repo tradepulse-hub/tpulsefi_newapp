@@ -781,6 +781,17 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     }
   }, [walletAddress, loadBalances, loadTransactionHistory]) // Removido loadTokenUnitPrices da dependência
 
+  useEffect(() => {
+    if (walletAddress) {
+      const interval = setInterval(() => {
+        refreshBalances()
+        loadTransactionHistory(true) // Pass true to reset and reload history
+      }, 10000) // Refresh every 10 seconds
+
+      return () => clearInterval(interval) // Clean up on unmount or walletAddress change
+    }
+  }, [walletAddress, refreshBalances, loadTransactionHistory])
+
   const formatBalance = useCallback((balance: string): string => {
     const num = Number.parseFloat(balance)
     if (num === 0) return "0"
@@ -855,7 +866,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                     <Wallet className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <p className="text-white font-semibold text-sm">{t.connected}</p>
+                    <p className="text-gray-800 font-semibold text-sm">{t.connected}</p>
                     <p className="text-gray-400 text-xs">{formatAddress(walletAddress)}</p>
                   </div>
                 </div>
@@ -893,7 +904,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                       className="flex items-center space-x-2 text-white hover:text-gray-300 transition-colors"
                     >
                       {showBalances ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      <span className="text-sm font-medium">{t.tokens}</span>
+                      <span className="text-gray-800 text-sm font-medium">{t.tokens}</span>
                     </button>
                   </div>
                   <button
@@ -929,10 +940,8 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                           <span className="text-gray-400 text-sm">No tokens found</span>
                         </div>
                       ) : (
-                        TOKENS.map((token, index) => {
-                          const currentBalance = balances.find((b) => b.symbol === token.symbol)
-                          const displayBalance = currentBalance ? currentBalance.balance : "0"
-
+                        balances.map((token, index) => {
+                          // Only display tokens that are actually in the balances array (i.e., have non-zero balance)
                           return (
                             <motion.button
                               key={token.symbol}
@@ -960,7 +969,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                                 </div>
                                 <div className="text-right flex flex-col items-end">
                                   <p className="text-gray-800 font-medium text-sm">
-                                    {showBalances ? formatBalance(displayBalance) : "••••"}
+                                    {showBalances ? formatBalance(token.balance) : "••••"}
                                   </p>
                                 </div>
                               </div>
