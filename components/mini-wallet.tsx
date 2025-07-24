@@ -777,9 +777,8 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     if (walletAddress) {
       loadBalances()
       loadTransactionHistory(true)
-      // Removido: loadTokenUnitPrices()
     }
-  }, [walletAddress, loadBalances, loadTransactionHistory]) // Removido loadTokenUnitPrices da dependência
+  }, [walletAddress]) // Removido loadBalances e loadTransactionHistory das dependências
 
   const formatBalance = useCallback((balance: string): string => {
     const num = Number.parseFloat(balance)
