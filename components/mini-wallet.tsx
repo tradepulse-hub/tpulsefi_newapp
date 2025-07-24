@@ -923,47 +923,48 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                           <AlertCircle className="w-4 h-4 text-red-400 mr-2" />
                           <span className="text-red-400 text-sm">{error}</span>
                         </div>
-                      ) : balances.length === 0 ? (
+                      ) : balances.filter((token) => Number.parseFloat(token.balance) > 0).length === 0 ? (
                         <div className="text-center py-4">
                           <span className="text-gray-400 text-sm">No tokens found</span>
                         </div>
                       ) : (
-                        balances.map((token, index) => {
-                          // Only display tokens that are actually in the balances array (i.e., have non-zero balance)
-                          return (
-                            <motion.button
-                              key={token.symbol}
-                              initial={{ opacity: 0, x: -20 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              transition={{ delay: index * 0.1 }}
-                              className="w-full bg-gray-100 border border-gray-200 rounded-xl p-3 hover:bg-gray-200 transition-all duration-200 group"
-                            >
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center space-x-3">
-                                  <div className="w-8 h-8 rounded-full overflow-hidden bg-white flex items-center justify-center">
-                                    <img
-                                      src={getTokenIcon(token.symbol) || "/placeholder.svg"}
-                                      alt={token.name}
-                                      className="w-full h-full object-contain"
-                                      onError={(e) => {
-                                        e.currentTarget.src = "/placeholder.svg?height=32&width=32"
-                                      }}
-                                    />
+                        balances
+                          .filter((token) => Number.parseFloat(token.balance) > 0) // Filter out zero balance tokens
+                          .map((token, index) => {
+                            return (
+                              <motion.button
+                                key={token.symbol}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: index * 0.1 }}
+                                className="w-full bg-gray-100 border border-gray-200 rounded-xl p-3 hover:bg-gray-200 transition-all duration-200 group"
+                              >
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center space-x-3">
+                                    <div className="w-8 h-8 rounded-full overflow-hidden bg-white flex items-center justify-center">
+                                      <img
+                                        src={getTokenIcon(token.symbol) || "/placeholder.svg"}
+                                        alt={token.name}
+                                        className="w-full h-full object-contain"
+                                        onError={(e) => {
+                                          e.currentTarget.src = "/placeholder.svg?height=32&width=32"
+                                        }}
+                                      />
+                                    </div>
+                                    <div>
+                                      <p className="text-gray-800 font-medium text-sm text-left">{token.symbol}</p>
+                                      <p className="text-gray-500 text-xs text-left">{token.name}</p>
+                                    </div>
                                   </div>
-                                  <div>
-                                    <p className="text-gray-800 font-medium text-sm text-left">{token.symbol}</p>
-                                    <p className="text-gray-500 text-xs text-left">{token.name}</p>
+                                  <div className="text-right flex flex-col items-end">
+                                    <p className="text-gray-800 font-medium text-sm">
+                                      {showBalances ? formatBalance(token.balance) : "••••"}
+                                    </p>
                                   </div>
                                 </div>
-                                <div className="text-right flex flex-col items-end">
-                                  <p className="text-gray-800 font-medium text-sm">
-                                    {showBalances ? formatBalance(token.balance) : "••••"}
-                                  </p>
-                                </div>
-                              </div>
-                            </motion.button>
-                          )
-                        })
+                              </motion.button>
+                            )
+                          })
                       )}
                     </motion.div>
                   )}
