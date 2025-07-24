@@ -781,17 +781,6 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     }
   }, [walletAddress, loadBalances, loadTransactionHistory]) // Removido loadTokenUnitPrices da dependência
 
-  useEffect(() => {
-    if (walletAddress) {
-      const interval = setInterval(() => {
-        refreshBalances()
-        loadTransactionHistory(true) // Pass true to reset and reload history
-      }, 10000) // Refresh every 10 seconds
-
-      return () => clearInterval(interval) // Clean up on unmount or walletAddress change
-    }
-  }, [walletAddress, refreshBalances, loadTransactionHistory])
-
   const formatBalance = useCallback((balance: string): string => {
     const num = Number.parseFloat(balance)
     if (num === 0) return "0"
