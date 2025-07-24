@@ -73,7 +73,7 @@ export default function PartnershipsPage() {
           </motion.div>
 
           {/* Partners Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-12">
             {partners.map((partner, index) => (
               <motion.div
                 key={partner.id}
@@ -88,7 +88,7 @@ export default function PartnershipsPage() {
                             hover:bg-gray-700/40 hover:shadow-xl hover:border-blue-500/50"
                 >
                   {/* Partner Logo */}
-                  <div className="flex items-center justify-center mb-4">
+                  <div className="flex items-center justify-center mb-3">
                     <div className="w-20 h-20 rounded-xl overflow-hidden bg-gray-700/50">
                       <Image
                         src={partner.image || "/placeholder.svg"}
@@ -101,7 +101,7 @@ export default function PartnershipsPage() {
                   </div>
 
                   {/* Partner Name */}
-                  <div className="text-center mb-4">
+                  <div className="text-center mb-3">
                     <h3 className="text-xl font-bold text-white mb-2">{partner.name}</h3>
                     <div className={`h-1 w-16 bg-gradient-to-r ${partner.gradient} rounded-full mx-auto`} />
                   </div>
