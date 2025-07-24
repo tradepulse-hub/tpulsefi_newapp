@@ -30,8 +30,6 @@ import { AnimatePresence, motion } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { useMobile } from "@/hooks/use-mobile"
 import { BackgroundEffect } from "../../components/background-effect" // Import the new BackgroundEffect
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 // Simplified language support
 const LANGUAGES = [
@@ -979,46 +977,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
           </div>
         </div>
       </div>
-
-      {/* Mobile Card */}
-      {isMobile && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 p-4">
-          <Card className="w-full max-w-md bg-gray-800 text-white shadow-lg">
-            <CardHeader className="text-center">
-              <Image
-                src="/public/images/logo-tpf.png"
-                alt="PulseCode Token Logo"
-                width={100}
-                height={100}
-                className="mx-auto mb-4"
-              />
-              <CardTitle className="text-3xl font-bold">PulseCode Token</CardTitle>
-              <CardDescription className="text-gray-400">Conecte sua carteira Worldcoin</CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col items-center space-y-4">
-              {isLoading ? (
-                <p className="text-lg">Carregando...</p>
-              ) : isAuthenticated ? (
-                <>
-                  <p className="text-lg font-semibold">
-                    Conectado como:{" "}
-                    {user?.walletAddress
-                      ? `${user.walletAddress.slice(0, 6)}...${user.walletAddress.slice(-4)}`
-                      : "N/A"}
-                  </p>
-                  <Button onClick={disconnectWallet} className="w-full bg-red-600 hover:bg-red-700">
-                    Desconectar Carteira
-                  </Button>
-                </>
-              ) : (
-                <Button onClick={connectWallet} className="w-full bg-blue-600 hover:bg-blue-700">
-                  Conectar Carteira Worldcoin
-                </Button>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      )}
     </div>
   )
 }
