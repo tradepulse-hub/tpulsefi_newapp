@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
+import { BackgroundEffect } from "@/components/background-effect" // Import the BackgroundEffect component
 
 export default function HomePage() {
   const [language, setLanguage] = useState("en")
@@ -21,8 +22,12 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center">
+    <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden">
+      {/* Render the BackgroundEffect component */}
+      <BackgroundEffect />
+
+      {/* Content of the page */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center relative z-10">
         <h1 className="text-2xl font-bold text-white mb-4">
           {welcomeMessages[language as keyof typeof welcomeMessages]}
         </h1>
