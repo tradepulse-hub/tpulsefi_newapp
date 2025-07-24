@@ -290,7 +290,7 @@ export default function AboutPage() {
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-6"
+          className="text-center mb-6 pt-20"
         >
           <h1 className="text-3xl font-bold tracking-tighter">
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-cyan-200 to-blue-200">
