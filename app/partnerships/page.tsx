@@ -73,7 +73,7 @@ export default function PartnershipsPage() {
           </motion.div>
 
           {/* Partners Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
             {partners.map((partner, index) => (
               <motion.div
                 key={partner.id}
@@ -82,24 +82,28 @@ export default function PartnershipsPage() {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 className="group relative"
               >
-                <div className="bg-gray-800/40 backdrop-blur-sm border border-gray-700/30 rounded-xl p-6 hover:bg-gray-700/40 transition-all duration-300">
+                <div
+                  className="bg-gray-800/40 backdrop-blur-sm border border-gray-700/30 rounded-xl p-4
+                            transition-all duration-300 ease-in-out
+                            hover:bg-gray-700/40 hover:shadow-xl hover:border-blue-500/50"
+                >
                   {/* Partner Logo */}
-                  <div className="flex items-center justify-center mb-6">
-                    <div className="w-24 h-24 rounded-xl overflow-hidden bg-gray-700/50">
+                  <div className="flex items-center justify-center mb-4">
+                    <div className="w-20 h-20 rounded-xl overflow-hidden bg-gray-700/50">
                       <Image
                         src={partner.image || "/placeholder.svg"}
                         alt={partner.name}
-                        width={96}
-                        height={96}
+                        width={80}
+                        height={80}
                         className="w-full h-full object-cover"
                       />
                     </div>
                   </div>
 
                   {/* Partner Name */}
-                  <div className="text-center mb-6">
-                    <h3 className="text-2xl font-bold text-white mb-2">{partner.name}</h3>
-                    <div className={`h-1 w-20 bg-gradient-to-r ${partner.gradient} rounded-full mx-auto`} />
+                  <div className="text-center mb-4">
+                    <h3 className="text-xl font-bold text-white mb-2">{partner.name}</h3>
+                    <div className={`h-1 w-16 bg-gradient-to-r ${partner.gradient} rounded-full mx-auto`} />
                   </div>
 
                   {/* Action Button */}
@@ -107,7 +111,7 @@ export default function PartnershipsPage() {
                     href={partner.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`w-full bg-gradient-to-r ${partner.gradient} text-white py-3 px-4 rounded-lg font-medium hover:opacity-90 transition-all duration-300 flex items-center justify-center space-x-2`}
+                    className={`w-full bg-gradient-to-r ${partner.gradient} text-white py-2 px-3 rounded-lg font-medium hover:opacity-90 transition-all duration-300 flex items-center justify-center space-x-2 text-sm`}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
