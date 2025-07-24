@@ -45,14 +45,6 @@ const TOKENS = [
     logo: "/images/keplerpay-logo.png",
     color: "#6A0DAD", // Deep purple color
   },
-  {
-    address: "0xbF0B23Ec1b8F8505b4F1772517151B2df4A27703",
-    symbol: "EDEN",
-    name: "Project Eden Token",
-    decimals: 18, // Assuming 18 decimals based on common ERC-20 tokens
-    logo: "/images/eden-logo.png",
-    color: "#4CAF50", // A green color for Eden
-  },
 ]
 
 // Configuração do SDK Holdstation (mantida aqui para a função de cotação)
