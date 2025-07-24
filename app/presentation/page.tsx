@@ -85,7 +85,7 @@ const translations = {
       connectWallet: "Connect Wallet",
     },
     navigation: {
-      pulsecode: "PulseCode", // Changed from codepulse
+      codepulse: "CodePulse", // New translation key for CodePulse
       wallet: "Wallet",
       news: "News",
       airdrop: "Airdrop",
@@ -125,7 +125,7 @@ const translations = {
       connectWallet: "Conectar Carteira",
     },
     navigation: {
-      pulsecode: "PulseCode", // Changed from codepulse
+      codepulse: "CodePulse", // New translation key for CodePulse
       wallet: "Carteira",
       news: "Notícias",
       airdrop: "Airdrop",
@@ -165,7 +165,7 @@ const translations = {
       connectWallet: "Conectar Billetera",
     },
     navigation: {
-      pulsecode: "PulseCode", // Changed from codepulse
+      codepulse: "CodePulse", // New translation key for CodePulse
       wallet: "Billetera",
       news: "Noticias",
       airdrop: "Airdrop",
@@ -206,7 +206,7 @@ const translations = {
       connectWallet: "Hubungkan Dompet",
     },
     navigation: {
-      pulsecode: "PulseCode", // Changed from codepulse
+      codepulse: "CodePulse", // New translation key for CodePulse
       wallet: "Dompet",
       news: "Berita",
       airdrop: "Airdrop",
@@ -373,11 +373,11 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
 
   const navigationItems: NavItem[] = [
     {
-      id: "pulsecode",
-      labelKey: "pulsecode", // Changed label key to "pulsecode"
-      icon: Code,
-      href: "/codepulse",
-      action: handleCodePulseMenuClick,
+      id: "pulsecode", // Changed from wallet
+      labelKey: "codepulse", // Changed label key
+      icon: Code, // Changed icon to Code
+      href: "/codepulse", // New href
+      action: handleCodePulseMenuClick, // Explicit action for clarity
     },
     {
       id: "news",
