@@ -414,8 +414,10 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
   const [error, setError] = useState<string | null>(null)
   const [isMinimized, setIsMinimized] = useState(false)
 
-  // Removido: const [tokenUnitPrices, setTokenUnitPrices] = useState<Record<string, number>>({})
-  // Removido: const [loadingPrices, setLoadingPrices] = useState(true)
+  // Novos estados para preços em USDC
+  const [tokenUSDCUnitPrices, setTokenUSDCUnitPrices] = useState<Record<string, number>>({})
+  const [loadingPrices, setLoadingPrices] = useState(true)
+  const [priceError, setPriceError] = useState<string | null>(null)
 
   const TRANSACTIONS_PER_PAGE = 5
 
@@ -439,9 +441,6 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }, [walletAddress])
-
-  // Removido: loadTokenUnitPrices function
-  // const loadTokenUnitPrices = useCallback(async () => { ... }, [USDC_ADDRESS])
 
   const loadBalances = useCallback(async () => {
     try {
@@ -502,12 +501,60 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     }
   }, [allTransactions, currentPage, loadTransactionHistory])
 
+  // Nova função para carregar os preços unitários em USDC
+  const loadTokenUSDCUnitPrices = useCallback(async () => {
+    setLoadingPrices(true)
+    setPriceError(null)
+    const newUSDCUnitPrices: Record<string, number> = {}
+
+    if (!USDC_TOKEN_INFO) {
+      setPriceError(t.priceUnavailable)
+      setLoadingPrices(false)
+      return
+    }
+
+    for (const token of TOKENS) {
+      if (token.symbol === "USDC") {
+        newUSDCUnitPrices[token.symbol] = 1.0 // O valor do USDC é 1.00 USDC
+        continue
+      }
+
+      try {
+        // Para obter o preço unitário, estimamos um swap de 1 unidade do token para USDC.
+        // O amountIn precisa ser formatado corretamente com base nos decimais do token.
+        const amountInBigInt = ethers.parseUnits("1", token.decimals)
+
+        const quote = await swapHelper.estimate.quote({
+          tokenIn: token.address,
+          tokenOut: USDC_TOKEN_INFO.address,
+          amountIn: amountInBigInt.toString(), // Passar como string
+          slippage: "0.3",
+          fee: "0.2",
+          feeReceiver: ethers.ZeroAddress,
+        })
+
+        if (quote && quote.outAmount) {
+          // quote.outAmount é um BigInt, precisamos formatá-lo para um número com base nos decimais do USDC
+          const outAmountNumber = Number.parseFloat(ethers.formatUnits(quote.outAmount, USDC_TOKEN_INFO.decimals))
+          newUSDCUnitPrices[token.symbol] = outAmountNumber
+        } else {
+          newUSDCUnitPrices[token.symbol] = 0 // Indicar que o preço não está disponível
+        }
+      } catch (err) {
+        console.error(`Error fetching USDC unit price for ${token.symbol}:`, err)
+        newUSDCUnitPrices[token.symbol] = 0 // Indicar que o preço não está disponível
+      }
+    }
+    setTokenUSDCUnitPrices(newUSDCUnitPrices)
+    setLoadingPrices(false)
+  }, [t.priceUnavailable, USDC_TOKEN_INFO])
+
   const refreshBalances = useCallback(async () => {
     setRefreshing(true)
     await loadBalances()
-    // Removido: await loadTokenUnitPrices() // Refresh unit prices as well
+    await loadTokenUSDCUnitPrices() // Atualizar preços unitários também
     setRefreshing(false)
-  }, [loadBalances]) // Removido loadTokenUnitPrices da dependência
+  }, [loadBalances, loadTokenUSDCUnitPrices])
 
   const handleSend = useCallback(async () => {
     if (!sendForm.amount || !sendForm.recipient) return
@@ -777,8 +824,9 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
     if (walletAddress) {
       loadBalances()
       loadTransactionHistory(true)
+      loadTokenUSDCUnitPrices() // Chamar a nova função para carregar os preços em USDC
     }
-  }, [walletAddress]) // Removido loadBalances e loadTransactionHistory das dependências
+  }, [walletAddress, loadBalances, loadTransactionHistory, loadTokenUSDCUnitPrices])
 
   const formatBalance = useCallback((balance: string): string => {
     const num = Number.parseFloat(balance)
@@ -931,6 +979,11 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                         balances
                           .filter((token) => Number.parseFloat(token.balance) > 0) // Filter out zero balance tokens
                           .map((token, index) => {
+                            // Calcular o valor total em USDC
+                            const totalUSDCValue = (
+                              Number.parseFloat(token.balance) * (tokenUSDCUnitPrices[token.symbol] || 0)
+                            ).toFixed(2)
+
                             return (
                               <motion.button
                                 key={token.symbol}
@@ -960,6 +1013,16 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                                     <p className="text-gray-800 font-medium text-sm">
                                       {showBalances ? formatBalance(token.balance) : "••••"}
                                     </p>
+                                    {showBalances &&
+                                      (loadingPrices ? (
+                                        <span className="text-gray-500 text-xs">{t.loadingPrice}</span>
+                                      ) : priceError ? (
+                                        <span className="text-red-400 text-xs">{priceError}</span>
+                                      ) : tokenUSDCUnitPrices[token.symbol] > 0 ? (
+                                        <span className="text-gray-500 text-xs">${totalUSDCValue} USDC</span>
+                                      ) : (
+                                        <span className="text-gray-500 text-xs">{t.priceUnavailable}</span>
+                                      ))}
                                   </div>
                                 </div>
                               </motion.button>
