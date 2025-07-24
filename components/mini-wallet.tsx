@@ -819,11 +819,11 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-xl border border-gray-600/50 rounded-full p-3 shadow-2xl fixed top-20 right-4 z-40"
+          className="bg-gradient-to-br from-gray-100/60 to-gray-200/60 backdrop-blur-xl border border-gray-300/50 rounded-full p-3 shadow-lg fixed top-20 right-4 z-40"
         >
           <button onClick={() => setIsMinimized(false)} className="flex items-center space-x-2">
-            <Wallet className="w-5 h-5 text-cyan-400" />
-            <span className="text-white text-sm font-medium">{formatAddress(walletAddress)}</span>
+            <Wallet className="w-5 h-5 text-gray-700" />
+            <span className="text-gray-800 text-sm font-medium">{formatAddress(walletAddress)}</span>
           </button>
         </motion.div>
       </>
@@ -836,7 +836,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
         initial={{ opacity: 0, y: -20, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: -20, scale: 0.95 }}
-        className="bg-gradient-to-br from-gray-800 to-gray-900 backdrop-blur-xl border border-gray-600 rounded-2xl shadow-2xl ring-1 ring-gray-700 min-w-[320px] max-w-[380px] overflow-hidden fixed top-20 right-4 z-40"
+        className="bg-gradient-to-br from-gray-50 to-gray-200 backdrop-blur-xl border border-gray-300 rounded-2xl shadow-lg ring-1 ring-gray-200 min-w-[320px] max-w-[380px] overflow-hidden fixed top-20 right-4 z-40"
       >
         <AnimatePresence mode="wait">
           {/* Main View */}
@@ -862,21 +862,21 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                 <div className="flex items-center space-x-1">
                   <button
                     onClick={copyAddress}
-                    className="p-2 text-gray-300 hover:text-white transition-colors rounded-lg hover:bg-gray-600/50"
+                    className="p-2 text-gray-600 hover:text-gray-800 transition-colors rounded-lg hover:bg-gray-200"
                     title={t.copyAddress}
                   >
                     {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                   </button>
                   <button
                     onClick={() => setIsMinimized(true)}
-                    className="p-2 text-gray-300 hover:text-white transition-colors rounded-lg hover:bg-gray-600/50"
+                    className="p-2 text-gray-600 hover:text-gray-800 transition-colors rounded-lg hover:bg-gray-200"
                     title="Minimize to icon"
                   >
                     <Minimize2 className="w-4 h-4" />
                   </button>
                   <button
                     onClick={onDisconnect}
-                    className="p-2 text-gray-300 hover:text-red-400 transition-colors rounded-lg hover:bg-gray-600/50"
+                    className="p-2 text-gray-600 hover:text-red-400 transition-colors rounded-lg hover:bg-gray-200"
                     title={t.disconnect}
                   >
                     <LogOut className="w-4 h-4" />
@@ -929,9 +929,9 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                           <span className="text-gray-400 text-sm">No tokens found</span>
                         </div>
                       ) : (
-                        balances.map((token, index) => {
-                          // Removido: const unitPrice = tokenUnitPrices[token.symbol] || 0
-                          // Removido: const valueInUsdc = Number.parseFloat(token.balance) * unitPrice
+                        TOKENS.map((token, index) => {
+                          const currentBalance = balances.find((b) => b.symbol === token.symbol)
+                          const displayBalance = currentBalance ? currentBalance.balance : "0"
 
                           return (
                             <motion.button
@@ -939,7 +939,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                               initial={{ opacity: 0, x: -20 }}
                               animate={{ opacity: 1, x: 0 }}
                               transition={{ delay: index * 0.1 }}
-                              className="w-full bg-gray-700 border border-gray-600 rounded-xl p-3 hover:bg-gray-600 transition-all duration-200 group"
+                              className="w-full bg-gray-100 border border-gray-200 rounded-xl p-3 hover:bg-gray-200 transition-all duration-200 group"
                             >
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center space-x-3">
@@ -954,16 +954,14 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                                     />
                                   </div>
                                   <div>
-                                    <p className="text-white font-medium text-sm text-left">{token.symbol}</p>
-                                    <p className="text-gray-400 text-xs text-left">{token.name}</p>
+                                    <p className="text-gray-800 font-medium text-sm text-left">{token.symbol}</p>
+                                    <p className="text-gray-500 text-xs text-left">{token.name}</p>
                                   </div>
                                 </div>
                                 <div className="text-right flex flex-col items-end">
-                                  <p className="text-white font-medium text-sm">
-                                    {showBalances ? formatBalance(token.balance) : "••••"}
+                                  <p className="text-gray-800 font-medium text-sm">
+                                    {showBalances ? formatBalance(displayBalance) : "••••"}
                                   </p>
-                                  {/* Removido: Bloco de exibição de valor em USDC */}
-                                  {/* Removido: Bloco de exibição de preço unitário em USDC */}
                                 </div>
                               </div>
                             </motion.button>
@@ -976,32 +974,32 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
               </div>
 
               {/* Quick Actions */}
-              <div className="mt-4 pt-4 border-t border-gray-600">
+              <div className="mt-4 pt-4 border-t border-gray-300">
                 <div className="grid grid-cols-4 gap-2">
                   <button
                     onClick={() => setViewMode("send")}
-                    className="flex flex-col items-center justify-center space-y-1 py-2 px-2 bg-gray-600/30 hover:bg-gray-500/30 border border-gray-500/30 rounded-lg transition-all duration-200 text-blue-300 hover:text-blue-200"
+                    className="flex flex-col items-center justify-center space-y-1 py-2 px-2 bg-gray-200/50 hover:bg-gray-300/50 border border-gray-300/50 rounded-lg transition-all duration-200 text-gray-700 hover:text-gray-900"
                   >
                     <Send className="w-4 h-4" />
                     <span className="text-xs font-medium">{t.send}</span>
                   </button>
                   <button
                     onClick={() => setViewMode("receive")}
-                    className="flex flex-col items-center justify-center space-y-1 py-2 px-2 bg-gray-600/30 hover:bg-gray-500/30 border border-gray-500/30 rounded-lg transition-all duration-200 text-green-300 hover:text-green-200"
+                    className="flex flex-col items-center justify-center space-y-1 py-2 px-2 bg-gray-200/50 hover:bg-gray-300/50 border border-gray-300/50 rounded-lg transition-all duration-200 text-gray-700 hover:text-gray-900"
                   >
                     <ArrowDownLeft className="w-4 h-4" />
                     <span className="text-xs font-medium">{t.receive}</span>
                   </button>
                   <button
                     onClick={() => setViewMode("swap")}
-                    className="flex flex-col items-center justify-center space-y-1 py-2 px-2 bg-gray-600/30 hover:bg-gray-500/30 border border-gray-500/30 rounded-lg transition-all duration-200 text-orange-300 hover:text-orange-200"
+                    className="flex flex-col items-center justify-center space-y-1 py-2 px-2 bg-gray-200/50 hover:bg-gray-300/50 border border-gray-300/50 rounded-lg transition-all duration-200 text-gray-700 hover:text-gray-900"
                   >
                     <ArrowLeftRight className="w-4 h-4" />
                     <span className="text-xs font-medium">{t.swap}</span>
                   </button>
                   <button
                     onClick={() => setViewMode("history")}
-                    className="flex flex-col items-center justify-center space-y-1 py-2 px-2 bg-gray-600/30 hover:bg-gray-500/30 border border-gray-500/30 rounded-lg transition-all duration-200 text-purple-300 hover:text-purple-200"
+                    className="flex flex-col items-center justify-center space-y-1 py-2 px-2 bg-gray-200/50 hover:bg-gray-300/50 border border-gray-300/50 rounded-lg transition-all duration-200 text-gray-700 hover:text-gray-900"
                   >
                     <History className="w-4 h-4" />
                     <span className="text-xs font-medium">{t.history}</span>
@@ -1043,10 +1041,10 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                         token: e.target.value,
                       }))
                     }
-                    className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-400"
+                    className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-gray-800 focus:outline-none focus:border-cyan-400"
                   >
                     {balances.map((token) => (
-                      <option key={token.symbol} value={token.symbol} className="bg-gray-900">
+                      <option key={token.symbol} value={token.symbol} className="bg-gray-50 text-gray-800">
                         {token.symbol} ({t.available}: {formatBalance(token.balance)})
                       </option>
                     ))}
@@ -1065,7 +1063,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                       }))
                     }
                     placeholder="0.00"
-                    className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-400"
+                    className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-gray-800 focus:outline-none focus:border-cyan-400"
                   />
                 </div>
 
@@ -1081,7 +1079,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                       }))
                     }
                     placeholder="0x..."
-                    className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-400"
+                    className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-gray-800 focus:outline-none focus:border-cyan-400"
                   />
                 </div>
 
@@ -1095,7 +1093,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                 <button
                   onClick={handleSend}
                   disabled={sending || !sendForm.amount || !sendForm.recipient}
-                  className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-600 disabled:opacity-50 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
+                  className="w-full bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 disabled:opacity-50 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
                 >
                   {sending ? (
                     <>
@@ -1143,12 +1141,12 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
 
                 <div>
                   <p className="text-gray-300 text-sm mb-2">{t.yourWalletAddress}</p>
-                  <div className="bg-gray-700 border border-gray-600 rounded-lg p-3 break-all">
-                    <p className="text-white text-sm font-mono">{walletAddress}</p>
+                  <div className="bg-gray-100 border border-gray-300 rounded-lg p-3 break-all">
+                    <p className="text-gray-800 text-sm font-mono">{walletAddress}</p>
                   </div>
                   <button
                     onClick={copyAddress}
-                    className="mt-2 flex items-center justify-center space-x-2 w-full bg-gray-600 hover:bg-gray-500 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                    className="mt-2 flex items-center justify-center space-x-2 w-full bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors"
                   >
                     {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                     <span>{t.copyAddress}</span>
@@ -1190,7 +1188,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                 {/* From Token Selection */}
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">{t.from}</label>
-                  <div className="bg-gray-700 border border-gray-600 rounded-lg p-3">
+                  <div className="bg-gray-100 border border-gray-300 rounded-lg p-3">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center space-x-2">
                         <img
@@ -1211,10 +1209,10 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                               amountFrom: "",
                             }))
                           }
-                          className="bg-transparent text-white font-medium focus:outline-none"
+                          className="bg-transparent text-gray-800 font-medium focus:outline-none"
                         >
                           {TOKENS.map((token) => (
-                            <option key={token.symbol} value={token.symbol} className="bg-gray-900">
+                            <option key={token.symbol} value={token.symbol} className="bg-gray-50 text-gray-800">
                               {token.symbol}
                             </option>
                           ))}
@@ -1236,7 +1234,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                         }))
                       }
                       placeholder="0.00"
-                      className="w-full bg-transparent text-white text-lg font-medium focus:outline-none"
+                      className="w-full bg-transparent text-gray-800 text-lg font-medium focus:outline-none"
                     />
                   </div>
                 </div>
@@ -1245,7 +1243,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                 <div className="flex justify-center">
                   <button
                     onClick={handleSwapTokens}
-                    className="p-2 bg-gray-600/50 rounded-full hover:bg-gray-500/50 transition-colors"
+                    className="p-2 bg-gray-300/50 rounded-full hover:bg-gray-400/50 transition-colors text-gray-700"
                     title="Swap tokens"
                   >
                     <ArrowLeftRight className="w-4 h-4" />
@@ -1255,7 +1253,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                 {/* To Token Selection */}
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">{t.to}</label>
-                  <div className="bg-gray-700 border border-gray-600 rounded-lg p-3">
+                  <div className="bg-gray-100 border border-gray-300 rounded-lg p-3">
                     <div className="flex items-center space-x-2">
                       <img
                         src={getTokenIcon(swapForm.tokenTo) || "/placeholder.svg"}
@@ -1275,25 +1273,25 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                             amountFrom: "",
                           }))
                         }
-                        className="bg-transparent text-white font-medium focus:outline-none"
+                        className="bg-transparent text-gray-800 font-medium focus:outline-none"
                       >
                         {TOKENS.map((token) => (
-                          <option key={token.symbol} value={token.symbol} className="bg-gray-900">
+                          <option key={token.symbol} value={token.symbol} className="bg-gray-50 text-gray-800">
                             {token.symbol}
                           </option>
                         ))}
                       </select>
                     </div>
-                    <div className="text-white text-lg font-medium">
+                    <div className="text-gray-800 text-lg font-medium">
                       {gettingQuote ? (
                         <div className="flex items-center space-x-2">
                           <RefreshCw className="w-4 h-4 animate-spin" />
-                          <span className="text-gray-400">{t.gettingQuote}</span>
+                          <span className="text-gray-500">{t.gettingQuote}</span>
                         </div>
                       ) : swapForm.amountTo ? (
                         swapForm.amountTo
                       ) : (
-                        <span className="text-gray-500">{t.enterAmount}</span>
+                        <span className="text-gray-600">{t.enterAmount}</span>
                       )}
                     </div>
                   </div>
@@ -1321,7 +1319,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                     !!quoteError ||
                     swapForm.tokenFrom === swapForm.tokenTo
                   }
-                  className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-gray-600 disabled:opacity-50 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
+                  className="w-full bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 disabled:opacity-50 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
                 >
                   {swapping ? (
                     <>
@@ -1379,7 +1377,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.05 }}
-                        className="bg-gray-700 border border-gray-600 rounded-lg p-3 hover:bg-gray-600 transition-colors"
+                        className="bg-gray-100 border border-gray-300 rounded-lg p-3 hover:bg-gray-200 transition-colors"
                       >
                         <div className="flex items-center justify-between">
                           <div
@@ -1394,14 +1392,14 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                             )}
                           </div>
                           <div>
-                            <p className="text-white font-medium text-sm">
+                            <p className="text-gray-800 font-medium text-sm">
                               {tx.type === "sent" ? t.sent : t.received} {tx.token}
                             </p>
-                            <p className="text-gray-400 text-xs">{formatAddress(tx.address)}</p>
+                            <p className="text-gray-500 text-xs">{formatAddress(tx.address)}</p>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="text-white font-medium text-sm">
+                          <p className="text-gray-800 font-medium text-sm">
                             {tx.type === "sent" ? "-" : "+"}
                             {tx.amount}
                           </p>
@@ -1418,7 +1416,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                             </button>
                           </div>
                         </div>
-                        <div className="mt-2 text-xs text-gray-500">{formatTimestamp(tx.timestamp)}</div>
+                        <div className="mt-2 text-xs text-gray-600">{formatTimestamp(tx.timestamp)}</div>
                       </motion.div>
                     ))}
 
@@ -1426,7 +1424,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
                       <button
                         onClick={loadMoreTransactions}
                         disabled={loadingMore}
-                        className="w-full bg-gray-600/50 hover:bg-gray-500/70 disabled:opacity-50 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
+                        className="w-full bg-gray-300/50 hover:bg-gray-400/70 disabled:opacity-50 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
                       >
                         {loadingMore ? (
                           <>
