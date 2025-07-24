@@ -1016,12 +1016,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
               <span className="text-white text-sm font-medium relative z-10">Follow Us</span>
             </div>
           </a>
-          <a
-            href="https://t.me/yourtelegramchannel" // Placeholder for Telegram link
-            target="_blank"
-            rel="noopener noreferrer"
-            className="relative group"
-          >
+          <a href="https://t.me/tpulsefi" target="_blank" rel="noopener noreferrer" className="relative group">
             <div className="px-4 py-2 bg-black/20 backdrop-blur-md border border-white/10 rounded-full flex items-center space-x-2 hover:bg-white/10 transition-all duration-300">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-400/10 to-cyan-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <Send className="w-4 h-4 text-blue-300 relative z-10" />
