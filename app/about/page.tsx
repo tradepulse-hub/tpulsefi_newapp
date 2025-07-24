@@ -5,6 +5,7 @@ import Image from "next/image"
 import { useState, useEffect } from "react"
 import { ArrowLeft } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { BackgroundEffect } from "@/components/background-effect" // Import BackgroundEffect
 
 // Supported languages
 const SUPPORTED_LANGUAGES = ["en", "pt", "es", "id"] as const
