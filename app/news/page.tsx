@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Bell, Calendar, ChevronRight, ArrowLeft, Users, Gift, Copy } from "lucide-react"
 import { motion } from "framer-motion"
 import { useRouter } from "next/navigation"
+import { BackgroundEffect } from "@/components/background-effect" // Import BackgroundEffect
 
 // Supported languages
 const SUPPORTED_LANGUAGES = ["en", "pt", "es", "id"] as const
@@ -78,7 +79,7 @@ const translations = {
     referralEmailLabel: "Email de Soporte:",
     stayTuned: "Mantente Atento",
     moreAnnouncements: "Más anuncios próximamente. ¡Vuelve regularmente para ver actualizaciones!",
-    back: "Volver",
+    back: "Voltar",
   },
   id: {
     title: "Berita",
@@ -130,78 +131,8 @@ export default function NewsPage() {
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden flex flex-col">
-      {/* Same animated background as presentation.tsx */}
-      <div className="absolute inset-0">
-        {/* Horizontal Moving Lines */}
-        {[...Array(12)].map((_, i) => (
-          <div
-            key={`h-line-${i}`}
-            className="absolute h-px bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent animate-pulse"
-            style={{
-              top: `${8 + i * 8}%`,
-              left: "-100%",
-              width: "200%",
-              animation: `moveRight 4s linear infinite`,
-              animationDelay: `${i * 0.3}s`,
-            }}
-          />
-        ))}
-
-        {/* Vertical Moving Lines */}
-        {[...Array(10)].map((_, i) => (
-          <div
-            key={`v-line-${i}`}
-            className="absolute w-px bg-gradient-to-b from-transparent via-blue-400/50 to-transparent"
-            style={{
-              left: `${10 + i * 10}%`,
-              top: "-100%",
-              height: "200%",
-              animation: `moveDown 5s linear infinite`,
-              animationDelay: `${i * 0.4}s`,
-            }}
-          />
-        ))}
-
-        {/* Diagonal Moving Lines */}
-        {[...Array(8)].map((_, i) => (
-          <div
-            key={`d-line-${i}`}
-            className="absolute h-px bg-gradient-to-r from-transparent via-white/30 to-transparent rotate-45"
-            style={{
-              top: `${15 + i * 12}%`,
-              left: "-100%",
-              width: "200%",
-              animation: `moveRight 6s linear infinite`,
-              animationDelay: `${i * 0.5}s`,
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Static Grid for Reference */}
-      <div
-        className="absolute inset-0 opacity-10"
-        style={{
-          backgroundImage: `
-            linear-gradient(rgba(34,211,238,0.3) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(34,211,238,0.3) 1px, transparent 1px)
-          `,
-          backgroundSize: "60px 60px",
-        }}
-      />
-
-      {/* Central Glow Effect */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="w-96 h-96 bg-white/5 rounded-full blur-3xl animate-pulse" />
-        <div
-          className="absolute w-80 h-80 bg-cyan-400/10 rounded-full blur-2xl animate-pulse"
-          style={{ animationDelay: "0.5s" }}
-        />
-        <div
-          className="absolute w-64 h-64 bg-blue-400/15 rounded-full blur-xl animate-pulse"
-          style={{ animationDelay: "1s" }}
-        />
-      </div>
+      {/* Background Effect */}
+      <BackgroundEffect />
 
       {/* Content */}
       <div className="relative z-10 flex flex-col min-h-screen">
@@ -351,60 +282,6 @@ export default function NewsPage() {
           </div>
         </div>
       </div>
-
-      {/* Enhanced Floating Particles */}
-      {[...Array(20)].map((_, i) => (
-        <div
-          key={`particle-${i}`}
-          className="absolute rounded-full animate-ping"
-          style={{
-            width: `${2 + Math.random() * 3}px`,
-            height: `${2 + Math.random() * 3}px`,
-            backgroundColor:
-              i % 3 === 0 ? "rgba(255,255,255,0.6)" : i % 3 === 1 ? "rgba(34,211,238,0.4)" : "rgba(59,130,246,0.3)",
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-            animationDelay: `${Math.random() * 4}s`,
-            animationDuration: `${1 + Math.random() * 2}s`,
-          }}
-        />
-      ))}
-
-      <style jsx>{`
-        @keyframes moveRight {
-          0% {
-            transform: translateX(-100%);
-            opacity: 0;
-          }
-          10% {
-            opacity: 1;
-          }
-          90% {
-            opacity: 1;
-          }
-          100% {
-            transform: translateX(100vw);
-            opacity: 0;
-          }
-        }
-
-        @keyframes moveDown {
-          0% {
-            transform: translateY(-100%);
-            opacity: 0;
-          }
-          10% {
-            opacity: 1;
-          }
-          90% {
-            opacity: 1;
-          }
-          100% {
-            transform: translateY(100vh);
-            opacity: 0;
-          }
-        }
-      `}</style>
     </div>
   )
 }
