@@ -3,9 +3,9 @@ import { useEffect, useState } from "react"
 import { ArrowLeft, Crown, Loader2, CheckCircle, Copy } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useRouter } from "next/navigation"
-import { MiniKit } from "@worldcoin/minikit-js" // Re-added original import
-import { useMiniKit } from "../../hooks/use-minikit" // Re-added original import
-import { BackgroundEffect } from "@/components/background-effect" // Import BackgroundEffect
+import { MiniKit } from "@worldcoin/minikit-js"
+import { useMiniKit } from "../../hooks/use-minikit"
+import { BackgroundEffect } from "@/components/background-effect"
 
 // Supported languages
 const SUPPORTED_LANGUAGES = ["en", "pt", "es", "id"] as const
@@ -28,7 +28,8 @@ const translations = {
     oneTimePayment: "One-time payment",
     emailInstruction: "After payment, send proof to support@tradepulsetoken.com",
     monthlyPayments: "Payments to exclusive members occur every month on the 9th",
-    paidToMembers: "Value paid to early members so far: (74555 TPF)", // Added this translation
+    paidToMembersPrefix: "Value paid to early members so far:",
+    paidToMembersSuffix: "TPF",
   },
   pt: {
     title: "Membros TPulseFi",
@@ -45,7 +46,8 @@ const translations = {
     oneTimePayment: "Pagamento único",
     emailInstruction: "Após pagamento enviar comprovativo para support@tradepulsetoken.com",
     monthlyPayments: "Os pagamentos aos membros exclusivos decorrem todos os meses ao dia 9",
-    paidToMembers: "Valor pago até agora para os primeiros membros: (74555 TPF)", // Added this translation
+    paidToMembersPrefix: "Valor pago até agora para os primeiros membros:",
+    paidToMembersSuffix: "TPF",
   },
   es: {
     title: "Membresía TPulseFi",
@@ -61,8 +63,9 @@ const translations = {
       "¡Si te suscribes tienes derecho a una parte de las tarifas de transacción que gana TPulseFi! ¡Y no es poco! ¿Qué estás esperando? ¡Es un pago de por vida! Es la mejor membresía del mundo, prometemos recuperación de la inversión a largo plazo.",
     oneTimePayment: "Pago único",
     emailInstruction: "Después del pago, envía comprobante a support@tradepulsetoken.com",
-    monthlyPayments: "Los pagamentos a miembros exclusivos ocurren todos los meses el día 9",
-    paidToMembers: "Valor pagado a los primeros miembros hasta ahora: (74555 TPF)", // Added this translation
+    monthlyPayments: "Los pagos a miembros exclusivos ocurren todos los meses el día 9",
+    paidToMembersPrefix: "Valor pagado a los primeros miembros hasta ahora:",
+    paidToMembersSuffix: "TPF",
   },
   id: {
     title: "Keanggotaan TPulseFi",
@@ -79,7 +82,8 @@ const translations = {
     oneTimePayment: "Pembayaran sekali",
     emailInstruction: "Setelah pembayaran, kirim bukti ke support@tradepulsetoken.com",
     monthlyPayments: "Pembayaran kepada anggota eksklusif terjadi setiap bulan pada tanggal 9",
-    paidToMembers: "Nilai yang dibayarkan kepada anggota awal sejauh ini: (74555 TPF)", // Added this translation
+    paidToMembersPrefix: "Nilai yang dibayarkan kepada anggota awal sejauh ini:",
+    paidToMembersSuffix: "TPF",
   },
 }
 
@@ -104,11 +108,12 @@ const ERC20_ABI = [
 
 export default function MembershipPage() {
   const router = useRouter()
-  const { user, isAuthenticated } = useMiniKit() // Original useMiniKit
+  const { user, isAuthenticated } = useMiniKit()
   const [currentLang, setCurrentLang] = useState<SupportedLanguage>("en")
   const [isProcessing, setIsProcessing] = useState(false)
   const [paymentSuccess, setPaymentSuccess] = useState(false)
   const [paymentError, setPaymentError] = useState<string | null>(null)
+  const [animatedValue, setAnimatedValue] = useState(0)
 
   // Load saved language
   useEffect(() => {
@@ -117,6 +122,35 @@ export default function MembershipPage() {
       setCurrentLang(savedLanguage)
     }
   }, [])
+
+  // Animation for the paid value
+  useEffect(() => {
+    const targetValue = 74555
+    const duration = 5000 // 5 seconds
+    const frameRate = 60 // frames per second
+    const totalFrames = (duration / 1000) * frameRate
+    const increment = targetValue / totalFrames
+
+    let currentFrame = 0
+    let animationFrameId: number
+
+    const animateCount = () => {
+      currentFrame++
+      const newValue = Math.min(targetValue, Math.round(increment * currentFrame))
+      setAnimatedValue(newValue)
+
+      if (newValue < targetValue) {
+        animationFrameId = requestAnimationFrame(animateCount)
+      }
+    }
+
+    animationFrameId = requestAnimationFrame(animateCount)
+
+    return () => {
+      cancelAnimationFrame(animationFrameId)
+      setAnimatedValue(0) // Reset on unmount
+    }
+  }, []) // Empty dependency array means it runs once on mount
 
   // Get translations for current language
   const t = translations[currentLang]
@@ -241,11 +275,9 @@ export default function MembershipPage() {
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="text-center mt-16 relative z-10" // Adjusted margin-top
+        className="text-center mt-16 relative z-10"
       >
         <h1 className="text-3xl font-bold tracking-tighter flex items-center justify-center mb-2">
-          {" "}
-          {/* Reduced font size */}
           <Crown className="w-8 h-8 mr-3 text-yellow-400" />
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-yellow-200 via-yellow-400 to-orange-400">
             {t.title}
@@ -261,8 +293,9 @@ export default function MembershipPage() {
                      bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300 rounded-full
                      px-6 py-3 border border-gray-400/50 shadow-xl animate-pulse-slow"
         >
-          {/* Removed DollarSign icon */}
-          <span>{t.paidToMembers}</span>
+          <span className="animate-blink">
+            {t.paidToMembersPrefix} ({animatedValue} {t.paidToMembersSuffix})
+          </span>
         </motion.div>
       </motion.div>
 
