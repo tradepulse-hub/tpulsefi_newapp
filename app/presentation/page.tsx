@@ -1248,24 +1248,24 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
         </div>
 
         {/* New Social Media Icons */}
-        <div className="flex items-center justify-center gap-4 mb-8 z-20 relative">
+        <div className="flex items-center justify-center gap-3 mb-8 z-20 relative">
           <a
             href="https://x.com/TradePulseToken?t=N-8tJuaN9E4asIH0A-gGEg&s=09"
             target="_blank"
             rel="noopener noreferrer"
             className="relative group"
           >
-            <div className="px-4 py-2 bg-black/20 backdrop-blur-md border border-white/10 rounded-full flex items-center space-x-2 hover:bg-white/10 transition-all duration-300">
+            <div className="px-2 py-1 bg-black/20 backdrop-blur-md border border-white/10 rounded-full flex items-center space-x-1.5 hover:bg-white/10 transition-all duration-300">
               <div className="absolute inset-0 bg-gradient-to-r from-gray-400/10 to-gray-600/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <X className="w-4 h-4 text-gray-300 relative z-10" />
-              <span className="text-white text-sm font-medium relative z-10">Follow Us</span>
+              <X className="w-3 h-3 text-gray-300 relative z-10" />
+              <span className="text-white text-xs font-medium relative z-10">Follow Us</span>
             </div>
           </a>
           <a href="https://t.me/tpulsefi" target="_blank" rel="noopener noreferrer" className="relative group">
-            <div className="px-4 py-2 bg-black/20 backdrop-blur-md border border-white/10 rounded-full flex items-center space-x-2 hover:bg-white/10 transition-all duration-300">
+            <div className="px-2 py-1 bg-black/20 backdrop-blur-md border border-white/10 rounded-full flex items-center space-x-1.5 hover:bg-white/10 transition-all duration-300">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-400/10 to-cyan-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <Send className="w-4 h-4 text-blue-300 relative z-10" />
-              <span className="text-white text-sm font-medium relative z-10">Join Telegram</span>
+              <Send className="w-3 h-3 text-blue-300 relative z-10" />
+              <span className="text-white text-xs font-medium relative z-10">Join Telegram</span>
             </div>
           </a>
         </div>
@@ -1297,10 +1297,10 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
         {/* Invite Button */}
         <div className="flex items-center justify-center mb-12 z-20 relative">
           <button onClick={() => setShowShareModal(true)} className="relative group">
-            <div className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-full flex items-center space-x-2 transition-all duration-300 transform hover:scale-105 shadow-lg">
+            <div className="px-3 py-1.5 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-full flex items-center space-x-1.5 transition-all duration-300 transform hover:scale-105 shadow-lg">
               <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <Share2 className="w-5 h-5 text-white relative z-10" />
-              <span className="text-white text-lg font-bold relative z-10 tracking-wide">
+              <Share2 className="w-4 h-4 text-white relative z-10" />
+              <span className="text-white text-sm font-bold relative z-10 tracking-wide">
                 {t.common?.invite || "INVITE"}
               </span>
             </div>
