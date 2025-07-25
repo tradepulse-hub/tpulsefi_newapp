@@ -1047,36 +1047,36 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
           {/* Glow Effect */}
           <div className="absolute inset-0 bg-gradient-to-t from-gray-400/20 via-gray-300/10 to-transparent blur-lg" />
           {/* Main Bar */}
-          <div className="relative bg-black/40 backdrop-blur-xl border border-white/10 rounded-xl">
+          <div className="relative bg-gradient-to-t from-gray-100 to-white backdrop-blur-xl border border-gray-200 rounded-xl">
             <div className="flex items-center justify-center py-2 px-4 space-x-4">
               {/* Wallet Icon (when wallet is connected but hidden) */}
               {isAuthenticated && !showMiniWallet && (
                 <button onClick={handleShowWallet} className="relative group">
-                  <div className="w-8 h-8 bg-gradient-to-r from-green-400/20 to-emerald-400/20 backdrop-blur-md border border-green-400/30 rounded-full flex items-center justify-center hover:from-green-400/30 hover:to-emerald-400/30 transition-all duration-300 shadow-xl">
-                    <div className="absolute inset-0 bg-gradient-to-r from-green-400/30 to-emerald-400/30 rounded-full animate-ping opacity-75" />
-                    <div className="absolute inset-1 bg-gradient-to-r from-white/10 to-white/5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    <Eye className="w-4 h-4 text-green-300 relative z-10" />
+                  <div className="w-8 h-8 bg-gradient-to-r from-green-200/50 to-emerald-200/50 backdrop-blur-md border border-green-300 rounded-full flex items-center justify-center hover:from-green-300/50 hover:to-emerald-300/50 transition-all duration-300 shadow-xl">
+                    <div className="absolute inset-0 bg-gradient-to-r from-green-300 to-emerald-300 rounded-full animate-ping opacity-75" />
+                    <div className="absolute inset-1 bg-gradient-to-r from-black/10 to-black/5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <Eye className="w-4 h-4 text-green-700 relative z-10" />
                   </div>
-                  <div className="absolute inset-0 bg-gradient-to-r from-green-400/20 to-emerald-400/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-green-200/20 to-emerald-200/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </button>
               )}
 
               {/* Central Menu Button */}
               <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="relative group">
-                <div className="w-8 h-8 bg-gradient-to-r from-gray-400/20 to-gray-600/20 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center hover:from-gray-400/30 hover:to-gray-600/30 transition-all duration-300 shadow-xl">
+                <div className="w-8 h-8 bg-gradient-to-r from-gray-300 to-gray-400 backdrop-blur-md border border-gray-400 rounded-full flex items-center justify-center hover:from-gray-400 hover:to-gray-500 transition-all duration-300 shadow-xl">
                   {/* Pulsing Ring */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-gray-400/30 to-gray-600/30 rounded-full animate-ping opacity-75" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-gray-300 to-gray-400 rounded-full animate-ping opacity-75" />
                   {/* Inner Glow */}
-                  <div className="absolute inset-1 bg-gradient-to-r from-white/10 to-white/5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute inset-1 bg-gradient-to-r from-black/10 to-black/5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   {/* Icon */}
                   {isMenuOpen ? (
-                    <X className="w-4 h-4 text-white relative z-10 transition-transform duration-300 rotate-90" />
+                    <X className="w-4 h-4 text-black relative z-10 transition-transform duration-300 rotate-90" />
                   ) : (
-                    <Menu className="w-4 h-4 text-white relative z-10 transition-transform duration-300" />
+                    <Menu className="w-4 h-4 text-black relative z-10 transition-transform duration-300" />
                   )}
                 </div>
                 {/* Button Glow */}
-                <div className="absolute inset-0 bg-gradient-to-r from-gray-400/20 to-gray-600/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="absolute inset-0 bg-gradient-to-r from-gray-300/20 to-gray-400/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </button>
             </div>
           </div>
@@ -1093,15 +1093,13 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
             className="fixed bottom-6 left-6 right-6 z-40"
           >
-            <div className="bg-black/30 backdrop-blur-xl border border-white/10 rounded-2xl mb-12">
+            <div className="bg-gradient-to-br from-gray-100 to-white backdrop-blur-xl border border-gray-200 rounded-2xl mb-12">
               {/* Menu Handle */}
               <div className="flex justify-center pt-3 pb-1">
-                <div className="w-8 h-0.5 bg-white/30 rounded-full" />
+                <div className="w-8 h-0.5 bg-gray-500 rounded-full" />
               </div>
               {/* Menu Content */}
               <div className="p-4 pb-4">
-                {/* Menu Glow Effect */}
-                <div className="absolute inset-0 bg-gradient-to-br from-gray-400/5 to-gray-600/5 rounded-2xl" />
                 {/* Menu Items Grid */}
                 <div className="relative z-10 grid grid-cols-2 gap-3 mb-4">
                   {navigationItems.map((item, index) => (
@@ -1119,13 +1117,13 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                           setIsMenuOpen(false)
                         }
                       }}
-                      className="group p-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg hover:bg-white/10 transition-all duration-300"
+                      className="group p-2 bg-gray-50/50 backdrop-blur-sm border border-gray-200 rounded-lg hover:bg-gray-100/70 transition-all duration-300"
                     >
                       <div className="flex flex-col items-center space-y-1">
-                        <div className="w-6 h-6 bg-gradient-to-r from-gray-400/20 to-gray-600/20 rounded-full flex items-center justify-center group-hover:from-gray-400/30 group-hover:to-gray-600/30 transition-all duration-300">
-                          <item.icon className="w-3 h-3 text-gray-400 group-hover:text-white transition-colors" />
+                        <div className="w-6 h-6 bg-gradient-to-r from-gray-200 to-gray-300 rounded-full flex items-center justify-center group-hover:from-gray-300 group-hover:to-gray-400 transition-all duration-300">
+                          <item.icon className="w-3 h-3 text-gray-600 group-hover:text-black transition-colors" />
                         </div>
-                        <span className="text-white/80 group-hover:text-white font-medium text-xs tracking-wide">
+                        <span className="text-gray-800 group-hover:text-black font-medium text-xs tracking-wide">
                           {t.navigation?.[item.labelKey] || item.labelKey}
                         </span>
                       </div>
@@ -1133,7 +1131,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                   ))}
                 </div>
                 {/* Menu Bottom Glow */}
-                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-12 h-0.5 bg-gradient-to-r from-gray-400/50 to-gray-600/50 rounded-full" />
+                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-12 h-0.5 bg-gradient-to-r from-gray-400 to-gray-600 rounded-full" />
               </div>
             </div>
           </motion.div>
@@ -1201,32 +1199,31 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             style={{
               animation: "vibrateLogo 0.08s linear infinite",
             }}
-          >
-            <div
-              className="absolute inset-0 bg-white rounded-full shadow-2xl"
-              style={{
-                boxShadow: `
+          />
+          <div
+            className="absolute inset-0 bg-white rounded-full shadow-2xl"
+            style={{
+              boxShadow: `
           0 0 30px rgba(255,255,255,1),
           0 0 60px rgba(229,231,235,0.8),
           0 0 90px rgba(209,213,219,0.6),
           0 0 120px rgba(156,163,175,0.4)
         `,
-                animation: "pulse 0.5s ease-in-out infinite",
+              animation: "pulse 0.5s ease-in-out infinite",
+            }}
+          />
+          {/* REAL TPF LOGO - REDUCED */}
+          <div className="relative z-10 w-16 h-16 rounded-full overflow-hidden bg-white p-1.5">
+            <Image
+              src="/images/logo-tpf.png"
+              alt="TPulseFi Logo"
+              width={64}
+              height={64}
+              className="w-full h-full object-contain"
+              style={{
+                animation: "vibrateLogoImage 0.1s linear infinite",
               }}
             />
-            {/* REAL TPF LOGO - REDUCED */}
-            <div className="relative z-10 w-16 h-16 rounded-full overflow-hidden bg-white p-1.5">
-              <Image
-                src="/images/logo-tpf.png"
-                alt="TPulseFi Logo"
-                width={64}
-                height={64}
-                className="w-full h-full object-contain"
-                style={{
-                  animation: "vibrateLogoImage 0.1s linear infinite",
-                }}
-              />
-            </div>
           </div>
         </div>
 
