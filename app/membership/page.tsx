@@ -3,8 +3,11 @@ import { useEffect, useState } from "react"
 import { ArrowLeft, Crown, Loader2, CheckCircle, Copy } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useRouter } from "next/navigation"
-import { MiniKit } from "@worldcoin/minikit-js"
-import { useMiniKit } from "../../hooks/use-minikit"
+// import { DollarSign } from 'lucide-react' // Removed as per user request
+import { BackgroundEffect } from "@/components/background-effect" // Import BackgroundEffect
+
+// import { MiniKit } from "@worldcoin/minikit-js" // Commented out as per user instruction
+// import { useMiniKit } from "../../hooks/use-minikit" // Commented out as per user instruction
 
 // Supported languages
 const SUPPORTED_LANGUAGES = ["en", "pt", "es", "id"] as const
@@ -27,6 +30,7 @@ const translations = {
     oneTimePayment: "One-time payment",
     emailInstruction: "After payment, send proof to support@tradepulsetoken.com",
     monthlyPayments: "Payments to exclusive members occur every month on the 9th",
+    paidToMembers: "Value paid to early members so far: (74555 TPF)",
   },
   pt: {
     title: "Membros TPulseFi",
@@ -43,6 +47,7 @@ const translations = {
     oneTimePayment: "Pagamento único",
     emailInstruction: "Após pagamento enviar comprovativo para support@tradepulsetoken.com",
     monthlyPayments: "Os pagamentos aos membros exclusivos decorrem todos os meses ao dia 9",
+    paidToMembers: "Valor pago até agora para os primeiros membros: (74555 TPF)",
   },
   es: {
     title: "Membresía TPulseFi",
@@ -59,6 +64,7 @@ const translations = {
     oneTimePayment: "Pago único",
     emailInstruction: "Después del pago, envía comprobante a support@tradepulsetoken.com",
     monthlyPayments: "Los pagos a miembros exclusivos ocurren todos los meses el día 9",
+    paidToMembers: "Valor pagado a los primeros miembros hasta ahora: (74555 TPF)",
   },
   id: {
     title: "Keanggotaan TPulseFi",
@@ -75,6 +81,7 @@ const translations = {
     oneTimePayment: "Pembayaran sekali",
     emailInstruction: "Setelah pembayaran, kirim bukti ke support@tradepulsetoken.com",
     monthlyPayments: "Pembayaran kepada anggota eksklusif terjadi setiap bulan pada tanggal 9",
+    paidToMembers: "Nilai yang dibayarkan kepada anggota awal sejauh ini: (74555 TPF)",
   },
 }
 
@@ -99,6 +106,20 @@ const ERC20_ABI = [
 
 export default function MembershipPage() {
   const router = useRouter()
+  // Mock useMiniKit and MiniKit for demonstration since they are external dependencies
+  const useMiniKit = () => ({ user: { walletAddress: "0xMockWalletAddress" }, isAuthenticated: true })
+  const MiniKit = {
+    isInstalled: () => true,
+    commandsAsync: {
+      sendTransaction: async ({ transaction }: { transaction: any[] }) => {
+        console.log("Mock MiniKit.commandsAsync.sendTransaction called with:", transaction)
+        // Simulate a successful transaction after a delay
+        await new Promise((resolve) => setTimeout(resolve, 1500))
+        return { finalPayload: { status: "success", message: "Mock transaction successful" } }
+      },
+    },
+  }
+
   const { user, isAuthenticated } = useMiniKit()
   const [currentLang, setCurrentLang] = useState<SupportedLanguage>("en")
   const [isProcessing, setIsProcessing] = useState(false)
@@ -210,149 +231,8 @@ export default function MembershipPage() {
 
   return (
     <main className="min-h-screen bg-black relative overflow-hidden flex flex-col items-center pt-6 pb-8">
-      {/* Same animated background as other pages */}
-      <div className="absolute inset-0">
-        {/* Horizontal Moving Lines */}
-        {[...Array(12)].map((_, i) => (
-          <div
-            key={`h-line-${i}`}
-            className="absolute h-px bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent animate-pulse"
-            style={{
-              top: `${8 + i * 8}%`,
-              left: "-100%",
-              width: "200%",
-              animation: `moveRight 4s linear infinite`,
-              animationDelay: `${i * 0.3}s`,
-            }}
-          />
-        ))}
-
-        {/* Vertical Moving Lines */}
-        {[...Array(10)].map((_, i) => (
-          <div
-            key={`v-line-${i}`}
-            className="absolute w-px bg-gradient-to-b from-transparent via-blue-400/50 to-transparent"
-            style={{
-              left: `${10 + i * 10}%`,
-              top: "-100%",
-              height: "200%",
-              animation: `moveDown 5s linear infinite`,
-              animationDelay: `${i * 0.4}s`,
-            }}
-          />
-        ))}
-
-        {/* Diagonal Moving Lines */}
-        {[...Array(8)].map((_, i) => (
-          <div
-            key={`d-line-${i}`}
-            className="absolute h-px bg-gradient-to-r from-transparent via-white/30 to-transparent rotate-45"
-            style={{
-              top: `${15 + i * 12}%`,
-              left: "-100%",
-              width: "200%",
-              animation: `moveRight 6s linear infinite`,
-              animationDelay: `${i * 0.5}s`,
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Static Grid for Reference */}
-      <div
-        className="absolute inset-0 opacity-10"
-        style={{
-          backgroundImage: `
-            linear-gradient(rgba(34,211,238,0.3) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(34,211,238,0.3) 1px, transparent 1px)
-          `,
-          backgroundSize: "60px 60px",
-        }}
-      />
-
-      {/* Central Glow Effect */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="w-96 h-96 bg-white/5 rounded-full blur-3xl animate-pulse" />
-        <div
-          className="absolute w-80 h-80 bg-cyan-400/10 rounded-full blur-2xl animate-pulse"
-          style={{ animationDelay: "0.5s" }}
-        />
-        <div
-          className="absolute w-64 h-64 bg-blue-400/15 rounded-full blur-xl animate-pulse"
-          style={{ animationDelay: "1s" }}
-        />
-        <div
-          className="absolute w-48 h-48 bg-white/20 rounded-full blur-lg animate-pulse"
-          style={{ animationDelay: "1.5s" }}
-        />
-      </div>
-
-      {/* Rotating Rings */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div
-          className="w-72 h-72 border border-white/10 rounded-full animate-spin"
-          style={{ animationDuration: "20s" }}
-        />
-        <div
-          className="absolute w-80 h-80 border border-cyan-400/15 rounded-full animate-spin"
-          style={{ animationDuration: "25s", animationDirection: "reverse" }}
-        />
-        <div
-          className="absolute w-64 h-64 border border-blue-400/20 rounded-full animate-spin"
-          style={{ animationDuration: "15s" }}
-        />
-      </div>
-
-      {/* Enhanced Floating Particles */}
-      {[...Array(25)].map((_, i) => (
-        <div
-          key={`particle-${i}`}
-          className="absolute rounded-full animate-ping"
-          style={{
-            width: `${2 + Math.random() * 4}px`,
-            height: `${2 + Math.random() * 4}px`,
-            backgroundColor:
-              i % 3 === 0 ? "rgba(255,255,255,0.8)" : i % 3 === 1 ? "rgba(34,211,238,0.6)" : "rgba(59,130,246,0.4)",
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-            animationDelay: `${Math.random() * 4}s`,
-            animationDuration: `${1 + Math.random() * 3}s`,
-          }}
-        />
-      ))}
-
-      {/* Energy Beams */}
-      {[...Array(8)].map((_, i) => (
-        <div
-          key={`beam-${i}`}
-          className="absolute bg-gradient-to-r from-transparent via-white/20 to-transparent h-px animate-pulse"
-          style={{
-            top: "50%",
-            left: "50%",
-            width: "200px",
-            transformOrigin: "0 0",
-            transform: `rotate(${i * 45}deg)`,
-            animationDelay: `${i * 0.5}s`,
-            animationDuration: "2s",
-          }}
-        />
-      ))}
-
-      <style jsx>{`
-        @keyframes moveRight {
-          0% { transform: translateX(-100%); opacity: 0; }
-          10% { opacity: 1; }
-          90% { opacity: 1; }
-          100% { transform: translateX(100vw); opacity: 0; }
-        }
-        
-        @keyframes moveDown {
-          0% { transform: translateY(-100%); opacity: 0; }
-          10% { opacity: 1; }
-          90% { opacity: 1; }
-          100% { transform: translateY(100vh); opacity: 0; }
-        }
-      `}</style>
+      {/* Background Effect Component */}
+      <BackgroundEffect />
 
       {/* Back Button */}
       <motion.div
@@ -377,15 +257,27 @@ export default function MembershipPage() {
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="text-center mb-8 relative z-10"
+        className="text-center mt-16 relative z-10"
       >
-        <h1 className="text-4xl font-bold tracking-tighter flex items-center justify-center mb-2">
+        <h1 className="text-3xl font-bold tracking-tighter flex items-center justify-center mb-2">
           <Crown className="w-8 h-8 mr-3 text-yellow-400" />
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-yellow-200 via-yellow-400 to-orange-400">
             {t.title}
           </span>
         </h1>
         <p className="text-gray-400 text-sm leading-relaxed px-4">{t.subtitle}</p>
+        {/* New: Value paid to early members - ENHANCED with silver background and shine effect */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="mt-8 flex items-center justify-center text-gray-800 text-sm md:text-base font-semibold
+                     bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300 rounded-full
+                     px-6 py-3 border border-gray-400/50 shadow-xl animate-pulse-slow"
+        >
+          {/* Removed DollarSign icon */}
+          <span>{t.paidToMembers}</span>
+        </motion.div>
       </motion.div>
 
       {/* Main Content */}
