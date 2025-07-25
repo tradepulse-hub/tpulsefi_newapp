@@ -34,6 +34,13 @@ const translations = {
     stayTuned: "Stay Tuned",
     moreAnnouncements: "More announcements coming soon. Check back regularly for updates!",
     back: "Back",
+    incentiveDistributionTitle: "Incentive Distribution Policy",
+    incentiveDistributionDate: "Date: July 25, 2025",
+    incentiveDistributionDescription:
+      "As of today, any prize/incentive received from any subsidiary, including World or Optimism, will be distributed as follows:",
+    incentiveDistributionBullet1: "50% for buyback and burn (adding value to our token through scarcity and buyback)",
+    incentiveDistributionBullet2: "25% for liquidity addition (for token sustainability)",
+    incentiveDistributionBullet3: "25% for the team (for development and emergency reserve)",
   },
   pt: {
     title: "Notícias",
@@ -57,6 +64,14 @@ const translations = {
     stayTuned: "Fique Ligado",
     moreAnnouncements: "Mais anúncios em breve. Volte regularmente para atualizações!",
     back: "Voltar",
+    incentiveDistributionTitle: "Política de Distribuição de Incentivos",
+    incentiveDistributionDate: "Data: 25 de Julho de 2025",
+    incentiveDistributionDescription:
+      "A partir de hoje, qualquer valor de (prêmio/incentivo) recebido de qualquer subsidiária, incluindo World ou Optimism, será distribuído da seguinte forma:",
+    incentiveDistributionBullet1:
+      "50% destinado à recompra e queima (adicionando valor ao nosso token por escassez e recompra)",
+    incentiveDistributionBullet2: "25% destinado à adição de liquidez (para sustentabilidade do token)",
+    incentiveDistributionBullet3: "25% destinado à equipe (para desenvolvimento e reserva de emergência)",
   },
   es: {
     title: "Noticias",
@@ -80,6 +95,14 @@ const translations = {
     stayTuned: "Mantente Atento",
     moreAnnouncements: "Más anuncios próximamente. ¡Vuelve regularmente para ver actualizaciones!",
     back: "Voltar",
+    incentiveDistributionTitle: "Política de Distribución de Incentivos",
+    incentiveDistributionDate: "Fecha: 25 de Julio de 2025",
+    incentiveDistributionDescription:
+      "A partir de hoy, cualquier valor de (premio/incentivo) recibido de cualquier subsidiaria, incluyendo World u Optimism, se distribuirá de la siguiente manera:",
+    incentiveDistributionBullet1:
+      "50% destinado a la recompra y quema (añadiendo valor a nuestro token por escasez y recompra)",
+    incentiveDistributionBullet2: "25% destinado a la adición de liquidez (para la sostenibilidad del token)",
+    incentiveDistributionBullet3: "25% destinado al equipo (para desarrollo y reserva de emergencia)",
   },
   id: {
     title: "Berita",
@@ -103,6 +126,14 @@ const translations = {
     stayTuned: "Tetap Terhubung",
     moreAnnouncements: "Pengumuman lebih lanjut akan segera hadir. Periksa kembali secara berkala untuk pembaruan!",
     back: "Kembali",
+    incentiveDistributionTitle: "Kebijakan Distribusi Insentif",
+    incentiveDistributionDate: "Tanggal: 25 Juli 2025",
+    incentiveDistributionDescription:
+      "Mulai hari ini, setiap hadiah/insentif yang diterima dari anak perusahaan mana pun, termasuk World atau Optimism, akan didistribusikan sebagai berikut:",
+    incentiveDistributionBullet1:
+      "50% untuk pembelian kembali dan pembakaran (menambah nilai pada token kami melalui kelangkaan dan pembelian kembali)",
+    incentiveDistributionBullet2: "25% untuk penambahan likuiditas (untuk keberlanjutan token)",
+    incentiveDistributionBullet3: "25% untuk tim (untuk pengembangan dan cadangan darurat)",
   },
 }
 
@@ -261,6 +292,43 @@ export default function NewsPage() {
                       <span>{t.worldRepublicPartyEnterNow}</span>
                       <ChevronRight size={16} className="ml-1" />
                     </a>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Incentive Distribution Announcement */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl border border-purple-500/20 rounded-2xl p-6 shadow-2xl"
+            >
+              <div className="flex items-start">
+                <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-3 rounded-xl mr-4 flex-shrink-0">
+                  <Gift size={24} className="text-white" />
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-xl font-bold text-white mb-2">{t.incentiveDistributionTitle}</h2>
+                  <div className="flex items-center text-sm text-gray-400 mb-3">
+                    <Calendar size={16} className="mr-2" />
+                    <span>{t.incentiveDistributionDate}</span>
+                  </div>
+                  <p className="text-sm text-purple-300 font-semibold mb-4">{t.incentiveDistributionDescription}</p>
+
+                  <div className="space-y-2 text-xs text-gray-300">
+                    <div className="flex items-start">
+                      <ChevronRight className="w-3 h-3 mr-2 mt-0.5 text-purple-400 flex-shrink-0" />
+                      <span>{t.incentiveDistributionBullet1}</span>
+                    </div>
+                    <div className="flex items-start">
+                      <ChevronRight className="w-3 h-3 mr-2 mt-0.5 text-purple-400 flex-shrink-0" />
+                      <span>{t.incentiveDistributionBullet2}</span>
+                    </div>
+                    <div className="flex items-start">
+                      <ChevronRight className="w-3 h-3 mr-2 mt-0.5 text-purple-400 flex-shrink-0" />
+                      <span>{t.incentiveDistributionBullet3}</span>
+                    </div>
                   </div>
                 </div>
               </div>
