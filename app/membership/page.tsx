@@ -28,7 +28,7 @@ const translations = {
     oneTimePayment: "One-time payment",
     emailInstruction: "After payment, send proof to support@tradepulsetoken.com",
     monthlyPayments: "Payments to exclusive members occur every month on the 9th",
-    paidToMembersPrefix: "Value paid to early members so far:",
+    paidToMembersPrefix: "Value paid to early members so far: (By Member)",
     paidToMembersSuffix: "TPF",
   },
   pt: {
@@ -46,7 +46,7 @@ const translations = {
     oneTimePayment: "Pagamento único",
     emailInstruction: "Após pagamento enviar comprovativo para support@tradepulsetoken.com",
     monthlyPayments: "Os pagamentos aos membros exclusivos decorrem todos os meses ao dia 9",
-    paidToMembersPrefix: "Valor pago até agora para os primeiros membros:",
+    paidToMembersPrefix: "Valor pago até agora para os primeiros membros (Por Membro):",
     paidToMembersSuffix: "TPF",
   },
   es: {
@@ -64,7 +64,7 @@ const translations = {
     oneTimePayment: "Pago único",
     emailInstruction: "Después del pago, envía comprobante a support@tradepulsetoken.com",
     monthlyPayments: "Los pagos a miembros exclusivos ocurren todos los meses el día 9",
-    paidToMembersPrefix: "Valor pagado a los primeros miembros hasta ahora:",
+    paidToMembersPrefix: "Valor pagado a los primeros miembros hasta ahora (Por Miembro):",
     paidToMembersSuffix: "TPF",
   },
   id: {
@@ -82,7 +82,7 @@ const translations = {
     oneTimePayment: "Pembayaran sekali",
     emailInstruction: "Setelah pembayaran, kirim bukti ke support@tradepulsetoken.com",
     monthlyPayments: "Pembayaran kepada anggota eksklusif terjadi setiap bulan pada tanggal 9",
-    paidToMembersPrefix: "Nilai yang dibayarkan kepada anggota awal sejauh ini:",
+    paidToMembersPrefix: "Nilai yang dibayarkan kepada anggota awal sejauh ini (Oleh Anggota):",
     paidToMembersSuffix: "TPF",
   },
 }
