@@ -78,6 +78,18 @@ const PARTNERSHIPS = [
   },
 ]
 
+// Palavras motivacionais que aparecem entre os botões sociais e parcerias
+const MOTIVATIONAL_WORDS = [
+  "Confiança",
+  "Foco no longo prazo",
+  "Compromisso",
+  "são palavras que para nós faz sentido",
+  "apoia o nosso projeto",
+  "convida amigos e familiares",
+  "e vamos",
+  "dar valor a TPulseFi",
+]
+
 // Translations
 const translations = {
   en: {
@@ -269,6 +281,10 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
   const router = useRouter()
   const isMobile = useMobile()
 
+  // Adiciona um novo estado para controlar as palavras que aparecem:
+  const [currentWordIndex, setCurrentWordIndex] = useState(0)
+  const [showWord, setShowWord] = useState(true)
+
   // Get translations for current language
   const t = translations[currentLang]
   const fullText = t.presentation?.tagline || "The Future of Decentralized Finance"
@@ -307,6 +323,19 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
     }, 3000)
 
     return () => clearInterval(interval)
+  }, [])
+
+  // Efeito para palavras motivacionais
+  useEffect(() => {
+    const wordInterval = setInterval(() => {
+      setShowWord(false)
+      setTimeout(() => {
+        setCurrentWordIndex((prev) => (prev + 1) % MOTIVATIONAL_WORDS.length)
+        setShowWord(true)
+      }, 200) // Pequena pausa entre palavras
+    }, 2000) // 2 segundos por palavra
+
+    return () => clearInterval(wordInterval)
   }, [])
 
   // REAL wallet connection handler
@@ -1003,7 +1032,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
         </div>
 
         {/* New Social Media Icons */}
-        <div className="flex items-center justify-center gap-4 mb-12 z-20 relative">
+        <div className="flex items-center justify-center gap-4 mb-8 z-20 relative">
           <a
             href="https://x.com/TradePulseToken?t=N-8tJuaN9E4asIH0A-gGEg&s=09"
             target="_blank"
@@ -1021,6 +1050,46 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
               <div className="absolute inset-0 bg-gradient-to-r from-blue-400/10 to-cyan-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <Send className="w-4 h-4 text-blue-300 relative z-10" />
               <span className="text-white text-sm font-medium relative z-10">Join Telegram</span>
+            </div>
+          </a>
+        </div>
+
+        {/* Motivational Words Animation */}
+        <div className="flex items-center justify-center mb-8 z-20 relative">
+          <div className="h-12 flex items-center justify-center">
+            <AnimatePresence mode="wait">
+              {showWord && (
+                <motion.p
+                  key={currentWordIndex}
+                  initial={{ opacity: 0, y: 20, scale: 0.8 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -20, scale: 0.8 }}
+                  transition={{ duration: 0.5, ease: "easeInOut" }}
+                  className="text-lg md:text-xl text-white font-medium text-center max-w-md px-4"
+                  style={{
+                    textShadow: "0 0 20px rgba(255,255,255,0.5)",
+                    animation: showWord ? "pulse 2s ease-in-out infinite" : "none",
+                  }}
+                >
+                  {MOTIVATIONAL_WORDS[currentWordIndex]}
+                </motion.p>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+
+        {/* Invite Button */}
+        <div className="flex items-center justify-center mb-12 z-20 relative">
+          <a
+            href="https://worldcoin.org/mini-app?app_id=app_a3a55e132983350c67923dd57dc22c5e&app_mode=mini-app"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="relative group"
+          >
+            <div className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-full flex items-center space-x-2 transition-all duration-300 transform hover:scale-105 shadow-lg">
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <Users className="w-5 h-5 text-white relative z-10" />
+              <span className="text-white text-lg font-bold relative z-10 tracking-wide">INVITE</span>
             </div>
           </a>
         </div>
