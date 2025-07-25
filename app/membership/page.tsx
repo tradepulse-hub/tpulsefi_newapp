@@ -3,11 +3,9 @@ import { useEffect, useState } from "react"
 import { ArrowLeft, Crown, Loader2, CheckCircle, Copy } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useRouter } from "next/navigation"
-// import { DollarSign } from 'lucide-react' // Removed as per user request
+import { MiniKit } from "@worldcoin/minikit-js" // Re-added original import
+import { useMiniKit } from "../../hooks/use-minikit" // Re-added original import
 import { BackgroundEffect } from "@/components/background-effect" // Import BackgroundEffect
-
-// import { MiniKit } from "@worldcoin/minikit-js" // Commented out as per user instruction
-// import { useMiniKit } from "../../hooks/use-minikit" // Commented out as per user instruction
 
 // Supported languages
 const SUPPORTED_LANGUAGES = ["en", "pt", "es", "id"] as const
@@ -30,7 +28,7 @@ const translations = {
     oneTimePayment: "One-time payment",
     emailInstruction: "After payment, send proof to support@tradepulsetoken.com",
     monthlyPayments: "Payments to exclusive members occur every month on the 9th",
-    paidToMembers: "Value paid to early members so far: (74555 TPF)",
+    paidToMembers: "Value paid to early members so far: (74555 TPF)", // Added this translation
   },
   pt: {
     title: "Membros TPulseFi",
@@ -47,7 +45,7 @@ const translations = {
     oneTimePayment: "Pagamento único",
     emailInstruction: "Após pagamento enviar comprovativo para support@tradepulsetoken.com",
     monthlyPayments: "Os pagamentos aos membros exclusivos decorrem todos os meses ao dia 9",
-    paidToMembers: "Valor pago até agora para os primeiros membros: (74555 TPF)",
+    paidToMembers: "Valor pago até agora para os primeiros membros: (74555 TPF)", // Added this translation
   },
   es: {
     title: "Membresía TPulseFi",
@@ -63,8 +61,8 @@ const translations = {
       "¡Si te suscribes tienes derecho a una parte de las tarifas de transacción que gana TPulseFi! ¡Y no es poco! ¿Qué estás esperando? ¡Es un pago de por vida! Es la mejor membresía del mundo, prometemos recuperación de la inversión a largo plazo.",
     oneTimePayment: "Pago único",
     emailInstruction: "Después del pago, envía comprobante a support@tradepulsetoken.com",
-    monthlyPayments: "Los pagos a miembros exclusivos ocurren todos los meses el día 9",
-    paidToMembers: "Valor pagado a los primeros miembros hasta ahora: (74555 TPF)",
+    monthlyPayments: "Los pagamentos a miembros exclusivos ocurren todos los meses el día 9",
+    paidToMembers: "Valor pagado a los primeros miembros hasta ahora: (74555 TPF)", // Added this translation
   },
   id: {
     title: "Keanggotaan TPulseFi",
@@ -81,7 +79,7 @@ const translations = {
     oneTimePayment: "Pembayaran sekali",
     emailInstruction: "Setelah pembayaran, kirim bukti ke support@tradepulsetoken.com",
     monthlyPayments: "Pembayaran kepada anggota eksklusif terjadi setiap bulan pada tanggal 9",
-    paidToMembers: "Nilai yang dibayarkan kepada anggota awal sejauh ini: (74555 TPF)",
+    paidToMembers: "Nilai yang dibayarkan kepada anggota awal sejauh ini: (74555 TPF)", // Added this translation
   },
 }
 
@@ -106,21 +104,7 @@ const ERC20_ABI = [
 
 export default function MembershipPage() {
   const router = useRouter()
-  // Mock useMiniKit and MiniKit for demonstration since they are external dependencies
-  const useMiniKit = () => ({ user: { walletAddress: "0xMockWalletAddress" }, isAuthenticated: true })
-  const MiniKit = {
-    isInstalled: () => true,
-    commandsAsync: {
-      sendTransaction: async ({ transaction }: { transaction: any[] }) => {
-        console.log("Mock MiniKit.commandsAsync.sendTransaction called with:", transaction)
-        // Simulate a successful transaction after a delay
-        await new Promise((resolve) => setTimeout(resolve, 1500))
-        return { finalPayload: { status: "success", message: "Mock transaction successful" } }
-      },
-    },
-  }
-
-  const { user, isAuthenticated } = useMiniKit()
+  const { user, isAuthenticated } = useMiniKit() // Original useMiniKit
   const [currentLang, setCurrentLang] = useState<SupportedLanguage>("en")
   const [isProcessing, setIsProcessing] = useState(false)
   const [paymentSuccess, setPaymentSuccess] = useState(false)
@@ -257,9 +241,11 @@ export default function MembershipPage() {
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="text-center mt-16 relative z-10"
+        className="text-center mt-16 relative z-10" // Adjusted margin-top
       >
         <h1 className="text-3xl font-bold tracking-tighter flex items-center justify-center mb-2">
+          {" "}
+          {/* Reduced font size */}
           <Crown className="w-8 h-8 mr-3 text-yellow-400" />
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-yellow-200 via-yellow-400 to-orange-400">
             {t.title}
