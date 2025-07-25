@@ -9,8 +9,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { MiniKit } from "@worldcoin/minikit-js"
 import { ethers } from "ethers"
 import { getCurrentLanguage, getTranslations } from "@/lib/i18n"
-import { useMiniKit } from "../hooks/use-minikit"
-import { BackgroundEffect } from "@/components/background-effect"
+import { useMiniKit } from "../../hooks/use-minikit" // Mantido o caminho original
+import { BackgroundEffect } from "@/components/background-effect" // Import BackgroundEffect
 
 // Endereço da carteira morta (burn address)
 const DEAD_WALLET = "0x000000000000000000000000000000000000dEaD"
@@ -1324,7 +1324,7 @@ export default function PulseCodePage() {
 
   return (
     <div className="min-h-screen text-white flex flex-col items-center justify-center p-4 relative overflow-hidden">
-      <BackgroundEffect />
+      <BackgroundEffect /> {/* Adicionado o componente BackgroundEffect */}
       <button
         onClick={() => router.back()}
         className="absolute top-6 left-6 flex items-center space-x-2 text-gray-400 hover:text-white transition-colors z-50"
@@ -1332,12 +1332,10 @@ export default function PulseCodePage() {
         <ArrowLeft className="w-5 h-5" />
         <span className="text-lg font-medium">{t.common?.back || "Back"}</span>
       </button>
-
       <div className="relative z-10 bg-black/60 backdrop-blur-lg border border-white/10 rounded-xl p-8 max-w-2xl text-center shadow-2xl mb-20">
         {" "}
         {renderContent()}
       </div>
-
       <footer className="fixed bottom-4 left-1/2 -translate-x-1/2 w-full max-w-xs bg-black/70 backdrop-blur-md border border-white/10 rounded-full p-2 z-50">
         <div className="flex justify-around items-center">
           {/* Removed the CodeStaking button */}
