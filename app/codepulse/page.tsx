@@ -9,7 +9,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { MiniKit } from "@worldcoin/minikit-js"
 import { ethers } from "ethers"
 import { getCurrentLanguage, getTranslations } from "@/lib/i18n"
-import { useMiniKit } from "../../hooks/use-minikit"
+import { useMiniKit } from "../hooks/use-minikit"
+import { BackgroundEffect } from "@/components/background-effect"
 
 // Endereço da carteira morta (burn address)
 const DEAD_WALLET = "0x000000000000000000000000000000000000dEaD"
@@ -1322,93 +1323,8 @@ export default function PulseCodePage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4 relative overflow-hidden">
-      <div className="absolute inset-0">
-        {[...Array(12)].map((_, i) => (
-          <div
-            key={`h-line-${i}`}
-            className="absolute h-px bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent animate-pulse"
-            style={{
-              top: `${8 + i * 8}%`,
-              left: "-100%",
-              width: "200%",
-              animation: `moveRight 4s linear infinite`,
-              animationDelay: `${i * 0.3}s`,
-            }}
-          />
-        ))}
-
-        {[...Array(10)].map((_, i) => (
-          <div
-            key={`v-line-${i}`}
-            className="absolute w-px bg-gradient-to-b from-transparent via-blue-400/50 to-transparent"
-            style={{
-              left: `${10 + i * 10}%`,
-              top: "-100%",
-              height: "200%",
-              animation: `moveDown 5s linear infinite`,
-              animationDelay: `${i * 0.4}s`,
-            }}
-          />
-        ))}
-
-        {[...Array(8)].map((_, i) => (
-          <div
-            key={`d-line-${i}`}
-            className="absolute h-px bg-gradient-to-r from-transparent via-white/30 to-transparent rotate-45"
-            style={{
-              top: `${15 + i * 12}%`,
-              left: "-100%",
-              width: "200%",
-              animation: `moveRight 6s linear infinite`,
-              animationDelay: `${i * 0.5}s`,
-            }}
-          />
-        ))}
-      </div>
-
-      <div
-        className="absolute inset-0 opacity-10"
-        style={{
-          backgroundImage: `
-       linear-gradient(rgba(34,211,238,0.3) 1px, transparent 1px),
-       linear-gradient(90deg, rgba(34,211,238,0.3) 1px, transparent 1px)
-     `,
-          backgroundSize: "60px 60px",
-        }}
-      />
-
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="w-96 h-96 bg-white/5 rounded-full blur-3xl animate-pulse" />
-        <div
-          className="absolute w-80 h-80 bg-cyan-400/10 rounded-full blur-2xl animate-pulse"
-          style={{ animationDelay: "0.5s" }}
-        />
-        <div
-          className="absolute w-64 h-64 bg-blue-400/15 rounded-full blur-xl animate-pulse"
-          style={{ animationDelay: "1s" }}
-        />
-        <div
-          className="absolute w-48 h-48 bg-white/20 rounded-full blur-lg animate-pulse"
-          style={{ animationDelay: "1.5s" }}
-        />
-      </div>
-
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div
-          className="w-72 h-72 border border-white/10 rounded-full animate-spin"
-          style={{ animationDuration: "20s" }}
-        />
-        <div
-          className="absolute w-80 h-80 border border-cyan-400/15 rounded-full animate-spin"
-          style={{ animationDuration: "25s", animationDirection: "reverse" }}
-        />
-        <div
-          className="absolute w-64 h-64 border border-blue-400/20 rounded-full animate-spin"
-          style={{ animationDuration: "15s" }}
-        />
-      </div>
-
+    <div className="min-h-screen text-white flex flex-col items-center justify-center p-4 relative overflow-hidden">
+      <BackgroundEffect />
       <button
         onClick={() => router.back()}
         className="absolute top-6 left-6 flex items-center space-x-2 text-gray-400 hover:text-white transition-colors z-50"
@@ -1421,39 +1337,6 @@ export default function PulseCodePage() {
         {" "}
         {renderContent()}
       </div>
-
-      {[...Array(25)].map((_, i) => (
-        <div
-          key={`particle-${i}`}
-          className="absolute rounded-full animate-ping"
-          style={{
-            width: `${2 + Math.random() * 4}px`,
-            height: `${2 + Math.random() * 4}px`,
-            backgroundColor:
-              i % 3 === 0 ? "rgba(255,255,255,0.8)" : i % 3 === 1 ? "rgba(34,211,238,0.6)" : "rgba(59,130,246,0.4)",
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-            animationDelay: `${Math.random() * 4}s`,
-            animationDuration: `${1 + Math.random() * 3}s`,
-          }}
-        />
-      ))}
-
-      {[...Array(8)].map((_, i) => (
-        <div
-          key={`beam-${i}`}
-          className="absolute bg-gradient-to-r from-transparent via-white/20 to-transparent h-px animate-pulse"
-          style={{
-            top: "50%",
-            left: "50%",
-            width: "200px",
-            transformOrigin: "0 0",
-            transform: `rotate(${i * 45}deg)`,
-            animationDelay: `${i * 0.5}s`,
-            animationDuration: "2s",
-          }}
-        />
-      ))}
 
       <footer className="fixed bottom-4 left-1/2 -translate-x-1/2 w-full max-w-xs bg-black/70 backdrop-blur-md border border-white/10 rounded-full p-2 z-50">
         <div className="flex justify-around items-center">
@@ -1490,144 +1373,6 @@ export default function PulseCodePage() {
           </Button>
         </div>
       </footer>
-
-      <style jsx>{`
-        @keyframes moveRight {
-          0% {
-            transform: translateX(-100%);
-            opacity: 0;
-          }
-          10% {
-            opacity: 1;
-          }
-          90% {
-            opacity: 1;
-          }
-          100% {
-            transform: translateX(100vw);
-            opacity: 0;
-          }
-        }
-
-        @keyframes moveDown {
-          0% {
-            transform: translateY(-100%);
-            opacity: 0;
-          }
-          10% {
-            opacity: 1;
-          }
-          90% {
-            opacity: 1;
-          }
-          100% {
-            transform: translateY(100vh);
-            opacity: 0;
-          }
-        }
-
-        @keyframes vibrateAura {
-          0% {
-            transform: translate(0);
-          }
-          25% {
-            transform: translate(0.5px, 0.5px);
-          }
-          50% {
-            transform: translate(-0.5px, 0.5px);
-          }
-          75% {
-            transform: translate(0.5px, -0.5px);
-          }
-          100% {
-            transform: translate(-0.5px, -0.5px);
-          }
-        }
-
-        @keyframes vibrateRing {
-          0% {
-            transform: translate(0) rotate(0deg);
-          }
-          25% {
-            transform: translate(1px, 1px) rotate(90deg);
-          }
-          50% {
-            transform: translate(-1px, 1px) rotate(180deg);
-          }
-          75% {
-            transform: translate(1px, -1px) rotate(270deg);
-          }
-          100% {
-            transform: translate(-1px, -1px) rotate(360deg);
-          }
-        }
-
-        @keyframes vibrateLogo {
-          0% {
-            transform: translate(0);
-          }
-          25% {
-            transform: translate(0.3px, 0.3px);
-          }
-          50% {
-            transform: translate(-0.3px, 0.3px);
-          }
-          75% {
-            transform: translate(0.3px, -0.3px);
-          }
-          100% {
-            transform: translate(-0.3px, -0.3px);
-          }
-        }
-
-        @keyframes vibrateLogoImage {
-          0% {
-            transform: translate(0) scale(1);
-          }
-          25% {
-            transform: translate(0.2px, 0.2px) scale(1.01);
-          }
-          50% {
-            transform: translate(-0.2px, 0.2px) scale(0.99);
-          }
-          75% {
-            transform: translate(0.2px, -0.2px) scale(1.01);
-          }
-          100% {
-            transform: translate(-0.2px, -0.2px) scale(0.99);
-          }
-        }
-
-        @keyframes spin {
-          from {
-            transform: rotate(0deg);
-          }
-          to {
-            transform: rotate(360deg);
-          }
-        }
-
-        @keyframes hammer {
-          0% {
-            transform: rotate(0deg);
-          }
-          25% {
-            transform: rotate(-20deg);
-          }
-          50% {
-            transform: rotate(0deg);
-          }
-          75% {
-            transform: rotate(20deg);
-          }
-          100% {
-            transform: rotate(0deg);
-          }
-        }
-        .animate-hammer {
-          animation: hammer 1s ease-in-out infinite;
-        }
-      `}</style>
     </div>
   )
 }
