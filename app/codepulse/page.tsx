@@ -713,34 +713,65 @@ export default function PulseCodePage() {
                 </div>
               </div>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 tracking-wider">
+            <h1 className="text-4xl md:text-5xl font-bold mb-2 tracking-wider">
               <span className="bg-gradient-to-r from-white via-cyan-200 to-blue-200 bg-clip-text text-transparent">
                 {t.pulsecode?.title || "PulseCode: The Project Unifier"}
               </span>
             </h1>
-            <p className="text-lg text-gray-300 leading-relaxed">
+            <h2 className="text-xl md:text-2xl font-semibold mb-4 text-gray-200">
+              {t.pulsecode?.subtitle || "Inovação e Crescimento no Ecossistema Web3"}
+            </h2>
+            <p className="text-lg text-gray-300 leading-relaxed mb-6">
               {t.pulsecode?.description ||
-                "A project focused on helping various projects get developed for a fee of 500 WLD. What do we do with this fee? 50% - Liquidity, 50% - Repurchase, continuously increasing the value of PulseCode (PSC)."}
+                "A PulseCode é uma iniciativa dedicada a impulsionar o desenvolvimento de projetos inovadores no espaço Web3. Através de um modelo de financiamento único, garantimos a sustentabilidade e o crescimento contínuo do nosso ecossistema."}
+            </p>
+            <div className="w-full h-px bg-gray-700/50 my-6" /> {/* Separador visual */}
+            <h3 className="text-2xl font-bold mb-4 text-cyan-300">
+              {t.pulsecode?.ourMissionTitle || "A Nossa Missão"}
+            </h3>
+            <p className="text-md text-gray-400 leading-relaxed">
+              {t.pulsecode?.ourMissionDescription ||
+                "O nosso objetivo é criar um ciclo virtuoso de valor: 50% das taxas de desenvolvimento são alocadas para liquidez, e os restantes 50% para recompra de tokens, aumentando progressivamente o valor do PulseCode (PSC) e beneficiando toda a comunidade."}
             </p>
           </>
         )
       // Removed the "codestaking" case entirely
       case "projects":
         return (
-          <div className="flex flex-col items-center justify-center text-xl font-semibold text-gray-300">
-            <h2 className="text-2xl font-bold mb-4 text-cyan-300">
-              {t.pulsecode?.footer?.projectsInDevelopment || "Projects in Development"}
+          <div className="flex flex-col items-center justify-center text-center">
+            <h2 className="text-4xl md:text-5xl font-bold mb-2 tracking-wider">
+              <span className="bg-gradient-to-r from-white via-cyan-200 to-blue-200 bg-clip-text text-transparent">
+                {t.pulsecode?.footer?.projectsTitle || "Nossos Projetos"}
+              </span>
             </h2>
-            <div className="flex items-center gap-2">
-              <Image
-                src="/images/keplerpay-logo.png"
-                alt="KeplerPay Logo"
-                width={40}
-                height={40}
-                className="rounded-full"
-              />
-              <span>{t.pulsecode?.footer?.keplerPay || "KeplerPay (KPP)"}</span>
-              <Hammer className="w-6 h-6 ml-2 animate-hammer" />
+            <p className="text-lg text-gray-300 leading-relaxed mb-8">
+              {t.pulsecode?.footer?.projectsSubtitle ||
+                "Descubra as iniciativas que estamos a desenvolver para o futuro da Web3."}
+            </p>
+            <div className="w-full h-px bg-gray-700/50 my-6" /> {/* Separador visual */}
+            <div className="bg-gray-900/70 backdrop-blur-sm rounded-xl border border-gray-800/50 p-6 max-w-md w-full">
+              <h3 className="text-2xl font-bold mb-4 text-cyan-300">
+                {t.pulsecode?.footer?.projectsInDevelopment || "Projetos em Desenvolvimento"}
+              </h3>
+              <div className="flex items-center justify-center gap-4 p-4 bg-gray-800/50 rounded-lg border border-gray-700">
+                <Image
+                  src="/images/keplerpay-logo.png"
+                  alt="KeplerPay Logo"
+                  width={60}
+                  height={60}
+                  className="rounded-full shadow-lg"
+                />
+                <div className="text-left">
+                  <span className="text-2xl font-semibold text-gray-100 block">
+                    {t.pulsecode?.footer?.keplerPay || "KeplerPay (KPP)"}
+                  </span>
+                  <p className="text-sm text-gray-400">
+                    {t.pulsecode?.footer?.keplerPayDescription ||
+                      "Uma plataforma de pagamentos descentralizada para o ecossistema Web3."}
+                  </p>
+                </div>
+                <Hammer className="w-8 h-8 ml-auto text-cyan-400 animate-hammer" />
+              </div>
             </div>
           </div>
         )
