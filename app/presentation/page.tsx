@@ -88,7 +88,7 @@ const INVITE_URL = "https://worldcoin.org/mini-app?app_id=app_a3a55e132983350c67
 const translations = {
   en: {
     presentation: {
-      tagline: "The Future of Decentralized Finance",
+      tagline: "THE GLOBAL CRYPTO BRIDGE",
       connectWallet: "Connect Wallet",
     },
     navigation: {
@@ -142,7 +142,7 @@ const translations = {
   },
   pt: {
     presentation: {
-      tagline: "O Futuro das Finanças Descentralizadas",
+      tagline: "THE GLOBAL CRYPTO BRIDGE",
       connectWallet: "Conectar Carteira",
     },
     navigation: {
@@ -196,7 +196,7 @@ const translations = {
   },
   es: {
     presentation: {
-      tagline: "El Futuro de las Finanças Descentralizadas",
+      tagline: "THE GLOBAL CRYPTO BRIDGE",
       connectWallet: "Conectar Billetera",
     },
     navigation: {
@@ -251,7 +251,7 @@ const translations = {
   },
   id: {
     presentation: {
-      tagline: "Masa Depan Keuangan Terdesentralisasi",
+      tagline: "THE GLOBAL CRYPTO BRIDGE",
       connectWallet: "Hubungkan Dompet",
     },
     navigation: {
@@ -1140,11 +1140,11 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
 
       {/* Main Content */}
       <div className="relative z-10 text-center">
-        {/* Logo with Ultra Vibrant Auras and Vibration */}
-        <div className="relative mb-8 flex items-center justify-center">
-          {/* Multiple Vibrant Aura Layers with Intense Pulsing */}
+        {/* Logo with Ultra Vibrant Auras and Vibration - COMPACTED */}
+        <div className="relative mb-4 flex items-center justify-center">
+          {/* Multiple Vibrant Aura Layers with Intense Pulsing - REDUCED */}
           <div
-            className="absolute w-96 h-96 rounded-full"
+            className="absolute w-64 h-64 rounded-full"
             style={{
               background: `radial-gradient(circle,
                 rgba(255,255,255,0.4) 0%,
@@ -1155,7 +1155,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             }}
           />
           <div
-            className="absolute w-80 h-80 rounded-full"
+            className="absolute w-52 h-52 rounded-full"
             style={{
               background: `radial-gradient(circle,
                 rgba(255,255,255,0.6) 0%,
@@ -1166,7 +1166,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             }}
           />
           <div
-            className="absolute w-64 h-64 rounded-full"
+            className="absolute w-40 h-40 rounded-full"
             style={{
               background: `radial-gradient(circle,
                 rgba(243,244,246,0.5) 0%,
@@ -1177,25 +1177,25 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             }}
           />
 
-          {/* Intense Vibrating Rings */}
+          {/* Intense Vibrating Rings - REDUCED */}
           <div
-            className="absolute w-72 h-72 border-2 border-gray-300/60 rounded-full"
+            className="absolute w-48 h-48 border-2 border-gray-300/60 rounded-full"
             style={{
               animation: "vibrateRing 0.1s linear infinite, spin 8s linear infinite",
-              boxShadow: "0 0 40px rgba(255,255,255,0.8), inset 0 0 40px rgba(229,231,235,0.5)",
+              boxShadow: "0 0 30px rgba(255,255,255,0.8), inset 0 0 30px rgba(229,231,235,0.5)",
             }}
           />
           <div
-            className="absolute w-60 h-60 border border-gray-400/70 rounded-full"
+            className="absolute w-36 h-36 border border-gray-400/70 rounded-full"
             style={{
               animation: "vibrateRing 0.12s linear infinite, spin 6s linear infinite reverse",
-              boxShadow: "0 0 30px rgba(255,255,255,1)",
+              boxShadow: "0 0 20px rgba(255,255,255,1)",
             }}
           />
 
-          {/* Vibrating Logo Container with REAL TPF Logo */}
+          {/* Vibrating Logo Container with REAL TPF Logo - REDUCED */}
           <div
-            className="relative w-32 h-32 flex items-center justify-center"
+            className="relative w-20 h-20 flex items-center justify-center"
             style={{
               animation: "vibrateLogo 0.08s linear infinite",
             }}
@@ -1204,21 +1204,21 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
               className="absolute inset-0 bg-white rounded-full shadow-2xl"
               style={{
                 boxShadow: `
-                  0 0 50px rgba(255,255,255,1),
-                  0 0 100px rgba(229,231,235,0.8),
-                  0 0 150px rgba(209,213,219,0.6),
-                  0 0 200px rgba(156,163,175,0.4)
-                `,
+          0 0 30px rgba(255,255,255,1),
+          0 0 60px rgba(229,231,235,0.8),
+          0 0 90px rgba(209,213,219,0.6),
+          0 0 120px rgba(156,163,175,0.4)
+        `,
                 animation: "pulse 0.5s ease-in-out infinite",
               }}
             />
-            {/* REAL TPF LOGO */}
-            <div className="relative z-10 w-28 h-28 rounded-full overflow-hidden bg-white p-2">
+            {/* REAL TPF LOGO - REDUCED */}
+            <div className="relative z-10 w-16 h-16 rounded-full overflow-hidden bg-white p-1.5">
               <Image
                 src="/images/logo-tpf.png"
                 alt="TPulseFi Logo"
-                width={112}
-                height={112}
+                width={64}
+                height={64}
                 className="w-full h-full object-contain"
                 style={{
                   animation: "vibrateLogoImage 0.1s linear infinite",
@@ -1228,22 +1228,22 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
           </div>
         </div>
 
-        {/* Brand Name */}
-        <h1 className="text-5xl md:text-6xl font-bold mb-6 tracking-wider">
+        {/* Brand Name - COMPACTED */}
+        <h1 className="text-3xl md:text-4xl font-bold mb-4 tracking-wider">
           <span className="bg-gradient-to-r from-white via-cyan-200 to-blue-200 bg-clip-text text-transparent">
             TPulseFi
           </span>
         </h1>
 
-        {/* Animated Subtitle */}
-        <div className="h-8 flex items-center justify-center mb-16">
-          <div className="flex items-center space-x-4">
-            <div className="h-px w-12 bg-gradient-to-r from-transparent to-white/50" />
-            <p className="text-lg md:text-xl text-gray-300 font-light tracking-widest uppercase min-w-[400px] text-center">
+        {/* Animated Subtitle - COMPACTED */}
+        <div className="h-6 flex items-center justify-center mb-8">
+          <div className="flex items-center space-x-3">
+            <div className="h-px w-8 bg-gradient-to-r from-transparent to-white/50" />
+            <p className="text-sm md:text-base text-gray-300 font-light tracking-widest uppercase min-w-[300px] text-center">
               {displayText}
               <span className="animate-pulse">|</span>
             </p>
-            <div className="h-px w-12 bg-gradient-to-l from-transparent to-white/50" />
+            <div className="h-px w-8 bg-gradient-to-l from-transparent to-white/50" />
           </div>
         </div>
 
@@ -1270,20 +1270,20 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
           </a>
         </div>
 
-        {/* Motivational Words Animation */}
-        <div className="flex items-center justify-center mb-8 z-20 relative">
-          <div className="h-12 flex items-center justify-center">
+        {/* Motivational Words Animation - COMPACTED */}
+        <div className="flex items-center justify-center mb-6 z-20 relative">
+          <div className="h-8 flex items-center justify-center">
             <AnimatePresence mode="wait">
               {showWord && (
                 <motion.p
                   key={currentWordIndex}
-                  initial={{ opacity: 0, y: 20, scale: 0.8 }}
+                  initial={{ opacity: 0, y: 15, scale: 0.8 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -20, scale: 0.8 }}
+                  exit={{ opacity: 0, y: -15, scale: 0.8 }}
                   transition={{ duration: 0.5, ease: "easeInOut" }}
-                  className="text-lg md:text-xl text-white font-medium text-center max-w-md px-4"
+                  className="text-sm md:text-base text-white font-medium text-center max-w-sm px-3"
                   style={{
-                    textShadow: "0 0 20px rgba(255,255,255,0.5)",
+                    textShadow: "0 0 15px rgba(255,255,255,0.5)",
                     animation: showWord ? "pulse 2s ease-in-out infinite" : "none",
                   }}
                 >
