@@ -7,8 +7,74 @@ import { ArrowLeft } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { BackgroundEffect } from "@/components/background-effect" // Import BackgroundEffect
 
-// Supported languages
-const SUPPORTED_LANGUAGES = ["en", "pt", "es", "id"] as const
+// Recharts and shadcn/ui chart imports
+import { CartesianGrid, Line, LineChart, XAxis, YAxis, ResponsiveContainer } from "recharts"
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+
+// Utility functions and data for the chart
+const parseDate = (dateString: string) => {
+  const parts = dateString.replace(" de ", " ").split(" ")
+  let day, month, year
+  if (parts.length === 3) {
+    day = Number.parseInt(parts[0])
+    month = getMonthIndex(parts[1])
+    year = Number.parseInt(parts[2])
+  } else if (parts.length === 4) {
+    day = Number.parseInt(parts[0])
+    month = getMonthIndex(parts[2])
+    year = Number.parseInt(parts[3])
+  } else {
+    throw new Error("Invalid date format: " + dateString)
+  }
+  return new Date(year, month, day)
+}
+
+const getMonthIndex = (monthName: string) => {
+  const months: { [key: string]: number } = {
+    Janeiro: 0,
+    Fevereiro: 1,
+    Março: 2,
+    Abril: 3,
+    Maio: 4,
+    Junho: 5,
+    Julho: 6,
+    Agosto: 7,
+    Setembro: 8,
+    Outubro: 9,
+    Novembro: 10,
+    Dezembro: 11,
+  }
+  return months[monthName.charAt(0).toUpperCase() + monthName.slice(1).toLowerCase()]
+}
+
+const rawData = [
+  { date: "05 Abril 2025", value: 0.000003354 },
+  { date: "10 Abril de 2025", value: 0.000005461 },
+  { date: "31 de Maio de 2025", value: 0.00001085 },
+  { date: "25 de Julho de 2025", value: 0.00002539 },
+  { date: "25 Setembro 2025", value: 0.00004 },
+  { date: "25 Novembro 2025", value: 0.00006 },
+  { date: "25 Janeiro 2026", value: 0.000085 },
+  { date: "25 Março 2026", value: 0.000115 },
+  { date: "25 Maio 2026", value: 0.00015 },
+  { date: "25 Julho 2026", value: 0.00019 },
+  { date: "25 Setembro 2026", value: 0.000235 },
+  { date: "25 Novembro 2026", value: 0.000285 },
+  { date: "25 Janeiro 2027", value: 0.00034 },
+  { date: "25 Março 2027", value: 0.0004 },
+  { date: "25 Maio 2027", value: 0.000465 },
+  { date: "25 Julho 2027", value: 0.000535 },
+  { date: "25 Setembro 2027", value: 0.00061 },
+  { date: "25 Novembro 2027", value: 0.00069 },
+]
+
+const chartData = rawData.map((item) => ({
+  date: parseDate(item.date).toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" }),
+  value: item.value,
+}))
+
+// Supported languages - now includes 'chart' for the tab label
+const SUPPORTED_LANGUAGES = ["en", "pt", "es", "id", "chart"] as const
 type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number]
 
 // Translations for about page
@@ -19,6 +85,7 @@ const translations = {
     about: "About",
     roadmap: "Roadmap",
     tokenomics: "Tokenomics",
+    chart: "Chart", // Added chart tab translation
     description:
       "TPulseFi is a DeFi project designed for long-term market appreciation, rewarding its users with daily airdrops.",
     whyChoose: "Why choose TPulseFi?",
@@ -72,6 +139,7 @@ const translations = {
     about: "Sobre",
     roadmap: "Roteiro",
     tokenomics: "Tokenomics",
+    chart: "Gráfico", // Added chart tab translation
     description:
       "TPulseFi é um projeto DeFi projetado para valorização de mercado a longo prazo, recompensando seus usuários com airdrops diários.",
     whyChoose: "Por que escolher TPulseFi?",
@@ -125,6 +193,7 @@ const translations = {
     about: "Acerca de",
     roadmap: "Hoja de Ruta",
     tokenomics: "Tokenomics",
+    chart: "Gráfico", // Added chart tab translation
     description:
       "TPulseFi es un proyecto DeFi diseñado para la apreciación del mercado a largo plazo, recompensando a sus usuarios con airdrops diarios.",
     whyChoose: "¿Por qué elegir TPulseFi?",
@@ -178,6 +247,7 @@ const translations = {
     about: "Tentang",
     roadmap: "Peta Jalan",
     tokenomics: "Tokenomics",
+    chart: "Grafik", // Added chart tab translation
     description:
       "TPulseFi adalah proyek DeFi yang dirancang untuk apresiasi pasar jangka panjang, memberikan reward kepada penggunanya dengan airdrop harian.",
     whyChoose: "Mengapa memilih TPulseFi?",
@@ -228,9 +298,13 @@ const translations = {
 }
 
 export default function AboutPage() {
-  const [activeTab, setActiveTab] = useState<"about" | "roadmap" | "tokenomics">("about")
+  const [activeTab, setActiveTab] = useState<"about" | "roadmap" | "tokenomics" | "chart">("about")
   const [currentLang, setCurrentLang] = useState<SupportedLanguage>("en")
   const router = useRouter()
+
+  // Chart specific states
+  const [isMounted, setIsMounted] = useState(false)
+  const [currentValue, setCurrentValue] = useState(chartData[0]?.value || 0)
 
   // Load saved language
   useEffect(() => {
@@ -255,6 +329,45 @@ export default function AboutPage() {
   const handleBack = () => {
     router.back()
   }
+
+  // Chart animation logic
+  const totalAnimationDuration = (chartData.length - 1) * 2000
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (isMounted && chartData.length > 0 && activeTab === "chart") {
+      const startTime = Date.now()
+      const interval = setInterval(() => {
+        const elapsed = Date.now() - startTime
+        if (elapsed >= totalAnimationDuration) {
+          setCurrentValue(chartData[chartData.length - 1].value)
+          clearInterval(interval)
+          return
+        }
+
+        const segmentDuration = 2000
+        const currentSegmentIndex = Math.floor(elapsed / segmentDuration)
+        const segmentProgress = (elapsed % segmentDuration) / segmentDuration
+
+        if (currentSegmentIndex < chartData.length - 1) {
+          const startValue = chartData[currentSegmentIndex].value
+          const endValue = chartData[currentSegmentIndex + 1].value
+          const interpolatedValue = startValue + (endValue - startValue) * segmentProgress
+          setCurrentValue(interpolatedValue)
+        } else {
+          setCurrentValue(chartData[chartData.length - 1].value)
+        }
+      }, 50)
+
+      return () => clearInterval(interval)
+    } else if (activeTab !== "chart" && isMounted && chartData.length > 0) {
+      // Reset value when leaving chart tab
+      setCurrentValue(chartData[0].value)
+    }
+  }, [isMounted, chartData, totalAnimationDuration, activeTab])
 
   return (
     <main className="min-h-screen bg-black relative overflow-hidden flex flex-col items-center pt-6 pb-8">
@@ -306,6 +419,7 @@ export default function AboutPage() {
             { id: "about", label: t.about },
             { id: "roadmap", label: t.roadmap },
             { id: "tokenomics", label: t.tokenomics },
+            { id: "chart", label: t.chart }, // New Chart Tab
           ].map((tab) => (
             <motion.button
               key={tab.id}
@@ -694,6 +808,81 @@ export default function AboutPage() {
                 </a>
               </motion.div>
             </div>
+          </motion.div>
+        )}
+
+        {/* Chart Content */}
+        {activeTab === "chart" && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="bg-black/30 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl"
+          >
+            <div className="text-center text-4xl font-bold mb-4 text-white">
+              Current Value: {currentValue.toFixed(8)}
+            </div>
+            <ChartContainer
+              config={{
+                value: {
+                  label: "Value",
+                  color: "hsl(var(--foreground))",
+                },
+              }}
+              className="min-h-[400px] w-full"
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart
+                  accessibilityLayer
+                  data={chartData}
+                  margin={{
+                    top: 20,
+                    right: 30,
+                    left: 20,
+                    bottom: 5,
+                  }}
+                >
+                  <CartesianGrid vertical={false} stroke="white" strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="date"
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={10}
+                    className="text-sm text-white"
+                  />
+                  <YAxis
+                    tickFormatter={(value) => value.toFixed(8)}
+                    tickLine={false}
+                    axisLine={false}
+                    className="text-sm text-white"
+                  />
+                  <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="line" />} />
+                  {isMounted && (
+                    <Line
+                      dataKey="value"
+                      type="monotone"
+                      stroke="white"
+                      strokeWidth={2}
+                      dot={{
+                        fill: "white",
+                        r: 4,
+                        strokeWidth: 2,
+                        stroke: "white",
+                      }}
+                      activeDot={{
+                        r: 6,
+                        fill: "white",
+                        stroke: "white",
+                        strokeWidth: 2,
+                      }}
+                      isAnimationActive={true}
+                      animationDuration={totalAnimationDuration}
+                      animationEasing="linear"
+                    />
+                  )}
+                </LineChart>
+              </ResponsiveContainer>
+            </ChartContainer>
           </motion.div>
         )}
       </motion.div>
