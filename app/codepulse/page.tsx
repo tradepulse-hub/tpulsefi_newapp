@@ -8,9 +8,9 @@ import { Button } from "@/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
 import { MiniKit } from "@worldcoin/minikit-js"
 import { ethers } from "ethers"
-import { getCurrentLanguage } from "@/lib/i18n"
-import { useMiniKit } from "../../hooks/use-minikit" // Mantido o caminho original
+import { getCurrentLanguage } from "@/lib/i18n" // Mantido para detecção de idioma
 import { BackgroundEffect } from "@/components/background-effect" // Import BackgroundEffect
+import { useMiniKit } from "@worldcoin/minikit-js"
 
 // Endereço da carteira morta (burn address)
 const DEAD_WALLET = "0x000000000000000000000000000000000000dEaD"
@@ -497,9 +497,9 @@ export default function PulseCodePage() {
 
   useEffect(() => {
     const savedLanguage = localStorage.getItem("preferred-language") as SupportedLanguage
-    if (savedLanguage && SUPPORTED_LANGUAGES.includes(savedLanguage)) {
-      setCurrentLang(savedLanguage)
-    }
+    const initialLang = savedLanguage && SUPPORTED_LANGUAGES.includes(savedLanguage) ? savedLanguage : "en"
+    setCurrentLang(initialLang)
+    setTranslations(pageTranslations[initialLang])
 
     const handleLanguageChange = () => {
       const newLang = getCurrentLanguage() as SupportedLanguage
@@ -946,11 +946,19 @@ export default function PulseCodePage() {
               {t.pulsecode?.footer?.projectsSubtitle || "A desenvolver para o futuro do mundo World."}
             </p>
             <div className="w-full h-px bg-gray-700/50 my-6" /> {/* Separador visual */}
-            <div className="bg-gray-900/70 backdrop-blur-sm rounded-xl border border-gray-800/50 p-6 max-w-md w-full">
-              <h3 className="text-2xl font-bold mb-4 text-cyan-300">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="bg-gray-900/70 backdrop-blur-sm rounded-2xl border border-gray-800/50 p-6 max-w-md w-full overflow-hidden relative group"
+              whileHover={{ scale: 1.02, borderColor: "rgba(59, 130, 246, 0.5)" }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-cyan-900/20 to-blue-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl" />
+              <h3 className="text-2xl font-bold mb-4 text-cyan-300 relative z-10">
                 {t.pulsecode?.footer?.projectsInDevelopment || "Projetos em Desenvolvimento"}
               </h3>
-              <div className="flex items-center justify-center gap-4 p-4 bg-gray-800/50 rounded-lg border border-gray-700">
+              <div className="flex items-center justify-center gap-4 p-4 bg-gray-800/50 rounded-lg border border-gray-700 relative z-10">
                 <Image
                   src="/images/keplerpay-logo.png"
                   alt="KeplerPay Logo"
@@ -969,7 +977,7 @@ export default function PulseCodePage() {
                 </div>
                 <Hammer className="w-8 h-8 ml-auto text-cyan-400 animate-hammer" />
               </div>
-            </div>
+            </motion.div>
           </div>
         )
       case "burn":
@@ -1560,10 +1568,14 @@ export default function PulseCodePage() {
         <ArrowLeft className="w-5 h-5" />
         <span className="text-lg font-medium">{t.common?.back || "Back"}</span>
       </button>
-      <div className="relative z-10 bg-black/60 backdrop-blur-lg border border-white/10 rounded-xl p-8 max-w-2xl text-center shadow-2xl mb-20">
-        {" "}
+      <motion.div
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="relative z-10 bg-black/60 backdrop-blur-lg border border-white/10 rounded-xl p-8 max-w-3xl w-full text-center shadow-2xl mb-20"
+      >
         {renderContent()}
-      </div>
+      </motion.div>
       <footer className="fixed bottom-4 left-1/2 -translate-x-1/2 w-full max-w-xs bg-black/70 backdrop-blur-md border border-white/10 rounded-full p-2 z-50">
         <div className="flex justify-around items-center">
           {/* Removed the CodeStaking button */}
