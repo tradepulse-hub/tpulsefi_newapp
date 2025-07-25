@@ -298,7 +298,7 @@ const translations = {
 }
 
 export default function AboutPage() {
-  const [activeTab, setActiveTab] = useState<"about" | "roadmap" | "tokenomics" | "prediction">("about")
+  const [activeTab, setActiveTab] = useState<"about" | "roadmap" | "tokenomics" | "chart">("about")
   const [currentLang, setCurrentLang] = useState<SupportedLanguage>("en")
   const router = useRouter()
 
@@ -419,7 +419,7 @@ export default function AboutPage() {
             { id: "about", label: t.about },
             { id: "roadmap", label: t.roadmap },
             { id: "tokenomics", label: t.tokenomics },
-            { id: "prediction", label: t.chart }, // New Chart Tab
+            { id: "chart", label: t.chart }, // New Chart Tab
           ].map((tab) => (
             <motion.button
               key={tab.id}
