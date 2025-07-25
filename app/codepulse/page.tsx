@@ -723,7 +723,7 @@ export default function PulseCodePage() {
             </h2>
             <p className="text-lg text-gray-300 leading-relaxed mb-6">
               {t.pulsecode?.description ||
-                "A PulseCode é uma iniciativa dedicada a impulsionar o desenvolvimento de projetos inovadores no espaço Web3. Através de um modelo de financiamento único, garantimos a sustentabilidade e o crescimento contínuo do nosso ecossistema."}
+                "A PulseCode é uma iniciativa dedicada a impulsionar o desenvolvimento de projetos inovadores dentro da WorldApp. Através de um modelo de financiamento único, garantimos a sustentabilidade e o crescimento contínuo do nosso ecossistema."}
             </p>
             <div className="w-full h-px bg-gray-700/50 my-6" /> {/* Separador visual */}
             <h3 className="text-2xl font-bold mb-4 text-cyan-300">
