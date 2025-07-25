@@ -419,7 +419,7 @@ export default function AboutPage() {
             { id: "about", label: t.about },
             { id: "roadmap", label: t.roadmap },
             { id: "tokenomics", label: t.tokenomics },
-            { id: "chart", label: t.chart }, // New Chart Tab
+            { id: "prediction", label: t.chart }, // New Chart Tab
           ].map((tab) => (
             <motion.button
               key={tab.id}
