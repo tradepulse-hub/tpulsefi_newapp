@@ -298,7 +298,7 @@ const translations = {
 }
 
 export default function AboutPage() {
-  const [activeTab, setActiveTab] = useState<"about" | "roadmap" | "tokenomics" | "chart">("about")
+  const [activeTab, setActiveTab] = useState<"about" | "roadmap" | "tokenomics" | "prediction">("about")
   const [currentLang, setCurrentLang] = useState<SupportedLanguage>("en")
   const router = useRouter()
 
