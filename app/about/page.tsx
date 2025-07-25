@@ -85,7 +85,8 @@ const translations = {
     about: "About",
     roadmap: "Roadmap",
     tokenomics: "Tokenomics",
-    chart: "Chart", // Added chart tab translation
+    chart: "Prediction", // Changed from Chart to Prediction
+    chartTitle: "TPulseFi Minimum Value Prediction until 2027", // New chart title
     description:
       "TPulseFi is a DeFi project designed for long-term market appreciation, rewarding its users with daily airdrops.",
     whyChoose: "Why choose TPulseFi?",
@@ -139,7 +140,8 @@ const translations = {
     about: "Sobre",
     roadmap: "Roteiro",
     tokenomics: "Tokenomics",
-    chart: "Gráfico", // Added chart tab translation
+    chart: "Previsão", // Changed from Gráfico to Previsão
+    chartTitle: "Previsão do valor mínimo de TPulseFi até 2027", // New chart title
     description:
       "TPulseFi é um projeto DeFi projetado para valorização de mercado a longo prazo, recompensando seus usuários com airdrops diários.",
     whyChoose: "Por que escolher TPulseFi?",
@@ -193,7 +195,8 @@ const translations = {
     about: "Acerca de",
     roadmap: "Hoja de Ruta",
     tokenomics: "Tokenomics",
-    chart: "Gráfico", // Added chart tab translation
+    chart: "Predicción", // Changed from Gráfico to Predicción
+    chartTitle: "Predicción del valor mínimo de TPulseFi hasta 2027", // New chart title
     description:
       "TPulseFi es un proyecto DeFi diseñado para la apreciación del mercado a largo plazo, recompensando a sus usuarios con airdrops diarios.",
     whyChoose: "¿Por qué elegir TPulseFi?",
@@ -247,7 +250,8 @@ const translations = {
     about: "Tentang",
     roadmap: "Peta Jalan",
     tokenomics: "Tokenomics",
-    chart: "Grafik", // Added chart tab translation
+    chart: "Prediksi", // Changed from Grafik to Prediksi
+    chartTitle: "Prediksi Nilai Minimum TPulseFi hingga 2027", // New chart title
     description:
       "TPulseFi adalah proyek DeFi yang dirancang untuk apresiasi pasar jangka panjang, memberikan reward kepada penggunanya dengan airdrop harian.",
     whyChoose: "Mengapa memilih TPulseFi?",
@@ -332,10 +336,6 @@ export default function AboutPage() {
 
   // Chart animation logic
   const totalAnimationDuration = (chartData.length - 1) * 2000
-
-  useEffect(() => {
-    setIsMounted(true)
-  }, [])
 
   useEffect(() => {
     if (isMounted && chartData.length > 0 && activeTab === "chart") {
@@ -478,7 +478,7 @@ export default function AboutPage() {
               </motion.h2>
               <motion.p
                 initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
+                animate={{ y: 1, opacity: 1 }}
                 transition={{ delay: 0.4 }}
                 className="text-gray-300 text-sm leading-relaxed"
               >
@@ -819,6 +819,7 @@ export default function AboutPage() {
             exit={{ opacity: 0, y: -20 }}
             className="bg-black/30 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl"
           >
+            <h3 className="text-xl font-bold text-white text-center mb-4">{t.chartTitle}</h3>
             <div className="text-center text-4xl font-bold mb-4 text-white">
               Current Value: {currentValue.toFixed(8)}
             </div>
@@ -829,7 +830,7 @@ export default function AboutPage() {
                   color: "hsl(var(--foreground))",
                 },
               }}
-              className="min-h-[400px] w-full"
+              className="min-h-[300px] w-full" // Adjusted height for more compact view
             >
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart
