@@ -8,9 +8,9 @@ import { Button } from "@/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
 import { MiniKit } from "@worldcoin/minikit-js"
 import { ethers } from "ethers"
-import { getCurrentLanguage } from "@/lib/i18n" // Mantido para detecção de idioma
+import { getCurrentLanguage, getTranslations } from "@/lib/i18n" // Revertido para o import original
+import { useMiniKit } from "../../hooks/use-minikit" // Mantido o caminho original
 import { BackgroundEffect } from "@/components/background-effect" // Import BackgroundEffect
-import { useMiniKit } from "@worldcoin/minikit-js"
 
 // Endereço da carteira morta (burn address)
 const DEAD_WALLET = "0x000000000000000000000000000000000000dEaD"
@@ -269,201 +269,10 @@ const SOFT_STAKING_ABI = [
   },
 ]
 
-// Supported languages
-const SUPPORTED_LANGUAGES = ["en", "pt", "es", "id"] as const
-type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number]
-
-// Translations for the PulseCode page
-const pageTranslations = {
-  en: {
-    common: {
-      back: "Back",
-      minikitNotInstalled: "MiniKit is not installed",
-      transactionFailed: "Transaction failed",
-      walletNotConnected: "Wallet not connected",
-      errorFetchingData: "Error fetching data",
-      hash: "Hash",
-      close_verb: "CLOSE",
-    },
-    pulsecode: {
-      title: "PulseCode: The Project Unifier",
-      subtitle: "Innovation and Growth in the Web3 Ecosystem",
-      description:
-        "PulseCode is an initiative dedicated to driving the development of innovative projects within the WorldApp. Through a unique funding model, we ensure the sustainability and continuous growth of our ecosystem.",
-      ourMissionTitle: "Our Mission",
-      ourMissionDescription:
-        "Our goal is to create a virtuous cycle of value: 50% of development fees are allocated to liquidity, and the remaining 50% for token buybacks, progressively increasing the value of PulseCode (PSC) and benefiting the entire community.",
-      footer: {
-        projectsTitle: "Our Projects",
-        projectsSubtitle: "Developing for the future of the World.", // Updated subtitle
-        projectsInDevelopment: "Projects in Development",
-        keplerPay: "KeplerPay (KPP)",
-        keplerPayDescription: "A decentralized payment platform for the Web3 ecosystem.",
-      },
-    },
-    furnace: {
-      title: "Furnace",
-      subtitle: "Burn PSC tokens and contribute to token stability",
-      totalBurned: "Total burned",
-      invalidBurnAmount: "Invalid amount for burning",
-      burnCompleted: "Burn Completed!",
-      lastTransaction: "Last Transaction",
-      burning: "Burning...",
-      openFurnace: "Open Furnace",
-      startBurn: "Start Burn",
-      instructions: "Click the button to open the furnace",
-      amountToBurn: "Amount of PSC to burn",
-      furnaceInfo: "Furnace Information",
-      deflation:
-        "Deflation: Each token burned is sent to a dead wallet (0x000...dEaD) and permanently removed from circulation.",
-    },
-    staking: {
-      claimFailed: "Failed to claim rewards.",
-    },
-  },
-  pt: {
-    common: {
-      back: "Voltar",
-      minikitNotInstalled: "MiniKit não está instalado",
-      transactionFailed: "Transação falhou",
-      walletNotConnected: "Carteira não conectada",
-      errorFetchingData: "Erro ao buscar dados",
-      hash: "Hash",
-      close_verb: "FECHAR",
-    },
-    pulsecode: {
-      title: "PulseCode: O Unificador de Projetos",
-      subtitle: "Inovação e Crescimento no Ecossistema Web3",
-      description:
-        "A PulseCode é uma iniciativa dedicada a impulsionar o desenvolvimento de projetos inovadores dentro da WorldApp. Através de um modelo de financiamento único, garantimos a sustentabilidade e o crescimento contínuo do nosso ecossistema.",
-      ourMissionTitle: "A Nossa Missão",
-      ourMissionDescription:
-        "O nosso objetivo é criar um ciclo virtuoso de valor: 50% das taxas de desenvolvimento são alocadas para liquidez, e os restantes 50% para recompra de tokens, aumentando progressivamente o valor do PulseCode (PSC) e beneficiando toda a comunidade.",
-      footer: {
-        projectsTitle: "Nossos Projetos",
-        projectsSubtitle: "A desenvolver para o futuro do mundo World.", // Updated subtitle
-        projectsInDevelopment: "Projetos em Desenvolvimento",
-        keplerPay: "KeplerPay (KPP)",
-        keplerPayDescription: "Uma plataforma de pagamentos descentralizada para o ecossistema Web3.",
-      },
-    },
-    furnace: {
-      title: "Fornalha",
-      subtitle: "Queime tokens PSC e contribua para a estabilidade do token",
-      totalBurned: "Total queimado",
-      invalidBurnAmount: "Quantidade inválida para queima",
-      burnCompleted: "Queima Concluída!",
-      lastTransaction: "Última Transação",
-      burning: "Queimando...",
-      openFurnace: "Abrir a Fornalha",
-      startBurn: "Iniciar Queima",
-      instructions: "Clique no botão para abrir a fornalha",
-      amountToBurn: "Quantidade de PSC para queimar",
-      furnaceInfo: "Informações sobre a Fornalha",
-      deflation:
-        "Deflação: Cada token queimado é enviado para uma carteira morta (0x000...dEaD) e removido permanentemente da circulação.",
-    },
-    staking: {
-      claimFailed: "Falha ao reivindicar recompensas.",
-    },
-  },
-  es: {
-    common: {
-      back: "Volver",
-      minikitNotInstalled: "MiniKit no está instalado",
-      transactionFailed: "Transacción fallida",
-      walletNotConnected: "Billetera no conectada",
-      errorFetchingData: "Error al obtener datos",
-      hash: "Hash",
-      close_verb: "CERRAR",
-    },
-    pulsecode: {
-      title: "PulseCode: El Unificador de Proyectos",
-      subtitle: "Innovación y Crecimiento en el Ecosistema Web3",
-      description:
-        "PulseCode es una iniciativa dedicada a impulsar el desarrollo de proyectos innovadores dentro de WorldApp. A través de un modelo de financiación único, aseguramos la sostenibilidad y el crecimiento continuo de nuestro ecosistema.",
-      ourMissionTitle: "Nuestra Misión",
-      ourMissionDescription:
-        "Nuestro objetivo es crear un ciclo virtuoso de valor: el 50% de las tarifas de desarrollo se asignan a la liquidez, y el 50% restante para la recompra de tokens, aumentando progresivamente el valor de PulseCode (PSC) y beneficiando a toda la comunidad.",
-      footer: {
-        projectsTitle: "Nuestros Proyectos",
-        projectsSubtitle: "Desarrollando para el futuro del mundo World.", // Updated subtitle
-        projectsInDevelopment: "Proyectos en Desarrollo",
-        keplerPay: "KeplerPay (KPP)",
-        keplerPayDescription: "Una plataforma de pagos descentralizada para el ecosistema Web3.",
-      },
-    },
-    furnace: {
-      title: "Horno",
-      subtitle: "Quema tokens PSC y contribuye a la estabilidad del token",
-      totalBurned: "Total quemado",
-      invalidBurnAmount: "Cantidad inválida para quemar",
-      burnCompleted: "¡Quema Completada!",
-      lastTransaction: "Última Transacción",
-      burning: "Quemando...",
-      openFurnace: "Abrir el Horno",
-      startBurn: "Iniciar Quema",
-      instructions: "Haz clic en el botón para abrir el horno",
-      amountToBurn: "Cantidad de PSC a quemar",
-      furnaceInfo: "Información del Horno",
-      deflation:
-        "Deflación: Cada token quemado se envía a una billetera muerta (0x000...dEaD) y se elimina permanentemente de la circulación.",
-    },
-    staking: {
-      claimFailed: "No se pudieron reclamar las recompensas.",
-    },
-  },
-  id: {
-    common: {
-      back: "Kembali",
-      minikitNotInstalled: "MiniKit tidak terinstal",
-      transactionFailed: "Transaksi gagal",
-      walletNotConnected: "Dompet tidak terhubung",
-      errorFetchingData: "Gagal mengambil data",
-      hash: "Hash",
-      close_verb: "TUTUP",
-    },
-    pulsecode: {
-      title: "PulseCode: Penyatuan Proyek",
-      subtitle: "Inovasi dan Pertumbuhan dalam Ekosistem Web3",
-      description:
-        "PulseCode adalah inisiatif yang didedikasikan untuk mendorong pengembangan proyek-proyek inovatif di dalam WorldApp. Melalui model pendanaan yang unik, kami memastikan keberlanjutan dan pertumbuhan ekosistem kami yang berkelanjutan.",
-      ourMissionTitle: "Misi Kami",
-      ourMissionDescription:
-        "Tujuan kami adalah menciptakan siklus nilai yang baik: 50% dari biaya pengembangan dialokasikan untuk likuiditas, dan 50% sisanya untuk pembelian kembali token, secara progresif meningkatkan nilai PulseCode (PSC) dan menguntungkan seluruh komunitas.",
-      footer: {
-        projectsTitle: "Proyek Kami",
-        projectsSubtitle: "Mengembangkan untuk masa depan Dunia.", // Updated subtitle
-        projectsInDevelopment: "Proyek dalam Pengembangan",
-        keplerPay: "KeplerPay (KPP)",
-        keplerPayDescription: "Platform pembayaran terdesentralisasi untuk ekosistem Web3.",
-      },
-    },
-    furnace: {
-      title: "Tungku",
-      subtitle: "Bakar token PSC dan berkontribusi pada stabilitas token",
-      totalBurned: "Total dibakar",
-      invalidBurnAmount: "Jumlah pembakaran tidak valid",
-      burnCompleted: "Pembakaran Selesai!",
-      lastTransaction: "Transaksi Terakhir",
-      burning: "Membakar...",
-      openFurnace: "Buka Tungku",
-      startBurn: "Mulai Pembakaran",
-      instructions: "Klik tombol untuk membuka tungku",
-      amountToBurn: "Jumlah PSC yang akan dibakar",
-      furnaceInfo: "Informasi Tungku",
-      deflation:
-        "Deflasi: Setiap token yang dibakar dikirim ke dompet mati (0x000...dEaD) dan dihapus secara permanen dari peredaran.",
-    },
-    staking: {
-      claimFailed: "Gagal mengklaim hadiah.",
-    },
-  },
-}
-
 export default function PulseCodePage() {
   const router = useRouter()
-  const [currentLang, setCurrentLang] = useState<SupportedLanguage>("en")
+  const [currentLang, setCurrentLang] = useState<string>("en")
+  const [activeFooterTab, setActiveFooterTab] = useState<"about" | "projects" | "burn">("about")
 
   // Use useMiniKit hook
   const { address: userAddress, isConnected: isAuthenticated, isConnecting } = useMiniKit()
@@ -493,20 +302,16 @@ export default function PulseCodePage() {
   const [claimError, setClaimError] = useState<string | null>(null)
 
   // Translations
-  const [translations, setTranslations] = useState(pageTranslations[currentLang])
+  const [translations, setTranslations] = useState(getTranslations(getCurrentLanguage())) // Revertido para o estado original
 
   useEffect(() => {
-    const savedLanguage = localStorage.getItem("preferred-language") as SupportedLanguage
-    const initialLang = savedLanguage && SUPPORTED_LANGUAGES.includes(savedLanguage) ? savedLanguage : "en"
-    setCurrentLang(initialLang)
-    setTranslations(pageTranslations[initialLang])
+    const savedLanguage = localStorage.getItem("preferred-language")
+    if (savedLanguage) {
+      setCurrentLang(savedLanguage)
+    }
 
     const handleLanguageChange = () => {
-      const newLang = getCurrentLanguage() as SupportedLanguage
-      if (SUPPORTED_LANGUAGES.includes(newLang)) {
-        setCurrentLang(newLang)
-        setTranslations(pageTranslations[newLang])
-      }
+      setTranslations(getTranslations(getCurrentLanguage()))
     }
     window.addEventListener("languageChange", handleLanguageChange)
     return () => {
@@ -515,9 +320,6 @@ export default function PulseCodePage() {
   }, [])
 
   const t = translations
-
-  // State for active footer tab
-  const [activeFooterTab, setActiveFooterTab] = useState<"about" | "projects" | "burn">("about")
 
   useEffect(() => {
     if (doorOpen) {
@@ -624,7 +426,7 @@ export default function PulseCodePage() {
       setIsBurning(false)
 
       console.error(
-        t.common?.transactionFailed || "Falha ao queimar tokens",
+        t.wallet?.sendToken?.transactionFailed || "Falha ao queimar tokens",
         error instanceof Error ? error.message : "Erro desconhecido",
       )
     }
@@ -834,10 +636,10 @@ export default function PulseCodePage() {
                 className="absolute w-48 h-48 rounded-full"
                 style={{
                   background: `radial-gradient(circle,
-                rgba(255,255,255,0.4) 0%,
-                rgba(156,163,175,0.3) 30%,
-                rgba(107,114,128,0.2) 60%,
-                transparent 100%)`,
+              rgba(255,255,255,0.4) 0%,
+              rgba(156,163,175,0.3) 30%,
+              rgba(107,114,128,0.2) 60%,
+              transparent 100%)`,
                   animation: "vibrateAura 0.1s linear infinite, pulse 1s ease-in-out infinite",
                 }}
               />
@@ -845,9 +647,9 @@ export default function PulseCodePage() {
                 className="absolute w-40 h-40 rounded-full"
                 style={{
                   background: `radial-gradient(circle,
-                rgba(255,255,255,0.6) 0%,
-                rgba(229,231,235,0.4) 40%,
-                transparent 100%)`,
+              rgba(255,255,255,0.6) 0%,
+              rgba(229,231,235,0.4) 40%,
+              transparent 100%)`,
                   animation: "vibrateAura 0.15s linear infinite, pulse 0.8s ease-in-out infinite",
                   animationDelay: "0.05s",
                 }}
@@ -856,9 +658,9 @@ export default function PulseCodePage() {
                 className="absolute w-32 h-32 rounded-full"
                 style={{
                   background: `radial-gradient(circle,
-                rgba(243,244,246,0.5) 0%,
-                rgba(209,213,219,0.4) 50%,
-                transparent 100%)`,
+              rgba(243,244,246,0.5) 0%,
+              rgba(209,213,219,0.4) 50%,
+              transparent 100%)`,
                   animation: "vibrateAura 0.2s linear infinite, pulse 0.6s ease-in-out infinite",
                   animationDelay: "0.1s",
                 }}
@@ -889,11 +691,11 @@ export default function PulseCodePage() {
                   className="absolute inset-0 bg-white rounded-full shadow-2xl"
                   style={{
                     boxShadow: `
-                  0 0 25px rgba(255,255,255,1),
-                  0 0 50px rgba(229,231,235,0.8),
-                  0 0 75px rgba(209,213,219,0.6),
-                  0 0 100px rgba(156,163,175,0.4)
-                `,
+                0 0 25px rgba(255,255,255,1),
+                0 0 50px rgba(229,231,235,0.8),
+                0 0 75px rgba(209,213,219,0.6),
+                0 0 100px rgba(156,163,175,0.4)
+              `,
                     animation: "pulse 0.5s ease-in-out infinite",
                   }}
                 />
@@ -943,22 +745,15 @@ export default function PulseCodePage() {
               </span>
             </h2>
             <p className="text-lg text-gray-300 leading-relaxed mb-8">
-              {t.pulsecode?.footer?.projectsSubtitle || "A desenvolver para o futuro do mundo World."}
+              {t.pulsecode?.footer?.projectsSubtitle ||
+                "Descubra as iniciativas que estamos a desenvolver para o futuro da Web3."}
             </p>
             <div className="w-full h-px bg-gray-700/50 my-6" /> {/* Separador visual */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="bg-gray-900/70 backdrop-blur-sm rounded-2xl border border-gray-800/50 p-6 max-w-md w-full overflow-hidden relative group"
-              whileHover={{ scale: 1.02, borderColor: "rgba(59, 130, 246, 0.5)" }}
-              transition={{ duration: 0.2 }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-cyan-900/20 to-blue-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl" />
-              <h3 className="text-2xl font-bold mb-4 text-cyan-300 relative z-10">
+            <div className="bg-gray-900/70 backdrop-blur-sm rounded-xl border border-gray-800/50 p-6 max-w-md w-full">
+              <h3 className="text-2xl font-bold mb-4 text-cyan-300">
                 {t.pulsecode?.footer?.projectsInDevelopment || "Projetos em Desenvolvimento"}
               </h3>
-              <div className="flex items-center justify-center gap-4 p-4 bg-gray-800/50 rounded-lg border border-gray-700 relative z-10">
+              <div className="flex items-center justify-center gap-4 p-4 bg-gray-800/50 rounded-lg border border-gray-700">
                 <Image
                   src="/images/keplerpay-logo.png"
                   alt="KeplerPay Logo"
@@ -977,7 +772,7 @@ export default function PulseCodePage() {
                 </div>
                 <Hammer className="w-8 h-8 ml-auto text-cyan-400 animate-hammer" />
               </div>
-            </motion.div>
+            </div>
           </div>
         )
       case "burn":
@@ -1568,14 +1363,10 @@ export default function PulseCodePage() {
         <ArrowLeft className="w-5 h-5" />
         <span className="text-lg font-medium">{t.common?.back || "Back"}</span>
       </button>
-      <motion.div
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        className="relative z-10 bg-black/60 backdrop-blur-lg border border-white/10 rounded-xl p-8 max-w-3xl w-full text-center shadow-2xl mb-20"
-      >
+      <div className="relative z-10 bg-black/60 backdrop-blur-lg border border-white/10 rounded-xl p-8 max-w-2xl text-center shadow-2xl mb-20">
+        {" "}
         {renderContent()}
-      </motion.div>
+      </div>
       <footer className="fixed bottom-4 left-1/2 -translate-x-1/2 w-full max-w-xs bg-black/70 backdrop-blur-md border border-white/10 rounded-full p-2 z-50">
         <div className="flex justify-around items-center">
           {/* Removed the CodeStaking button */}
