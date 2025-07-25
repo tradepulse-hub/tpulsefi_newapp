@@ -24,6 +24,9 @@ import {
   Gamepad2,
   Code,
   Send,
+  Share2,
+  Copy,
+  Check,
 } from "lucide-react"
 import { useMiniKit } from "../../hooks/use-minikit"
 import MiniWallet from "../../components/mini-wallet"
@@ -78,17 +81,8 @@ const PARTNERSHIPS = [
   },
 ]
 
-// Palavras motivacionais que aparecem entre os botões sociais e parcerias
-const MOTIVATIONAL_WORDS = [
-  "Confiança",
-  "Foco no longo prazo",
-  "Compromisso",
-  "são palavras que para nós faz sentido",
-  "apoia o nosso projeto",
-  "convida amigos e familiares",
-  "e vamos",
-  "dar valor a TPulseFi",
-]
+// URL do convite
+const INVITE_URL = "https://worldcoin.org/mini-app?app_id=app_a3a55e132983350c67923dd57dc22c5e&app_mode=mini-app"
 
 // Translations
 const translations = {
@@ -98,7 +92,7 @@ const translations = {
       connectWallet: "Connect Wallet",
     },
     navigation: {
-      codepulse: "PulseCode", // Changed from CodePulse
+      codepulse: "PulseCode",
       wallet: "Wallet",
       news: "News",
       airdrop: "Airdrop",
@@ -114,6 +108,10 @@ const translations = {
       language: "Language",
       close: "Close",
       back: "Back",
+      invite: "INVITE",
+      linkCopied: "Link copied!",
+      shareVia: "Share via",
+      copyLink: "Copy Link",
     },
     partnerships: {
       visitApp: "Visit App",
@@ -131,6 +129,16 @@ const translations = {
       termsConditions: "Terms & Conditions",
       eventButton: "Event",
     },
+    motivationalWords: [
+      "Trust",
+      "Long-term focus",
+      "Commitment",
+      "these are words that make sense to us",
+      "support our project",
+      "invite friends and family",
+      "and let's",
+      "give value to TPulseFi",
+    ],
   },
   pt: {
     presentation: {
@@ -138,7 +146,7 @@ const translations = {
       connectWallet: "Conectar Carteira",
     },
     navigation: {
-      codepulse: "PulseCode", // Changed from CodePulse
+      codepulse: "PulseCode",
       wallet: "Carteira",
       news: "Notícias",
       airdrop: "Airdrop",
@@ -154,6 +162,10 @@ const translations = {
       language: "Idioma",
       close: "Fechar",
       back: "Voltar",
+      invite: "CONVIDAR",
+      linkCopied: "Link copiado!",
+      shareVia: "Partilhar via",
+      copyLink: "Copiar Link",
     },
     partnerships: {
       visitApp: "Visitar App",
@@ -171,6 +183,16 @@ const translations = {
       termsConditions: "Termos e Condições",
       eventButton: "Evento",
     },
+    motivationalWords: [
+      "Confiança",
+      "Foco no longo prazo",
+      "Compromisso",
+      "são palavras que para nós faz sentido",
+      "apoia o nosso projeto",
+      "convida amigos e familiares",
+      "e vamos",
+      "dar valor a TPulseFi",
+    ],
   },
   es: {
     presentation: {
@@ -178,7 +200,7 @@ const translations = {
       connectWallet: "Conectar Billetera",
     },
     navigation: {
-      codepulse: "PulseCode", // Changed from CodePulse
+      codepulse: "PulseCode",
       wallet: "Billetera",
       news: "Noticias",
       airdrop: "Airdrop",
@@ -194,6 +216,10 @@ const translations = {
       language: "Idioma",
       close: "Cerrar",
       back: "Atrás",
+      invite: "INVITAR",
+      linkCopied: "¡Enlace copiado!",
+      shareVia: "Compartir vía",
+      copyLink: "Copiar Enlace",
     },
     partnerships: {
       visitApp: "Visitar App",
@@ -212,6 +238,16 @@ const translations = {
       termsConditions: "Términos y Condiciones",
       eventButton: "Evento",
     },
+    motivationalWords: [
+      "Confianza",
+      "Enfoque a largo plazo",
+      "Compromiso",
+      "son palabras que tienen sentido para nosotros",
+      "apoya nuestro proyecto",
+      "invita a amigos y familiares",
+      "y vamos a",
+      "dar valor a TPulseFi",
+    ],
   },
   id: {
     presentation: {
@@ -219,7 +255,7 @@ const translations = {
       connectWallet: "Hubungkan Dompet",
     },
     navigation: {
-      codepulse: "PulseCode", // Changed from CodePulse
+      codepulse: "PulseCode",
       wallet: "Dompet",
       news: "Berita",
       airdrop: "Airdrop",
@@ -235,6 +271,10 @@ const translations = {
       language: "Bahasa",
       close: "Tutup",
       back: "Kembali",
+      invite: "UNDANG",
+      linkCopied: "Link disalin!",
+      shareVia: "Bagikan via",
+      copyLink: "Salin Link",
     },
     partnerships: {
       visitApp: "Kunjungi App",
@@ -252,6 +292,16 @@ const translations = {
       termsConditions: "Syarat & Ketentuan",
       eventButton: "Acara",
     },
+    motivationalWords: [
+      "Kepercayaan",
+      "Fokus jangka panjang",
+      "Komitmen",
+      "adalah kata-kata yang masuk akal bagi kami",
+      "dukung proyek kami",
+      "undang teman dan keluarga",
+      "dan mari",
+      "berikan nilai pada TPulseFi",
+    ],
   },
 }
 
@@ -276,6 +326,8 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
   const [showMiniWallet, setShowMiniWallet] = useState(false)
   const [showLanguageMenu, setShowLanguageMenu] = useState(false)
   const [showEventsModal, setShowEventsModal] = useState(false)
+  const [showShareModal, setShowShareModal] = useState(false)
+  const [linkCopied, setLinkCopied] = useState(false)
   const [currentLang, setCurrentLang] = useState<keyof typeof translations>("en")
   const [currentPartnerIndex, setCurrentPartnerIndex] = useState(0)
   const router = useRouter()
@@ -330,13 +382,59 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
     const wordInterval = setInterval(() => {
       setShowWord(false)
       setTimeout(() => {
-        setCurrentWordIndex((prev) => (prev + 1) % MOTIVATIONAL_WORDS.length)
+        setCurrentWordIndex((prev) => (prev + 1) % t.motivationalWords.length)
         setShowWord(true)
       }, 200) // Pequena pausa entre palavras
     }, 2000) // 2 segundos por palavra
 
     return () => clearInterval(wordInterval)
-  }, [])
+  }, [t.motivationalWords.length])
+
+  // Handle copy link
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(INVITE_URL)
+      setLinkCopied(true)
+      setTimeout(() => setLinkCopied(false), 2000)
+    } catch (error) {
+      console.error("Failed to copy link:", error)
+    }
+  }
+
+  // Handle share options
+  const handleShare = (platform: string) => {
+    const message = `Join TPulseFi - The Future of Decentralized Finance! ${INVITE_URL}`
+    const encodedMessage = encodeURIComponent(message)
+    const encodedUrl = encodeURIComponent(INVITE_URL)
+
+    let shareUrl = ""
+
+    switch (platform) {
+      case "whatsapp":
+        shareUrl = `https://wa.me/?text=${encodedMessage}`
+        break
+      case "telegram":
+        shareUrl = `https://t.me/share/url?url=${encodedUrl}&text=${encodeURIComponent("Join TPulseFi - The Future of Decentralized Finance!")}`
+        break
+      case "twitter":
+        shareUrl = `https://twitter.com/intent/tweet?text=${encodedMessage}`
+        break
+      case "facebook":
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`
+        break
+      case "linkedin":
+        shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`
+        break
+      case "email":
+        shareUrl = `mailto:?subject=${encodeURIComponent("Join TPulseFi")}&body=${encodedMessage}`
+        break
+      default:
+        return
+    }
+
+    window.open(shareUrl, "_blank", "width=600,height=400")
+    setShowShareModal(false)
+  }
 
   // REAL wallet connection handler
   const handleWalletConnect = async () => {
@@ -754,6 +852,124 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
         )}
       </AnimatePresence>
 
+      {/* Share Modal */}
+      <AnimatePresence>
+        {showShareModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            onClick={() => setShowShareModal(false)}
+          >
+            {/* Backdrop */}
+            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+
+            {/* Modal */}
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0, y: 50 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.8, opacity: 0, y: 50 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="relative bg-black/90 backdrop-blur-xl border border-white/20 rounded-2xl p-4 max-w-sm w-full mx-4 shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => setShowShareModal(false)}
+                className="absolute top-4 right-4 w-8 h-8 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all duration-200"
+              >
+                <X className="w-4 h-4 text-white" />
+              </button>
+
+              {/* Modal Header */}
+              <div className="text-center mb-4">
+                <h3 className="text-lg font-bold text-white mb-2">{t.common?.shareVia || "Share via"}</h3>
+              </div>
+
+              {/* Share Options */}
+              <div className="grid grid-cols-3 gap-3 mb-4">
+                <button
+                  onClick={() => handleShare("whatsapp")}
+                  className="flex flex-col items-center p-3 bg-green-500/20 hover:bg-green-500/30 rounded-lg transition-all duration-200"
+                >
+                  <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center mb-2">
+                    <span className="text-white text-sm font-bold">W</span>
+                  </div>
+                  <span className="text-white text-xs">WhatsApp</span>
+                </button>
+
+                <button
+                  onClick={() => handleShare("telegram")}
+                  className="flex flex-col items-center p-3 bg-blue-500/20 hover:bg-blue-500/30 rounded-lg transition-all duration-200"
+                >
+                  <Send className="w-8 h-8 text-blue-400 mb-2" />
+                  <span className="text-white text-xs">Telegram</span>
+                </button>
+
+                <button
+                  onClick={() => handleShare("twitter")}
+                  className="flex flex-col items-center p-3 bg-sky-500/20 hover:bg-sky-500/30 rounded-lg transition-all duration-200"
+                >
+                  <div className="w-8 h-8 bg-sky-500 rounded-full flex items-center justify-center mb-2">
+                    <span className="text-white text-sm font-bold">X</span>
+                  </div>
+                  <span className="text-white text-xs">Twitter</span>
+                </button>
+
+                <button
+                  onClick={() => handleShare("facebook")}
+                  className="flex flex-col items-center p-3 bg-blue-600/20 hover:bg-blue-600/30 rounded-lg transition-all duration-200"
+                >
+                  <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center mb-2">
+                    <span className="text-white text-sm font-bold">f</span>
+                  </div>
+                  <span className="text-white text-xs">Facebook</span>
+                </button>
+
+                <button
+                  onClick={() => handleShare("linkedin")}
+                  className="flex flex-col items-center p-3 bg-blue-700/20 hover:bg-blue-700/30 rounded-lg transition-all duration-200"
+                >
+                  <div className="w-8 h-8 bg-blue-700 rounded-full flex items-center justify-center mb-2">
+                    <span className="text-white text-sm font-bold">in</span>
+                  </div>
+                  <span className="text-white text-xs">LinkedIn</span>
+                </button>
+
+                <button
+                  onClick={() => handleShare("email")}
+                  className="flex flex-col items-center p-3 bg-gray-500/20 hover:bg-gray-500/30 rounded-lg transition-all duration-200"
+                >
+                  <div className="w-8 h-8 bg-gray-500 rounded-full flex items-center justify-center mb-2">
+                    <span className="text-white text-sm font-bold">@</span>
+                  </div>
+                  <span className="text-white text-xs">Email</span>
+                </button>
+              </div>
+
+              {/* Copy Link Button */}
+              <button
+                onClick={handleCopyLink}
+                className="w-full flex items-center justify-center space-x-2 p-3 bg-white/10 hover:bg-white/20 rounded-lg transition-all duration-200"
+              >
+                {linkCopied ? (
+                  <>
+                    <Check className="w-4 h-4 text-green-400" />
+                    <span className="text-green-400 font-medium">{t.common?.linkCopied || "Link copied!"}</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4 text-white" />
+                    <span className="text-white font-medium">{t.common?.copyLink || "Copy Link"}</span>
+                  </>
+                )}
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Partnership Slideshow - Between subtitle and bottom bar */}
       <div className="fixed bottom-20 left-0 right-0 z-30 flex justify-center">
         <AnimatePresence mode="wait">
@@ -1071,7 +1287,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                     animation: showWord ? "pulse 2s ease-in-out infinite" : "none",
                   }}
                 >
-                  {MOTIVATIONAL_WORDS[currentWordIndex]}
+                  {t.motivationalWords[currentWordIndex]}
                 </motion.p>
               )}
             </AnimatePresence>
@@ -1080,18 +1296,15 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
 
         {/* Invite Button */}
         <div className="flex items-center justify-center mb-12 z-20 relative">
-          <a
-            href="https://worldcoin.org/mini-app?app_id=app_a3a55e132983350c67923dd57dc22c5e&app_mode=mini-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="relative group"
-          >
+          <button onClick={() => setShowShareModal(true)} className="relative group">
             <div className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-full flex items-center space-x-2 transition-all duration-300 transform hover:scale-105 shadow-lg">
               <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <Users className="w-5 h-5 text-white relative z-10" />
-              <span className="text-white text-lg font-bold relative z-10 tracking-wide">INVITE</span>
+              <Share2 className="w-5 h-5 text-white relative z-10" />
+              <span className="text-white text-lg font-bold relative z-10 tracking-wide">
+                {t.common?.invite || "INVITE"}
+              </span>
             </div>
-          </a>
+          </button>
         </div>
       </div>
     </div>
