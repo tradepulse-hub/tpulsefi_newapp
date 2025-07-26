@@ -1282,32 +1282,33 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             style={{
               animation: "vibrateLogo 0.08s linear infinite",
             }}
-          />
-          <div
-            className="absolute inset-0 bg-white rounded-full shadow-2xl"
-            style={{
-              boxShadow: `
+          > {/* Corrected: This div is now an opening tag */}
+            <div
+              className="absolute inset-0 bg-white rounded-full shadow-2xl"
+              style={{
+                boxShadow: `
       0 0 30px rgba(255,255,255,1),
       0 0 60px rgba(229,231,235,0.8),
       0 0 90px rgba(209,213,219,0.6),
       0 0 120px rgba(156,163,175,0.4)
     `,
-              animation: "pulse 0.5s ease-in-out infinite",
-            }}
-          />
-          {/* REAL TPF LOGO - REDUCED */}
-          <div className="relative z-10 w-16 h-16 rounded-full overflow-hidden bg-white p-1.5">
-            <Image
-              src="/images/logo-tpf.png"
-              alt="TPulseFi Logo"
-              width={64}
-              height={64}
-              className="w-full h-full object-contain"
-              style={{
-                animation: "vibrateLogoImage 0.1s linear infinite",
+                animation: "pulse 0.5s ease-in-out infinite",
               }}
             />
-          </div>
+            {/* REAL TPF LOGO - REDUCED */}
+            <div className="relative z-10 w-16 h-16 rounded-full overflow-hidden bg-white p-1.5">
+              <Image
+                src="/images/logo-tpf.png"
+                alt="TPulseFi Logo"
+                width={64}
+                height={64}
+                className="w-full h-full object-contain"
+                style={{
+                  animation: "vibrateLogoImage 0.1s linear infinite",
+                }}
+              />
+            </div>
+          </div> {/* Corrected: Added closing tag for the div */}
         </div>
 
         {/* Brand Name - COMPACTED */}
