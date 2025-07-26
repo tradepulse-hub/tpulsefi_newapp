@@ -10,7 +10,9 @@ export function TechGlobe() {
   const sceneRef = useRef<THREE.Scene | null>(null)
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null)
   const globeGroupRef = useRef<THREE.Group | null>(null)
+  const wireframeGroupRef = useRef<THREE.Group | null>(null) // Re-adicionado
   const particlesRef = useRef<THREE.Points | null>(null)
+  const ringsGroupRef = useRef<THREE.Group | null>(null) // Re-adicionado
 
   useEffect(() => {
     if (!mountRef.current) return
@@ -80,7 +82,32 @@ export function TechGlobe() {
     const outerGlowSphere = new THREE.Mesh(outerGlowGeometry, outerGlowMaterial)
     globeGroup.add(outerGlowSphere)
 
-    // Enhanced Particle Field - Changed to white and adjusted size/opacity
+    // Wireframe Globe Layers - Re-adicionado e confirmado branco
+    const wireframeGroup = new THREE.Group()
+    wireframeGroupRef.current = wireframeGroup
+    globeGroup.add(wireframeGroup)
+
+    const primaryWireframeGeometry = new THREE.SphereGeometry(0.9, 24, 12)
+    const primaryWireframeMaterial = new THREE.MeshBasicMaterial({
+      color: 0xffffff, // White
+      wireframe: true,
+      transparent: true,
+      opacity: 0.4,
+    })
+    const primaryWireframe = new THREE.Mesh(primaryWireframeGeometry, primaryWireframeMaterial)
+    wireframeGroup.add(primaryWireframe)
+
+    const secondaryWireframeGeometry = new THREE.SphereGeometry(0.95, 16, 8)
+    const secondaryWireframeMaterial = new THREE.MeshBasicMaterial({
+      wireframe: true,
+      color: 0xffffff, // White
+      transparent: true,
+      opacity: 0.2,
+    })
+    const secondaryWireframe = new THREE.Mesh(secondaryWireframeGeometry, secondaryWireframeMaterial)
+    wireframeGroup.add(secondaryWireframe)
+
+    // Enhanced Particle Field - Confirmado branco
     const particleCount = 1000
     const positions = new Float32Array(particleCount * 3)
     const colors = new Float32Array(particleCount * 3)
@@ -115,6 +142,49 @@ export function TechGlobe() {
     particlesRef.current = particles
     scene.add(particles)
 
+    // Rotating Tech Rings - Re-adicionado e confirmado branco
+    const ringsGroup = new THREE.Group()
+    ringsGroupRef.current = ringsGroup
+    scene.add(ringsGroup)
+
+    const ringMaterial = (opacity: number) =>
+      new THREE.MeshBasicMaterial({
+        color: 0xffffff, // White
+        transparent: true,
+        opacity: opacity,
+        emissive: 0xffffff, // White emissive
+        emissiveIntensity: 0.1, // Reduced emissive intensity
+      })
+
+    const ring1 = new THREE.Mesh(new THREE.TorusGeometry(1.0, 0.015, 8, 100), ringMaterial(0.4))
+    ring1.rotation.x = Math.PI / 2
+    ringsGroup.add(ring1)
+
+    const ring2 = new THREE.Mesh(new THREE.TorusGeometry(1.1, 0.015, 8, 100), ringMaterial(0.3))
+    ring2.rotation.y = Math.PI / 2
+    ringsGroup.add(ring2)
+
+    const ring3 = new THREE.Mesh(new THREE.TorusGeometry(1.2, 0.015, 8, 100), ringMaterial(0.2))
+    ring3.rotation.set(Math.PI / 4, Math.PI / 4, 0)
+    ringsGroup.add(ring3)
+
+    const ring4 = new THREE.Mesh(new THREE.TorusGeometry(1.3, 0.01, 8, 100), ringMaterial(0.1))
+    ring4.rotation.set(-Math.PI / 4, -Math.PI / 4, Math.PI / 2)
+    ringsGroup.add(ring4)
+
+    // Data Streams - Curved Lines - Re-adicionado e confirmado branco
+    for (let i = 0; i < 6; i++) {
+      const streamGeometry = new THREE.TorusGeometry(1.4 + i * 0.03, 0.003, 4, 50)
+      const streamMaterial = new THREE.MeshBasicMaterial({
+        color: 0xffffff, // White
+        transparent: true,
+        opacity: 0.4, // Reduced opacity
+      })
+      const stream = new THREE.Mesh(streamGeometry, streamMaterial)
+      stream.rotation.y = (i * Math.PI) / 3
+      globeGroup.add(stream)
+    }
+
     // Animation loop
     const animate = () => {
       requestAnimationFrame(animate)
@@ -126,9 +196,21 @@ export function TechGlobe() {
         globeGroupRef.current.rotation.x = Math.sin(time * 0.3) * 0.1
       }
 
+      if (wireframeGroupRef.current) {
+        wireframeGroupRef.current.rotation.y -= 0.003
+        wireframeGroupRef.current.rotation.z += 0.001
+      }
+
       if (particlesRef.current) {
         particlesRef.current.rotation.y += 0.002
         particlesRef.current.rotation.x = Math.sin(time * 0.2) * 0.05
+      }
+
+      if (ringsGroupRef.current) {
+        ringsGroupRef.current.children.forEach((ring, index) => {
+          ring.rotation.z += 0.01 + index * 0.002
+          ring.rotation.x += 0.005 + index * 0.001
+        })
       }
 
       renderer.render(scene, camera)
