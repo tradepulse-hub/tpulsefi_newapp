@@ -1150,7 +1150,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                           setIsMenuOpen(false)
                         }
                       }}
-                      className="group pointer-events-auto relative flex-shrink-0 w-24 h-24" // Fixed width and height
+                      className="group pointer-events-auto relative flex-shrink-0 w-20 h-20" // Fixed width and height
                       style={{
                         transformStyle: "preserve-3d",
                       }}
@@ -1208,7 +1208,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                             delay: index * 0.4,
                           }}
                         >
-                          <item.icon className="w-10 h-10 text-white drop-shadow-lg" />
+                          <item.icon className="w-8 h-8 text-white drop-shadow-lg" />
                         </motion.div>
                         {/* Outer Glow Effect */}
                         <div
