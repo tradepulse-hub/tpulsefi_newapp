@@ -1460,7 +1460,7 @@ export default function PulseCodePage() {
       <BackgroundEffect />
 
       {/* 3D Globe Container (z-index: 1) */}
-      <div className="absolute inset-0 z-10 flex items-center justify-start pl-32">
+      <div className="absolute inset-0 z-10 flex items-center justify-center">
         {" "}
         {/* Adjusted: justify-start and pl-32 */}
         <div className="relative w-[250px] h-[250px]">{activeFooterTab === "about" && <TechGlobe />}</div>
