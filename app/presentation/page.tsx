@@ -48,8 +48,40 @@ const LANGUAGES = [
   },
 ]
 
+// Partnerships data
+const PARTNERSHIPS = [
+  {
+    id: "holdstation",
+    name: "HoldStation",
+    image: "/images/holdstation-logo.jpg",
+    gradient: "from-blue-500 to-purple-600",
+    url: "https://world.org/mini-app?app_id=app_0d4b759921490adc1f2bd569fda9b53a&path=/ref/f5S3wA",
+  },
+  {
+    id: "axo",
+    name: "AXO",
+    image: "/images/axo.jpg",
+    gradient: "from-pink-500 to-rose-600",
+    url: "https://worldcoin.org/mini-app?app_id=app_8aeb55d57b7be834fb8d67e2f803d258&app_mode=mini-app",
+  },
+  {
+    id: "dropwallet",
+    name: "Drop Wallet",
+    image: "/images/HUB.png",
+    gradient: "from-yellow-500 to-orange-600",
+    url: "https://worldcoin.org/mini-app?app_id=app_459cd0d0d3125864ea42bd4c19d1986c&app_mode=mini-app",
+  },
+  {
+    id: "humantap",
+    name: "Human Tap",
+    image: "/images/human-tap.jpg",
+    gradient: "from-green-500 to-emerald-600",
+    url: "https://worldcoin.org/mini-app?app_id=app_25cf6ee1d9660721e651d43cf126953a&app_mode=mini-app",
+  },
+]
+
 // URL do convite
-// const INVITE_URL = "https://worldcoin.org/mini-app?app_id=app_a3a55e132983350c67923dd57dc22c5e&app_mode=mini-app"
+const INVITE_URL = "https://worldcoin.org/mini-app?app_id=app_a3a55e132983350c67923dd57dc22c5e&app_mode=mini-app"
 
 // Translations
 const translations = {
@@ -131,7 +163,7 @@ const translations = {
       close: "Fechar",
       back: "Voltar",
       invite: "CONVIDAR",
-      linkCopied: "Link copiado!",
+      linkCopiado: "Link copiado!",
       shareVia: "Partilhar via",
       copyLink: "Copiar Link",
       move: "MOVER", // Added "MOVER" translation
@@ -186,7 +218,7 @@ const translations = {
       close: "Cerrar",
       back: "Atrás",
       invite: "INVITAR",
-      linkCopiado: "¡Enlace copiado!",
+      linkCopied: "¡Enlace copiado!",
       shareVia: "Compartir vía",
       copyLink: "Copiar Enlace",
       move: "MOVER", // Added "MOVER" translation
@@ -300,6 +332,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
   const [showShareModal, setShowShareModal] = useState(false)
   const [linkCopied, setLinkCopied] = useState(false)
   const [currentLang, setCurrentLang] = useState<keyof typeof translations>("en")
+  const [currentPartnerIndex, setCurrentPartnerIndex] = useState(0)
   const router = useRouter()
   const isMobile = useMobile()
 
@@ -338,6 +371,15 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
     }
   }, [isAuthenticated, user])
 
+  // Partnership slideshow effect
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentPartnerIndex((prev) => (prev + 1) % PARTNERSHIPS.length)
+    }, 3000)
+
+    return () => clearInterval(interval)
+  }, [])
+
   // Efeito para palavras motivacionais
   useEffect(() => {
     const wordInterval = setInterval(() => {
@@ -354,9 +396,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
   // Handle copy link
   const handleCopyLink = async () => {
     try {
-      await navigator.clipboard.writeText(
-        "https://worldcoin.org/mini-app?app_id=app_a3a55e132983350c67923dd57dc22c5e&app_mode=mini-app",
-      )
+      await navigator.clipboard.writeText(INVITE_URL)
       setLinkCopied(true)
       setTimeout(() => setLinkCopied(false), 2000)
     } catch (error) {
@@ -366,11 +406,9 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
 
   // Handle share options
   const handleShare = (platform: string) => {
-    const message = `Join TPulseFi - The Future of Decentralized Finance! https://worldcoin.org/mini-app?app_id=app_a3a55e132983350c67923dd57dc22c5e&app_mode=mini-app`
+    const message = `Join TPulseFi - The Future of Decentralized Finance! ${INVITE_URL}`
     const encodedMessage = encodeURIComponent(message)
-    const encodedUrl = encodeURIComponent(
-      "https://worldcoin.org/mini-app?app_id=app_a3a55e132983350c67923dd57dc22c5e&app_mode=mini-app",
-    )
+    const encodedUrl = encodeURIComponent(INVITE_URL)
 
     let shareUrl = ""
 
@@ -466,11 +504,11 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
 
   const navigationItems: NavItem[] = [
     {
-      id: "pulsecode", // Changed from wallet
-      labelKey: "codepulse", // Changed label key
-      icon: Code, // Changed icon to Code
-      href: "/codepulse", // New href
-      action: handleCodePulseMenuClick, // Explicit action for clarity
+      id: "pulsecode",
+      labelKey: "codepulse",
+      icon: Code,
+      href: "/codepulse",
+      action: handleCodePulseMenuClick,
     },
     {
       id: "news",
@@ -525,6 +563,11 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
   }
 
   const currentLanguage = LANGUAGES.find((lang) => lang.code === currentLang)
+  const currentPartner = PARTNERSHIPS[currentPartnerIndex]
+
+  const handlePartnerClick = () => {
+    window.open(currentPartner.url, "_blank")
+  }
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden flex items-center justify-center">
@@ -942,72 +985,73 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                       : "0 10px 20px rgba(0, 0, 0, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.1)",
                   }}
                 >
-                {/* 3D Inner Ring */}
-                <div
-                  className="absolute inset-1 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                  style={{ transform: "translateZ(2px)" }}
-                />
+                  {/* 3D Inner Ring */}
+                  <div
+                    className="absolute inset-1 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                    style={{ transform: "translateZ(2px)" }}
+                  />
 
-                {/* Pulsing Ring */}
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-blue-400/30 to-purple-400/30 rounded-full"
-                  animate={{
-                    scale: [1, 1.2, 1],
-                    opacity: [0.3, 0.6, 0.3],
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Number.POSITIVE_INFINITY,
-                    ease: "easeInOut",
-                  }}
-                />
+                  {/* Pulsing Ring */}
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-blue-400/30 to-purple-400/30 rounded-full"
+                    animate={{
+                      scale: [1, 1.2, 1],
+                      opacity: [0.3, 0.6, 0.3],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Number.POSITIVE_INFINITY,
+                      ease: "easeInOut",
+                    }}
+                  />
 
-                {/* Icon with 3D effect */}
-                <motion.div
-                  style={{
-                    transformStyle: "preserve-3d",
-                    transform: "translateZ(4px)",
-                  }}
-                  // Removida a animação de rotação específica do ícone
-                  transition={{ duration: 0.3 }}
-                  className="flex items-center space-x-2"
-                >
-                  <CircleDot className="w-4 h-4 text-white relative z-10 drop-shadow-lg" />{" "}
-                  {/* Alterado para ícone CircleDot */}
-                  <AnimatePresence mode="wait">
-                    {isMenuOpen ? (
-                      <motion.span
-                        key="close-text"
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 10 }}
-                        transition={{ duration: 0.2 }}
-                        className="text-white text-sm font-bold relative z-10 drop-shadow-lg"
-                      >
-                        {t.common?.close || "CLOSE"}
-                      </motion.span>
-                    ) : (
-                      <motion.span
-                        key="move-text"
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 10 }}
-                        transition={{ duration: 0.2 }}
-                        className="text-white text-sm font-bold relative z-10 drop-shadow-lg"
-                      >
-                        {t.common?.move || "MOVE"}
-                      </motion.span>
-                    )}
-                  </AnimatePresence>
+                  {/* Icon with 3D effect */}
+                  <motion.div
+                    style={{
+                      transformStyle: "preserve-3d",
+                      transform: "translateZ(4px)",
+                    }}
+                    // Removida a animação de rotação específica do ícone
+                    transition={{ duration: 0.3 }}
+                    className="flex items-center space-x-2"
+                  >
+                    <CircleDot className="w-4 h-4 text-white relative z-10 drop-shadow-lg" />{" "}
+                    {/* Alterado para ícone CircleDot */}
+                    <AnimatePresence mode="wait">
+                      {isMenuOpen ? (
+                        <motion.span
+                          key="close-text"
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: 10 }}
+                          transition={{ duration: 0.2 }}
+                          className="text-white text-sm font-bold relative z-10 drop-shadow-lg"
+                        >
+                          {t.common?.close || "CLOSE"}
+                        </motion.span>
+                      ) : (
+                        <motion.span
+                          key="move-text"
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: 10 }}
+                          transition={{ duration: 0.2 }}
+                          className="text-white text-sm font-bold relative z-10 drop-shadow-lg"
+                        >
+                          {t.common?.move || "MOVE"}
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
                 </motion.div>
-              </motion.div>
 
-              {/* 3D Button Glow */}
-              <div
-                className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                style={{ transform: "translateZ(-10px)" }}
-              />
-            </button>
+                {/* 3D Button Glow */}
+                <div
+                  className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  style={{ transform: "translateZ(-10px)" }}
+                />
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -1222,6 +1266,24 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
       </div>
 
       {/* Main Content with 3D Globe */}
+      <div className="absolute inset-0 bg-gray-900">
+        {/* Horizontal Moving Lines */}
+        {[...Array(12)].map((_, i) => (
+          <div
+            key={`h-line-${i}`}
+            className="absolute h-px bg-gradient-to-r from-transparent via-white/60 to-transparent animate-pulse"
+            style={{
+              top: `${8 + i * 8}%`,
+              left: "-100%",
+              width: "200%",
+              animation: `moveRight 4s linear infinite`,
+              animationDelay: `${i * 0.3}s`,
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Main Content with 3D Globe */}
       <div className="relative z-10 text-center">
         {/* Logo with Ultra Vibrant Auras and Vibration - COMPACTED */}
         <div className="relative mb-4 flex items-center justify-center">
@@ -1230,10 +1292,10 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             className="absolute w-64 h-64 rounded-full"
             style={{
               background: `radial-gradient(circle,
-            rgba(255,255,255,0.4) 0%,
-            rgba(156,163,175,0.3) 30%,
-            rgba(107,114,128,0.2) 60%,
-            transparent 100%)`,
+          rgba(255,255,255,0.4) 0%,
+          rgba(156,163,175,0.3) 30%,
+          rgba(107,114,128,0.2) 60%,
+          transparent 100%)`,
               animation: "vibrateAura 0.1s linear infinite, pulse 1s ease-in-out infinite",
             }}
           />
@@ -1241,9 +1303,9 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             className="absolute w-52 h-52 rounded-full"
             style={{
               background: `radial-gradient(circle,
-            rgba(255,255,255,0.6) 0%,
-            rgba(229,231,235,0.4) 40%,
-            transparent 100%)`,
+          rgba(255,255,255,0.6) 0%,
+          rgba(229,231,235,0.4) 40%,
+          transparent 100%)`,
               animation: "vibrateAura 0.15s linear infinite, pulse 0.8s ease-in-out infinite",
               animationDelay: "0.05s",
             }}
@@ -1252,9 +1314,9 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             className="absolute w-40 h-40 rounded-full"
             style={{
               background: `radial-gradient(circle,
-            rgba(243,244,246,0.5) 0%,
-            rgba(209,213,219,0.4) 50%,
-            transparent 100%)`,
+          rgba(243,244,246,0.5) 0%,
+          rgba(209,213,219,0.4) 50%,
+          transparent 100%)`,
               animation: "vibrateAura 0.2s linear infinite, pulse 0.6s ease-in-out infinite",
               animationDelay: "0.1s",
             }}
@@ -1282,16 +1344,16 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             style={{
               animation: "vibrateLogo 0.08s linear infinite",
             }}
-          > {/* Corrected: This div is now an opening tag */}
+          >
             <div
               className="absolute inset-0 bg-white rounded-full shadow-2xl"
               style={{
                 boxShadow: `
-      0 0 30px rgba(255,255,255,1),
-      0 0 60px rgba(229,231,235,0.8),
-      0 0 90px rgba(209,213,219,0.6),
-      0 0 120px rgba(156,163,175,0.4)
-    `,
+        0 0 30px rgba(255,255,255,1),
+        0 0 60px rgba(229,231,235,0.8),
+        0 0 90px rgba(209,213,219,0.6),
+        0 0 120px rgba(156,163,175,0.4)
+      `,
                 animation: "pulse 0.5s ease-in-out infinite",
               }}
             />
@@ -1308,7 +1370,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                 }}
               />
             </div>
-          </div> {/* Corrected: Added closing tag for the div */}
+          </div>
         </div>
 
         {/* Brand Name - COMPACTED */}
@@ -1461,7 +1523,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
           0% {
             transform: rotate(0deg);
           }
-            50% {
+          50% {
             transform: rotate(-0.2deg);
           }
           100% {
@@ -1491,5 +1553,5 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
     </div>
   )
 }
-\
+
 export default Presentation
