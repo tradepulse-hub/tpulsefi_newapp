@@ -1564,6 +1564,7 @@ export default function PulseCodePage() {
       <BackgroundEffect />
 
       {/* 3D Globe Container (z-index: 1) */}
+      {/* Removed <Canvas> and <Environment> components, TechGlobe now manages its own Three.js context */}
       <div className="absolute inset-0 z-10 flex items-center justify-center">
         <div className="relative w-[400px] h-[400px]">
           <TechGlobe />
