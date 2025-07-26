@@ -1,16 +1,13 @@
 "use client"
 
 import Image from "next/image"
-import { ArrowLeft, Info, Hammer, Flame } from "lucide-react"
+import { Hammer } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState, useRef, useCallback } from "react"
-import { Button } from "@/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
 import { MiniKit } from "@worldcoin/minikit-js"
 import { ethers } from "ethers"
 import { useMiniKit } from "../../hooks/use-minikit"
-import { TechGlobe } from "../../components/tech-globe"
-import { BackgroundEffect } from "../../components/background-effect"
 
 // Endereço da carteira morta (burn address)
 const DEAD_WALLET = "0x000000000000000000000000000000000000dEaD"
@@ -634,6 +631,8 @@ export default function PulseCodePage() {
       userAddress,
       "isConnecting:",
       isConnecting,
+      "isLoadingStakingData:",
+      isLoadingStakingData,
     )
 
     if (isConnecting) {
@@ -822,112 +821,9 @@ export default function PulseCodePage() {
 
     switch (activeFooterTab) {
       case "about":
-        return (
-          <>
-            <div className="relative mb-8 flex items-center justify-center">
-              <div
-                className="absolute w-48 h-48 rounded-full"
-                style={{
-                  background: `radial-gradient(circle,
-              rgba(255,255,255,0.4) 0%,
-              rgba(156,163,175,0.3) 30%,
-              rgba(107,114,128,0.2) 60%,
-              transparent 100%)`,
-                  animation: "vibrateAura 0.1s linear infinite, pulse 1s ease-in-out infinite",
-                }}
-              />
-              <div
-                className="absolute w-40 h-40 rounded-full"
-                style={{
-                  background: `radial-gradient(circle,
-              rgba(255,255,255,0.6) 0%,
-              rgba(229,231,235,0.4) 40%,
-                  transparent 100%)`,
-                  animation: "vibrateAura 0.15s linear infinite, pulse 0.8s ease-in-out infinite",
-                  animationDelay: "0.05s",
-                }}
-              />
-              <div
-                className="absolute w-32 h-32 rounded-full"
-                style={{
-                  background: `radial-gradient(circle,
-              rgba(243,244,246,0.5) 0%,
-              rgba(209,213,219,0.4) 50%,
-                  transparent 100%)`,
-                  animation: "vibrateAura 0.2s linear infinite, pulse 0.6s ease-in-out infinite",
-                  animationDelay: "0.1s",
-                }}
-              />
-
-              <div
-                className="absolute w-36 h-36 border-2 border-gray-300/60 rounded-full"
-                style={{
-                  animation: "vibrateRing 0.1s linear infinite, spin 8s linear infinite",
-                  boxShadow: "0 0 20px rgba(255,255,255,0.8), inset 0 0 20px rgba(229,231,235,0.5)",
-                }}
-              />
-              <div
-                className="absolute w-30 h-30 border border-gray-400/70 rounded-full"
-                style={{
-                  animation: "vibrateRing 0.12s linear infinite, spin 6s linear infinite reverse",
-                  boxShadow: "0 0 15px rgba(255,255,255,1)",
-                }}
-              />
-
-              <div
-                className="relative w-24 h-24 flex items-center justify-center"
-                style={{
-                  animation: "vibrateLogo 0.08s linear infinite",
-                }}
-              >
-                <div
-                  className="absolute inset-0 bg-white rounded-full shadow-2xl"
-                  style={{
-                    boxShadow: `
-                0 0 25px rgba(255,255,255,1),
-                0 0 50px rgba(229,231,235,0.8),
-                0 0 75px rgba(209,213,219,0.6),
-                0 0 100px rgba(156,163,175,0.4)
-              `,
-                    animation: "pulse 0.5s ease-in-out infinite",
-                  }}
-                />
-                <div className="relative z-10 w-20 h-20 rounded-full overflow-hidden bg-white p-1">
-                  <Image
-                    src="/images/codepulse-logo.png"
-                    alt="PulseCode Logo"
-                    width={80}
-                    height={80}
-                    className="w-full h-full object-contain"
-                    style={{
-                      animation: "vibrateLogoImage 0.1s linear infinite",
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-            <h1 className="text-4xl md:text-5xl font-bold mb-2 tracking-wider">
-              <span className="bg-gradient-to-r from-white via-cyan-200 to-blue-200 bg-clip-text text-transparent">
-                {t.pulsecode?.title || "PulseCode: The Project Unifier"}
-              </span>
-            </h1>
-            <h2 className="text-xl md:text-2xl font-semibold mb-4 text-gray-200">
-              {t.pulsecode?.subtitle || "Inovação e Crescimento no Ecossistema Web3"}
-            </h2>
-            <p className="text-lg text-gray-300 leading-relaxed mb-6">
-              {t.pulsecode?.description ||
-                "A PulseCode é uma iniciativa dedicada a impulsionar o desenvolvimento de projetos inovadores dentro da WorldApp. Através de um modelo de financiamento único, garantimos a sustentabilidade e o crescimento contínuo do nosso ecossistema."}
-            </p>
-            <div className="w-full h-px bg-gray-700/50 my-6" /> {/* Separador visual */}
-            <h3 className="text-2xl font-bold mb-4 text-cyan-300">
-              {t.pulsecode?.ourMissionTitle || "A Nossa Missão"}
-            </h3>
-            <p className="text-md text-gray-400 leading-relaxed">
-              {t.pulsecode?.ourMissionDescription ||
-                "O nosso objetivo é criar um ciclo virtuoso de valor: 50% das taxas de desenvolvimento são alocadas para liquidez, e os restantes 50% para recompra de tokens, aumentando progressivamente o valor do PulseCode (PSC) e beneficiando toda a comunidade."}
-            </p>
-          </>
-        )
+      return (
+        <></>
+      )
       // Removed the "codestaking" case entirely
       case "projects":
         return (
@@ -1506,117 +1402,4 @@ export default function PulseCodePage() {
                               >
                                 <path
                                   fillRule="evenodd"
-                                  d="M12.963 2.286a.75.75 0 00-1.071-.136 9.742 9.742 0 00-3.539 6.177A7.547 7.547 0 016.648 6.61a.75.75 0 00-1.152.082A9 9 0 1015.68 4.534a7.46 7.46 0 01-2.717-2.248zM15.75 14.25a3.75 3.75 0 11-7.313-1.172c.628.465 1.35.81 2.133 1a5.99 5.99 0 011.925-3.545 3.75 3.75 0 013.255 3.717z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
-                              <div className="text-xs text-gray-300">
-                                <strong className="text-white">
-                                  {t.furnace?.deflation?.split(":")[0] || "Deflação"}:
-                                </strong>
-                                {t.furnace?.deflation?.split(":")[1] ||
-                                  " Cada token queimado é enviado para uma carteira morta (0x000...dEaD) e removido permanentemente da circulação."}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </div>
-            </motion.div>
-            {burnTxHash && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="mt-4 w-full max-w-xs px-4" // Changed max-w-sm to max-w-xs
-              >
-                <div className="bg-gray-900/70 backdrop-blur-sm rounded-xl border border-gray-800/50 p-3">
-                  <h3 className="text-sm font-medium text-gray-300 mb-2">
-                    {t.furnace?.lastTransaction || "Última Transação"}
-                  </h3>
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-gray-400">{t.common?.hash || "Hash"}:</span>
-                    <a
-                      href={`https://worldscan.org/tx/${burnTxHash}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-orange-400 hover:text-orange-300 truncate max-w-[200px]"
-                    >
-                      {burnTxHash.substring(0, 10)}...{burnTxHash.substring(burnTxHash.length - 8)}
-                    </a>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </main>
-        )
-      default:
-        return null
-    }
-  }
-
-  return (
-    <div className="min-h-screen text-white flex flex-col items-center justify-center p-4 relative overflow-hidden">
-      {/* Background Effect (z-index: 0) */}
-      <BackgroundEffect />
-
-      {/* 3D Globe Container (z-index: 1) */}
-      <div className="absolute inset-0 z-10 flex items-center justify-center">
-        <div className="relative w-[400px] h-[400px]">{activeFooterTab === "about" && <TechGlobe />}</div>
-      </div>
-
-      <button
-        onClick={() => router.back()}
-        className="absolute top-6 left-6 flex items-center space-x-2 text-gray-400 hover:text-white transition-colors z-50"
-      >
-        <ArrowLeft className="w-5 h-5" />
-        <span className="text-lg font-medium">{t.common?.back || "Back"}</span>
-      </button>
-      <motion.div
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        className="relative z-20 bg-black/60 backdrop-blur-lg border border-white/10 rounded-xl p-8 max-w-3xl w-full text-center shadow-2xl mb-20"
-      >
-        {renderContent()}
-      </motion.div>
-      <footer className="fixed bottom-4 left-1/2 -translate-x-1/2 w-full max-w-xs bg-black/70 backdrop-blur-md border border-white/10 rounded-full p-2 z-50">
-        <div className="flex justify-around items-center">
-          <Button
-            variant="ghost"
-            size="icon"
-            className={`flex flex-col items-center justify-center p-2 ${
-              activeFooterTab === "about" ? "text-cyan-400" : "text-gray-400 hover:text-cyan-400"
-            }`}
-            onClick={() => setActiveFooterTab("about")}
-          >
-            <Info className="w-6 h-6" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className={`flex flex-col items-center justify-center p-2 ${
-              activeFooterTab === "projects" ? "text-cyan-400" : "text-gray-400 hover:text-cyan-400"
-            }`}
-            onClick={() => setActiveFooterTab("projects")}
-          >
-            <Hammer className="w-6 h-6" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className={`flex flex-col items-center justify-center p-2 ${
-              activeFooterTab === "burn" ? "text-orange-400" : "text-gray-400 hover:text-orange-400"
-            }`}
-            onClick={() => setActiveFooterTab("burn")}
-          >
-            <Flame className="w-6 h-6" />
-          </Button>
-        </div>
-      </footer>
-    </div>
-  )
-}
+                                  d="M12.963 2.286a.75.75 0 00-1.071-.136 9.742 9.742 0 00-3.539 6.177A7.547 7.547 0 016.648 6.61a.75.75 0 00-1.152.082A9 9 0 1015.68 4.534a7.46 7.46 0 01-2.717-2.248zM15.75 14\
