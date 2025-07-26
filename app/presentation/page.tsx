@@ -3,31 +3,7 @@
 import type React from "react"
 import { useEffect, useState } from "react"
 import Image from "next/image"
-import {
-  Menu,
-  X,
-  Wallet,
-  Eye,
-  Newspaper,
-  Users,
-  Info,
-  Gift,
-  TrendingUp,
-  Hand,
-  Globe,
-  ExternalLink,
-  Calendar,
-  Star,
-  Clock,
-  AlertTriangle,
-  ArrowLeft,
-  Gamepad2,
-  Code,
-  Send,
-  Share2,
-  Copy,
-  Check,
-} from "lucide-react"
+import { Menu, X, Wallet, Eye, Newspaper, Users, Info, Gift, TrendingUp, Hand, Globe, ExternalLink, Calendar, Star, Clock, AlertTriangle, ArrowLeft, Gamepad2, Code, Send, Share2, Copy, Check } from 'lucide-react'
 import { useMiniKit } from "../../hooks/use-minikit"
 import MiniWallet from "../../components/mini-wallet"
 import { AnimatePresence, motion } from "framer-motion"
@@ -217,7 +193,7 @@ const translations = {
       close: "Cerrar",
       back: "Atrás",
       invite: "INVITAR",
-      linkCopied: "¡Enlace copiado!",
+      linkCopiado: "¡Enlace copiado!",
       shareVia: "Compartir vía",
       copyLink: "Copiar Enlace",
     },
@@ -589,7 +565,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                 <Calendar className="w-3 h-3 text-orange-300 relative z-10" /> {/* Reduced icon size */}
                 <span className="text-xs font-medium relative z-10">
                   {" "}
-                  {/* Reduced text size */}
                   {t.events?.eventButton || "Evento"}
                 </span>
                 {/* Live Indicator */}
@@ -1085,7 +1060,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: "100%", opacity: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed bottom-6 left-6 right-6 z-40"
+            className="fixed bottom-20 left-0 right-0 z-40" {/* Adjusted bottom, left, and right */}
             style={{ perspective: "1000px" }} // Apply perspective here
           >
             <div className="bg-gradient-to-br from-gray-100 to-white backdrop-blur-xl border border-gray-200 rounded-2xl">
@@ -1348,6 +1323,12 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             {/* REAL TPF LOGO - REDUCED */}
             <div className="relative z-10 w-16 h-16 rounded-full overflow-hidden bg-white p-1.5">
               <Image
+                src="/images/logo-tpf.png"
+                alt="TPulseFi Logo"
+                width={64}
+                height={64}
+                className="w-full h-full object-contain"
+                style={{
                 src="/images/logo-tpf.png"
                 alt="TPulseFi Logo"
                 width={64}
