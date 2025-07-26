@@ -190,12 +190,12 @@ export function TechGlobe() {
     // Carregar e adicionar o logo como um objeto 3D
     const textureLoader = new THREE.TextureLoader()
     textureLoader.load("/images/codepulse-logo.png", (texture) => {
-      const logoGeometry = new THREE.PlaneGeometry(0.7, 0.7) // Aumentado o tamanho do logo
+      const logoGeometry = new THREE.PlaneGeometry(0.7, 0.7) // Mantido o tamanho
       const logoMaterial = new THREE.MeshBasicMaterial({
         map: texture,
         transparent: true,
         emissive: 0xffffff, // Cor do brilho do logo (branco)
-        emissiveIntensity: 4.0, // Aumentada a intensidade do brilho
+        emissiveIntensity: 8.0, // Aumentada a intensidade do brilho para o dobro
         side: THREE.DoubleSide, // Renderizar em ambos os lados
       })
       const logoMesh = new THREE.Mesh(logoGeometry, logoMaterial)
