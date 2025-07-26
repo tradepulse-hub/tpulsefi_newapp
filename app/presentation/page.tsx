@@ -1089,8 +1089,8 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
               <div className="flex justify-center pt-3 pb-1">
                 <div className="w-8 h-0.5 bg-gray-500 rounded-full" />
               </div>
-              {/* Menu Content */}
-              <div className="p-3 pb-3">
+              {/* Menu Content - Increased padding for larger window */}
+              <div className="p-4 pb-4">
                 {/* Menu Items Grid */}
                 <div className="relative z-10 flex overflow-x-auto whitespace-nowrap justify-start gap-3 mb-3 no-scrollbar">
                   {navigationItems.map((item, index) => (
