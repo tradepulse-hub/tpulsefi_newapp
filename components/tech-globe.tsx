@@ -158,9 +158,10 @@ export function TechGlobe() {
         emissiveIntensity: 0.1, // Reduced emissive intensity
       })
 
-    const ring1 = new THREE.Mesh(new THREE.TorusGeometry(1.0, 0.015, 8, 100), ringMaterial(0.4))
-    ring1.rotation.x = Math.PI / 2
-    ringsGroup.add(ring1)
+    // Removido o ring1 que causava a linha reta no meio
+    // const ring1 = new THREE.Mesh(new THREE.TorusGeometry(1.0, 0.015, 8, 100), ringMaterial(0.4))
+    // ring1.rotation.x = Math.PI / 2
+    // ringsGroup.add(ring1)
 
     const ring2 = new THREE.Mesh(new THREE.TorusGeometry(1.1, 0.015, 8, 100), ringMaterial(0.3))
     ring2.rotation.y = Math.PI / 2
@@ -237,19 +238,6 @@ export function TechGlobe() {
           ring.rotation.x += 0.005 + index * 0.001
         })
       }
-
-      // O logo agora está parado, então removemos as animações de pulsação e vibração
-      // if (logoMeshRef.current) {
-      //   const pulseScale = 1 + Math.sin(time * 5) * 0.05
-      //   logoMeshRef.current.scale.setScalar(pulseScale)
-      //   const vibrateOffset = 0.002
-      //   const initialLogoX = 0.1
-      //   const initialLogoY = 0.1
-      //   const initialLogoZ = 0.75
-      //   logoMeshRef.current.position.x = initialLogoX + Math.sin(time * 100) * vibrateOffset
-      //   logoMeshRef.current.position.y = initialLogoY + Math.cos(time * 100) * vibrateOffset
-      //   logoMeshRef.current.position.z = initialLogoZ
-      // }
 
       renderer.render(scene, camera)
     }
