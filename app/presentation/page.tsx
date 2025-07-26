@@ -25,7 +25,7 @@ import {
   Share2,
   Copy,
   Check,
-  Menu,
+  CircleDot,
 } from "lucide-react"
 import { useMiniKit } from "../../hooks/use-minikit"
 import MiniWallet from "../../components/mini-wallet"
@@ -942,73 +942,72 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                       : "0 10px 20px rgba(0, 0, 0, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.1)",
                   }}
                 >
-                  {/* 3D Inner Ring */}
-                  <div
-                    className="absolute inset-1 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                    style={{ transform: "translateZ(2px)" }}
-                  />
-
-                  {/* Pulsing Ring */}
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-blue-400/30 to-purple-400/30 rounded-full"
-                    animate={{
-                      scale: [1, 1.2, 1],
-                      opacity: [0.3, 0.6, 0.3],
-                    }}
-                    transition={{
-                      duration: 2,
-                      repeat: Number.POSITIVE_INFINITY,
-                      ease: "easeInOut",
-                    }}
-                  />
-
-                  {/* Icon with 3D effect */}
-                  <motion.div
-                    style={{
-                      transformStyle: "preserve-3d",
-                      transform: "translateZ(4px)",
-                    }}
-                    // Removida a animação de rotação específica do ícone
-                    transition={{ duration: 0.3 }}
-                    className="flex items-center space-x-2"
-                  >
-                    <Menu className="w-4 h-4 text-white relative z-10 drop-shadow-lg" />{" "}
-                    {/* Alterado para ícone Menu e ajustado o tamanho */}
-                    <AnimatePresence mode="wait">
-                      {isMenuOpen ? (
-                        <motion.span
-                          key="close-text"
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: 10 }}
-                          transition={{ duration: 0.2 }}
-                          className="text-white text-sm font-bold relative z-10 drop-shadow-lg"
-                        >
-                          {t.common?.close || "CLOSE"}
-                        </motion.span>
-                      ) : (
-                        <motion.span
-                          key="move-text"
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: 10 }}
-                          transition={{ duration: 0.2 }}
-                          className="text-white text-sm font-bold relative z-10 drop-shadow-lg"
-                        >
-                          {t.common?.move || "MOVE"}
-                        </motion.span>
-                      )}
-                    </AnimatePresence>
-                  </motion.div>
-                </motion.div>
-
-                {/* 3D Button Glow */}
+                {/* 3D Inner Ring */}
                 <div
-                  className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                  style={{ transform: "translateZ(-10px)" }}
+                  className="absolute inset-1 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  style={{ transform: "translateZ(2px)" }}
                 />
-              </button>
-            </div>
+
+                {/* Pulsing Ring */}
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-blue-400/30 to-purple-400/30 rounded-full"
+                  animate={{
+                    scale: [1, 1.2, 1],
+                    opacity: [0.3, 0.6, 0.3],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Number.POSITIVE_INFINITY,
+                    ease: "easeInOut",
+                  }}
+                />
+
+                {/* Icon with 3D effect */}
+                <motion.div
+                  style={{
+                    transformStyle: "preserve-3d",
+                    transform: "translateZ(4px)",
+                  }}
+                  // Removida a animação de rotação específica do ícone
+                  transition={{ duration: 0.3 }}
+                  className="flex items-center space-x-2"
+                >
+                  <CircleDot className="w-4 h-4 text-white relative z-10 drop-shadow-lg" />{" "}
+                  {/* Alterado para ícone CircleDot */}
+                  <AnimatePresence mode="wait">
+                    {isMenuOpen ? (
+                      <motion.span
+                        key="close-text"
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 10 }}
+                        transition={{ duration: 0.2 }}
+                        className="text-white text-sm font-bold relative z-10 drop-shadow-lg"
+                      >
+                        {t.common?.close || "CLOSE"}
+                      </motion.span>
+                    ) : (
+                      <motion.span
+                        key="move-text"
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 10 }}
+                        transition={{ duration: 0.2 }}
+                        className="text-white text-sm font-bold relative z-10 drop-shadow-lg"
+                      >
+                        {t.common?.move || "MOVE"}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              </motion.div>
+
+              {/* 3D Button Glow */}
+              <div
+                className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                style={{ transform: "translateZ(-10px)" }}
+              />
+            </button>
           </div>
         </div>
       </div>
@@ -1137,7 +1136,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                           delay: index * 0.4,
                         }}
                       >
-                        <item.icon className="w-8 h-8 text-white drop-shadow-2xl" />{" "}
+                        <item.icon className="w-4 h-4 text-white drop-shadow-2xl" />{" "}
                         {/* Aumentado w-6 h-6 para w-8 h-8 */}
                       </motion.div>
 
@@ -1158,7 +1157,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                     >
                       <div className="px-2 py-0.5 bg-gray-800/80 backdrop-blur-md border border-gray-700/50 rounded-full">
                         {" "}
-                        <span className="text-white text-xs font-medium drop-shadow-lg">
+                        <span className="text-white text-[9px] font-medium drop-shadow-lg">
                           {" "}
                           {t.navigation?.[item.labelKey] || item.labelKey}
                         </span>
@@ -1283,32 +1282,31 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             style={{
               animation: "vibrateLogo 0.08s linear infinite",
             }}
-          >
-            <div
-              className="absolute inset-0 bg-white rounded-full shadow-2xl"
-              style={{
-                boxShadow: `
+          />
+          <div
+            className="absolute inset-0 bg-white rounded-full shadow-2xl"
+            style={{
+              boxShadow: `
       0 0 30px rgba(255,255,255,1),
       0 0 60px rgba(229,231,235,0.8),
       0 0 90px rgba(209,213,219,0.6),
       0 0 120px rgba(156,163,175,0.4)
     `,
-                animation: "pulse 0.5s ease-in-out infinite",
+              animation: "pulse 0.5s ease-in-out infinite",
+            }}
+          />
+          {/* REAL TPF LOGO - REDUCED */}
+          <div className="relative z-10 w-16 h-16 rounded-full overflow-hidden bg-white p-1.5">
+            <Image
+              src="/images/logo-tpf.png"
+              alt="TPulseFi Logo"
+              width={64}
+              height={64}
+              className="w-full h-full object-contain"
+              style={{
+                animation: "vibrateLogoImage 0.1s linear infinite",
               }}
             />
-            {/* REAL TPF LOGO - REDUCED */}
-            <div className="relative z-10 w-16 h-16 rounded-full overflow-hidden bg-white p-1.5">
-              <Image
-                src="/images/logo-tpf.png"
-                alt="TPulseFi Logo"
-                width={64}
-                height={64}
-                className="w-full h-full object-contain"
-                style={{
-                  animation: "vibrateLogoImage 0.1s linear infinite",
-                }}
-              />
-            </div>
           </div>
         </div>
 
@@ -1492,5 +1490,5 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
     </div>
   )
 }
-
+\
 export default Presentation
