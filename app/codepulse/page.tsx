@@ -3,16 +3,14 @@
 import Image from "next/image"
 import { ArrowLeft, Info, Hammer, Flame } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useEffect, useState, useRef, useCallback, Suspense } from "react"
+import { useEffect, useState, useRef, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
 import { MiniKit } from "@worldcoin/minikit-js"
 import { ethers } from "ethers"
 import { useMiniKit } from "../../hooks/use-minikit"
-import { Canvas } from "@react-three/fiber"
-import { Environment } from "@react-three/drei"
 import { TechGlobe } from "../../components/tech-globe"
-import { BackgroundEffect } from "../../components/background-effect" // Re-importado BackgroundEffect
+import { BackgroundEffect } from "../../components/background-effect"
 
 // Endereço da carteira morta (burn address)
 const DEAD_WALLET = "0x000000000000000000000000000000000000dEaD"
@@ -1376,7 +1374,7 @@ export default function PulseCodePage() {
                   </div>
                 </div>
 
-                <div className="p-3 bg-gray-800/50 border-t border-gray-700/30">
+                <div className="p-3 border-t border-gray-800/80 bg-gray-900/50">
                   {doorOpen && !isBurning && !burnComplete ? (
                     <div className="mb-3">
                       <label htmlFor="amount" className="block text-xs font-medium text-gray-300 mb-1">
@@ -1562,13 +1560,10 @@ export default function PulseCodePage() {
       <BackgroundEffect />
 
       {/* 3D Globe Container (z-index: 1) */}
-      <div className="absolute inset-0 z-10">
-        <Canvas camera={{ position: [0, 0, 5], fov: 45 }}>
-          <Suspense fallback={null}>
-            <TechGlobe />
-            <Environment preset="night" />
-          </Suspense>
-        </Canvas>
+      <div className="absolute inset-0 z-10 flex items-center justify-center">
+        <div className="relative w-[400px] h-[400px]">
+          <TechGlobe />
+        </div>
       </div>
 
       <button
