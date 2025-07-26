@@ -333,9 +333,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
   const router = useRouter()
   const isMobile = useMobile()
 
-  // Adiciona um novo estado para controlar a navegação pendente
-  const [pendingNavigation, setPendingNavigation] = useState<{ href?: string; action?: () => void } | null>(null)
-
   // Adiciona um novo estado para controlar as palavras que aparecem:
   const [currentWordIndex, setCurrentWordIndex] = useState(0)
   const [showWord, setShowWord] = useState(true)
@@ -501,7 +498,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
       labelKey: "codepulse", // Changed label key
       icon: Code, // Changed icon to Code
       href: "/codepulse", // New href
-      // No direct action here, will be handled by pendingNavigation
     },
     {
       id: "news",
@@ -560,19 +556,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
 
   const handlePartnerClick = () => {
     window.open(currentPartner.url, "_blank")
-  }
-
-  // Function to handle navigation after menu animation completes
-  const handleMenuAnimationComplete = () => {
-    if (!isMenuOpen && pendingNavigation) {
-      console.log("Menu exit animation complete, initiating pending navigation:", pendingNavigation)
-      if (pendingNavigation.action) {
-        pendingNavigation.action()
-      } else if (pendingNavigation.href) {
-        router.push(pendingNavigation.href)
-      }
-      setPendingNavigation(null) // Clear pending navigation
-    }
   }
 
   return (
@@ -1096,7 +1079,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
             className="fixed bottom-20 z-40 !w-screen"
             style={{ perspective: "1000px" }}
-            onAnimationComplete={handleMenuAnimationComplete} // Add this prop
+            // Removed onAnimationComplete as navigation is now instant
           >
             <div className="bg-gradient-to-br from-black/90 to-gray-950/90 backdrop-blur-xl border border-white/10 rounded-2xl w-full">
               {/* Menu Handle */}
@@ -1158,7 +1141,11 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                       onClick={() => {
                         console.log(`Clicked item: ${item.id}`)
                         setIsMenuOpen(false) // Close menu immediately
-                        setPendingNavigation({ href: item.href, action: item.action }) // Store navigation
+                        if (item.action) {
+                          item.action()
+                        } else if (item.href) {
+                          router.push(item.href)
+                        }
                       }}
                       className="group pointer-events-auto relative flex-shrink-0 w-16 h-16" // Fixed width and height
                       style={{
