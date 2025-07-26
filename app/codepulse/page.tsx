@@ -889,26 +889,7 @@ export default function PulseCodePage() {
 
     switch (activeFooterTab) {
       case "about":
-        return (
-          <div className="flex flex-col items-center justify-center text-center h-full">
-            <h1 className="text-5xl md:text-7xl font-extrabold mb-4 tracking-tight">
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-cyan-200 to-blue-200">
-                {displayedAboutTitle}
-              </span>
-            </h1>
-            <p className="text-lg md:text-xl text-gray-300 leading-relaxed max-w-2xl">
-              {displayedAboutSubtitle}
-              {aboutTitleAnimationComplete && (
-                <motion.span
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.5, repeat: Number.POSITIVE_INFINITY, repeatType: "reverse" }}
-                  className="inline-block w-2 h-6 bg-white ml-1 align-middle" // Blinking cursor
-                />
-              )}
-            </p>
-          </div>
-        )
+        return <></> // Conteúdo do "about" agora está no cabeçalho
       case "projects":
         return (
           <div className="flex flex-col items-center justify-center text-center">
@@ -1542,6 +1523,36 @@ export default function PulseCodePage() {
     <div className="min-h-screen text-white flex flex-col items-center justify-center p-4 relative overflow-hidden">
       {/* Background Effect (z-index: 0) */}
       <BackgroundEffect />
+
+      {/* Header for About tab (z-index: 30) */}
+      <AnimatePresence>
+        {activeFooterTab === "about" && (
+          <motion.div
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -50 }}
+            transition={{ duration: 0.5 }}
+            className="absolute top-24 left-1/2 -translate-x-1/2 text-center z-30 w-full max-w-3xl px-4"
+          >
+            <h1 className="text-5xl md:text-7xl font-extrabold mb-4 tracking-tight">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-cyan-200 to-blue-200">
+                {displayedAboutTitle}
+              </span>
+            </h1>
+            <p className="text-lg md:text-xl text-gray-300 leading-relaxed max-w-2xl mx-auto">
+              {displayedAboutSubtitle}
+              {aboutTitleAnimationComplete && (
+                <motion.span
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5, repeat: Number.POSITIVE_INFINITY, repeatType: "reverse" }}
+                  className="inline-block w-2 h-6 bg-white ml-1 align-middle" // Blinking cursor
+                />
+              )}
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* 3D Globe Container (z-index: 1) */}
       <div className="absolute inset-0 z-10 flex items-center justify-center">
