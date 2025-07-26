@@ -1101,7 +1101,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
               {/* Menu Content */}
               <div className="p-3 pb-3">
                 {/* Menu Items Grid */}
-                <div className="relative z-10 flex flex-wrap justify-center gap-2 mb-3">
+                <div className="relative z-10 flex overflow-x-auto whitespace-nowrap justify-start gap-2 mb-3 no-scrollbar">
                   {navigationItems.map((item, index) => (
                     <motion.button
                       key={item.id}
@@ -1117,7 +1117,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                           setIsMenuOpen(false)
                         }
                       }}
-                      className="group px-3 py-2 bg-gray-50/50 backdrop-blur-sm border border-gray-200 rounded-lg hover:bg-gray-100/70 transition-all duration-300 flex-shrink-0"
+                      className="group px-3 py-2 bg-gray-50/50 backdrop-blur-sm border border-gray-200 rounded-lg hover:bg-gray-100/70 transition-all duration-300 flex-shrink-0 w-[calc(25%-0.5rem)] sm:w-28"
                     >
                       <div className="flex flex-col items-center space-y-1">
                         <div className="w-5 h-5 bg-gradient-to-r from-gray-200 to-gray-300 rounded-full flex items-center justify-center group-hover:from-gray-300 group-hover:to-gray-400 transition-all duration-300">
