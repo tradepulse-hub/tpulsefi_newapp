@@ -3,13 +3,16 @@
 import Image from "next/image"
 import { ArrowLeft, Info, Hammer, Flame } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useEffect, useState, useRef, useCallback } from "react"
+import { useEffect, useState, useRef, useCallback, Suspense } from "react"
 import { Button } from "@/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
 import { MiniKit } from "@worldcoin/minikit-js"
 import { ethers } from "ethers"
-import { BackgroundEffect } from "@/components/background-effect" // Import BackgroundEffect
-import { useMiniKit } from "../../hooks/use-minikit" // Mantido o caminho original
+import { useMiniKit } from "../../hooks/use-minikit"
+import { Canvas } from "@react-three/fiber"
+import { Environment } from "@react-three/drei"
+import { TechGlobe } from "../../components/tech-globe"
+import { BackgroundEffect } from "../../components/background-effect" // Re-importado BackgroundEffect
 
 // Endereço da carteira morta (burn address)
 const DEAD_WALLET = "0x000000000000000000000000000000000000dEaD"
@@ -727,6 +730,8 @@ export default function PulseCodePage() {
       userAddress,
       "isConnecting:",
       isConnecting,
+      "isLoadingStakingData:",
+      isLoadingStakingData,
     )
     let interval: NodeJS.Timeout | undefined
 
@@ -839,7 +844,7 @@ export default function PulseCodePage() {
                   background: `radial-gradient(circle,
               rgba(255,255,255,0.6) 0%,
               rgba(229,231,235,0.4) 40%,
-              transparent 100%)`,
+                  transparent 100%)`,
                   animation: "vibrateAura 0.15s linear infinite, pulse 0.8s ease-in-out infinite",
                   animationDelay: "0.05s",
                 }}
@@ -850,7 +855,7 @@ export default function PulseCodePage() {
                   background: `radial-gradient(circle,
               rgba(243,244,246,0.5) 0%,
               rgba(209,213,219,0.4) 50%,
-              transparent 100%)`,
+                  transparent 100%)`,
                   animation: "vibrateAura 0.2s linear infinite, pulse 0.6s ease-in-out infinite",
                   animationDelay: "0.1s",
                 }}
@@ -1553,7 +1558,19 @@ export default function PulseCodePage() {
 
   return (
     <div className="min-h-screen text-white flex flex-col items-center justify-center p-4 relative overflow-hidden">
-      <BackgroundEffect /> {/* Adicionado o componente BackgroundEffect */}
+      {/* Background Effect (z-index: 0) */}
+      <BackgroundEffect />
+
+      {/* 3D Globe Container (z-index: 1) */}
+      <div className="absolute inset-0 z-10">
+        <Canvas camera={{ position: [0, 0, 5], fov: 45 }}>
+          <Suspense fallback={null}>
+            <TechGlobe />
+            <Environment preset="night" />
+          </Suspense>
+        </Canvas>
+      </div>
+
       <button
         onClick={() => router.back()}
         className="absolute top-6 left-6 flex items-center space-x-2 text-gray-400 hover:text-white transition-colors z-50"
@@ -1565,13 +1582,12 @@ export default function PulseCodePage() {
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        className="relative z-10 bg-black/60 backdrop-blur-lg border border-white/10 rounded-xl p-8 max-w-3xl w-full text-center shadow-2xl mb-20"
+        className="relative z-20 bg-black/60 backdrop-blur-lg border border-white/10 rounded-xl p-8 max-w-3xl w-full text-center shadow-2xl mb-20"
       >
         {renderContent()}
       </motion.div>
       <footer className="fixed bottom-4 left-1/2 -translate-x-1/2 w-full max-w-xs bg-black/70 backdrop-blur-md border border-white/10 rounded-full p-2 z-50">
         <div className="flex justify-around items-center">
-          {/* Removed the CodeStaking button */}
           <Button
             variant="ghost"
             size="icon"
