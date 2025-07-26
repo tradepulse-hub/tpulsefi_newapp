@@ -116,7 +116,7 @@ const SOFT_STAKING_ABI = [
   {
     inputs: [{ internalType: "address", name: "_user", type: "address" }],
     name: "calculateRewardsPerSecond",
-    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    outputs: [{ internalType: "uint256", name: "", type: "function" }],
     stateMutability: "view",
     type: "function",
   },
@@ -1097,6 +1097,10 @@ export default function PulseCodePage() {
                               className="absolute inset-0 bg-gradient-to-t from-orange-600/60 via-orange-500/40 to-yellow-400/20"
                               animate={{
                                 opacity: fireIntensity * 0.3,
+                              }}
+                              transition={{
+                                duration: 2,
+                                delay: 2,
                               }}
                             />
                           </div>
