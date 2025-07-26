@@ -1037,7 +1037,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
           {/* Glow Effect */}
           <div className="absolute inset-0 bg-gradient-to-t from-gray-400/20 via-gray-300/10 to-transparent blur-lg" />
           {/* Main Bar */}
-          <div className="relative bg-gradient-to-t from-gray-100 to-white backdrop-blur-xl border border-gray-200 rounded-xl">
+          <div className="relative bg-gradient-to-t from-black/90 to-gray-950/90 backdrop-blur-xl border border-white/10 rounded-xl">
             <div className="flex items-center justify-center py-2 px-4 space-x-4">
               {/* Wallet Icon (when wallet is connected but hidden) */}
               {isAuthenticated && !showMiniWallet && (
@@ -1084,7 +1084,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             className="fixed bottom-20 z-40 !w-screen"
             style={{ perspective: "1000px" }}
           >
-            <div className="bg-gradient-to-br from-gray-100 to-white backdrop-blur-xl border border-gray-200 rounded-2xl w-full">
+            <div className="bg-gradient-to-br from-black/90 to-gray-950/90 backdrop-blur-xl border border-white/10 rounded-2xl w-full">
               {/* Menu Handle */}
               <div className="flex justify-center pt-3 pb-1">
                 <div className="w-8 h-0.5 bg-gray-500 rounded-full" />
