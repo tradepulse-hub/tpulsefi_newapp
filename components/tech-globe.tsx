@@ -205,7 +205,8 @@ export function TechGlobe() {
       const initialLogoZ = 0.75
       logoMesh.position.set(0, 0, initialLogoZ) // Logo parado no centro
 
-      globeGroup.add(logoMesh)
+      // Adicionar o logo diretamente à cena, não ao globeGroup
+      scene.add(logoMesh)
       logoMeshRef.current = logoMesh
     })
 
