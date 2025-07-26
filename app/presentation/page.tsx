@@ -944,116 +944,101 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
         )}
       </AnimatePresence>
 
-      {/* Bottom Navigation Bar with 3D Menu Button */}
-      <div className="fixed bottom-6 left-6 right-6 z-50" style={{ perspective: "1000px" }}>
-        {/* Futuristic Bottom Bar */}
-        <div className="relative">
-          {/* Glow Effect */}
-          <div className="absolute inset-0 bg-gradient-to-t from-gray-700/20 via-gray-600/10 to-transparent blur-lg" />
-          {/* Main Bar */}
-          <div className="relative bg-gray-800/70 backdrop-blur-xl border border-gray-700/50 rounded-xl">
-            <div className="flex items-center justify-center py-1 px-4 space-x-4">
-              {" "}
-              {/* Reduzido py-2 para py-1 */}
-              {/* Central 3D Menu Button */}
-              <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="relative group flex items-center justify-center px-4 py-0.5" // Ajustado py para o botão central
-                style={{ transformStyle: "preserve-3d" }}
-              >
-                <motion.div
-                  className="w-auto h-8 bg-gradient-to-br from-gray-700/80 to-gray-800/90 backdrop-blur-md border border-gray-600/50 rounded-full flex items-center justify-center shadow-2xl" // Reduzido h-12 para h-8
-                  whileHover={{
-                    scale: 1.1,
-                    rotateX: 15,
-                    rotateY: 15,
-                    transition: { duration: 0.2 },
-                  }}
-                  whileTap={{
-                    scale: 0.95,
-                    rotateX: -10,
-                    rotateY: -10,
-                  }}
-                  animate={{
-                    rotateZ: isMenuOpen ? 180 : 0,
-                    transition: { duration: 0.3 },
-                  }}
-                  style={{
-                    transformStyle: "preserve-3d",
-                    boxShadow: isMenuOpen
-                      ? "0 20px 40px rgba(59, 130, 246, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.1)"
-                      : "0 10px 20px rgba(0, 0, 0, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.1)",
-                  }}
-                >
-                  {/* 3D Inner Ring */}
-                  <div
-                    className="absolute inset-1 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                    style={{ transform: "translateZ(2px)" }}
-                  />
+      {/* Central 3D Menu Button - Moved outside the removed bottom bar */}
+      <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50" style={{ perspective: "1000px" }}>
+        <button
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          className="relative group flex items-center justify-center px-4 py-0.5"
+          style={{ transformStyle: "preserve-3d" }}
+        >
+          <motion.div
+            className="w-auto h-8 bg-gradient-to-br from-gray-700/80 to-gray-800/90 backdrop-blur-md border border-gray-600/50 rounded-full flex items-center justify-center shadow-2xl"
+            whileHover={{
+              scale: 1.1,
+              rotateX: 15,
+              rotateY: 15,
+              transition: { duration: 0.2 },
+            }}
+            whileTap={{
+              scale: 0.95,
+              rotateX: -10,
+              rotateY: -10,
+            }}
+            animate={{
+              rotateZ: isMenuOpen ? 180 : 0,
+              transition: { duration: 0.3 },
+            }}
+            style={{
+              transformStyle: "preserve-3d",
+              boxShadow: isMenuOpen
+                ? "0 20px 40px rgba(59, 130, 246, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.1)"
+                : "0 10px 20px rgba(0, 0, 0, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.1)",
+            }}
+          >
+            {/* 3D Inner Ring */}
+            <div
+              className="absolute inset-1 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+              style={{ transform: "translateZ(2px)" }}
+            />
 
-                  {/* Pulsing Ring */}
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-blue-400/30 to-purple-400/30 rounded-full"
-                    animate={{
-                      scale: [1, 1.2, 1],
-                      opacity: [0.3, 0.6, 0.3],
-                    }}
-                    transition={{
-                      duration: 2,
-                      repeat: Number.POSITIVE_INFINITY,
-                      ease: "easeInOut",
-                    }}
-                  />
+            {/* Pulsing Ring */}
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-r from-blue-400/30 to-purple-400/30 rounded-full"
+              animate={{
+                scale: [1, 1.2, 1],
+                opacity: [0.3, 0.6, 0.3],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Number.POSITIVE_INFINITY,
+                ease: "easeInOut",
+              }}
+            />
 
-                  {/* Icon with 3D effect */}
-                  <motion.div
-                    style={{
-                      transformStyle: "preserve-3d",
-                      transform: "translateZ(4px)",
-                    }}
-                    // Removida a animação de rotação específica do ícone
-                    transition={{ duration: 0.3 }}
-                    className="flex items-center space-x-2"
+            {/* Icon with 3D effect */}
+            <motion.div
+              style={{
+                transformStyle: "preserve-3d",
+                transform: "translateZ(4px)",
+              }}
+              transition={{ duration: 0.3 }}
+              className="flex items-center space-x-2"
+            >
+              <CircleDot className="w-4 h-4 text-white relative z-10 drop-shadow-lg" />
+              <AnimatePresence mode="wait">
+                {isMenuOpen ? (
+                  <motion.span
+                    key="close-text"
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 10 }}
+                    transition={{ duration: 0.2 }}
+                    className="text-white text-sm font-bold relative z-10 drop-shadow-lg"
                   >
-                    <CircleDot className="w-4 h-4 text-white relative z-10 drop-shadow-lg" />{" "}
-                    {/* Alterado para ícone CircleDot */}
-                    <AnimatePresence mode="wait">
-                      {isMenuOpen ? (
-                        <motion.span
-                          key="close-text"
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: 10 }}
-                          transition={{ duration: 0.2 }}
-                          className="text-white text-sm font-bold relative z-10 drop-shadow-lg"
-                        >
-                          {t.common?.close || "CLOSE"}
-                        </motion.span>
-                      ) : (
-                        <motion.span
-                          key="move-text"
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: 10 }}
-                          transition={{ duration: 0.2 }}
-                          className="text-white text-sm font-bold relative z-10 drop-shadow-lg"
-                        >
-                          {t.common?.move || "MOVE"}
-                        </motion.span>
-                      )}
-                    </AnimatePresence>
-                  </motion.div>
-                </motion.div>
+                    {t.common?.close || "CLOSE"}
+                  </motion.span>
+                ) : (
+                  <motion.span
+                    key="move-text"
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 10 }}
+                    transition={{ duration: 0.2 }}
+                    className="text-white text-sm font-bold relative z-10 drop-shadow-lg"
+                  >
+                    {t.common?.move || "MOVE"}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </motion.div>
 
-                {/* 3D Button Glow */}
-                <div
-                  className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                  style={{ transform: "translateZ(-10px)" }}
-                />
-              </button>
-            </div>
-          </div>
-        </div>
+            {/* 3D Button Glow */}
+            <div
+              className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+              style={{ transform: "translateZ(-10px)" }}
+            />
+          </motion.div>
+        </button>
       </div>
 
       {/* 3D Floating Icons Menu - No Background */}
@@ -1061,12 +1046,8 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
         {isMenuOpen && (
           <div className="fixed inset-0 z-40 pointer-events-none">
             {/* Menu Items as Floating 3D Icons */}
-            <div className="absolute bottom-36 left-1/2 transform -translate-x-1/2">
-              {" "}
-              {/* Ajustado bottom-24 para bottom-36 */}
+            <div className="absolute bottom-48 left-1/2 transform -translate-x-1/2">
               <div className="relative flex justify-center gap-8">
-                {" "}
-                {/* Ajustado gap-6 para gap-8 */}
                 {navigationItems.map((item, index) => (
                   <motion.button
                     key={item.id}
@@ -1127,7 +1108,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                   >
                     {/* 3D Icon Container with Glow */}
                     <motion.div
-                      className="w-20 h-20 bg-gradient-to-br from-gray-800/90 to-gray-900/95 backdrop-blur-xl border border-gray-600/50 rounded-lg flex items-center justify-center shadow-xl" // Aumentado w-16 h-16 para w-20 h-20
+                      className="w-20 h-20 bg-gradient-to-br from-gray-800/90 to-gray-900/95 backdrop-blur-xl border border-gray-600/50 rounded-lg flex items-center justify-center shadow-xl"
                       style={{
                         transformStyle: "preserve-3d",
                         boxShadow: "0 8px 16px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.1)", // Reduced shadow
@@ -1144,7 +1125,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                     >
                       {/* Pulsing Glow Ring */}
                       <motion.div
-                        className="absolute inset-0 bg-gradient-to-r from-blue-400/30 to-purple-400/30 rounded-lg blur-sm" // Rounded-lg
+                        className="absolute inset-0 bg-gradient-to-r from-blue-400/30 to-purple-400/30 rounded-lg blur-sm"
                         animate={{
                           scale: [1, 1.3, 1],
                           opacity: [0.3, 0.7, 0.3],
@@ -1159,7 +1140,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
 
                       {/* Inner Glow */}
                       <div
-                        className="absolute inset-1 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" // Rounded-md
+                        className="absolute inset-1 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                         style={{ transform: "translateZ(2px)" }}
                       />
 
@@ -1180,13 +1161,12 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                           delay: index * 0.4,
                         }}
                       >
-                        <item.icon className="w-4 h-4 text-white drop-shadow-2xl" />{" "}
-                        {/* Aumentado w-6 h-6 para w-8 h-8 */}
+                        <item.icon className="w-4 h-4 text-white drop-shadow-2xl" />
                       </motion.div>
 
                       {/* Outer Glow Effect */}
                       <div
-                        className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" // Rounded-lg
+                        className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                         style={{ transform: "translateZ(-10px)" }}
                       />
                     </motion.div>
@@ -1196,13 +1176,11 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.15 + 0.3 }}
-                      className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 whitespace-nowrap" // Ajustado -bottom-8 para -bottom-10
+                      className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 whitespace-nowrap"
                       style={{ transform: "translateZ(4px)" }}
                     >
                       <div className="px-2 py-0.5 bg-gray-800/80 backdrop-blur-md border border-gray-700/50 rounded-full">
-                        {" "}
                         <span className="text-white text-[9px] font-medium drop-shadow-lg">
-                          {" "}
                           {t.navigation?.[item.labelKey] || item.labelKey}
                         </span>
                       </div>
