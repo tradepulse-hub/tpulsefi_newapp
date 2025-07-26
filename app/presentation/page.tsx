@@ -1025,38 +1025,36 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                 {" "}
                 {/* Ajustado gap-6 para gap-8 */}
                 {navigationItems.map((item, index) => (
-                  {" "}\
-                  {/* Removido .slice(0, 4) para mostrar todos os itens */}\
                   <motion.button
                     key={item.id}
-                    initial={{\
-                      opacity: 0,\
-                      y: 100,\
-                      scale: 0,\
-                      rotateX: 90,\
-                      rotateY: 180,\
-                    }}\
-                    animate={{\
-                      opacity: 1,\
-                      y: [100, -20, 0],\
-                      scale: [0, 1.2, 1],\
-                      rotateX: [90, -10, 0],\
+                    initial={{
+                      opacity: 0,
+                      y: 100,
+                      scale: 0,
+                      rotateX: 90,
+                      rotateY: 180,
+                    }}
+                    animate={{
+                      opacity: 1,
+                      y: [100, -20, 0],
+                      scale: [0, 1.2, 1],
+                      rotateX: [90, -10, 0],
                       rotateY: [180, 10, 0],
-                    }}\
-                    exit={{\
-                      opacity: 0,\
-                      y: 100,\
-                      scale: 0,\
-                      rotateX: 90,\
-                      rotateY: 180,\
-                    }}\
-                    transition={{\
-                      delay: index * 0.15,\
-                      type: \"spring\",
-                      damping: 15,\
-                      stiffness: 200,\
-                      duration: 0.8,\
-                    }}\
+                    }}
+                    exit={{
+                      opacity: 0,
+                      y: 100,
+                      scale: 0,
+                      rotateX: 90,
+                      rotateY: 180,
+                    }}
+                    transition={{
+                      delay: index * 0.15,
+                      type: "spring",
+                      damping: 15,
+                      stiffness: 200,
+                      duration: 0.8,
+                    }}
                     whileHover={{
                       scale: 1.15,
                       y: -10,
@@ -1202,203 +1200,200 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                 ))}
               </div>
             </div>
-  </div>
-        )
-}
-</AnimatePresence>
+          </div>
+        )}
+      </AnimatePresence>
 
-{
-  /* Moving Light Lines Background */
-}
-;<div className="absolute inset-0 bg-gray-900">
-  {/* Horizontal Moving Lines */}
-  {[...Array(12)].map((_, i) => (
-    <div
-      key={`h-line-${i}`}
-      className="absolute h-px bg-gradient-to-r from-transparent via-white/60 to-transparent animate-pulse"
-      style={{
-        top: `${8 + i * 8}%`,
-        left: "-100%",
-        width: "200%",
-        animation: `moveRight 4s linear infinite`,
-        animationDelay: `${i * 0.3}s`,
-      }}
-    />
-  ))}
-</div>
+      {/* Moving Light Lines Background */}
+      <div className="absolute inset-0 bg-gray-900">
+        {/* Horizontal Moving Lines */}
+        {[...Array(12)].map((_, i) => (
+          <div
+            key={`h-line-${i}`}
+            className="absolute h-px bg-gradient-to-r from-transparent via-white/60 to-transparent animate-pulse"
+            style={{
+              top: `${8 + i * 8}%`,
+              left: "-100%",
+              width: "200%",
+              animation: `moveRight 4s linear infinite`,
+              animationDelay: `${i * 0.3}s`,
+            }}
+          />
+        ))}
+      </div>
 
-{
-  /* Main Content with 3D Globe */
-}
-;<div className="relative z-10 text-center">
-  {/* Logo with Ultra Vibrant Auras and Vibration - COMPACTED */}
-  <div className="relative mb-4 flex items-center justify-center">
-    {/* Multiple Vibrant Aura Layers with Intense Pulsing - REDUCED */}
-    <div
-      className="absolute w-64 h-64 rounded-full"
-      style={{
-        background: `radial-gradient(circle,
+      {/* Main Content with 3D Globe */}
+      <div className="relative z-10 text-center">
+        {/* Logo with Ultra Vibrant Auras and Vibration - COMPACTED */}
+        <div className="relative mb-4 flex items-center justify-center">
+          {/* Multiple Vibrant Aura Layers with Intense Pulsing - REDUCED */}
+          <div
+            className="absolute w-64 h-64 rounded-full"
+            style={{
+              background: `radial-gradient(circle,
             rgba(255,255,255,0.4) 0%,
             rgba(156,163,175,0.3) 30%,
             rgba(107,114,128,0.2) 60%,
             transparent 100%)`,
-        animation: "vibrateAura 0.1s linear infinite, pulse 1s ease-in-out infinite",
-      }}
-    />
-    <div
-      className="absolute w-52 h-52 rounded-full"
-      style={{
-        background: `radial-gradient(circle,
+              animation: "vibrateAura 0.1s linear infinite, pulse 1s ease-in-out infinite",
+            }}
+          />
+          <div
+            className="absolute w-52 h-52 rounded-full"
+            style={{
+              background: `radial-gradient(circle,
             rgba(255,255,255,0.6) 0%,
             rgba(229,231,235,0.4) 40%,
             transparent 100%)`,
-        animation: "vibrateAura 0.15s linear infinite, pulse 0.8s ease-in-out infinite",
-        animationDelay: "0.05s",
-      }}
-    />
-    <div
-      className="absolute w-40 h-40 rounded-full"
-      style={{
-        background: `radial-gradient(circle,
+              animation: "vibrateAura 0.15s linear infinite, pulse 0.8s ease-in-out infinite",
+              animationDelay: "0.05s",
+            }}
+          />
+          <div
+            className="absolute w-40 h-40 rounded-full"
+            style={{
+              background: `radial-gradient(circle,
             rgba(243,244,246,0.5) 0%,
             rgba(209,213,219,0.4) 50%,
             transparent 100%)`,
-        animation: "vibrateAura 0.2s linear infinite, pulse 0.6s ease-in-out infinite",
-        animationDelay: "0.1s",
-      }}
-    />
+              animation: "vibrateAura 0.2s linear infinite, pulse 0.6s ease-in-out infinite",
+              animationDelay: "0.1s",
+            }}
+          />
 
-    {/* Intense Vibrating Rings - REDUCED */}
-    <div
-      className="absolute w-48 h-48 border-2 border-gray-300/60 rounded-full"
-      style={{
-        animation: "vibrateRing 0.1s linear infinite, spin 8s linear infinite",
-        boxShadow: "0 0 30px rgba(255,255,255,0.8), inset 0 0 30px rgba(229,231,235,0.5)",
-      }}
-    />
-    <div
-      className="absolute w-36 h-36 border border-gray-400/70 rounded-full"
-      style={{
-        animation: "vibrateRing 0.12s linear infinite, spin 6s linear infinite reverse",
-        boxShadow: "0 0 20px rgba(255,255,255,1)",
-      }}
-    />
+          {/* Intense Vibrating Rings - REDUCED */}
+          <div
+            className="absolute w-48 h-48 border-2 border-gray-300/60 rounded-full"
+            style={{
+              animation: "vibrateRing 0.1s linear infinite, spin 8s linear infinite",
+              boxShadow: "0 0 30px rgba(255,255,255,0.8), inset 0 0 30px rgba(229,231,235,0.5)",
+            }}
+          />
+          <div
+            className="absolute w-36 h-36 border border-gray-400/70 rounded-full"
+            style={{
+              animation: "vibrateRing 0.12s linear infinite, spin 6s linear infinite reverse",
+              boxShadow: "0 0 20px rgba(255,255,255,1)",
+            }}
+          />
 
-    {/* Vibrating Logo Container with REAL TPF Logo - REDUCED */}
-    <div
-      className="relative w-20 h-20 flex items-center justify-center"
-      style={{
-        animation: "vibrateLogo 0.08s linear infinite",
-      }}
-    >
-      <div
-        className="absolute inset-0 bg-white rounded-full shadow-2xl"
-        style={{
-          boxShadow: `
+          {/* Vibrating Logo Container with REAL TPF Logo - REDUCED */}
+          <div
+            className="relative w-20 h-20 flex items-center justify-center"
+            style={{
+              animation: "vibrateLogo 0.08s linear infinite",
+            }}
+          >
+            <div
+              className="absolute inset-0 bg-white rounded-full shadow-2xl"
+              style={{
+                boxShadow: `
       0 0 30px rgba(255,255,255,1),
       0 0 60px rgba(229,231,235,0.8),
       0 0 90px rgba(209,213,219,0.6),
       0 0 120px rgba(156,163,175,0.4)
     `,
-          animation: "pulse 0.5s ease-in-out infinite",
-        }}
-      />
-      {/* REAL TPF LOGO - REDUCED */}
-      <div className="relative z-10 w-16 h-16 rounded-full overflow-hidden bg-white p-1.5">
-        <Image
-          src="/images/logo-tpf.png"
-          alt="TPulseFi Logo"
-          width={64}
-          height={64}
-          className="w-full h-full object-contain"
-          style={{
-            animation: "vibrateLogoImage 0.1s linear infinite",
-          }}
-        />
-      </div>
-    </div>
-  </div>
+                animation: "pulse 0.5s ease-in-out infinite",
+              }}
+            />
+            {/* REAL TPF LOGO - REDUCED */}
+            <div className="relative z-10 w-16 h-16 rounded-full overflow-hidden bg-white p-1.5">
+              <Image
+                src="/images/logo-tpf.png"
+                alt="TPulseFi Logo"
+                width={64}
+                height={64}
+                className="w-full h-full object-contain"
+                style={{
+                  animation: "vibrateLogoImage 0.1s linear infinite",
+                }}
+              />
+            </div>
+          </div>
+        </div>
 
-  {/* Brand Name - COMPACTED */}
-  <h1 className="text-3xl md:text-4xl font-bold mb-4 tracking-wider">
-    <span className="bg-gradient-to-r from-white via-cyan-200 to-blue-200 bg-clip-text text-transparent">TPulseFi</span>
-  </h1>
+        {/* Brand Name - COMPACTED */}
+        <h1 className="text-3xl md:text-4xl font-bold mb-4 tracking-wider">
+          <span className="bg-gradient-to-r from-white via-cyan-200 to-blue-200 bg-clip-text text-transparent">
+            TPulseFi
+          </span>
+        </h1>
 
-  {/* Animated Subtitle - COMPACTED */}
-  <div className="h-6 flex items-center justify-center mb-8">
-    <div className="flex items-center space-x-3">
-      <div className="h-px w-8 bg-gradient-to-r from-transparent to-white/50" />
-      <p className="text-sm md:text-base text-gray-300 font-light tracking-widest uppercase min-w-[300px] text-center">
-        {displayText}
-        <span className="animate-pulse">|</span>
-      </p>
-      <div className="h-px w-8 bg-gradient-to-l from-transparent to-white/50" />
-    </div>
-  </div>
+        {/* Animated Subtitle - COMPACTED */}
+        <div className="h-6 flex items-center justify-center mb-8">
+          <div className="flex items-center space-x-3">
+            <div className="h-px w-8 bg-gradient-to-r from-transparent to-white/50" />
+            <p className="text-sm md:text-base text-gray-300 font-light tracking-widest uppercase min-w-[300px] text-center">
+              {displayText}
+              <span className="animate-pulse">|</span>
+            </p>
+            <div className="h-px w-8 bg-gradient-to-l from-transparent to-white/50" />
+          </div>
+        </div>
 
-  {/* New Social Media Icons */}
-  <div className="flex items-center justify-center gap-3 mb-8 z-20 relative">
-    <a
-      href="https://x.com/TradePulseToken?t=N-8tJuaN9E4asIH0A-gGEg&s=09"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="relative group"
-    >
-      <div className="px-2 py-1 bg-black/20 backdrop-blur-md border border-white/10 rounded-full flex items-center space-x-1.5 hover:bg-white/10 transition-all duration-300">
-        <div className="absolute inset-0 bg-gradient-to-r from-gray-400/10 to-gray-600/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        <X className="w-3 h-3 text-gray-300 relative z-10" />
-        <span className="text-white text-xs font-medium relative z-10">Follow Us</span>
-      </div>
-    </a>
-    <a href="https://t.me/tpulsefi" target="_blank" rel="noopener noreferrer" className="relative group">
-      <div className="px-2 py-1 bg-black/20 backdrop-blur-md border border-white/10 rounded-full flex items-center space-x-1.5 hover:bg-white/10 transition-all duration-300">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-400/10 to-cyan-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        <Send className="w-3 h-3 text-blue-300 relative z-10" />
-        <span className="text-white text-xs font-medium relative z-10">Join Telegram</span>
-      </div>
-    </a>
-  </div>
-
-  {/* Motivational Words Animation - COMPACTED */}
-  <div className="flex items-center justify-center mb-6 z-20 relative">
-    <div className="h-8 flex items-center justify-center">
-      <AnimatePresence mode="wait">
-        {showWord && (
-          <motion.p
-            key={currentWordIndex}
-            initial={{ opacity: 0, y: 15, scale: 0.8 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -15, scale: 0.8 }}
-            transition={{ duration: 0.5, ease: "easeInOut" }}
-            className="text-sm md:text-base text-white font-medium text-center max-w-sm px-3"
-            style={{
-              textShadow: "0 0 15px rgba(255,255,255,0.5)",
-              animation: showWord ? "pulse 2s ease-in-out infinite" : "none",
-            }}
+        {/* New Social Media Icons */}
+        <div className="flex items-center justify-center gap-3 mb-8 z-20 relative">
+          <a
+            href="https://x.com/TradePulseToken?t=N-8tJuaN9E4asIH0A-gGEg&s=09"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="relative group"
           >
-            {t.motivationalWords[currentWordIndex]}
-          </motion.p>
-        )}
-      </AnimatePresence>
-    </div>
-  </div>
+            <div className="px-2 py-1 bg-black/20 backdrop-blur-md border border-white/10 rounded-full flex items-center space-x-1.5 hover:bg-white/10 transition-all duration-300">
+              <div className="absolute inset-0 bg-gradient-to-r from-gray-400/10 to-gray-600/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <X className="w-3 h-3 text-gray-300 relative z-10" />
+              <span className="text-white text-xs font-medium relative z-10">Follow Us</span>
+            </div>
+          </a>
+          <a href="https://t.me/tpulsefi" target="_blank" rel="noopener noreferrer" className="relative group">
+            <div className="px-2 py-1 bg-black/20 backdrop-blur-md border border-white/10 rounded-full flex items-center space-x-1.5 hover:bg-white/10 transition-all duration-300">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-400/10 to-cyan-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <Send className="w-3 h-3 text-blue-300 relative z-10" />
+              <span className="text-white text-xs font-medium relative z-10">Join Telegram</span>
+            </div>
+          </a>
+        </div>
 
-  {/* Invite Button */}
-  <div className="flex items-center justify-center mb-12 z-20 relative">
-    <button onClick={() => setShowShareModal(true)} className="relative group">
-      <div className="px-3 py-1.5 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-full flex items-center space-x-1.5 transition-all duration-300 transform hover:scale-105 shadow-lg">
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        <Share2 className="w-4 h-4 text-white relative z-10" />
-        <span className="text-white text-sm font-bold relative z-10 tracking-wide">{t.common?.invite || "INVITE"}</span>
+        {/* Motivational Words Animation - COMPACTED */}
+        <div className="flex items-center justify-center mb-6 z-20 relative">
+          <div className="h-8 flex items-center justify-center">
+            <AnimatePresence mode="wait">
+              {showWord && (
+                <motion.p
+                  key={currentWordIndex}
+                  initial={{ opacity: 0, y: 15, scale: 0.8 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -15, scale: 0.8 }}
+                  transition={{ duration: 0.5, ease: "easeInOut" }}
+                  className="text-sm md:text-base text-white font-medium text-center max-w-sm px-3"
+                  style={{
+                    textShadow: "0 0 15px rgba(255,255,255,0.5)",
+                    animation: showWord ? "pulse 2s ease-in-out infinite" : "none",
+                  }}
+                >
+                  {t.motivationalWords[currentWordIndex]}
+                </motion.p>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+
+        {/* Invite Button */}
+        <div className="flex items-center justify-center mb-12 z-20 relative">
+          <button onClick={() => setShowShareModal(true)} className="relative group">
+            <div className="px-3 py-1.5 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-full flex items-center space-x-1.5 transition-all duration-300 transform hover:scale-105 shadow-lg">
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <Share2 className="w-4 h-4 text-white relative z-10" />
+              <span className="text-white text-sm font-bold relative z-10 tracking-wide">
+                {t.common?.invite || "INVITE"}
+              </span>
+            </div>
+          </button>
+        </div>
       </div>
-    </button>
-  </div>
-</div>
 
-{
-  /* Add custom CSS for animations */
-}
-;<style jsx>{`
+      {/* Add custom CSS for animations */}
+      <style jsx>{`
         @keyframes moveRight {
           0% {
             transform: translateX(-100%);
@@ -1494,7 +1489,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
           }
         }
       `}</style>
-</div>
+    </div>
   )
 }
 
