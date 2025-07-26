@@ -1094,7 +1094,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                 {" "}
                 {/* Changed from py-24 to py-8 */}
                 {/* Menu Items Grid - Added vertical padding to this specific container */}
-                <div className="relative z-10 flex overflow-x-auto whitespace-nowrap justify-start gap-3 mb-3 no-scrollbar py-6">
+                <div className="relative z-10 flex overflow-x-auto whitespace-nowrap justify-start gap-3 mb-3 no-scrollbar py-8">
                   {" "}
                   {/* Added py-6 here */}
                   {navigationItems.map((item, index) => (
