@@ -15,7 +15,6 @@ import {
   TrendingUp,
   Hand,
   Globe,
-  ExternalLink,
   Calendar,
   Star,
   Clock,
@@ -49,40 +48,8 @@ const LANGUAGES = [
   },
 ]
 
-// Partnerships data
-const PARTNERSHIPS = [
-  {
-    id: "holdstation",
-    name: "HoldStation",
-    image: "/images/holdstation-logo.jpg",
-    gradient: "from-blue-500 to-purple-600",
-    url: "https://world.org/mini-app?app_id=app_0d4b759921490adc1f2bd569fda9b53a&path=/ref/f5S3wA",
-  },
-  {
-    id: "axo",
-    name: "AXO",
-    image: "/images/axo.jpg",
-    gradient: "from-pink-500 to-rose-600",
-    url: "https://worldcoin.org/mini-app?app_id=app_8aeb55d57b7be834fb8d67e2f803d258&app_mode=mini-app",
-  },
-  {
-    id: "dropwallet",
-    name: "Drop Wallet",
-    image: "/images/HUB.png",
-    gradient: "from-yellow-500 to-orange-600",
-    url: "https://worldcoin.org/mini-app?app_id=app_459cd0d0d3125864ea42bd4c19d1986c&app_mode=mini-app",
-  },
-  {
-    id: "humantap",
-    name: "Human Tap",
-    image: "/images/human-tap.jpg",
-    gradient: "from-green-500 to-emerald-600",
-    url: "https://worldcoin.org/mini-app?app_id=app_25cf6ee1d9660721e651d43cf126953a&app_mode=mini-app",
-  },
-]
-
 // URL do convite
-const INVITE_URL = "https://worldcoin.org/mini-app?app_id=app_a3a55e132983350c67923dd57dc22c5e&app_mode=mini-app"
+// const INVITE_URL = "https://worldcoin.org/mini-app?app_id=app_a3a55e132983350c67923dd57dc22c5e&app_mode=mini-app"
 
 // Translations
 const translations = {
@@ -217,7 +184,7 @@ const translations = {
       close: "Cerrar",
       back: "Atrás",
       invite: "INVITAR",
-      linkCopied: "¡Enlace copiado!",
+      linkCopiado: "¡Enlace copiado!",
       shareVia: "Compartir vía",
       copyLink: "Copiar Enlace",
     },
@@ -329,7 +296,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
   const [showShareModal, setShowShareModal] = useState(false)
   const [linkCopied, setLinkCopied] = useState(false)
   const [currentLang, setCurrentLang] = useState<keyof typeof translations>("en")
-  const [currentPartnerIndex, setCurrentPartnerIndex] = useState(0)
   const router = useRouter()
   const isMobile = useMobile()
 
@@ -368,15 +334,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
     }
   }, [isAuthenticated, user])
 
-  // Partnership slideshow effect
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentPartnerIndex((prev) => (prev + 1) % PARTNERSHIPS.length)
-    }, 3000)
-
-    return () => clearInterval(interval)
-  }, [])
-
   // Efeito para palavras motivacionais
   useEffect(() => {
     const wordInterval = setInterval(() => {
@@ -393,7 +350,9 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
   // Handle copy link
   const handleCopyLink = async () => {
     try {
-      await navigator.clipboard.writeText(INVITE_URL)
+      await navigator.clipboard.writeText(
+        "https://worldcoin.org/mini-app?app_id=app_a3a55e132983350c67923dd57dc22c5e&app_mode=mini-app",
+      )
       setLinkCopied(true)
       setTimeout(() => setLinkCopied(false), 2000)
     } catch (error) {
@@ -403,9 +362,11 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
 
   // Handle share options
   const handleShare = (platform: string) => {
-    const message = `Join TPulseFi - The Future of Decentralized Finance! ${INVITE_URL}`
+    const message = `Join TPulseFi - The Future of Decentralized Finance! https://worldcoin.org/mini-app?app_id=app_a3a55e132983350c67923dd57dc22c5e&app_mode=mini-app`
     const encodedMessage = encodeURIComponent(message)
-    const encodedUrl = encodeURIComponent(INVITE_URL)
+    const encodedUrl = encodeURIComponent(
+      "https://worldcoin.org/mini-app?app_id=app_a3a55e132983350c67923dd57dc22c5e&app_mode=mini-app",
+    )
 
     let shareUrl = ""
 
@@ -560,11 +521,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
   }
 
   const currentLanguage = LANGUAGES.find((lang) => lang.code === currentLang)
-  const currentPartner = PARTNERSHIPS[currentPartnerIndex]
-
-  const handlePartnerClick = () => {
-    window.open(currentPartner.url, "_blank")
-  }
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden flex items-center justify-center">
@@ -577,10 +533,10 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
           {/* Left Side - Events Icon */}
           <div className="flex items-center space-x-2">
             <button onClick={() => setShowEventsModal(true)} className="relative group">
-              <div className="px-2 py-1.5 bg-black/20 backdrop-blur-md border border-orange-400/30 rounded-full flex items-center space-x-1 hover:bg-orange-500/10 transition-all duration-300">
+              <div className="px-1.5 py-1 bg-black/20 backdrop-blur-md border border-orange-400/30 rounded-full flex items-center space-x-0.5 hover:bg-orange-500/10 transition-all duration-300">
                 <div className="absolute inset-0 bg-gradient-to-r from-orange-400/10 to-red-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <Calendar className="w-3 h-3 text-orange-300 relative z-10" />
-                <span className="text-xs font-medium relative z-10">{t.events?.eventButton || "Evento"}</span>
+                <Calendar className="w-2.5 h-2.5 text-orange-300 relative z-10" />
+                <span className="text-[10px] font-medium relative z-10">{t.events?.eventButton || "Evento"}</span>
                 {/* Live Indicator */}
                 <div className="flex items-center space-x-0.5">
                   <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
@@ -591,20 +547,20 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             {/* Wallet Button (when wallet is connected but hidden) */}
             {isAuthenticated && !showMiniWallet && (
               <button onClick={handleShowWallet} className="relative group">
-                <div className="px-2 py-1.5 bg-black/20 backdrop-blur-md border border-green-400/30 rounded-full flex items-center space-x-1 hover:bg-green-500/10 transition-all duration-300">
+                <div className="px-1.5 py-1 bg-black/20 backdrop-blur-md border border-green-400/30 rounded-full flex items-center space-x-0.5 hover:bg-green-500/10 transition-all duration-300">
                   <div className="absolute inset-0 bg-gradient-to-r from-green-400/10 to-emerald-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <Eye className="w-3 h-3 text-green-300 relative z-10" />
-                  <span className="text-xs font-medium relative z-10">{t.common?.wallet || "Wallet"}</span>
+                  <Eye className="w-2.5 h-2.5 text-green-300 relative z-10" />
+                  <span className="text-[10px] font-medium relative z-10">{t.common?.wallet || "Wallet"}</span>
                 </div>
               </button>
             )}
             {/* Connect Wallet Button (only when not connected) */}
             {!isAuthenticated && (
               <button onClick={handleWalletConnect} disabled={isLoading} className="relative group">
-                <div className="px-4 py-2 bg-black/20 backdrop-blur-md border border-cyan-400/30 rounded-full flex items-center space-x-1.5 hover:bg-cyan-500/10 transition-all duration-300 disabled:opacity-50">
+                <div className="px-3 py-1.5 bg-black/20 backdrop-blur-md border border-cyan-400/30 rounded-full flex items-center space-x-1 hover:bg-cyan-500/10 transition-all duration-300 disabled:opacity-50">
                   <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/10 to-blue-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <Wallet className="w-4 h-4 text-cyan-300 relative z-10" />
-                  <span className="text-sm font-medium relative z-10">
+                  <Wallet className="w-3 h-3 text-cyan-300 relative z-10" />
+                  <span className="text-xs font-medium relative z-10">
                     {isLoading ? t.common?.loading || "Loading..." : t.presentation?.connectWallet || "Connect Wallet"}
                   </span>
                 </div>
@@ -615,10 +571,10 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
           {/* Right Side - Language Selector */}
           <div className="relative">
             <button onClick={() => setShowLanguageMenu(!showLanguageMenu)} className="relative group">
-              <div className="px-2 py-1.5 bg-black/20 backdrop-blur-md border border-white/10 rounded-full flex items-center space-x-1 hover:bg-white/10 transition-all duration-300">
+              <div className="px-1.5 py-1 bg-black/20 backdrop-blur-md border border-white/10 rounded-full flex items-center space-x-0.5 hover:bg-white/10 transition-all duration-300">
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-400/10 to-pink-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <Globe className="w-3 h-3 text-purple-300 relative z-10" />
-                <span className="text-xs font-medium relative z-10">
+                <Globe className="w-2.5 h-2.5 text-purple-300 relative z-10" />
+                <span className="text-[10px] font-medium relative z-10">
                   {currentLanguage?.flag} {currentLanguage?.code.toUpperCase()}
                 </span>
               </div>
@@ -631,22 +587,22 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                   initial={{ opacity: 0, y: -10, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                  className="absolute top-10 right-0 bg-black/90 backdrop-blur-xl border border-white/10 rounded-xl p-2 min-w-[180px] shadow-2xl"
+                  className="absolute top-10 right-0 bg-black/90 backdrop-blur-xl border border-white/10 rounded-xl p-1.5 min-w-[180px] shadow-2xl"
                 >
                   {LANGUAGES.map((lang) => (
                     <button
                       key={lang.code}
                       onClick={() => handleLanguageChange(lang.code as keyof typeof translations)}
-                      className={`w-full flex items-center space-x-2 p-2 rounded-lg transition-all duration-200 ${
+                      className={`w-full flex items-center space-x-1.5 p-1.5 rounded-lg transition-all duration-200 ${
                         currentLang === lang.code
                           ? `bg-gradient-to-r ${lang.gradient} bg-opacity-20 text-white`
                           : "hover:bg-white/5 text-gray-300 hover:text-white"
                       }`}
                     >
-                      <span className="text-base">{lang.flag}</span>
+                      <span className="text-sm">{lang.flag}</span>
                       <div className="text-left">
-                        <div className="text-xs font-medium">{lang.nativeName}</div>
-                        <div className="text-xs opacity-70">{lang.name}</div>
+                        <div className="text-[10px] font-medium">{lang.nativeName}</div>
+                        <div className="text-[10px] opacity-70">{lang.name}</div>
                       </div>
                       {currentLang === lang.code && <div className="ml-auto text-green-400 text-xs">✓</div>}
                     </button>
@@ -940,74 +896,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Partnership Slideshow - Between subtitle and bottom bar */}
-      <div className="fixed bottom-20 left-0 right-0 z-30 flex justify-center">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentPartnerIndex}
-            initial={{ x: -300, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: 300, opacity: 0 }}
-            transition={{
-              type: "spring",
-              stiffness: 100,
-              damping: 20,
-              duration: 0.8,
-            }}
-            className="relative group cursor-pointer"
-            onClick={handlePartnerClick}
-          >
-            {/* Partnership Card */}
-            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-xl p-2 hover:bg-black/60 transition-all duration-300 shadow-2xl">
-              {/* Glow Effect */}
-              <div
-                className={`absolute inset-0 bg-gradient-to-r ${currentPartner.gradient} opacity-0 group-hover:opacity-20 rounded-xl blur-xl transition-opacity duration-300`}
-              />
-
-              {/* Content */}
-              <div className="relative z-10 flex items-center space-x-3">
-                {/* Partner Logo */}
-                <div className="w-8 h-8 rounded-lg overflow-hidden bg-gray-700/50 flex-shrink-0">
-                  <Image
-                    src={currentPartner.image || "/placeholder.svg"}
-                    alt={currentPartner.name}
-                    width={32}
-                    height={32}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-
-                {/* Partner Info */}
-                <div className="flex-1">
-                  <h3 className="text-white font-semibold text-sm">{currentPartner.name}</h3>
-                  <div className={`h-0.5 w-12 bg-gradient-to-r ${currentPartner.gradient} rounded-full mt-0.5`} />
-                </div>
-
-                {/* Visit Button */}
-                <div
-                  className={`bg-gradient-to-r ${currentPartner.gradient} text-white px-3 py-1.5 rounded-lg font-medium flex items-center space-x-1.5 group-hover:scale-105 transition-transform duration-300`}
-                >
-                  <span className="text-xs">{t.partnerships?.visitApp || "Visit App"}</span>
-                  <ExternalLink className="w-3 h-3" />
-                </div>
-              </div>
-
-              {/* Progress Indicators */}
-              <div className="flex justify-center space-x-1.5 mt-2">
-                {PARTNERSHIPS.map((_, index) => (
-                  <div
-                    key={index}
-                    className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-                      index === currentPartnerIndex ? `bg-gradient-to-r ${currentPartner.gradient}` : "bg-white/20"
-                    }`}
-                  />
-                ))}
-              </div>
-            </div>
-          </motion.div>
-        </AnimatePresence>
-      </div>
 
       {/* Bottom Navigation Bar with 3D Menu Button */}
       <div className="fixed bottom-6 left-6 right-6 z-50" style={{ perspective: "1000px" }}>
