@@ -284,7 +284,7 @@ const translations = {
       eventTitle: "Acara Peningkatan FiStaking",
       eventDescription: "Sampai tanggal 20 bulan depan dua token FiStaking meningkatkan % keuntungan, manfaatkan.",
       eventDetails: "Semakin banyak TPF yang Anda miliki, semakin banyak yang Anda peroleh.",
-      eventWarning: "Jangan lewatkan kesempatan terbatas ini untuk memaksimalkan hadiah FiStaking Anda!",
+      eventWarning: "Jangan lewatkan kesempatan terbatas ini para memaksimalkan hadiah FiStaking Anda!",
       eventPeriod: "Periode Acara",
       eventDates: "15 Juli, 2025 - 15 Agustus, 2025",
       participateNow: "Berpartisipasi Sekarang",
@@ -1012,181 +1012,183 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
       <AnimatePresence>
         {isMenuOpen && (
           <div className="fixed inset-0 z-40 pointer-events-none">
-            {/* Menu Items Container */}
-            <div className="absolute bottom-32 left-0 right-0 flex justify-center">
-              {" "}
-              {/* Removed px-4 from here */}
-              <div className="relative flex flex-nowrap justify-start gap-3 overflow-x-auto whitespace-nowrap py-2 px-4">
+            {/* Menu Items Container - Centering wrapper */}
+            <div className="absolute bottom-40 left-0 right-0 flex justify-center">
+              {/* Fixed width container for the visible portion of the menu */}
+              <div className="relative w-[228px] overflow-x-auto">
                 {" "}
-                {/* Changed justify-center to justify-start and added px-4 */}
-                {navigationItems.map((item, index) => (
-                  <motion.button
-                    key={item.id}
-                    initial={{
-                      opacity: 0,
-                      y: 100,
-                      scale: 0,
-                      rotateX: 90,
-                      rotateY: 180,
-                    }}
-                    animate={{
-                      opacity: 1,
-                      y: [100, -20, 0],
-                      scale: [0, 1.2, 1],
-                      rotateX: [90, -10, 0],
-                      rotateY: [180, 10, 0],
-                    }}
-                    exit={{
-                      opacity: 0,
-                      y: 100,
-                      scale: 0,
-                      rotateX: 90,
-                      rotateY: 180,
-                    }}
-                    transition={{
-                      delay: index * 0.15,
-                      type: "spring",
-                      damping: 15,
-                      stiffness: 200,
-                      duration: 0.8,
-                    }}
-                    whileHover={{
-                      scale: 1.15,
-                      y: -10,
-                      rotateX: -15,
-                      rotateY: 15,
-                      transition: { duration: 0.2 },
-                    }}
-                    whileTap={{
-                      scale: 0.9,
-                      y: 5,
-                      rotateX: 10,
-                      rotateY: -10,
-                    }}
-                    onClick={() => {
-                      if (item.href) {
-                        router.push(item.href)
-                      }
-                      setIsMenuOpen(false)
-                    }}
-                    className="group pointer-events-auto relative flex-shrink-0"
-                    style={{
-                      transformStyle: "preserve-3d",
-                    }}
-                  >
-                    {/* 3D Icon Container with Glow */}
-                    <motion.div
-                      className="w-10 h-10 bg-gradient-to-br from-gray-800/90 to-gray-900/95 backdrop-blur-xl border border-gray-600/50 rounded-xl flex items-center justify-center shadow-2xl"
-                      style={{
-                        transformStyle: "preserve-3d",
-                        boxShadow: "0 8px 15px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.1)",
+                {/* Adjusted width to fit 4 icons (4*40px + 3*12px + 2*16px) */}
+                {/* The actual scrollable list of icons */}
+                <div className="flex flex-nowrap gap-3 whitespace-nowrap py-2 px-4">
+                  {navigationItems.map((item, index) => (
+                    <motion.button
+                      key={item.id}
+                      initial={{
+                        opacity: 0,
+                        y: 100,
+                        scale: 0,
+                        rotateX: 90,
+                        rotateY: 180,
                       }}
                       animate={{
-                        rotateZ: [0, 5, -5, 0],
+                        opacity: 1,
+                        y: [100, -20, 0],
+                        scale: [0, 1.2, 1],
+                        rotateX: [90, -10, 0],
+                        rotateY: [180, 10, 0],
+                      }}
+                      exit={{
+                        opacity: 0,
+                        y: 100,
+                        scale: 0,
+                        rotateX: 90,
+                        rotateY: 180,
                       }}
                       transition={{
-                        duration: 4,
-                        repeat: Number.POSITIVE_INFINITY,
-                        ease: "easeInOut",
-                        delay: index * 0.5,
+                        delay: index * 0.15,
+                        type: "spring",
+                        damping: 15,
+                        stiffness: 200,
+                        duration: 0.8,
+                      }}
+                      whileHover={{
+                        scale: 1.15,
+                        y: -10,
+                        rotateX: -15,
+                        rotateY: 15,
+                        transition: { duration: 0.2 },
+                      }}
+                      whileTap={{
+                        scale: 0.9,
+                        y: 5,
+                        rotateX: 10,
+                        rotateY: -10,
+                      }}
+                      onClick={() => {
+                        if (item.href) {
+                          router.push(item.href)
+                        }
+                        setIsMenuOpen(false)
+                      }}
+                      className="group pointer-events-auto relative flex-shrink-0"
+                      style={{
+                        transformStyle: "preserve-3d",
                       }}
                     >
-                      {/* Pulsing Glow Ring */}
+                      {/* 3D Icon Container with Glow */}
                       <motion.div
-                        className="absolute inset-0 bg-gradient-to-r from-blue-400/30 to-purple-400/30 rounded-lg blur-sm"
-                        animate={{
-                          scale: [1, 1.3, 1],
-                          opacity: [0.3, 0.7, 0.3],
-                        }}
-                        transition={{
-                          duration: 2,
-                          repeat: Number.POSITIVE_INFINITY,
-                          ease: "easeInOut",
-                          delay: index * 0.3,
-                        }}
-                      />
-
-                      {/* Inner Glow */}
-                      <div
-                        className="absolute inset-1 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                        style={{ transform: "translateZ(2px)" }}
-                      />
-
-                      {/* 3D Icon with Floating Animation */}
-                      <motion.div
+                        className="w-10 h-10 bg-gradient-to-br from-gray-800/90 to-gray-900/95 backdrop-blur-xl border border-gray-600/50 rounded-xl flex items-center justify-center shadow-2xl"
                         style={{
                           transformStyle: "preserve-3d",
-                          transform: "translateZ(3px)",
+                          boxShadow: "0 8px 15px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.1)",
                         }}
                         animate={{
-                          y: [0, -2, 0],
-                          rotateY: [0, 10, -10, 0],
+                          rotateZ: [0, 5, -5, 0],
                         }}
                         transition={{
-                          duration: 3,
+                          duration: 4,
                           repeat: Number.POSITIVE_INFINITY,
                           ease: "easeInOut",
-                          delay: index * 0.4,
+                          delay: index * 0.5,
                         }}
                       >
-                        <item.icon className="w-5 h-5 text-white drop-shadow-lg" />
-                      </motion.div>
-
-                      {/* Outer Glow Effect */}
-                      <div
-                        className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-xl blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                        style={{ transform: "translateZ(-5px)" }}
-                      />
-                    </motion.div>
-
-                    {/* Floating Label */}
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.15 + 0.3 }}
-                      className="absolute -bottom-7 left-1/2 transform -translate-x-1/2 whitespace-nowrap"
-                      style={{ transform: "translateZ(2px)" }}
-                    >
-                      <div className="px-2.5 py-1 bg-gray-800/80 backdrop-blur-md border border-gray-700/50 rounded-full">
-                        <span className="text-white text-xs font-medium drop-shadow-lg">
-                          {t.navigation[item.labelKey]}
-                        </span>
-                      </div>
-                    </motion.div>
-
-                    {/* Particle Effect on Hover */}
-                    <motion.div
-                      className="absolute inset-0 pointer-events-none"
-                      whileHover={{
-                        scale: [1, 1.5, 1],
-                        opacity: [0, 1, 0],
-                      }}
-                      transition={{ duration: 0.6 }}
-                    >
-                      {[...Array(6)].map((_, particleIndex) => (
+                        {/* Pulsing Glow Ring */}
                         <motion.div
-                          key={particleIndex}
-                          className="absolute w-1 h-1 bg-blue-400 rounded-full"
-                          style={{
-                            top: "50%",
-                            left: "50%",
-                          }}
+                          className="absolute inset-0 bg-gradient-to-r from-blue-400/30 to-purple-400/30 rounded-lg blur-sm"
                           animate={{
-                            x: Math.cos((particleIndex * Math.PI * 2) / 6) * 20,
-                            y: Math.sin((particleIndex * Math.PI * 2) / 6) * 20,
-                            opacity: [0, 1, 0],
-                            scale: [0, 1, 0],
+                            scale: [1, 1.3, 1],
+                            opacity: [0.3, 0.7, 0.3],
                           }}
                           transition={{
-                            duration: 0.8,
+                            duration: 2,
                             repeat: Number.POSITIVE_INFINITY,
-                            delay: particleIndex * 0.1,
+                            ease: "easeInOut",
+                            delay: index * 0.3,
                           }}
                         />
-                      ))}
-                    </motion.div>
-                  </motion.button>
-                ))}
+
+                        {/* Inner Glow */}
+                        <div
+                          className="absolute inset-1 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                          style={{ transform: "translateZ(2px)" }}
+                        />
+
+                        {/* 3D Icon with Floating Animation */}
+                        <motion.div
+                          style={{
+                            transformStyle: "preserve-3d",
+                            transform: "translateZ(3px)",
+                          }}
+                          animate={{
+                            y: [0, -2, 0],
+                            rotateY: [0, 10, -10, 0],
+                          }}
+                          transition={{
+                            duration: 3,
+                            repeat: Number.POSITIVE_INFINITY,
+                            ease: "easeInOut",
+                            delay: index * 0.4,
+                          }}
+                        >
+                          <item.icon className="w-5 h-5 text-white drop-shadow-lg" />
+                        </motion.div>
+
+                        {/* Outer Glow Effect */}
+                        <div
+                          className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-xl blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                          style={{ transform: "translateZ(-5px)" }}
+                        />
+                      </motion.div>
+
+                      {/* Floating Label */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.15 + 0.3 }}
+                        className="absolute -bottom-7 left-1/2 transform -translate-x-1/2 whitespace-nowrap"
+                        style={{ transform: "translateZ(2px)" }}
+                      >
+                        <div className="px-2.5 py-1 bg-gray-800/80 backdrop-blur-md border border-gray-700/50 rounded-full">
+                          <span className="text-white text-xs font-medium drop-shadow-lg">
+                            {t.navigation[item.labelKey]}
+                          </span>
+                        </div>
+                      </motion.div>
+
+                      {/* Particle Effect on Hover */}
+                      <motion.div
+                        className="absolute inset-0 pointer-events-none"
+                        whileHover={{
+                          scale: [1, 1.5, 1],
+                          opacity: [0, 1, 0],
+                        }}
+                        transition={{ duration: 0.6 }}
+                      >
+                        {[...Array(6)].map((_, particleIndex) => (
+                          <motion.div
+                            key={particleIndex}
+                            className="absolute w-1 h-1 bg-blue-400 rounded-full"
+                            style={{
+                              top: "50%",
+                              left: "50%",
+                            }}
+                            animate={{
+                              x: Math.cos((particleIndex * Math.PI * 2) / 6) * 20,
+                              y: Math.sin((particleIndex * Math.PI * 2) / 6) * 20,
+                              opacity: [0, 1, 0],
+                              scale: [0, 1, 0],
+                            }}
+                            transition={{
+                              duration: 0.8,
+                              repeat: Number.POSITIVE_INFINITY,
+                              delay: particleIndex * 0.1,
+                            }}
+                          />
+                        ))}
+                      </motion.div>
+                    </motion.button>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
