@@ -2,7 +2,8 @@
 
 import { useEffect, useRef } from "react"
 import * as THREE from "three"
-import Image from "next/image"
+// Não precisamos mais importar Image do next/image aqui, pois o logo será um objeto 3D
+// import Image from "next/image"
 
 export function TechGlobe() {
   const mountRef = useRef<HTMLDivElement>(null)
@@ -10,9 +11,10 @@ export function TechGlobe() {
   const sceneRef = useRef<THREE.Scene | null>(null)
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null)
   const globeGroupRef = useRef<THREE.Group | null>(null)
-  const wireframeGroupRef = useRef<THREE.Group | null>(null) // Re-adicionado
+  const wireframeGroupRef = useRef<THREE.Group | null>(null)
   const particlesRef = useRef<THREE.Points | null>(null)
-  const ringsGroupRef = useRef<THREE.Group | null>(null) // Re-adicionado
+  const ringsGroupRef = useRef<THREE.Group | null>(null)
+  const logoMeshRef = useRef<THREE.Mesh | null>(null) // Ref para o objeto 3D do logo
 
   useEffect(() => {
     if (!mountRef.current) return
@@ -82,7 +84,7 @@ export function TechGlobe() {
     const outerGlowSphere = new THREE.Mesh(outerGlowGeometry, outerGlowMaterial)
     globeGroup.add(outerGlowSphere)
 
-    // Wireframe Globe Layers - Re-adicionado e confirmado branco
+    // Wireframe Globe Layers
     const wireframeGroup = new THREE.Group()
     wireframeGroupRef.current = wireframeGroup
     globeGroup.add(wireframeGroup)
@@ -107,7 +109,7 @@ export function TechGlobe() {
     const secondaryWireframe = new THREE.Mesh(secondaryWireframeGeometry, secondaryWireframeMaterial)
     wireframeGroup.add(secondaryWireframe)
 
-    // Enhanced Particle Field - Confirmado branco
+    // Enhanced Particle Field
     const particleCount = 1000
     const positions = new Float32Array(particleCount * 3)
     const colors = new Float32Array(particleCount * 3)
@@ -142,7 +144,7 @@ export function TechGlobe() {
     particlesRef.current = particles
     scene.add(particles)
 
-    // Rotating Tech Rings - Re-adicionado e confirmado branco
+    // Rotating Tech Rings
     const ringsGroup = new THREE.Group()
     ringsGroupRef.current = ringsGroup
     scene.add(ringsGroup)
@@ -172,7 +174,7 @@ export function TechGlobe() {
     ring4.rotation.set(-Math.PI / 4, -Math.PI / 4, Math.PI / 2)
     ringsGroup.add(ring4)
 
-    // Data Streams - Curved Lines - Re-adicionado e confirmado branco
+    // Data Streams - Curved Lines
     for (let i = 0; i < 6; i++) {
       const streamGeometry = new THREE.TorusGeometry(1.4 + i * 0.03, 0.003, 4, 50)
       const streamMaterial = new THREE.MeshBasicMaterial({
@@ -184,6 +186,28 @@ export function TechGlobe() {
       stream.rotation.y = (i * Math.PI) / 3
       globeGroup.add(stream)
     }
+
+    // Carregar e adicionar o logo como um objeto 3D
+    const textureLoader = new THREE.TextureLoader()
+    textureLoader.load("/images/codepulse-logo.png", (texture) => {
+      const logoGeometry = new THREE.PlaneGeometry(0.5, 0.5) // Tamanho do logo
+      const logoMaterial = new THREE.MeshBasicMaterial({
+        map: texture,
+        transparent: true,
+        emissive: 0xffffff, // Cor do brilho do logo (branco)
+        emissiveIntensity: 0.8, // Intensidade do brilho
+        side: THREE.DoubleSide, // Renderizar em ambos os lados
+      })
+      const logoMesh = new THREE.Mesh(logoGeometry, logoMaterial)
+
+      // Posição inicial do logo (no centro do globo, ligeiramente para cima e para a direita)
+      const initialLogoX = 0.1
+      const initialLogoY = 0.1
+      logoMesh.position.set(initialLogoX, initialLogoY, 0)
+
+      globeGroup.add(logoMesh)
+      logoMeshRef.current = logoMesh
+    })
 
     // Animation loop
     const animate = () => {
@@ -211,6 +235,20 @@ export function TechGlobe() {
           ring.rotation.z += 0.01 + index * 0.002
           ring.rotation.x += 0.005 + index * 0.001
         })
+      }
+
+      // Animações do logo 3D
+      if (logoMeshRef.current) {
+        // Animação de pulsação (escala)
+        const pulseScale = 1 + Math.sin(time * 5) * 0.05 // Escala entre 1 e 1.1
+        logoMeshRef.current.scale.setScalar(pulseScale)
+
+        // Animação de vibração (pequenas mudanças de posição)
+        const vibrateOffset = 0.002 // Offset muito pequeno
+        const initialLogoX = 0.1 // Posição X base
+        const initialLogoY = 0.1 // Posição Y base
+        logoMeshRef.current.position.x = initialLogoX + Math.sin(time * 100) * vibrateOffset
+        logoMeshRef.current.position.y = initialLogoY + Math.cos(time * 100) * vibrateOffset
       }
 
       renderer.render(scene, camera)
@@ -257,59 +295,7 @@ export function TechGlobe() {
 
   return (
     <div ref={mountRef} className="w-full h-full relative flex items-center justify-center">
-      {/* Logo and Vibration Effect inside the globe container */}
-      <div
-        className="absolute w-24 h-24 flex items-center justify-center top-1/2 -translate-y-1/2 right-0 mr-20 mt-[-40px]"
-        style={{
-          animation: "vibrateLogo 0.08s linear infinite",
-        }}
-      >
-        <div
-          className="absolute inset-0 bg-white rounded-full shadow-2xl"
-          style={{
-            boxShadow: `
-            0 0 25px rgba(255,255,255,1),
-            0 0 50px rgba(229,231,235,0.8),
-            0 0 75px rgba(209,213,219,0.6),
-            0 0 100px rgba(156,163,175,0.4)
-          `,
-            animation: "pulse 0.5s ease-in-out infinite",
-          }}
-        />
-        <div className="relative z-10 w-20 h-20 rounded-full overflow-hidden bg-white p-1">
-          <Image
-            src="/images/codepulse-logo.png"
-            alt="PulseCode Logo"
-            width={80}
-            height={80}
-            className="w-full h-full object-contain"
-            style={{
-              animation: "vibrateLogoImage 0.1s linear infinite",
-            }}
-          />
-        </div>
-      </div>
-      <style jsx>{`
-      @keyframes vibrateLogo {
-        0% { transform: translate(0, 0); }
-        25% { transform: translate(-0.5px, 0.5px); }
-        50% { transform: translate(0.5px, -0.5px); }
-        75% { transform: translate(-0.5px, -0.5px); }
-        100% { transform: translate(0, 0); }
-      }
-      @keyframes vibrateLogoImage {
-        0% { transform: translate(0, 0); }
-        25% { transform: translate(0.2px, -0.2px); }
-        50% { transform: translate(-0.2px, 0.2px); }
-        75% { transform: translate(0.2px, 0.2px); }
-        100% { transform: translate(0, 0); }
-      }
-      @keyframes pulse {
-        0% { transform: scale(1); opacity: 1; }
-        50% { transform: scale(1.05); opacity: 0.9; }
-        100% { transform: scale(1); opacity: 1; }
-      }
-    `}</style>
+      {/* O logo agora é renderizado dentro da cena Three.js, então não precisamos mais do div HTML aqui. */}
     </div>
   )
 }
