@@ -163,7 +163,7 @@ const translations = {
       close: "Fechar",
       back: "Voltar",
       invite: "CONVIDAR",
-      linkCopiado: "Link copiado!",
+      linkCopied: "Link copiado!",
       shareVia: "Partilhar via",
       copyLink: "Copiar Link",
     },
@@ -570,6 +570,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
     <div className="min-h-screen bg-black relative overflow-hidden flex items-center justify-center">
       {/* New Background Effect */}
       <BackgroundEffect />
+
       {/* Top Navigation */}
       <div className="absolute top-0 left-0 right-0 z-50 p-4">
         {" "}
@@ -675,6 +676,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
           </div>
         </div>
       </div>
+
       {/* Mini Wallet - Positioned with safe spacing from top navigation */}
       <AnimatePresence>
         {showMiniWallet && user && (
@@ -689,6 +691,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
           </div>
         )}
       </AnimatePresence>
+
       {/* Events Modal */}
       <AnimatePresence>
         {showEventsModal && (
@@ -838,6 +841,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
           </motion.div>
         )}
       </AnimatePresence>
+
       {/* Share Modal */}
       <AnimatePresence>
         {showShareModal && (
@@ -957,6 +961,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
           </motion.div>
         )}
       </AnimatePresence>
+
       {/* Partnership Slideshow - Between subtitle and bottom bar */}
       <div className="fixed bottom-20 left-0 right-0 z-30 flex justify-center">
         <AnimatePresence mode="wait">
@@ -1024,6 +1029,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
           </motion.div>
         </AnimatePresence>
       </div>
+
       {/* Bottom Navigation Bar with Wallet Icon + Menu Button */}
       <div className="fixed bottom-6 left-6 right-6 z-50">
         {/* Futuristic Bottom Bar */}
@@ -1066,6 +1072,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
           </div>
         </div>
       </div>
+
       {/* 3D Floating Icons Menu - No Background */}
       <AnimatePresence>
         {isMenuOpen && (
@@ -1143,14 +1150,14 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                           setIsMenuOpen(false)
                         }
                       }}
-                      className="group pointer-events-auto relative flex-shrink-0 w-16 h-16 flex flex-col items-center justify-between" // Fixed width and height
+                      className="group pointer-events-auto relative flex-shrink-0 w-16 h-16" // Fixed width and height
                       style={{
                         transformStyle: "preserve-3d",
                       }}
                     >
                       {/* 3D Icon Container with Glow */}
                       <motion.div
-                        className="w-12 h-12 bg-gradient-to-br from-gray-800/90 to-gray-900/95 backdrop-blur-xl border border-gray-600/50 rounded-xl flex items-center justify-center shadow-2xl"
+                        className="w-full h-full bg-gradient-to-br from-gray-800/90 to-gray-900/95 backdrop-blur-xl border border-gray-600/50 rounded-xl flex items-center justify-center shadow-2xl"
                         style={{
                           transformStyle: "preserve-3d",
                           boxShadow: "0 8px 15px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.1)",
@@ -1210,9 +1217,15 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                         />
                       </motion.div>
                       {/* Floating Label */}
-                      <motion.div className="whitespace-nowrap" style={{ transform: "translateZ(2px)" }}>
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.15 + 0.3 }}
+                        className="absolute -bottom-7 left-1/2 transform -translate-x-1/2 whitespace-nowrap"
+                        style={{ transform: "translateZ(2px)" }}
+                      >
                         <div className="px-2.5 py-1 bg-gray-800/80 backdrop-blur-md border border-gray-700/50 rounded-full">
-                          <span className="text-white text-[0.65rem] font-medium drop-shadow-lg">
+                          <span className="text-white text-xs font-medium drop-shadow-lg">
                             {t.navigation[item.labelKey]}
                           </span>
                         </div>
@@ -1340,86 +1353,92 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                 width={64}
                 height={64}
                 className="w-full h-full object-contain"
+                style={{
+                  animation: "vibrateLogoImage 0.1s linear infinite",
+                }}
               />
             </div>
           </div>
-        </div>{" "}
-        {/* <-- ESTA TAG DE FECHO ESTAVA EM FALTA */}
-      </div>{" "}
-      {/* <-- Esta é a tag de fecho para o contêiner "Logo with Ultra Vibrant Auras and Vibration" */}
-      {/* Brand Name - COMPACTED */}
-      <h1 className="text-3xl md:text-4xl font-bold mb-4 tracking-wider">
-        <span className="bg-gradient-to-r from-white via-cyan-200 to-blue-200 bg-clip-text text-transparent">
-          TPulseFi
-        </span>
-      </h1>
-      {/* Animated Subtitle - COMPACTED */}
-      <div className="h-6 flex items-center justify-center mb-8">
-        <div className="flex items-center space-x-3">
-          <div className="h-px w-8 bg-gradient-to-r from-transparent to-white/50" />
-          <p className="text-sm md:text-base text-gray-300 font-light tracking-widest uppercase min-w-[300px] text-center">
-            {displayText}
-            <span className="animate-pulse">|</span>
-          </p>
-          <div className="h-px w-8 bg-gradient-to-l from-transparent to-white/50" />
         </div>
-      </div>
-      {/* New Social Media Icons */}
-      <div className="flex items-center justify-center gap-3 mb-8 z-20 relative">
-        <a
-          href="https://x.com/TradePulseToken?t=N-8tJuaN9E4asIH0A-gGEg&s=09"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="relative group"
-        >
-          <div className="px-2 py-1 bg-black/20 backdrop-blur-md border border-white/10 rounded-full flex items-center space-x-1.5 hover:bg-white/10 transition-all duration-300">
-            <div className="absolute inset-0 bg-gradient-to-r from-gray-400/10 to-gray-600/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            <X className="w-3 h-3 text-gray-300 relative z-10" />
-            <span className="text-white text-xs font-medium relative z-10">Follow Us</span>
+
+        {/* Brand Name - COMPACTED */}
+        <h1 className="text-3xl md:text-4xl font-bold mb-4 tracking-wider">
+          <span className="bg-gradient-to-r from-white via-cyan-200 to-blue-200 bg-clip-text text-transparent">
+            TPulseFi
+          </span>
+        </h1>
+
+        {/* Animated Subtitle - COMPACTED */}
+        <div className="h-6 flex items-center justify-center mb-8">
+          <div className="flex items-center space-x-3">
+            <div className="h-px w-8 bg-gradient-to-r from-transparent to-white/50" />
+            <p className="text-sm md:text-base text-gray-300 font-light tracking-widest uppercase min-w-[300px] text-center">
+              {displayText}
+              <span className="animate-pulse">|</span>
+            </p>
+            <div className="h-px w-8 bg-gradient-to-l from-transparent to-white/50" />
           </div>
-        </a>
-        <a href="https://t.me/tpulsefi" target="_blank" rel="noopener noreferrer" className="relative group">
-          <div className="px-2 py-1 bg-black/20 backdrop-blur-md border border-white/10 rounded-full flex items-center space-x-1.5 hover:bg-white/10 transition-all duration-300">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-400/10 to-cyan-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            <Send className="w-3 h-3 text-blue-300 relative z-10" />
-            <span className="text-white text-xs font-medium relative z-10">Join Telegram</span>
-          </div>
-        </a>
-      </div>
-      {/* Motivational Words Animation - COMPACTED */}
-      <div className="flex items-center justify-center mb-6 z-20 relative">
-        <div className="h-8 flex items-center justify-center">
-          <AnimatePresence mode="wait">
-            {showWord && (
-              <motion.p
-                key={currentWordIndex}
-                initial={{ opacity: 0, y: 15, scale: 0.8 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -15, scale: 0.8 }}
-                transition={{ duration: 0.5, ease: "easeInOut" }}
-                className="text-sm md:text-base text-white font-medium text-center max-w-sm px-3"
-                style={{
-                  textShadow: "0 0 15px rgba(255,255,255,0.5)",
-                  animation: showWord ? "pulse 2s ease-in-out infinite" : "none",
-                }}
-              >
-                {t.motivationalWords[currentWordIndex]}
-              </motion.p>
-            )}
-          </AnimatePresence>
         </div>
-      </div>
-      {/* Invite Button */}
-      <div className="flex items-center justify-center mb-12 z-20 relative">
-        <button onClick={() => setShowShareModal(true)} className="relative group">
-          <div className="px-3 py-1.5 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-full flex items-center space-x-1.5 transition-all duration-300 transform hover:scale-105 shadow-lg">
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            <Share2 className="w-4 h-4 text-white relative z-10" />
-            <span className="text-white text-sm font-bold relative z-10 tracking-wide">
-              {t.common?.invite || "INVITE"}
-            </span>
+
+        {/* New Social Media Icons */}
+        <div className="flex items-center justify-center gap-3 mb-8 z-20 relative">
+          <a
+            href="https://x.com/TradePulseToken?t=N-8tJuaN9E4asIH0A-gGEg&s=09"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="relative group"
+          >
+            <div className="px-2 py-1 bg-black/20 backdrop-blur-md border border-white/10 rounded-full flex items-center space-x-1.5 hover:bg-white/10 transition-all duration-300">
+              <div className="absolute inset-0 bg-gradient-to-r from-gray-400/10 to-gray-600/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <X className="w-3 h-3 text-gray-300 relative z-10" />
+              <span className="text-white text-xs font-medium relative z-10">Follow Us</span>
+            </div>
+          </a>
+          <a href="https://t.me/tpulsefi" target="_blank" rel="noopener noreferrer" className="relative group">
+            <div className="px-2 py-1 bg-black/20 backdrop-blur-md border border-white/10 rounded-full flex items-center space-x-1.5 hover:bg-white/10 transition-all duration-300">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-400/10 to-cyan-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <Send className="w-3 h-3 text-blue-300 relative z-10" />
+              <span className="text-white text-xs font-medium relative z-10">Join Telegram</span>
+            </div>
+          </a>
+        </div>
+
+        {/* Motivational Words Animation - COMPACTED */}
+        <div className="flex items-center justify-center mb-6 z-20 relative">
+          <div className="h-8 flex items-center justify-center">
+            <AnimatePresence mode="wait">
+              {showWord && (
+                <motion.p
+                  key={currentWordIndex}
+                  initial={{ opacity: 0, y: 15, scale: 0.8 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -15, scale: 0.8 }}
+                  transition={{ duration: 0.5, ease: "easeInOut" }}
+                  className="text-sm md:text-base text-white font-medium text-center max-w-sm px-3"
+                  style={{
+                    textShadow: "0 0 15px rgba(255,255,255,0.5)",
+                    animation: showWord ? "pulse 2s ease-in-out infinite" : "none",
+                  }}
+                >
+                  {t.motivationalWords[currentWordIndex]}
+                </motion.p>
+              )}
+            </AnimatePresence>
           </div>
-        </button>
+        </div>
+
+        {/* Invite Button */}
+        <div className="flex items-center justify-center mb-12 z-20 relative">
+          <button onClick={() => setShowShareModal(true)} className="relative group">
+            <div className="px-3 py-1.5 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-full flex items-center space-x-1.5 transition-all duration-300 transform hover:scale-105 shadow-lg">
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <Share2 className="w-4 h-4 text-white relative z-10" />
+              <span className="text-white text-sm font-bold relative z-10 tracking-wide">
+                {t.common?.invite || "INVITE"}
+              </span>
+            </div>
+          </button>
+        </div>
       </div>
     </div>
   )
