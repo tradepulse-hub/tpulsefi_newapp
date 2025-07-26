@@ -1,16 +1,16 @@
 "use client"
 
 import Image from "next/image"
-import { ArrowLeft, Info, Hammer, Flame } from "lucide-react" // Re-adicionado Info
+import { ArrowLeft, Info, Hammer, Flame } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState, useRef, useCallback } from "react"
-import { Button } from "@/components/ui/button" // Re-adicionado Button
+import { Button } from "@/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
 import { MiniKit } from "@worldcoin/minikit-js"
 import { ethers } from "ethers"
 import { useMiniKit } from "../../hooks/use-minikit"
-import { TechGlobe } from "../../components/tech-globe" // Re-adicionado TechGlobe
-import { BackgroundEffect } from "../../components/background-effect" // Re-adicionado BackgroundEffect
+import { TechGlobe } from "../../components/tech-globe"
+import { BackgroundEffect } from "../../components/background-effect"
 
 // Endereço da carteira morta (burn address)
 const DEAD_WALLET = "0x000000000000000000000000000000000000dEaD"
@@ -825,7 +825,6 @@ export default function PulseCodePage() {
     switch (activeFooterTab) {
       case "about":
         return <></>
-      // Removed the "codestaking" case entirely
       case "projects":
         return (
           <div className="flex flex-col items-center justify-center text-center">
@@ -1428,7 +1427,7 @@ export default function PulseCodePage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
-                className="mt-4 w-full max-w-xs px-4" // Changed max-w-sm to max-w-xs
+                className="mt-4 w-full max-w-xs px-4"
               >
                 <div className="bg-gray-900/70 backdrop-blur-sm rounded-xl border border-gray-800/50 p-3">
                   <h3 className="text-sm font-medium text-gray-300 mb-2">
@@ -1461,8 +1460,9 @@ export default function PulseCodePage() {
       <BackgroundEffect />
 
       {/* 3D Globe Container (z-index: 1) */}
-      <div className="absolute inset-0 z-10 flex items-center justify-center">
-        {/* Adjusted size of the globe container */}
+      <div className="absolute inset-0 z-10 flex items-center justify-start pl-10">
+        {" "}
+        {/* Adjusted: justify-start and pl-10 */}
         <div className="relative w-[250px] h-[250px]">{activeFooterTab === "about" && <TechGlobe />}</div>
       </div>
 
@@ -1473,14 +1473,8 @@ export default function PulseCodePage() {
         <ArrowLeft className="w-5 h-5" />
         <span className="text-lg font-medium">{t.common?.back || "Back"}</span>
       </button>
-      <motion.div
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        className="relative z-20 bg-black/60 backdrop-blur-lg border border-white/10 rounded-xl p-8 max-w-3xl w-full text-center shadow-2xl mb-20"
-      >
-        {renderContent()}
-      </motion.div>
+      {/* Removed the motion.div wrapper around renderContent() */}
+      <div className="absolute inset-0 z-20 flex items-center justify-center p-4">{renderContent()}</div>
       <footer className="fixed bottom-4 left-1/2 -translate-x-1/2 w-full max-w-xs bg-black/70 backdrop-blur-md border border-white/10 rounded-full p-2 z-50">
         <div className="flex justify-around items-center">
           <Button
