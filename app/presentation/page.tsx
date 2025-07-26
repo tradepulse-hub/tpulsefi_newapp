@@ -1092,9 +1092,28 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                 {navigationItems.map((item, index) => (
                   <motion.button
                     key={item.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.08 }}
+                    initial={{ opacity: 0, y: 20, rotateX: 90, scale: 0.8 }}
+                    animate={{ opacity: 1, y: 0, rotateX: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 20, rotateX: 90, scale: 0.8 }}
+                    transition={{
+                      delay: index * 0.08,
+                      type: "spring",
+                      damping: 15,
+                      stiffness: 200,
+                    }}
+                    whileHover={{
+                      scale: 1.05,
+                      y: -5,
+                      rotateX: -5,
+                      rotateY: 5,
+                      transition: { duration: 0.2 },
+                    }}
+                    whileTap={{
+                      scale: 0.95,
+                      y: 2,
+                      rotateX: 2,
+                      rotateY: -2,
+                    }}
                     onClick={() => {
                       if (item.action) {
                         item.action()
@@ -1104,10 +1123,25 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                       setIsMenuOpen(false) // Close modal after item click
                     }}
                     className="group p-3 bg-gray-700/50 backdrop-blur-sm border border-gray-600/50 rounded-lg hover:bg-gray-600/70 transition-all duration-300 flex flex-col items-center justify-center space-y-2"
+                    style={{ transformStyle: "preserve-3d" }}
                   >
-                    <div className="w-10 h-10 bg-gradient-to-r from-gray-600 to-gray-700 rounded-full flex items-center justify-center group-hover:from-gray-500 group-hover:to-gray-600 transition-all duration-300 shadow-md">
+                    <motion.div
+                      className="w-10 h-10 bg-gradient-to-r from-gray-600 to-gray-700 rounded-full flex items-center justify-center group-hover:from-gray-500 group-hover:to-gray-600 transition-all duration-300 shadow-md"
+                      style={{ transform: "translateZ(10px)" }} // Push icon container forward in 3D space
+                      animate={{
+                        y: [0, -3, 0], // Jumping effect
+                        rotateX: [0, 5, 0],
+                        rotateY: [0, -5, 0],
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Number.POSITIVE_INFINITY,
+                        ease: "easeInOut",
+                        delay: index * 0.15,
+                      }}
+                    >
                       <item.icon className="w-5 h-5 text-white group-hover:text-gray-200 transition-colors" />
-                    </div>
+                    </motion.div>
                     <span className="text-white group-hover:text-gray-100 font-medium text-sm tracking-wide">
                       {t.navigation?.[item.labelKey] || item.labelKey}
                     </span>
