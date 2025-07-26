@@ -163,7 +163,7 @@ const translations = {
       close: "Fechar",
       back: "Voltar",
       invite: "CONVIDAR",
-      linkCopied: "Link copiado!",
+      linkCopiado: "Link copiado!",
       shareVia: "Partilhar via",
       copyLink: "Copiar Link",
     },
@@ -1092,7 +1092,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                 <div className="w-8 h-0.5 bg-gray-500 rounded-full" />
               </div>
               {/* Menu Content - Increased padding for larger window */}
-              <div className="py-20">
+              <div className="py-8">
                 {" "}
                 {/* Removed px-4 to maximize horizontal space */}
                 {/* Menu Items Grid */}
@@ -1280,10 +1280,10 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             className="absolute w-64 h-64 rounded-full"
             style={{
               background: `radial-gradient(circle,
-          rgba(255,255,255,0.4) 0%,
-          rgba(156,163,175,0.3) 30%,
-          rgba(107,114,128,0.2) 60%,
-          transparent 100%)`,
+        rgba(255,255,255,0.4) 0%,
+        rgba(156,163,175,0.3) 30%,
+        rgba(107,114,128,0.2) 60%,
+        transparent 100%)`,
               animation: "vibrateAura 0.1s linear infinite, pulse 1s ease-in-out infinite",
             }}
           />
@@ -1291,9 +1291,9 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             className="absolute w-52 h-52 rounded-full"
             style={{
               background: `radial-gradient(circle,
-          rgba(255,255,255,0.6) 0%,
-          rgba(229,231,235,0.4) 40%,
-          transparent 100%)`,
+        rgba(255,255,255,0.6) 0%,
+        rgba(229,231,235,0.4) 40%,
+        transparent 100%)`,
               animation: "vibrateAura 0.15s linear infinite, pulse 0.8s ease-in-out infinite",
               animationDelay: "0.05s",
             }}
@@ -1302,9 +1302,9 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             className="absolute w-40 h-40 rounded-full"
             style={{
               background: `radial-gradient(circle,
-          rgba(243,244,246,0.5) 0%,
-          rgba(209,213,219,0.4) 50%,
-          transparent 100%)`,
+        rgba(243,244,246,0.5) 0%,
+        rgba(209,213,219,0.4) 50%,
+        transparent 100%)`,
               animation: "vibrateAura 0.2s linear infinite, pulse 0.6s ease-in-out infinite",
               animationDelay: "0.1s",
             }}
@@ -1337,11 +1337,11 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
               className="absolute inset-0 bg-white rounded-full shadow-2xl"
               style={{
                 boxShadow: `
-    0 0 30px rgba(255,255,255,1),
-    0 0 60px rgba(229,231,235,0.8),
-    0 0 90px rgba(209,213,219,0.6),
-    0 0 120px rgba(156,163,175,0.4)
-  `,
+  0 0 30px rgba(255,255,255,1),
+  0 0 60px rgba(229,231,235,0.8),
+  0 0 90px rgba(209,213,219,0.6),
+  0 0 120px rgba(156,163,175,0.4)
+`,
                 animation: "pulse 0.5s ease-in-out infinite",
               }}
             />
