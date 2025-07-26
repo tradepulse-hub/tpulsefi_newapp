@@ -1,13 +1,16 @@
 "use client"
 
 import Image from "next/image"
-import { Hammer } from "lucide-react"
+import { ArrowLeft, Info, Hammer, Flame } from "lucide-react" // Re-adicionado Info
 import { useRouter } from "next/navigation"
 import { useEffect, useState, useRef, useCallback } from "react"
+import { Button } from "@/components/ui/button" // Re-adicionado Button
 import { motion, AnimatePresence } from "framer-motion"
 import { MiniKit } from "@worldcoin/minikit-js"
 import { ethers } from "ethers"
 import { useMiniKit } from "../../hooks/use-minikit"
+import { TechGlobe } from "../../components/tech-globe" // Re-adicionado TechGlobe
+import { BackgroundEffect } from "../../components/background-effect" // Re-adicionado BackgroundEffect
 
 // Endereço da carteira morta (burn address)
 const DEAD_WALLET = "0x000000000000000000000000000000000000dEaD"
@@ -821,9 +824,7 @@ export default function PulseCodePage() {
 
     switch (activeFooterTab) {
       case "about":
-      return (
-        <></>
-      )
+        return <></>
       // Removed the "codestaking" case entirely
       case "projects":
         return (
@@ -1044,7 +1045,7 @@ export default function PulseCodePage() {
                                   scale: [1, 1.2, 1],
                                 }}
                                 transition={{
-                                  duration: 1 + Math.random() * 2,
+                                  duration: 1 + Math.random() * 1,
                                   repeat: Number.POSITIVE_INFINITY,
                                   repeatType: "reverse",
                                   delay: Math.random() * 2,
@@ -1402,4 +1403,118 @@ export default function PulseCodePage() {
                               >
                                 <path
                                   fillRule="evenodd"
-                                  d="M12.963 2.286a.75.75 0 00-1.071-.136 9.742 9.742 0 00-3.539 6.177A7.547 7.547 0 016.648 6.61a.75.75 0 00-1.152.082A9 9 0 1015.68 4.534a7.46 7.46 0 01-2.717-2.248zM15.75 14\
+                                  d="M12.963 2.286a.75.75 0 00-1.071-.136 9.742 9.742 0 00-3.539 6.177A7.547 7.547 0 016.648 6.61a.75.75 0 00-1.152.082A9 9 0 1015.68 4.534a7.46 7.46 0 01-2.717-2.248zM15.75 14.25a3.75 3.75 0 11-7.313-1.172c.628.465 1.35.81 2.133 1a5.99 5.99 0 011.925-3.545 3.75 3.75 0 013.255 3.717z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                              <div className="text-xs text-gray-300">
+                                <strong className="text-white">
+                                  {t.furnace?.deflation?.split(":")[0] || "Deflação"}:
+                                </strong>
+                                {t.furnace?.deflation?.split(":")[1] ||
+                                  " Cada token queimado é enviado para uma carteira morta (0x000...dEaD) e removido permanentemente da circulação."}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
+            </motion.div>
+            {burnTxHash && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="mt-4 w-full max-w-xs px-4" // Changed max-w-sm to max-w-xs
+              >
+                <div className="bg-gray-900/70 backdrop-blur-sm rounded-xl border border-gray-800/50 p-3">
+                  <h3 className="text-sm font-medium text-gray-300 mb-2">
+                    {t.furnace?.lastTransaction || "Última Transação"}
+                  </h3>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-gray-400">{t.common?.hash || "Hash"}:</span>
+                    <a
+                      href={`https://worldscan.org/tx/${burnTxHash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-orange-400 hover:text-orange-300 truncate max-w-[200px]"
+                    >
+                      {burnTxHash.substring(0, 10)}...{burnTxHash.substring(burnTxHash.length - 8)}
+                    </a>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </main>
+        )
+      default:
+        return null
+    }
+  }
+
+  return (
+    <div className="min-h-screen text-white flex flex-col items-center justify-center p-4 relative overflow-hidden">
+      {/* Background Effect (z-index: 0) */}
+      <BackgroundEffect />
+
+      {/* 3D Globe Container (z-index: 1) */}
+      <div className="absolute inset-0 z-10 flex items-center justify-center">
+        {/* Adjusted size of the globe container */}
+        <div className="relative w-[250px] h-[250px]">{activeFooterTab === "about" && <TechGlobe />}</div>
+      </div>
+
+      <button
+        onClick={() => router.back()}
+        className="absolute top-6 left-6 flex items-center space-x-2 text-gray-400 hover:text-white transition-colors z-50"
+      >
+        <ArrowLeft className="w-5 h-5" />
+        <span className="text-lg font-medium">{t.common?.back || "Back"}</span>
+      </button>
+      <motion.div
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="relative z-20 bg-black/60 backdrop-blur-lg border border-white/10 rounded-xl p-8 max-w-3xl w-full text-center shadow-2xl mb-20"
+      >
+        {renderContent()}
+      </motion.div>
+      <footer className="fixed bottom-4 left-1/2 -translate-x-1/2 w-full max-w-xs bg-black/70 backdrop-blur-md border border-white/10 rounded-full p-2 z-50">
+        <div className="flex justify-around items-center">
+          <Button
+            variant="ghost"
+            size="icon"
+            className={`flex flex-col items-center justify-center p-2 ${
+              activeFooterTab === "about" ? "text-cyan-400" : "text-gray-400 hover:text-cyan-400"
+            }`}
+            onClick={() => setActiveFooterTab("about")}
+          >
+            <Info className="w-6 h-6" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className={`flex flex-col items-center justify-center p-2 ${
+              activeFooterTab === "projects" ? "text-cyan-400" : "text-gray-400 hover:text-cyan-400"
+            }`}
+            onClick={() => setActiveFooterTab("projects")}
+          >
+            <Hammer className="w-6 h-6" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className={`flex flex-col items-center justify-center p-2 ${
+              activeFooterTab === "burn" ? "text-orange-400" : "text-gray-400 hover:text-orange-400"
+            }`}
+            onClick={() => setActiveFooterTab("burn")}
+          >
+            <Flame className="w-6 h-6" />
+          </Button>
+        </div>
+      </footer>
+    </div>
+  )
+}
