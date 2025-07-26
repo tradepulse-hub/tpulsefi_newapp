@@ -54,14 +54,14 @@ const PARTNERSHIPS = [
   {
     id: "holdstation",
     name: "HoldStation",
-    image: "/images/holdstation-logo.png",
+    image: "/images/holdstation-logo.jpg",
     gradient: "from-blue-500 to-purple-600",
     url: "https://world.org/mini-app?app_id=app_0d4b759921490adc1f2bd569fda9b53a&path=/ref/f5S3wA",
   },
   {
     id: "axo",
     name: "AXO",
-    image: "/images/axo.png",
+    image: "/images/axo.jpg",
     gradient: "from-pink-500 to-rose-600",
     url: "https://worldcoin.org/mini-app?app_id=app_8aeb55d57b7be834fb8d67e2f803d258&app_mode=mini-app",
   },
@@ -75,7 +75,7 @@ const PARTNERSHIPS = [
   {
     id: "humantap",
     name: "Human Tap",
-    image: "/images/human-tap.png",
+    image: "/images/human-tap.jpg",
     gradient: "from-green-500 to-emerald-600",
     url: "https://worldcoin.org/mini-app?app_id=app_25cf6ee1d9660721e651d43cf126953a&app_mode=mini-app",
   },
@@ -587,7 +587,11 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                 {/* Reduced padding and space-x */}
                 <div className="absolute inset-0 bg-gradient-to-r from-orange-400/10 to-red-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <Calendar className="w-3 h-3 text-orange-300 relative z-10" /> {/* Reduced icon size */}
-                <span className="text-xs font-medium relative z-10"> {t.events?.eventButton || "Evento"}</span>
+                <span className="text-xs font-medium relative z-10">
+                  {" "}
+                  {/* Reduced text size */}
+                  {t.events?.eventButton || "Evento"}
+                </span>
                 {/* Live Indicator */}
                 <div className="flex items-center space-x-0.5">
                   {" "}
@@ -605,7 +609,11 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                   {/* Reduced padding and space-x */}
                   <div className="absolute inset-0 bg-gradient-to-r from-green-400/10 to-emerald-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   <Eye className="w-3 h-3 text-green-300 relative z-10" /> {/* Reduced icon size */}
-                  <span className="text-xs font-medium relative z-10"> {t.common?.wallet || "Wallet"}</span>
+                  <span className="text-xs font-medium relative z-10">
+                    {" "}
+                    {/* Reduced text size */}
+                    {t.common?.wallet || "Wallet"}
+                  </span>
                 </div>
               </button>
             )}
@@ -619,6 +627,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                   <Wallet className="w-4 h-4 text-cyan-300 relative z-10" /> {/* Reduced icon size */}
                   <span className="text-sm font-medium relative z-10">
                     {" "}
+                    {/* Reduced text size */}
                     {isLoading ? t.common?.loading || "Loading..." : t.presentation?.connectWallet || "Connect Wallet"}
                   </span>
                 </div>
@@ -636,6 +645,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                 <Globe className="w-3 h-3 text-purple-300 relative z-10" /> {/* Reduced icon size */}
                 <span className="text-xs font-medium relative z-10">
                   {" "}
+                  {/* Reduced text size */}
                   {currentLanguage?.flag} {currentLanguage?.code.toUpperCase()}
                 </span>
               </div>
@@ -1037,7 +1047,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
           {/* Glow Effect */}
           <div className="absolute inset-0 bg-gradient-to-t from-gray-400/20 via-gray-300/10 to-transparent blur-lg" />
           {/* Main Bar */}
-          <div className="relative bg-gradient-to-t from-black/90 to-gray-950/90 backdrop-blur-xl border border-white/10 rounded-xl">
+          <div className="relative bg-gradient-to-t from-gray-100 to-white backdrop-blur-xl border border-gray-200 rounded-xl">
             <div className="flex items-center justify-center py-2 px-4 space-x-4">
               {/* Wallet Icon (when wallet is connected but hidden) */}
               {isAuthenticated && !showMiniWallet && (
@@ -1073,7 +1083,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
         </div>
       </div>
 
-      {/* 3D Floating Icons Menu - No Background */}
+      {/* Sliding Menu from Bottom */}
       <AnimatePresence>
         {isMenuOpen && (
           <motion.div
@@ -1081,186 +1091,42 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: "100%", opacity: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed bottom-20 z-40 !w-screen"
-            style={{ perspective: "1000px" }}
+            className="fixed bottom-6 left-6 right-6 z-40"
           >
-            <div className="bg-gradient-to-br from-black/90 to-gray-950/90 backdrop-blur-xl border border-white/10 rounded-2xl w-full">
+            <div className="bg-gradient-to-br from-gray-100 to-white backdrop-blur-xl border border-gray-200 rounded-2xl mb-12">
               {/* Menu Handle */}
               <div className="flex justify-center pt-3 pb-1">
                 <div className="w-8 h-0.5 bg-gray-500 rounded-full" />
               </div>
-              {/* Menu Content - Reduced overall padding */}
-              <div className="py-8">
-                {" "}
-                {/* Changed from py-24 to py-8 */}
-                {/* Menu Items Grid - Added vertical padding to this specific container */}
-                <div className="relative z-10 flex overflow-x-auto whitespace-nowrap justify-start gap-6 mb-3 no-scrollbar py-8">
-                  {" "}
-                  {/* Added py-6 here */}
+              {/* Menu Content */}
+              <div className="p-4 pb-4">
+                {/* Menu Items Grid */}
+                <div className="relative z-10 grid grid-cols-2 gap-3 mb-4">
                   {navigationItems.map((item, index) => (
                     <motion.button
                       key={item.id}
-                      initial={{
-                        opacity: 0,
-                        y: 100,
-                        scale: 0,
-                        rotateX: 90,
-                        rotateY: 180,
-                      }}
-                      animate={{
-                        opacity: 1,
-                        y: [100, -20, 0],
-                        scale: [0, 1.2, 1],
-                        rotateX: [90, -10, 0],
-                        rotateY: [180, 10, 0],
-                      }}
-                      exit={{
-                        opacity: 0,
-                        y: 100,
-                        scale: 0,
-                        rotateX: 90,
-                        rotateY: 180,
-                      }}
-                      transition={{
-                        delay: index * 0.15,
-                        type: "spring",
-                        damping: 15,
-                        stiffness: 200,
-                        duration: 0.8,
-                      }}
-                      whileHover={{
-                        scale: 1.15,
-                        y: -10,
-                        rotateX: -15,
-                        rotateY: 15,
-                        transition: { duration: 0.2 },
-                      }}
-                      whileTap={{
-                        scale: 0.9,
-                        y: 5,
-                        rotateX: 10,
-                        rotateY: -10,
-                      }}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
                       onClick={() => {
                         if (item.action) {
                           item.action()
-                          setIsMenuOpen(false) // Close menu after action
+                          setIsMenuOpen(false)
                         } else if (item.href) {
                           router.push(item.href)
                           setIsMenuOpen(false)
                         }
                       }}
-                      className="group pointer-events-auto relative flex-shrink-0 w-16 h-16" // Fixed width and height
-                      style={{
-                        transformStyle: "preserve-3d",
-                      }}
+                      className="group p-2 bg-gray-50/50 backdrop-blur-sm border border-gray-200 rounded-lg hover:bg-gray-100/70 transition-all duration-300"
                     >
-                      {/* 3D Icon Container with Glow */}
-                      <motion.div
-                        className="w-full h-full bg-gradient-to-br from-gray-800/90 to-gray-900/95 backdrop-blur-xl border border-gray-600/50 rounded-xl flex items-center justify-center shadow-2xl"
-                        style={{
-                          transformStyle: "preserve-3d",
-                          boxShadow: "0 8px 15px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.1)",
-                        }}
-                        animate={{
-                          rotateZ: [0, 5, -5, 0],
-                        }}
-                        transition={{
-                          duration: 4,
-                          repeat: Number.POSITIVE_INFINITY,
-                          ease: "easeInOut",
-                          delay: index * 0.5,
-                        }}
-                      >
-                        {/* Pulsing Glow Ring */}
-                        <motion.div
-                          className="absolute inset-0 bg-gradient-to-r from-blue-400/30 to-purple-400/30 rounded-lg blur-sm"
-                          animate={{
-                            scale: [1, 1.3, 1],
-                            opacity: [0.3, 0.7, 0.3],
-                          }}
-                          transition={{
-                            duration: 2,
-                            repeat: Number.POSITIVE_INFINITY,
-                            ease: "easeInOut",
-                            delay: index * 0.3,
-                          }}
-                        />
-                        {/* Inner Glow */}
-                        <div
-                          className="absolute inset-1 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                          style={{ transform: "translateZ(2px)" }}
-                        />
-                        {/* 3D Icon with Floating Animation */}
-                        <motion.div
-                          style={{
-                            transformStyle: "preserve-3d",
-                            transform: "translateZ(3px)",
-                          }}
-                          animate={{
-                            y: [0, -2, 0],
-                            rotateY: [0, 10, -10, 0],
-                          }}
-                          transition={{
-                            duration: 3,
-                            repeat: Number.POSITIVE_INFINITY,
-                            ease: "easeInOut",
-                            delay: index * 0.4,
-                          }}
-                        >
-                          <item.icon className="w-6 h-6 text-white drop-shadow-lg" />
-                        </motion.div>
-                        {/* Outer Glow Effect */}
-                        <div
-                          className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-xl blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                          style={{ transform: "translateZ(-5px)" }}
-                        />
-                      </motion.div>
-                      {/* Floating Label */}
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.15 + 0.3 }}
-                        className="absolute -bottom-7 left-1/2 transform -translate-x-1/2 whitespace-nowrap"
-                        style={{ transform: "translateZ(2px)" }}
-                      >
-                        <div className="px-2.5 py-1 bg-gray-800/80 backdrop-blur-md border border-gray-700/50 rounded-full">
-                          <span className="text-white text-[0.6rem] font-medium drop-shadow-lg">
-                            {t.navigation[item.labelKey]}
-                          </span>
+                      <div className="flex flex-col items-center space-y-1">
+                        <div className="w-6 h-6 bg-gradient-to-r from-gray-200 to-gray-300 rounded-full flex items-center justify-center group-hover:from-gray-300 group-hover:to-gray-400 transition-all duration-300">
+                          <item.icon className="w-3 h-3 text-gray-600 group-hover:text-black transition-colors" />
                         </div>
-                      </motion.div>
-                      {/* Particle Effect on Hover */}
-                      <motion.div
-                        className="absolute inset-0 pointer-events-none"
-                        whileHover={{
-                          scale: [1, 1.5, 1],
-                          opacity: [0, 1, 0],
-                        }}
-                        transition={{ duration: 0.6 }}
-                      >
-                        {[...Array(6)].map((_, particleIndex) => (
-                          <motion.div
-                            key={particleIndex}
-                            className="absolute w-1 h-1 bg-blue-400 rounded-full"
-                            style={{
-                              top: "50%",
-                              left: "50%",
-                            }}
-                            animate={{
-                              x: Math.cos((particleIndex * Math.PI * 2) / 6) * 20,
-                              y: Math.sin((particleIndex * Math.PI * 2) / 6) * 20,
-                              opacity: [0, 1, 0],
-                              scale: [0, 1, 0],
-                            }}
-                            transition={{
-                              duration: 0.8,
-                              repeat: Number.POSITIVE_INFINITY,
-                              delay: particleIndex * 0.1,
-                            }}
-                          />
-                        ))}
-                      </motion.div>
+                        <span className="text-gray-800 group-hover:text-black font-medium text-xs tracking-wide">
+                          {t.navigation?.[item.labelKey] || item.labelKey}
+                        </span>
+                      </div>
                     </motion.button>
                   ))}
                 </div>
@@ -1271,6 +1137,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
           </motion.div>
         )}
       </AnimatePresence>
+
       {/* Main Content */}
       <div className="relative z-10 text-center">
         {/* Logo with Ultra Vibrant Auras and Vibration - COMPACTED */}
@@ -1280,10 +1147,10 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             className="absolute w-64 h-64 rounded-full"
             style={{
               background: `radial-gradient(circle,
-      rgba(255,255,255,0.4) 0%,
-      rgba(156,163,175,0.3) 30%,
-      rgba(107,114,128,0.2) 60%,
-      transparent 100%)`,
+              rgba(255,255,255,0.4) 0%,
+              rgba(156,163,175,0.3) 30%,
+              rgba(107,114,128,0.2) 60%,
+              transparent 100%)`,
               animation: "vibrateAura 0.1s linear infinite, pulse 1s ease-in-out infinite",
             }}
           />
@@ -1291,9 +1158,9 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             className="absolute w-52 h-52 rounded-full"
             style={{
               background: `radial-gradient(circle,
-      rgba(255,255,255,0.6) 0%,
-      rgba(229,231,235,0.4) 40%,
-      transparent 100%)`,
+              rgba(255,255,255,0.6) 0%,
+              rgba(229,231,235,0.4) 40%,
+              transparent 100%)`,
               animation: "vibrateAura 0.15s linear infinite, pulse 0.8s ease-in-out infinite",
               animationDelay: "0.05s",
             }}
@@ -1302,9 +1169,9 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             className="absolute w-40 h-40 rounded-full"
             style={{
               background: `radial-gradient(circle,
-      rgba(243,244,246,0.5) 0%,
-      rgba(209,213,219,0.4) 50%,
-      transparent 100%)`,
+              rgba(243,244,246,0.5) 0%,
+              rgba(209,213,219,0.4) 50%,
+              transparent 100%)`,
               animation: "vibrateAura 0.2s linear infinite, pulse 0.6s ease-in-out infinite",
               animationDelay: "0.1s",
             }}
@@ -1337,10 +1204,10 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
               className="absolute inset-0 bg-white rounded-full shadow-2xl"
               style={{
                 boxShadow: `
-0 0 30px rgba(255,255,255,1),
-0 0 60px rgba(229,231,235,0.8),
-0 0 90px rgba(209,213,219,0.6),
-0 0 120px rgba(156,163,175,0.4)
+        0 0 30px rgba(255,255,255,1),
+        0 0 60px rgba(229,231,235,0.8),
+        0 0 90px rgba(209,213,219,0.6),
+        0 0 120px rgba(156,163,175,0.4)
 `,
                 animation: "pulse 0.5s ease-in-out infinite",
               }}
