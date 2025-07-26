@@ -259,7 +259,7 @@ export function TechGlobe() {
     <div ref={mountRef} className="w-full h-full relative flex items-center justify-center">
       {/* Logo and Vibration Effect inside the globe container */}
       <div
-        className="absolute w-24 h-24 flex items-center justify-center top-1/2 -translate-y-1/2 right-0 mr-20"
+        className="absolute w-24 h-24 flex items-center justify-center top-1/2 -translate-y-1/2 right-0 mr-20 mt-[-40px]"
         style={{
           animation: "vibrateLogo 0.08s linear infinite",
         }}
@@ -268,11 +268,11 @@ export function TechGlobe() {
           className="absolute inset-0 bg-white rounded-full shadow-2xl"
           style={{
             boxShadow: `
-              0 0 25px rgba(255,255,255,1),
-              0 0 50px rgba(229,231,235,0.8),
-              0 0 75px rgba(209,213,219,0.6),
-              0 0 100px rgba(156,163,175,0.4)
-            `,
+            0 0 25px rgba(255,255,255,1),
+            0 0 50px rgba(229,231,235,0.8),
+            0 0 75px rgba(209,213,219,0.6),
+            0 0 100px rgba(156,163,175,0.4)
+          `,
             animation: "pulse 0.5s ease-in-out infinite",
           }}
         />
@@ -290,26 +290,26 @@ export function TechGlobe() {
         </div>
       </div>
       <style jsx>{`
-        @keyframes vibrateLogo {
-          0% { transform: translate(0, 0); }
-          25% { transform: translate(-0.5px, 0.5px); }
-          50% { transform: translate(0.5px, -0.5px); }
-          75% { transform: translate(-0.5px, -0.5px); }
-          100% { transform: translate(0, 0); }
-        }
-        @keyframes vibrateLogoImage {
-          0% { transform: translate(0, 0); }
-          25% { transform: translate(0.2px, -0.2px); }
-          50% { transform: translate(-0.2px, 0.2px); }
-          75% { transform: translate(0.2px, 0.2px); }
-          100% { transform: translate(0, 0); }
-        }
-        @keyframes pulse {
-          0% { transform: scale(1); opacity: 1; }
-          50% { transform: scale(1.05); opacity: 0.9; }
-          100% { transform: scale(1); opacity: 1; }
-        }
-      `}</style>
+      @keyframes vibrateLogo {
+        0% { transform: translate(0, 0); }
+        25% { transform: translate(-0.5px, 0.5px); }
+        50% { transform: translate(0.5px, -0.5px); }
+        75% { transform: translate(-0.5px, -0.5px); }
+        100% { transform: translate(0, 0); }
+      }
+      @keyframes vibrateLogoImage {
+        0% { transform: translate(0, 0); }
+        25% { transform: translate(0.2px, -0.2px); }
+        50% { transform: translate(-0.2px, 0.2px); }
+        75% { transform: translate(0.2px, 0.2px); }
+        100% { transform: translate(0, 0); }
+      }
+      @keyframes pulse {
+        0% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.05); opacity: 0.9; }
+        100% { transform: scale(1); opacity: 1; }
+      }
+    `}</style>
     </div>
   )
 }
