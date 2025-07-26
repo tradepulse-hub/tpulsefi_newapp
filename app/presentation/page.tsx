@@ -1050,7 +1050,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed bottom-0 left-0 right-0 z-45 flex flex-col" // Changed to bottom-0, left-0, right-0 and flex-col
+            className="fixed bottom-0 left-0 right-0 z-51 flex flex-col" // Z-index corrected to z-51
             onClick={() => setIsMenuOpen(false)} // Close modal on backdrop click
           >
             {/* Backdrop with black and white effect */}
