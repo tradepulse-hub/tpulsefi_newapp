@@ -15,7 +15,6 @@ import {
   TrendingUp,
   Hand,
   Globe,
-  ExternalLink,
   Calendar,
   Star,
   Clock,
@@ -966,74 +965,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
         )}
       </AnimatePresence>
 
-      {/* Partnership Slideshow - Between subtitle and bottom bar */}
-      <div className="fixed bottom-20 left-0 right-0 z-30 flex justify-center">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentPartnerIndex}
-            initial={{ x: -300, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: 300, opacity: 0 }}
-            transition={{
-              type: "spring",
-              stiffness: 100,
-              damping: 20,
-              duration: 0.8,
-            }}
-            className="relative group cursor-pointer"
-            onClick={handlePartnerClick}
-          >
-            {/* Partnership Card */}
-            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-xl p-2 hover:bg-black/60 transition-all duration-300 shadow-2xl">
-              {/* Glow Effect */}
-              <div
-                className={`absolute inset-0 bg-gradient-to-r ${currentPartner.gradient} opacity-0 group-hover:opacity-20 rounded-xl blur-xl transition-opacity duration-300`}
-              />
-
-              {/* Content */}
-              <div className="relative z-10 flex items-center space-x-3">
-                {/* Partner Logo */}
-                <div className="w-8 h-8 rounded-lg overflow-hidden bg-gray-700/50 flex-shrink-0">
-                  <Image
-                    src={currentPartner.image || "/placeholder.svg"}
-                    alt={currentPartner.name}
-                    width={32}
-                    height={32}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-
-                {/* Partner Info */}
-                <div className="flex-1">
-                  <h3 className="text-white font-semibold text-sm">{currentPartner.name}</h3>
-                  <div className={`h-0.5 w-12 bg-gradient-to-r ${currentPartner.gradient} rounded-full mt-0.5`} />
-                </div>
-
-                {/* Visit Button */}
-                <div
-                  className={`bg-gradient-to-r ${currentPartner.gradient} text-white px-3 py-1.5 rounded-lg font-medium flex items-center space-x-1.5 group-hover:scale-105 transition-transform duration-300`}
-                >
-                  <span className="text-xs">{t.partnerships?.visitApp || "Visit App"}</span>
-                  <ExternalLink className="w-3 h-3" />
-                </div>
-              </div>
-
-              {/* Progress Indicators */}
-              <div className="flex justify-center space-x-1.5 mt-2">
-                {PARTNERSHIPS.map((_, index) => (
-                  <div
-                    key={index}
-                    className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-                      index === currentPartnerIndex ? `bg-gradient-to-r ${currentPartner.gradient}` : "bg-white/20"
-                    }`}
-                  />
-                ))}
-              </div>
-            </div>
-          </motion.div>
-        </AnimatePresence>
-      </div>
-
       {/* Bottom Navigation Bar with Wallet Icon + Menu Button */}
       <div className="fixed bottom-6 left-6 right-6 z-50">
         {/* Futuristic Bottom Bar */}
@@ -1083,7 +1014,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
           <div className="fixed inset-0 z-40 pointer-events-none">
             {/* Menu Items as Floating 3D Icons */}
             <div className="absolute bottom-32 left-0 right-0 flex justify-center px-4">
-              <div className="relative flex flex-nowrap justify-center gap-8 overflow-x-auto whitespace-nowrap py-2">
+              <div className="relative flex flex-nowrap justify-center gap-4 overflow-x-auto whitespace-nowrap py-2">
                 {navigationItems.map((item, index) => (
                   <motion.button
                     key={item.id}
@@ -1267,10 +1198,10 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             className="absolute w-64 h-64 rounded-full"
             style={{
               background: `radial-gradient(circle,
-              rgba(255,255,255,0.4) 0%,
-              rgba(156,163,175,0.3) 30%,
-              rgba(107,114,128,0.2) 60%,
-              transparent 100%)`,
+            rgba(255,255,255,0.4) 0%,
+            rgba(156,163,175,0.3) 30%,
+            rgba(107,114,128,0.2) 60%,
+            transparent 100%)`,
               animation: "vibrateAura 0.1s linear infinite, pulse 1s ease-in-out infinite",
             }}
           />
@@ -1278,9 +1209,9 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             className="absolute w-52 h-52 rounded-full"
             style={{
               background: `radial-gradient(circle,
-              rgba(255,255,255,0.6) 0%,
-              rgba(229,231,235,0.4) 40%,
-              transparent 100%)`,
+            rgba(255,255,255,0.6) 0%,
+            rgba(229,231,235,0.4) 40%,
+            transparent 100%)`,
               animation: "vibrateAura 0.15s linear infinite, pulse 0.8s ease-in-out infinite",
               animationDelay: "0.05s",
             }}
@@ -1289,9 +1220,9 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             className="absolute w-40 h-40 rounded-full"
             style={{
               background: `radial-gradient(circle,
-              rgba(243,244,246,0.5) 0%,
-              rgba(209,213,219,0.4) 50%,
-              transparent 100%)`,
+            rgba(243,244,246,0.5) 0%,
+            rgba(209,213,219,0.4) 50%,
+            transparent 100%)`,
               animation: "vibrateAura 0.2s linear infinite, pulse 0.6s ease-in-out infinite",
               animationDelay: "0.1s",
             }}
@@ -1324,11 +1255,11 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
               className="absolute inset-0 bg-white rounded-full shadow-2xl"
               style={{
                 boxShadow: `
-        0 0 30px rgba(255,255,255,1),
-        0 0 60px rgba(229,231,235,0.8),
-        0 0 90px rgba(209,213,219,0.6),
-        0 0 120px rgba(156,163,175,0.4)
-      `,
+      0 0 30px rgba(255,255,255,1),
+      0 0 60px rgba(229,231,235,0.8),
+      0 0 90px rgba(209,213,219,0.6),
+      0 0 120px rgba(156,163,175,0.4)
+    `,
                 animation: "pulse 0.5s ease-in-out infinite",
               }}
             />
