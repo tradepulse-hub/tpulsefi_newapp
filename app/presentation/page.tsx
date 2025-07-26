@@ -285,7 +285,7 @@ const translations = {
       eventTitle: "Acara Peningkatan FiStaking",
       eventDescription: "Sampai tanggal 20 bulan depan dua token FiStaking meningkatkan % keuntungan, manfaatkan.",
       eventDetails: "Semakin banyak TPF yang Anda miliki, semakin banyak yang Anda peroleh.",
-      eventWarning: "Jangan lewatkan kesempatan terbatas ini untuk memaksimalkan hadiah FiStaking Anda!",
+      eventWarning: "Jangan lewatkan kesempatan terbatas ini para memaksimalkan hadiah FiStaking Anda!",
       eventPeriod: "Periode Acara",
       eventDates: "15 Juli, 2025 - 15 Agustus, 2025",
       participateNow: "Berpartisipasi Sekarang",
@@ -1090,7 +1090,9 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                 <div className="w-8 h-0.5 bg-gray-500 rounded-full" />
               </div>
               {/* Menu Content - Increased padding for larger window */}
-              <div className="p-4 pb-4">
+              <div className="py-20 px-4">
+                {" "}
+                {/* Increased vertical padding to py-20 */}
                 {/* Menu Items Grid */}
                 <div className="relative z-10 flex overflow-x-auto whitespace-nowrap justify-start gap-3 mb-3 no-scrollbar">
                   {navigationItems.map((item, index) => (
