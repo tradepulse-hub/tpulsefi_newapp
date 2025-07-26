@@ -25,7 +25,7 @@ import {
   Share2,
   Copy,
   Check,
-  ArrowRight,
+  Menu,
 } from "lucide-react"
 import { useMiniKit } from "../../hooks/use-minikit"
 import MiniWallet from "../../components/mini-wallet"
@@ -909,15 +909,17 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
           <div className="absolute inset-0 bg-gradient-to-t from-gray-700/20 via-gray-600/10 to-transparent blur-lg" />
           {/* Main Bar */}
           <div className="relative bg-gray-800/70 backdrop-blur-xl border border-gray-700/50 rounded-xl">
-            <div className="flex items-center justify-center py-2 px-4 space-x-4">
+            <div className="flex items-center justify-center py-1 px-4 space-x-4">
+              {" "}
+              {/* Reduzido py-2 para py-1 */}
               {/* Central 3D Menu Button */}
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="relative group flex items-center justify-center px-4 py-2" // Added flex, px, py
+                className="relative group flex items-center justify-center px-4 py-0.5" // Ajustado py para o botão central
                 style={{ transformStyle: "preserve-3d" }}
               >
                 <motion.div
-                  className="w-auto h-12 bg-gradient-to-br from-gray-700/80 to-gray-800/90 backdrop-blur-md border border-gray-600/50 rounded-full flex items-center justify-center shadow-2xl" // Changed w-12 to w-auto
+                  className="w-auto h-8 bg-gradient-to-br from-gray-700/80 to-gray-800/90 backdrop-blur-md border border-gray-600/50 rounded-full flex items-center justify-center shadow-2xl" // Reduzido h-12 para h-8
                   whileHover={{
                     scale: 1.1,
                     rotateX: 15,
@@ -966,13 +968,12 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                       transformStyle: "preserve-3d",
                       transform: "translateZ(4px)",
                     }}
-                    animate={{
-                      rotate: isMenuOpen ? 90 : 0, // Rotate arrow 90 degrees when open
-                    }}
+                    // Removida a animação de rotação específica do ícone
                     transition={{ duration: 0.3 }}
-                    className="flex items-center space-x-2" // Added flex for icon and text
+                    className="flex items-center space-x-2"
                   >
-                    <ArrowRight className="w-6 h-6 text-white relative z-10 drop-shadow-lg" />
+                    <Menu className="w-4 h-4 text-white relative z-10 drop-shadow-lg" />{" "}
+                    {/* Alterado para ícone Menu e ajustado o tamanho */}
                     <AnimatePresence mode="wait">
                       {isMenuOpen ? (
                         <motion.span
@@ -1017,12 +1018,11 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
         {isMenuOpen && (
           <div className="fixed inset-0 z-40 pointer-events-none">
             {/* Menu Items as Floating 3D Icons */}
-            <div className="absolute bottom-28 left-1/2 transform -translate-x-1/2">
+            <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2">
               {" "}
-              {/* Adjusted bottom position */}
+              {/* Ajustado bottom-28 para bottom-24 */}{" "}
               <div className="relative flex justify-center gap-6">
                 {" "}
-                {/* Removed flex-wrap to ensure single line */}
                 {navigationItems.slice(0, 4).map((item, index) => (
                   <motion.button
                     key={item.id}
@@ -1136,7 +1136,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                           delay: index * 0.4,
                         }}
                       >
-                        <item.icon className="w-6 h-6 text-white drop-shadow-2xl" /> {/* Increased icon size */}
+                        <item.icon className="w-6 h-6 text-white drop-shadow-2xl" />
                       </motion.div>
 
                       {/* Outer Glow Effect */}
@@ -1151,15 +1151,13 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.15 + 0.3 }}
-                      className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap" // Adjusted bottom
+                      className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap"
                       style={{ transform: "translateZ(4px)" }}
                     >
                       <div className="px-2 py-0.5 bg-gray-800/80 backdrop-blur-md border border-gray-700/50 rounded-full">
                         {" "}
-                        {/* Increased padding */}
                         <span className="text-white text-xs font-medium drop-shadow-lg">
                           {" "}
-                          {/* Increased font size */}
                           {t.navigation?.[item.labelKey] || item.labelKey}
                         </span>
                       </div>
