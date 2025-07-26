@@ -193,17 +193,20 @@ export function TechGlobe() {
       const logoGeometry = new THREE.PlaneGeometry(0.7, 0.7) // Mantido o tamanho
       const logoMaterial = new THREE.MeshBasicMaterial({
         map: texture,
+        color: 0xffffff, // Explicitamente setado para branco para tintar a textura
         transparent: true,
         emissive: 0xffffff, // Cor do brilho do logo (branco)
-        emissiveIntensity: 8.0, // Aumentada a intensidade do brilho para o dobro
+        emissiveIntensity: 8.0, // Mantida a intensidade do brilho
         side: THREE.DoubleSide, // Renderizar em ambos os lados
       })
       const logoMesh = new THREE.Mesh(logoGeometry, logoMaterial)
 
       // Posição inicial do logo (no centro do globo, ligeiramente para cima e para a direita)
+      // Ajustado o Z para que o logo fique na frente da esfera principal (raio 0.7)
       const initialLogoX = 0.1
       const initialLogoY = 0.1
-      logoMesh.position.set(initialLogoX, initialLogoY, 0)
+      const initialLogoZ = 0.75 // Movido para a frente da esfera principal
+      logoMesh.position.set(initialLogoX, initialLogoY, initialLogoZ)
 
       globeGroup.add(logoMesh)
       logoMeshRef.current = logoMesh
@@ -247,8 +250,10 @@ export function TechGlobe() {
         const vibrateOffset = 0.002 // Offset muito pequeno
         const initialLogoX = 0.1 // Posição X base
         const initialLogoY = 0.1 // Posição Y base
+        const initialLogoZ = 0.75 // Mantém a posição Z
         logoMeshRef.current.position.x = initialLogoX + Math.sin(time * 100) * vibrateOffset
         logoMeshRef.current.position.y = initialLogoY + Math.cos(time * 100) * vibrateOffset
+        logoMeshRef.current.position.z = initialLogoZ // Garante que Z não seja resetado
       }
 
       renderer.render(scene, camera)
