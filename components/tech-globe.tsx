@@ -95,7 +95,7 @@ export function TechGlobe() {
 
     const primaryWireframeGeometry = new THREE.SphereGeometry(0.9, 24, 12) // Reduced from 1.3
     const primaryWireframeMaterial = new THREE.MeshBasicMaterial({
-      color: 0xffffff,
+      color: 0xffffff, // Changed to white
       wireframe: true,
       transparent: true,
       opacity: 0.4,
@@ -106,7 +106,7 @@ export function TechGlobe() {
     const secondaryWireframeGeometry = new THREE.SphereGeometry(0.95, 16, 8) // Reduced from 1.4
     const secondaryWireframeMaterial = new THREE.MeshBasicMaterial({
       wireframe: true,
-      color: 0xffffff,
+      color: 0xffffff, // Changed to white
       transparent: true,
       opacity: 0.2,
     })
@@ -172,19 +172,19 @@ export function TechGlobe() {
         emissiveIntensity: 0.2,
       })
 
-    const ring1 = new THREE.Mesh(new THREE.TorusGeometry(1.0, 0.015, 8, 100), ringMaterial(0x00ffff, 0.6)) // Reduced from 1.5
+    const ring1 = new THREE.Mesh(new THREE.TorusGeometry(1.0, 0.015, 8, 100), ringMaterial(0xffffff, 0.6)) // Changed to white
     ring1.rotation.x = Math.PI / 2
     ringsGroup.add(ring1)
 
-    const ring2 = new THREE.Mesh(new THREE.TorusGeometry(1.1, 0.015, 8, 100), ringMaterial(0xff6b6b, 0.5)) // Reduced from 1.7
+    const ring2 = new THREE.Mesh(new THREE.TorusGeometry(1.1, 0.015, 8, 100), ringMaterial(0xffffff, 0.5)) // Changed to white
     ring2.rotation.y = Math.PI / 2
     ringsGroup.add(ring2)
 
-    const ring3 = new THREE.Mesh(new THREE.TorusGeometry(1.2, 0.015, 8, 100), ringMaterial(0x4ecdc4, 0.4)) // Reduced from 1.9
+    const ring3 = new THREE.Mesh(new THREE.TorusGeometry(1.2, 0.015, 8, 100), ringMaterial(0xffffff, 0.4)) // Changed to white
     ring3.rotation.set(Math.PI / 4, Math.PI / 4, 0)
     ringsGroup.add(ring3)
 
-    const ring4 = new THREE.Mesh(new THREE.TorusGeometry(1.3, 0.01, 8, 100), ringMaterial(0xffd93d, 0.3)) // Reduced from 2.1
+    const ring4 = new THREE.Mesh(new THREE.TorusGeometry(1.3, 0.01, 8, 100), ringMaterial(0xffffff, 0.3)) // Changed to white
     ring4.rotation.set(-Math.PI / 4, -Math.PI / 4, Math.PI / 2)
     ringsGroup.add(ring4)
 
@@ -193,7 +193,6 @@ export function TechGlobe() {
       // Reduced number of streams
       const streamGeometry = new THREE.TorusGeometry(1.4 + i * 0.03, 0.003, 4, 50) // Reduced from 2.2 + i * 0.05
       const streamMaterial = new THREE.MeshBasicMaterial({
-        color: new THREE.Color(`hsl(${180 + i * 30}, 70%, 60%)`).getHex(),
         color: 0xffffff, // Changed to white
         transparent: true,
         opacity: 0.6,
@@ -274,7 +273,7 @@ export function TechGlobe() {
     <div ref={mountRef} className="w-full h-full relative flex items-center justify-center">
       {/* Logo and Vibration Effect inside the globe container */}
       <div
-        className="absolute w-24 h-24 flex items-center justify-center top-1/2 -translate-y-1/2 right-0 mr-10" /* Adjusted: absolute, right-0, mr-10 */
+        className="absolute w-24 h-24 flex items-center justify-center top-1/2 -translate-y-1/2 right-0 mr-20" /* Adjusted: mr-20 */
         style={{
           animation: "vibrateLogo 0.08s linear infinite",
         }}
