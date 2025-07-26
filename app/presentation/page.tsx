@@ -1079,7 +1079,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
             className="fixed bottom-20 z-40 !w-screen"
             style={{ perspective: "1000px" }}
-            // Removed onAnimationComplete as navigation is now instant
           >
             <div className="bg-gradient-to-br from-black/90 to-gray-950/90 backdrop-blur-xl border border-white/10 rounded-2xl w-full">
               {/* Menu Handle */}
@@ -1125,19 +1124,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                         stiffness: 200,
                         duration: 0.8,
                       }}
-                      whileHover={{
-                        scale: 1.15,
-                        y: -10,
-                        rotateX: -15,
-                        rotateY: 15,
-                        transition: { duration: 0.2 },
-                      }}
-                      whileTap={{
-                        scale: 0.9,
-                        y: 5,
-                        rotateX: 10,
-                        rotateY: -10,
-                      }}
+                      // Removed whileHover and whileTap effects
                       onClick={() => {
                         console.log(`Clicked item: ${item.id}`)
                         setIsMenuOpen(false) // Close menu immediately
