@@ -609,11 +609,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                   {/* Reduced padding and space-x */}
                   <div className="absolute inset-0 bg-gradient-to-r from-green-400/10 to-emerald-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   <Eye className="w-3 h-3 text-green-300 relative z-10" /> {/* Reduced icon size */}
-                  <span className="text-xs font-medium relative z-10">
-                    {" "}
-                    {/* Reduced text size */}
-                    {t.common?.wallet || "Wallet"}
-                  </span>
+                  <span className="text-xs font-medium relative z-10"> {t.common?.wallet || "Wallet"}</span>
                 </div>
               </button>
             )}
@@ -627,7 +623,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                   <Wallet className="w-4 h-4 text-cyan-300 relative z-10" /> {/* Reduced icon size */}
                   <span className="text-sm font-medium relative z-10">
                     {" "}
-                    {/* Reduced text size */}
                     {isLoading ? t.common?.loading || "Loading..." : t.presentation?.connectWallet || "Connect Wallet"}
                   </span>
                 </div>
@@ -645,7 +640,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                 <Globe className="w-3 h-3 text-purple-300 relative z-10" /> {/* Reduced icon size */}
                 <span className="text-xs font-medium relative z-10">
                   {" "}
-                  {/* Reduced text size */}
                   {currentLanguage?.flag} {currentLanguage?.code.toUpperCase()}
                 </span>
               </div>
@@ -1083,7 +1077,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
         </div>
       </div>
 
-      {/* Sliding Menu from Bottom */}
+      {/* 3D Floating Icons Menu - No Background */}
       <AnimatePresence>
         {isMenuOpen && (
           <motion.div
@@ -1092,6 +1086,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             exit={{ y: "100%", opacity: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
             className="fixed bottom-6 left-6 right-6 z-40"
+            style={{ perspective: "1000px" }} // Apply perspective here
           >
             <div className="bg-gradient-to-br from-gray-100 to-white backdrop-blur-xl border border-gray-200 rounded-2xl mb-12">
               {/* Menu Handle */}
@@ -1101,13 +1096,51 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
               {/* Menu Content */}
               <div className="p-3 pb-3">
                 {/* Menu Items Grid */}
-                <div className="relative z-10 flex overflow-x-auto whitespace-nowrap justify-start gap-2 mb-3 no-scrollbar">
+                <div className="relative z-10 flex overflow-x-auto whitespace-nowrap justify-start gap-3 mb-3 no-scrollbar">
                   {navigationItems.map((item, index) => (
                     <motion.button
                       key={item.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1 }}
+                      initial={{
+                        opacity: 0,
+                        y: 100,
+                        scale: 0,
+                        rotateX: 90,
+                        rotateY: 180,
+                      }}
+                      animate={{
+                        opacity: 1,
+                        y: [100, -20, 0],
+                        scale: [0, 1.2, 1],
+                        rotateX: [90, -10, 0],
+                        rotateY: [180, 10, 0],
+                      }}
+                      exit={{
+                        opacity: 0,
+                        y: 100,
+                        scale: 0,
+                        rotateX: 90,
+                        rotateY: 180,
+                      }}
+                      transition={{
+                        delay: index * 0.15,
+                        type: "spring",
+                        damping: 15,
+                        stiffness: 200,
+                        duration: 0.8,
+                      }}
+                      whileHover={{
+                        scale: 1.15,
+                        y: -10,
+                        rotateX: -15,
+                        rotateY: 15,
+                        transition: { duration: 0.2 },
+                      }}
+                      whileTap={{
+                        scale: 0.9,
+                        y: 5,
+                        rotateX: 10,
+                        rotateY: -10,
+                      }}
                       onClick={() => {
                         if (item.action) {
                           item.action()
@@ -1117,16 +1150,117 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                           setIsMenuOpen(false)
                         }
                       }}
-                      className="group px-3 py-2 bg-gray-50/50 backdrop-blur-sm border border-gray-200 rounded-lg hover:bg-gray-100/70 transition-all duration-300 flex-shrink-0 w-[calc(25%-0.5rem)] sm:w-28"
+                      className="group pointer-events-auto relative flex-shrink-0 w-24 h-24" // Fixed width and height
+                      style={{
+                        transformStyle: "preserve-3d",
+                      }}
                     >
-                      <div className="flex flex-col items-center space-y-1">
-                        <div className="w-5 h-5 bg-gradient-to-r from-gray-200 to-gray-300 rounded-full flex items-center justify-center group-hover:from-gray-300 group-hover:to-gray-400 transition-all duration-300">
-                          <item.icon className="w-2.5 h-2.5 text-gray-600 group-hover:text-black transition-colors" />
+                      {/* 3D Icon Container with Glow */}
+                      <motion.div
+                        className="w-full h-full bg-gradient-to-br from-gray-800/90 to-gray-900/95 backdrop-blur-xl border border-gray-600/50 rounded-xl flex items-center justify-center shadow-2xl"
+                        style={{
+                          transformStyle: "preserve-3d",
+                          boxShadow: "0 8px 15px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.1)",
+                        }}
+                        animate={{
+                          rotateZ: [0, 5, -5, 0],
+                        }}
+                        transition={{
+                          duration: 4,
+                          repeat: Number.POSITIVE_INFINITY,
+                          ease: "easeInOut",
+                          delay: index * 0.5,
+                        }}
+                      >
+                        {/* Pulsing Glow Ring */}
+                        <motion.div
+                          className="absolute inset-0 bg-gradient-to-r from-blue-400/30 to-purple-400/30 rounded-lg blur-sm"
+                          animate={{
+                            scale: [1, 1.3, 1],
+                            opacity: [0.3, 0.7, 0.3],
+                          }}
+                          transition={{
+                            duration: 2,
+                            repeat: Number.POSITIVE_INFINITY,
+                            ease: "easeInOut",
+                            delay: index * 0.3,
+                          }}
+                        />
+                        {/* Inner Glow */}
+                        <div
+                          className="absolute inset-1 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                          style={{ transform: "translateZ(2px)" }}
+                        />
+                        {/* 3D Icon with Floating Animation */}
+                        <motion.div
+                          style={{
+                            transformStyle: "preserve-3d",
+                            transform: "translateZ(3px)",
+                          }}
+                          animate={{
+                            y: [0, -2, 0],
+                            rotateY: [0, 10, -10, 0],
+                          }}
+                          transition={{
+                            duration: 3,
+                            repeat: Number.POSITIVE_INFINITY,
+                            ease: "easeInOut",
+                            delay: index * 0.4,
+                          }}
+                        >
+                          <item.icon className="w-10 h-10 text-white drop-shadow-lg" />
+                        </motion.div>
+                        {/* Outer Glow Effect */}
+                        <div
+                          className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-xl blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                          style={{ transform: "translateZ(-5px)" }}
+                        />
+                      </motion.div>
+                      {/* Floating Label */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.15 + 0.3 }}
+                        className="absolute -bottom-7 left-1/2 transform -translate-x-1/2 whitespace-nowrap"
+                        style={{ transform: "translateZ(2px)" }}
+                      >
+                        <div className="px-2.5 py-1 bg-gray-800/80 backdrop-blur-md border border-gray-700/50 rounded-full">
+                          <span className="text-white text-xs font-medium drop-shadow-lg">
+                            {t.navigation[item.labelKey]}
+                          </span>
                         </div>
-                        <span className="text-gray-800 group-hover:text-black font-medium text-xs tracking-wide">
-                          {t.navigation?.[item.labelKey] || item.labelKey}
-                        </span>
-                      </div>
+                      </motion.div>
+                      {/* Particle Effect on Hover */}
+                      <motion.div
+                        className="absolute inset-0 pointer-events-none"
+                        whileHover={{
+                          scale: [1, 1.5, 1],
+                          opacity: [0, 1, 0],
+                        }}
+                        transition={{ duration: 0.6 }}
+                      >
+                        {[...Array(6)].map((_, particleIndex) => (
+                          <motion.div
+                            key={particleIndex}
+                            className="absolute w-1 h-1 bg-blue-400 rounded-full"
+                            style={{
+                              top: "50%",
+                              left: "50%",
+                            }}
+                            animate={{
+                              x: Math.cos((particleIndex * Math.PI * 2) / 6) * 20,
+                              y: Math.sin((particleIndex * Math.PI * 2) / 6) * 20,
+                              opacity: [0, 1, 0],
+                              scale: [0, 1, 0],
+                            }}
+                            transition={{
+                              duration: 0.8,
+                              repeat: Number.POSITIVE_INFINITY,
+                              delay: particleIndex * 0.1,
+                            }}
+                          />
+                        ))}
+                      </motion.div>
                     </motion.button>
                   ))}
                 </div>
@@ -1137,7 +1271,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
           </motion.div>
         )}
       </AnimatePresence>
-
       {/* Main Content */}
       <div className="relative z-10 text-center">
         {/* Logo with Ultra Vibrant Auras and Vibration - COMPACTED */}
