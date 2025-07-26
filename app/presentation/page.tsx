@@ -163,7 +163,7 @@ const translations = {
       close: "Fechar",
       back: "Voltar",
       invite: "CONVIDAR",
-      linkCopiado: "Link copiado!",
+      linkCopied: "Link copiado!",
       shareVia: "Partilhar via",
       copyLink: "Copiar Link",
     },
@@ -1092,9 +1092,9 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                 <div className="w-8 h-0.5 bg-gray-500 rounded-full" />
               </div>
               {/* Menu Content - Increased padding for larger window */}
-              <div className="py-8">
+              <div className="py-28">
                 {" "}
-                {/* Removed px-4 to maximize horizontal space */}
+                {/* Increased from py-8 to py-28 */}
                 {/* Menu Items Grid */}
                 <div className="relative z-10 flex overflow-x-auto whitespace-nowrap justify-start gap-3 mb-3 no-scrollbar">
                   {navigationItems.map((item, index) => (
