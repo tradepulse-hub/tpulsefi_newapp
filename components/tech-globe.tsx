@@ -273,7 +273,7 @@ export function TechGlobe() {
     <div ref={mountRef} className="w-full h-full relative flex items-center justify-center">
       {/* Logo and Vibration Effect inside the globe container */}
       <div
-        className="relative w-24 h-24 flex items-center justify-center"
+        className="absolute w-24 h-24 flex items-center justify-center top-1/2 -translate-y-1/2 right-0 mr-10" /* Adjusted: absolute, right-0, mr-10 */
         style={{
           animation: "vibrateLogo 0.08s linear infinite",
         }}
