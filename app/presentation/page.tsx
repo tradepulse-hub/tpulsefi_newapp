@@ -1076,7 +1076,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                   >
                     {/* 3D Icon Container with Glow */}
                     <motion.div
-                      className="w-10 h-10 bg-gradient-to-br from-gray-800/90 to-gray-900/95 backdrop-blur-xl border border-gray-600/50 rounded-xl flex items-center justify-center shadow-2xl" /* Reduced w-16 h-16 to w-8 h-8, rounded-2xl to rounded-lg */
+                      className="w-20 h-20 bg-gradient-to-br from-gray-800/90 to-gray-900/95 backdrop-blur-xl border border-gray-600/50 rounded-2xl flex items-center justify-center shadow-2xl" /* Increased w-10 h-10 to w-20 h-20, rounded-xl to rounded-2xl */
                       style={{
                         transformStyle: "preserve-3d",
                         boxShadow:
@@ -1094,7 +1094,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                     >
                       {/* Pulsing Glow Ring */}
                       <motion.div
-                        className="absolute inset-0 bg-gradient-to-r from-blue-400/30 to-purple-400/30 rounded-lg blur-sm" /* Adjusted rounded-2xl to rounded-lg */
+                        className="absolute inset-0 bg-gradient-to-r from-blue-400/30 to-purple-400/30 rounded-2xl blur-md" /* Adjusted rounded-xl to rounded-2xl, blur-sm to blur-md */
                         animate={{
                           scale: [1, 1.3, 1],
                           opacity: [0.3, 0.7, 0.3],
@@ -1109,7 +1109,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
 
                       {/* Inner Glow */}
                       <div
-                        className="absolute inset-1 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" /* Adjusted inset-1 to inset-0.5, rounded-md to rounded-md */
+                        className="absolute inset-2 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" /* Adjusted inset-1 to inset-2, rounded-lg to rounded-xl */
                         style={{ transform: "translateZ(2px)" }}
                       />
 
@@ -1117,10 +1117,10 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                       <motion.div
                         style={{
                           transformStyle: "preserve-3d",
-                          transform: "translateZ(3px)" /* Adjusted translateZ(6px) to 3px */,
+                          transform: "translateZ(6px)" /* Adjusted translateZ(4px) to 6px */,
                         }}
                         animate={{
-                          y: [0, -2, 0] /* Adjusted y animation */,
+                          y: [0, -4, 0] /* Adjusted y animation */,
                           rotateY: [0, 10, -10, 0],
                         }}
                         transition={{
@@ -1130,14 +1130,14 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                           delay: index * 0.4,
                         }}
                       >
-                        <item.icon className="w-5 h-5 text-white drop-shadow-lg" />{" "}
-                        {/* Reduced w-8 h-8 to w-4 h-4, drop-shadow-2xl to drop-shadow-lg */}
+                        <item.icon className="w-10 h-10 text-white drop-shadow-lg" />{" "}
+                        {/* Increased w-5 h-5 to w-10 h-10 */}
                       </motion.div>
 
                       {/* Outer Glow Effect */}
                       <div
-                        className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-xl blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" /* Adjusted rounded-2xl to rounded-lg, blur-xl to blur-xl */
-                        style={{ transform: "translateZ(-5px)" }} /* Adjusted translateZ(-10px) to -5px */
+                        className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" /* Adjusted rounded-xl to rounded-2xl, blur-md to blur-lg */
+                        style={{ transform: "translateZ(-10px)" }} /* Adjusted translateZ(-6px) to -10px */
                       />
                     </motion.div>
 
@@ -1146,13 +1146,13 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.15 + 0.3 }}
-                      className="absolute -bottom-7 left-1/2 transform -translate-x-1/2 whitespace-nowrap" /* Adjusted -bottom-8 to -bottom-6 */
-                      style={{ transform: "translateZ(2px)" }} /* Adjusted translateZ(4px) to 2px */
+                      className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 whitespace-nowrap" /* Adjusted -bottom-7 to -bottom-12 */
+                      style={{ transform: "translateZ(2px)" }}
                     >
-                      <div className="px-2.5 py-1 bg-gray-800/80 backdrop-blur-md border border-gray-700/50 rounded-full">
+                      <div className="px-4 py-2 bg-gray-800/80 backdrop-blur-md border border-gray-700/50 rounded-full">
                         {" "}
                         {/* Adjusted padding */}
-                        <span className="text-white text-xs font-medium drop-shadow-lg">
+                        <span className="text-white text-sm font-medium drop-shadow-lg">
                           {t.navigation[item.labelKey]}
                         </span>
                       </div>
@@ -1170,14 +1170,14 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                       {[...Array(6)].map((_, particleIndex) => (
                         <motion.div
                           key={particleIndex}
-                          className="absolute w-1 h-1 bg-blue-400 rounded-full" /* Reduced w-1 h-1 to w-0.5 h-0.5 */
+                          className="absolute w-2 h-2 bg-blue-400 rounded-full" /* Increased w-1 h-1 to w-2 h-2 */
                           style={{
                             top: "50%",
                             left: "50%",
                           }}
                           animate={{
-                            x: Math.cos((particleIndex * Math.PI * 2) / 6) * 20 /* Reduced spread */,
-                            y: Math.sin((particleIndex * Math.PI * 2) / 6) * 20 /* Reduced spread */,
+                            x: Math.cos((particleIndex * Math.PI * 2) / 6) * 40 /* Increased spread */,
+                            y: Math.sin((particleIndex * Math.PI * 2) / 6) * 40 /* Increased spread */,
                             opacity: [0, 1, 0],
                             scale: [0, 1, 0],
                           }}
