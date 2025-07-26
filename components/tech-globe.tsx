@@ -11,7 +11,8 @@ export function TechGlobe() {
   const sceneRef = useRef<THREE.Scene | null>(null)
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null)
   const globeGroupRef = useRef<THREE.Group | null>(null)
-  const wireframeGroupRef = useRef<THREE.Group | null>(null)
+  // wireframeGroupRef não é mais necessário se o wireframe for removido
+  // const wireframeGroupRef = useRef<THREE.Group | null>(null)
   const particlesRef = useRef<THREE.Points | null>(null)
   const ringsGroupRef = useRef<THREE.Group | null>(null)
   const logoMeshRef = useRef<THREE.Mesh | null>(null) // Ref para o objeto 3D do logo
@@ -84,30 +85,30 @@ export function TechGlobe() {
     const outerGlowSphere = new THREE.Mesh(outerGlowGeometry, outerGlowMaterial)
     globeGroup.add(outerGlowSphere)
 
-    // Wireframe Globe Layers
-    const wireframeGroup = new THREE.Group()
-    wireframeGroupRef.current = wireframeGroup
-    globeGroup.add(wireframeGroup)
+    // Wireframe Globe Layers - REMOVIDOS COMPLETAMENTE
+    // const wireframeGroup = new THREE.Group()
+    // wireframeGroupRef.current = wireframeGroup
+    // globeGroup.add(wireframeGroup)
 
-    const primaryWireframeGeometry = new THREE.SphereGeometry(0.9, 24, 12)
-    const primaryWireframeMaterial = new THREE.MeshBasicMaterial({
-      color: 0xffffff, // White
-      wireframe: true,
-      transparent: true,
-      opacity: 0.4,
-    })
-    const primaryWireframe = new THREE.Mesh(primaryWireframeGeometry, primaryWireframeMaterial)
-    wireframeGroup.add(primaryWireframe)
+    // const primaryWireframeGeometry = new THREE.SphereGeometry(0.9, 24, 12)
+    // const primaryWireframeMaterial = new THREE.MeshBasicMaterial({
+    //   color: 0xffffff, // White
+    //   wireframe: true,
+    //   transparent: true,
+    //   opacity: 0.4,
+    // })
+    // const primaryWireframe = new THREE.Mesh(primaryWireframeGeometry, primaryWireframeMaterial)
+    // wireframeGroup.add(primaryWireframe)
 
-    const secondaryWireframeGeometry = new THREE.SphereGeometry(0.95, 16, 8)
-    const secondaryWireframeMaterial = new THREE.MeshBasicMaterial({
-      wireframe: true,
-      color: 0xffffff, // White
-      transparent: true,
-      opacity: 0.2,
-    })
-    const secondaryWireframe = new THREE.Mesh(secondaryWireframeGeometry, secondaryWireframeMaterial)
-    wireframeGroup.add(secondaryWireframe)
+    // const secondaryWireframeGeometry = new THREE.SphereGeometry(0.95, 16, 8)
+    // const secondaryWireframeMaterial = new THREE.MeshBasicMaterial({
+    //   wireframe: true,
+    //   color: 0xffffff, // White
+    //   transparent: true,
+    //   opacity: 0.2,
+    // })
+    // const secondaryWireframe = new THREE.Mesh(secondaryWireframeGeometry, secondaryWireframeMaterial)
+    // wireframeGroup.add(secondaryWireframe)
 
     // Enhanced Particle Field
     const particleCount = 1000
@@ -222,10 +223,11 @@ export function TechGlobe() {
         globeGroupRef.current.rotation.x = Math.sin(time * 0.3) * 0.1
       }
 
-      if (wireframeGroupRef.current) {
-        wireframeGroupRef.current.rotation.y -= 0.003
-        wireframeGroupRef.current.rotation.z += 0.001
-      }
+      // wireframeGroupRef não é mais necessário
+      // if (wireframeGroupRef.current) {
+      //   wireframeGroupRef.current.rotation.y -= 0.003
+      //   wireframeGroupRef.current.rotation.z += 0.001
+      // }
 
       if (particlesRef.current) {
         particlesRef.current.rotation.y += 0.002
