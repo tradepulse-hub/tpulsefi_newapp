@@ -1532,7 +1532,7 @@ export default function PulseCodePage() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -50 }}
             transition={{ duration: 0.5 }}
-            className="absolute top-24 left-1/2 -translate-x-1/2 text-left z-30 w-full max-w-3xl px-4"
+            className="absolute top-32 left-6 text-left z-30 w-full px-4"
           >
             <h1 className="text-5xl md:text-7xl font-extrabold mb-4 tracking-tight">
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-cyan-200 to-blue-200">
