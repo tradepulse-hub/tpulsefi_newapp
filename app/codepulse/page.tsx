@@ -383,7 +383,7 @@ const pageTranslations = {
     },
     pulsecode: {
       title: "PulseCode: El Unificador de Proyectos",
-      subtitle: "Innovación y Crecimiento en el Ecosistema Web3",
+      subtitle: "Innovación y Crecimiento en el Ecossistema Web3",
       aboutTitle: "PulseCode", // New
       aboutSubtitle: "El proyecto que une proyectos", // New
       description:
@@ -508,6 +508,10 @@ export default function PulseCodePage() {
   const [displayedAboutSubtitle, setDisplayedAboutSubtitle] = useState("")
   const [aboutTitleAnimationComplete, setAboutTitleAnimationComplete] = useState(false)
 
+  // New states for typewriter indices
+  const [titleCharIndex, setTitleCharIndex] = useState(0)
+  const [subtitleCharIndex, setSubtitleCharIndex] = useState(0)
+
   useEffect(() => {
     const savedLanguage = localStorage.getItem("preferred-language") as SupportedLanguage
     const initialLang = savedLanguage && SUPPORTED_LANGUAGES.includes(savedLanguage) ? savedLanguage : "en"
@@ -529,51 +533,61 @@ export default function PulseCodePage() {
   useEffect(() => {
     let titleTimeout: NodeJS.Timeout | undefined
     let subtitleTimeout: NodeJS.Timeout | undefined
+    let initialDelayTimeout: NodeJS.Timeout | undefined // New timeout for initial delay
 
-    const startTypewriter = () => {
-      const fullTitle = t.pulsecode?.aboutTitle || "PulseCode"
-      const fullSubtitle = t.pulsecode?.aboutSubtitle || "O projeto que une projetos"
-      let titleIndex = 0
-      let subtitleIndex = 0
-
-      setDisplayedAboutTitle("")
-      setDisplayedAboutSubtitle("")
-      setAboutTitleAnimationComplete(false)
-
-      const typeTitle = () => {
-        if (titleIndex < fullTitle.length) {
-          setDisplayedAboutTitle((prev) => prev + fullTitle.charAt(titleIndex))
-          titleIndex++
-          titleTimeout = setTimeout(typeTitle, 100) // Velocidade da digitação do título
-        } else {
-          setAboutTitleAnimationComplete(true)
-          subtitleTimeout = setTimeout(typeSubtitle, 500) // Atraso antes do subtítulo começar
-        }
-      }
-
-      const typeSubtitle = () => {
-        if (subtitleIndex < fullSubtitle.length) {
-          setDisplayedAboutSubtitle((prev) => prev + fullSubtitle.charAt(subtitleIndex))
-          subtitleIndex++
-          subtitleTimeout = setTimeout(typeSubtitle, 50) // Velocidade da digitação do subtítulo
-        }
-      }
-
-      typeTitle() // Inicia a digitação do título
-    }
+    const fullTitle = t.pulsecode?.aboutTitle || "PulseCode"
+    const fullSubtitle = t.pulsecode?.aboutSubtitle || "O projeto que une projetos"
 
     if (activeFooterTab === "about") {
-      startTypewriter()
-    } else {
-      // Reset text when not on "about" tab
+      // Reset indices and displayed text when tab becomes active
       setDisplayedAboutTitle("")
       setDisplayedAboutSubtitle("")
       setAboutTitleAnimationComplete(false)
+      setTitleCharIndex(0) // Reset index
+      setSubtitleCharIndex(0) // Reset index
+
+      // Start typing after a small delay to ensure state reset is processed
+      initialDelayTimeout = setTimeout(() => {
+        const typeTitle = () => {
+          setTitleCharIndex((prevIndex) => {
+            const newIndex = prevIndex + 1
+            if (newIndex <= fullTitle.length) {
+              setDisplayedAboutTitle(fullTitle.slice(0, newIndex))
+              titleTimeout = setTimeout(typeTitle, 100) // Velocidade da digitação do título
+            } else {
+              setAboutTitleAnimationComplete(true)
+              subtitleTimeout = setTimeout(typeSubtitle, 500) // Atraso antes do subtítulo começar
+            }
+            return newIndex
+          })
+        }
+
+        const typeSubtitle = () => {
+          setSubtitleCharIndex((prevIndex) => {
+            const newIndex = prevIndex + 1
+            if (newIndex <= fullSubtitle.length) {
+              setDisplayedAboutSubtitle(fullSubtitle.slice(0, newIndex))
+              subtitleTimeout = setTimeout(typeSubtitle, 50) // Velocidade da digitação do subtítulo
+            }
+            return newIndex
+          })
+        }
+
+        typeTitle() // Inicia a digitação do título
+      }, 50) // Small initial delay to ensure state is reset
+    } else {
+      // Reset text and indices when not on "about" tab
+      setDisplayedAboutTitle("")
+      setDisplayedAboutSubtitle("")
+      setAboutTitleAnimationComplete(false)
+      setTitleCharIndex(0)
+      setSubtitleCharIndex(0)
     }
 
     return () => {
       clearTimeout(titleTimeout)
       clearTimeout(subtitleTimeout)
+      clearTimeout(initialDelayTimeout) // Clear initial delay timeout too
     }
   }, [activeFooterTab, t]) // Depende da aba ativa e das traduções
 
