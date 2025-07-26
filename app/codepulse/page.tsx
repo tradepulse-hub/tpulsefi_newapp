@@ -432,7 +432,7 @@ const pageTranslations = {
     pulsecode: {
       title: "PulseCode: Penyatuan Proyek",
       subtitle: "Inovasi dan Pertumbuhan dalam Ekosistem Web3",
-      aboutTitle: "PulseCode", // New
+      aboutTitle: "PulseCode", // Confirmed: This is already "PulseCode"
       aboutSubtitle: "Proyek yang menyatukan proyek", // Corrected translation
       description:
         "PulseCode adalah inisiatif yang didedikasikan untuk mendorong pengembangan proyek-proyek inovatif di dalam WorldApp. Melalui model pendanaan yang unik, kami memastikan keberlanjutan dan pertumbuhan ekosistem kami yang berkelanjutan.",
@@ -1532,7 +1532,7 @@ export default function PulseCodePage() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -50 }}
             transition={{ duration: 0.5 }}
-            className="absolute top-32 left-6 text-left z-30 w-full px-4"
+            className="absolute top-36 left-24 text-left z-30 w-full px-4"
           >
             <h1 className="text-5xl md:text-7xl font-extrabold mb-4 tracking-tight">
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-cyan-200 to-blue-200">
