@@ -4,7 +4,6 @@ import type React from "react"
 import { useEffect, useState } from "react"
 import Image from "next/image"
 import {
-  Menu,
   X,
   Wallet,
   Eye,
@@ -26,13 +25,14 @@ import {
   Share2,
   Copy,
   Check,
+  Menu,
 } from "lucide-react"
-import { useMiniKit } from "../../hooks/use-minikit" // Corrected path
-import MiniWallet from "../../components/mini-wallet" // Corrected path
+import { useMiniKit } from "../../hooks/use-minikit"
+import MiniWallet from "../../components/mini-wallet"
 import { AnimatePresence, motion } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { useMobile } from "@/hooks/use-mobile"
-import { BackgroundEffect } from "../../components/background-effect" // Import the new BackgroundEffect
+import { BackgroundEffect } from "../../components/background-effect"
 
 // Simplified language support
 const LANGUAGES = [
@@ -48,40 +48,8 @@ const LANGUAGES = [
   },
 ]
 
-// Partnerships data
-const PARTNERSHIPS = [
-  {
-    id: "holdstation",
-    name: "HoldStation",
-    image: "/images/holdstation-logo.jpg",
-    gradient: "from-blue-500 to-purple-600",
-    url: "https://world.org/mini-app?app_id=app_0d4b759921490adc1f2bd569fda9b53a&path=/ref/f5S3wA",
-  },
-  {
-    id: "axo",
-    name: "AXO",
-    image: "/images/axo.jpg",
-    gradient: "from-pink-500 to-rose-600",
-    url: "https://worldcoin.org/mini-app?app_id=app_8aeb55d57b7be834fb8d67e2f803d258&app_mode=mini-app",
-  },
-  {
-    id: "dropwallet",
-    name: "Drop Wallet",
-    image: "/images/HUB.png",
-    gradient: "from-yellow-500 to-orange-600",
-    url: "https://worldcoin.org/mini-app?app_id=app_459cd0d0d3125864ea42bd4c19d1986c&app_mode=mini-app",
-  },
-  {
-    id: "humantap",
-    name: "Human Tap",
-    image: "/images/human-tap.jpg",
-    gradient: "from-green-500 to-emerald-600",
-    url: "https://worldcoin.org/mini-app?app_id=app_25cf6ee1d9660721e651d43cf126953a&app_mode=mini-app",
-  },
-]
-
 // URL do convite
-const INVITE_URL = "https://worldcoin.org/mini-app?app_id=app_a3a55e132983350c67923dd57dc22c5e&app_mode=mini-app"
+// const INVITE_URL = "https://worldcoin.org/mini-app?app_id=app_a3a55e132983350c67923dd57dc22c5e&app_mode=mini-app"
 
 // Translations
 const translations = {
@@ -111,6 +79,7 @@ const translations = {
       linkCopied: "Link copied!",
       shareVia: "Share via",
       copyLink: "Copy Link",
+      move: "MOVE", // Added "MOVE" translation
     },
     partnerships: {
       visitApp: "Visit App",
@@ -165,6 +134,7 @@ const translations = {
       linkCopied: "Link copiado!",
       shareVia: "Partilhar via",
       copyLink: "Copiar Link",
+      move: "MOVER", // Added "MOVER" translation
     },
     partnerships: {
       visitApp: "Visitar App",
@@ -199,7 +169,7 @@ const translations = {
       connectWallet: "Conectar Billetera",
     },
     navigation: {
-      codepulse: "Billetera",
+      codepulse: "PulseCode",
       wallet: "Billetera",
       news: "Noticias",
       airdrop: "Airdrop",
@@ -219,6 +189,7 @@ const translations = {
       linkCopiado: "¡Enlace copiado!",
       shareVia: "Compartir vía",
       copyLink: "Copiar Enlace",
+      move: "MOVER", // Added "MOVER" translation
     },
     partnerships: {
       visitApp: "Visitar App",
@@ -274,6 +245,7 @@ const translations = {
       linkCopied: "Link disalin!",
       shareVia: "Bagikan via",
       copyLink: "Salin Link",
+      move: "PINDAH", // Added "PINDAH" translation
     },
     partnerships: {
       visitApp: "Kunjungi App",
@@ -284,7 +256,7 @@ const translations = {
       eventTitle: "Acara Peningkatan FiStaking",
       eventDescription: "Sampai tanggal 20 bulan depan dua token FiStaking meningkatkan % keuntungan, manfaatkan.",
       eventDetails: "Semakin banyak TPF yang Anda miliki, semakin banyak yang Anda peroleh.",
-      eventWarning: "Jangan lewatkan kesempatan terbatas ini para memaksimalkan hadiah FiStaking Anda!",
+      eventWarning: "Jangan lewatkan kesempatan terbatas ini untuk memaksimalkan hadiah FiStaking Anda!",
       eventPeriod: "Periode Acara",
       eventDates: "15 Juli, 2025 - 15 Agustus, 2025",
       participateNow: "Berpartisipasi Sekarang",
@@ -295,7 +267,7 @@ const translations = {
       "Kepercayaan",
       "Fokus jangka panjang",
       "Komitmen",
-      "adalah kata-kata yang masuk akhoal bagi kami",
+      "adalah kata-kata yang masuk akal bagi kami",
       "dukung proyek kami",
       "undang teman dan keluarga",
       "dan mari",
@@ -328,7 +300,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
   const [showShareModal, setShowShareModal] = useState(false)
   const [linkCopied, setLinkCopied] = useState(false)
   const [currentLang, setCurrentLang] = useState<keyof typeof translations>("en")
-  const [currentPartnerIndex, setCurrentPartnerIndex] = useState(0)
   const router = useRouter()
   const isMobile = useMobile()
 
@@ -367,15 +338,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
     }
   }, [isAuthenticated, user])
 
-  // Partnership slideshow effect
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentPartnerIndex((prev) => (prev + 1) % PARTNERSHIPS.length)
-    }, 3000)
-
-    return () => clearInterval(interval)
-  }, [])
-
   // Efeito para palavras motivacionais
   useEffect(() => {
     const wordInterval = setInterval(() => {
@@ -392,7 +354,9 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
   // Handle copy link
   const handleCopyLink = async () => {
     try {
-      await navigator.clipboard.writeText(INVITE_URL)
+      await navigator.clipboard.writeText(
+        "https://worldcoin.org/mini-app?app_id=app_a3a55e132983350c67923dd57dc22c5e&app_mode=mini-app",
+      )
       setLinkCopied(true)
       setTimeout(() => setLinkCopied(false), 2000)
     } catch (error) {
@@ -402,9 +366,11 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
 
   // Handle share options
   const handleShare = (platform: string) => {
-    const message = `Join TPulseFi - The Future of Decentralized Finance! ${INVITE_URL}`
+    const message = `Join TPulseFi - The Future of Decentralized Finance! https://worldcoin.org/mini-app?app_id=app_a3a55e132983350c67923dd57dc22c5e&app_mode=mini-app`
     const encodedMessage = encodeURIComponent(message)
-    const encodedUrl = encodeURIComponent(INVITE_URL)
+    const encodedUrl = encodeURIComponent(
+      "https://worldcoin.org/mini-app?app_id=app_a3a55e132983350c67923dd57dc22c5e&app_mode=mini-app",
+    )
 
     let shareUrl = ""
 
@@ -559,11 +525,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
   }
 
   const currentLanguage = LANGUAGES.find((lang) => lang.code === currentLang)
-  const currentPartner = PARTNERSHIPS[currentPartnerIndex]
-
-  const handlePartnerClick = () => {
-    window.open(currentPartner.url, "_blank")
-  }
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden flex items-center justify-center">
@@ -572,30 +533,17 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
 
       {/* Top Navigation */}
       <div className="absolute top-0 left-0 right-0 z-50 p-4">
-        {" "}
-        {/* Reduced padding from p-6 to p-4 */}
         <div className="flex items-center justify-between">
           {/* Left Side - Events Icon */}
           <div className="flex items-center space-x-2">
-            {" "}
-            {/* Reduced space-x-3 to space-x-2 */}
-            {/* Events Icon */}
             <button onClick={() => setShowEventsModal(true)} className="relative group">
-              <div className="px-2 py-1.5 bg-black/20 backdrop-blur-md border border-orange-400/30 rounded-full flex items-center space-x-1 hover:bg-orange-500/10 transition-all duration-300">
-                {" "}
-                {/* Reduced padding and space-x */}
+              <div className="px-1.5 py-1 bg-black/20 backdrop-blur-md border border-orange-400/30 rounded-full flex items-center space-x-0.5 hover:bg-orange-500/10 transition-all duration-300">
                 <div className="absolute inset-0 bg-gradient-to-r from-orange-400/10 to-red-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <Calendar className="w-3 h-3 text-orange-300 relative z-10" /> {/* Reduced icon size */}
-                <span className="text-xs font-medium relative z-10">
-                  {" "}
-                  {/* Reduced text size */}
-                  {t.events?.eventButton || "Evento"}
-                </span>
+                <Calendar className="w-2.5 h-2.5 text-orange-300 relative z-10" />
+                <span className="text-[10px] font-medium relative z-10">{t.events?.eventButton || "Evento"}</span>
                 {/* Live Indicator */}
                 <div className="flex items-center space-x-0.5">
-                  {" "}
-                  {/* Reduced space-x */}
-                  <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" /> {/* Reduced indicator size */}
+                  <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
                   <span className="text-xs font-bold">LIVE</span>
                 </div>
               </div>
@@ -603,25 +551,20 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             {/* Wallet Button (when wallet is connected but hidden) */}
             {isAuthenticated && !showMiniWallet && (
               <button onClick={handleShowWallet} className="relative group">
-                <div className="px-2 py-1.5 bg-black/20 backdrop-blur-md border border-green-400/30 rounded-full flex items-center space-x-1 hover:bg-green-500/10 transition-all duration-300">
-                  {" "}
-                  {/* Reduced padding and space-x */}
+                <div className="px-1.5 py-1 bg-black/20 backdrop-blur-md border border-green-400/30 rounded-full flex items-center space-x-0.5 hover:bg-green-500/10 transition-all duration-300">
                   <div className="absolute inset-0 bg-gradient-to-r from-green-400/10 to-emerald-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <Eye className="w-3 h-3 text-green-300 relative z-10" /> {/* Reduced icon size */}
-                  <span className="text-xs font-medium relative z-10"> {t.common?.wallet || "Wallet"}</span>
+                  <Eye className="w-2.5 h-2.5 text-green-300 relative z-10" />
+                  <span className="text-[10px] font-medium relative z-10">{t.common?.wallet || "Wallet"}</span>
                 </div>
               </button>
             )}
             {/* Connect Wallet Button (only when not connected) */}
             {!isAuthenticated && (
               <button onClick={handleWalletConnect} disabled={isLoading} className="relative group">
-                <div className="px-4 py-2 bg-black/20 backdrop-blur-md border border-cyan-400/30 rounded-full flex items-center space-x-1.5 hover:bg-cyan-500/10 transition-all duration-300 disabled:opacity-50">
-                  {" "}
-                  {/* Reduced padding and space-x */}
+                <div className="px-3 py-1.5 bg-black/20 backdrop-blur-md border border-cyan-400/30 rounded-full flex items-center space-x-1 hover:bg-cyan-500/10 transition-all duration-300 disabled:opacity-50">
                   <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/10 to-blue-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <Wallet className="w-4 h-4 text-cyan-300 relative z-10" /> {/* Reduced icon size */}
-                  <span className="text-sm font-medium relative z-10">
-                    {" "}
+                  <Wallet className="w-3 h-3 text-cyan-300 relative z-10" />
+                  <span className="text-xs font-medium relative z-10">
                     {isLoading ? t.common?.loading || "Loading..." : t.presentation?.connectWallet || "Connect Wallet"}
                   </span>
                 </div>
@@ -632,13 +575,10 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
           {/* Right Side - Language Selector */}
           <div className="relative">
             <button onClick={() => setShowLanguageMenu(!showLanguageMenu)} className="relative group">
-              <div className="px-2 py-1.5 bg-black/20 backdrop-blur-md border border-white/10 rounded-full flex items-center space-x-1 hover:bg-white/10 transition-all duration-300">
-                {" "}
-                {/* Reduced padding and space-x */}
+              <div className="px-1.5 py-1 bg-black/20 backdrop-blur-md border border-white/10 rounded-full flex items-center space-x-0.5 hover:bg-white/10 transition-all duration-300">
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-400/10 to-pink-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <Globe className="w-3 h-3 text-purple-300 relative z-10" /> {/* Reduced icon size */}
-                <span className="text-xs font-medium relative z-10">
-                  {" "}
+                <Globe className="w-2.5 h-2.5 text-purple-300 relative z-10" />
+                <span className="text-[10px] font-medium relative z-10">
                   {currentLanguage?.flag} {currentLanguage?.code.toUpperCase()}
                 </span>
               </div>
@@ -651,26 +591,24 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                   initial={{ opacity: 0, y: -10, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                  className="absolute top-10 right-0 bg-black/90 backdrop-blur-xl border border-white/10 rounded-xl p-2 min-w-[180px] shadow-2xl" // Adjusted top and min-width
+                  className="absolute top-10 right-0 bg-black/90 backdrop-blur-xl border border-white/10 rounded-xl p-1.5 min-w-[180px] shadow-2xl"
                 >
                   {LANGUAGES.map((lang) => (
                     <button
                       key={lang.code}
                       onClick={() => handleLanguageChange(lang.code as keyof typeof translations)}
-                      className={`w-full flex items-center space-x-2 p-2 rounded-lg transition-all duration-200 ${
-                        // Adjusted padding and space-x
+                      className={`w-full flex items-center space-x-1.5 p-1.5 rounded-lg transition-all duration-200 ${
                         currentLang === lang.code
                           ? `bg-gradient-to-r ${lang.gradient} bg-opacity-20 text-white`
                           : "hover:bg-white/5 text-gray-300 hover:text-white"
                       }`}
                     >
-                      <span className="text-base">{lang.flag}</span> {/* Adjusted text size */}
+                      <span className="text-sm">{lang.flag}</span>
                       <div className="text-left">
-                        <div className="text-xs font-medium">{lang.nativeName}</div> {/* Adjusted text size */}
-                        <div className="text-xs opacity-70">{lang.name}</div> {/* Adjusted text size */}
+                        <div className="text-[10px] font-medium">{lang.nativeName}</div>
+                        <div className="text-[10px] opacity-70">{lang.name}</div>
                       </div>
-                      {currentLang === lang.code && <div className="ml-auto text-green-400 text-xs">✓</div>}{" "}
-                      {/* Adjusted text size */}
+                      {currentLang === lang.code && <div className="ml-auto text-green-400 text-xs">✓</div>}
                     </button>
                   ))}
                 </motion.div>
@@ -684,8 +622,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
       <AnimatePresence>
         {showMiniWallet && user && (
           <div className="absolute top-4 left-4 z-40">
-            {" "}
-            {/* Adjusted top and left */}
             <MiniWallet
               walletAddress={user.walletAddress}
               onMinimize={handleMinimizeWallet}
@@ -965,43 +901,112 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
         )}
       </AnimatePresence>
 
-      {/* Bottom Navigation Bar with Wallet Icon + Menu Button */}
-      <div className="fixed bottom-6 left-6 right-6 z-50">
+      {/* Bottom Navigation Bar with 3D Menu Button */}
+      <div className="fixed bottom-6 left-6 right-6 z-50" style={{ perspective: "1000px" }}>
         {/* Futuristic Bottom Bar */}
         <div className="relative">
           {/* Glow Effect */}
-          <div className="absolute inset-0 bg-gradient-to-t from-gray-400/20 via-gray-300/10 to-transparent blur-lg" />
+          <div className="absolute inset-0 bg-gradient-to-t from-gray-700/20 via-gray-600/10 to-transparent blur-lg" />
           {/* Main Bar */}
-          <div className="relative bg-gradient-to-t from-gray-100 to-white backdrop-blur-xl border border-gray-200 rounded-xl">
-            <div className="flex items-center justify-center py-2 px-4 space-x-4">
-              {/* Wallet Icon (when wallet is connected but hidden) */}
-              {isAuthenticated && !showMiniWallet && (
-                <button onClick={handleShowWallet} className="relative group">
-                  <div className="w-8 h-8 bg-gradient-to-r from-green-200/50 to-emerald-200/50 backdrop-blur-md border border-green-300 rounded-full flex items-center justify-center hover:from-green-300/50 hover:to-emerald-300/50 transition-all duration-300 shadow-xl">
-                    <div className="absolute inset-0 bg-gradient-to-r from-green-300 to-emerald-300 rounded-full animate-ping opacity-75" />
-                    <div className="absolute inset-1 bg-gradient-to-r from-black/10 to-black/5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    <Eye className="w-4 h-4 text-green-700 relative z-10" />
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-r from-green-200/20 to-emerald-200/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                </button>
-              )}
+          <div className="relative bg-gray-800/70 backdrop-blur-xl border border-gray-700/50 rounded-xl">
+            <div className="flex items-center justify-center py-1 px-4 space-x-4">
+              {" "}
+              {/* Reduzido py-2 para py-1 */}
+              {/* Central 3D Menu Button */}
+              <button
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="relative group flex items-center justify-center px-4 py-0.5" // Ajustado py para o botão central
+                style={{ transformStyle: "preserve-3d" }}
+              >
+                <motion.div
+                  className="w-auto h-8 bg-gradient-to-br from-gray-700/80 to-gray-800/90 backdrop-blur-md border border-gray-600/50 rounded-full flex items-center justify-center shadow-2xl" // Reduzido h-12 para h-8
+                  whileHover={{
+                    scale: 1.1,
+                    rotateX: 15,
+                    rotateY: 15,
+                    transition: { duration: 0.2 },
+                  }}
+                  whileTap={{
+                    scale: 0.95,
+                    rotateX: -10,
+                    rotateY: -10,
+                  }}
+                  animate={{
+                    rotateZ: isMenuOpen ? 180 : 0,
+                    transition: { duration: 0.3 },
+                  }}
+                  style={{
+                    transformStyle: "preserve-3d",
+                    boxShadow: isMenuOpen
+                      ? "0 20px 40px rgba(59, 130, 246, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.1)"
+                      : "0 10px 20px rgba(0, 0, 0, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.1)",
+                  }}
+                >
+                  {/* 3D Inner Ring */}
+                  <div
+                    className="absolute inset-1 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                    style={{ transform: "translateZ(2px)" }}
+                  />
 
-              {/* Central Menu Button */}
-              <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="relative group">
-                <div className="w-8 h-8 bg-gradient-to-r from-gray-300 to-gray-400 backdrop-blur-md border border-gray-400 rounded-full flex items-center justify-center hover:from-gray-400 hover:to-gray-500 transition-all duration-300 shadow-xl">
                   {/* Pulsing Ring */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-gray-300 to-gray-400 rounded-full animate-ping opacity-75" />
-                  {/* Inner Glow */}
-                  <div className="absolute inset-1 bg-gradient-to-r from-black/10 to-black/5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  {/* Icon */}
-                  {isMenuOpen ? (
-                    <X className="w-4 h-4 text-black relative z-10 transition-transform duration-300 rotate-90" />
-                  ) : (
-                    <Menu className="w-4 h-4 text-black relative z-10 transition-transform duration-300" />
-                  )}
-                </div>
-                {/* Button Glow */}
-                <div className="absolute inset-0 bg-gradient-to-r from-gray-300/20 to-gray-400/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-blue-400/30 to-purple-400/30 rounded-full"
+                    animate={{
+                      scale: [1, 1.2, 1],
+                      opacity: [0.3, 0.6, 0.3],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Number.POSITIVE_INFINITY,
+                      ease: "easeInOut",
+                    }}
+                  />
+
+                  {/* Icon with 3D effect */}
+                  <motion.div
+                    style={{
+                      transformStyle: "preserve-3d",
+                      transform: "translateZ(4px)",
+                    }}
+                    // Removida a animação de rotação específica do ícone
+                    transition={{ duration: 0.3 }}
+                    className="flex items-center space-x-2"
+                  >
+                    <Menu className="w-4 h-4 text-white relative z-10 drop-shadow-lg" />{" "}
+                    {/* Alterado para ícone Menu e ajustado o tamanho */}
+                    <AnimatePresence mode="wait">
+                      {isMenuOpen ? (
+                        <motion.span
+                          key="close-text"
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: 10 }}
+                          transition={{ duration: 0.2 }}
+                          className="text-white text-sm font-bold relative z-10 drop-shadow-lg"
+                        >
+                          {t.common?.close || "CLOSE"}
+                        </motion.span>
+                      ) : (
+                        <motion.span
+                          key="move-text"
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: 10 }}
+                          transition={{ duration: 0.2 }}
+                          className="text-white text-sm font-bold relative z-10 drop-shadow-lg"
+                        >
+                          {t.common?.move || "MOVE"}
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                </motion.div>
+
+                {/* 3D Button Glow */}
+                <div
+                  className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  style={{ transform: "translateZ(-10px)" }}
+                />
               </button>
             </div>
           </div>
@@ -1012,359 +1017,484 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
       <AnimatePresence>
         {isMenuOpen && (
           <div className="fixed inset-0 z-40 pointer-events-none">
-            {/* Menu Items Container - Centering wrapper */}
-            <div className="absolute bottom-40 left-0 right-0 flex justify-center">
-              {/* Fixed width container for the visible portion of the menu */}
-              <div className="relative w-[228px] overflow-x-auto">
+            {/* Menu Items as Floating 3D Icons */}
+            <div className="absolute bottom-36 left-1/2 transform -translate-x-1/2">
+              {" "}
+              {/* Ajustado bottom-24 para bottom-36 */}
+              <div className="relative flex justify-center gap-8">
                 {" "}
-                {/* Adjusted width to fit 4 icons (4*40px + 3*12px + 2*16px) */}
-                {/* The actual scrollable list of icons */}
-                <div className="flex flex-nowrap gap-3 whitespace-nowrap py-2 px-4">
-                  {navigationItems.map((item, index) => (
-                    <motion.button
-                      key={item.id}
-                      initial={{
-                        opacity: 0,
-                        y: 100,
-                        scale: 0,
-                        rotateX: 90,
-                        rotateY: 180,
-                      }}
-                      animate={{
-                        opacity: 1,
-                        y: [100, -20, 0],
-                        scale: [0, 1.2, 1],
-                        rotateX: [90, -10, 0],
-                        rotateY: [180, 10, 0],
-                      }}
-                      exit={{
-                        opacity: 0,
-                        y: 100,
-                        scale: 0,
-                        rotateX: 90,
-                        rotateY: 180,
-                      }}
-                      transition={{
-                        delay: index * 0.15,
-                        type: "spring",
-                        damping: 15,
-                        stiffness: 200,
-                        duration: 0.8,
-                      }}
-                      whileHover={{
-                        scale: 1.15,
-                        y: -10,
-                        rotateX: -15,
-                        rotateY: 15,
-                        transition: { duration: 0.2 },
-                      }}
-                      whileTap={{
-                        scale: 0.9,
-                        y: 5,
-                        rotateX: 10,
-                        rotateY: -10,
-                      }}
-                      onClick={() => {
-                        if (item.href) {
-                          router.push(item.href)
-                        }
-                        setIsMenuOpen(false)
-                      }}
-                      className="group pointer-events-auto relative flex-shrink-0"
+                {/* Ajustado gap-6 para gap-8 */}
+                {navigationItems.map((item, index) => (
+                  {" "}\
+                  {/* Removido .slice(0, 4) para mostrar todos os itens */}\
+                  <motion.button
+                    key={item.id}
+                    initial={{\
+                      opacity: 0,\
+                      y: 100,\
+                      scale: 0,\
+                      rotateX: 90,\
+                      rotateY: 180,\
+                    }}\
+                    animate={{\
+                      opacity: 1,\
+                      y: [100, -20, 0],\
+                      scale: [0, 1.2, 1],\
+                      rotateX: [90, -10, 0],\
+                      rotateY: [180, 10, 0],
+                    }}\
+                    exit={{\
+                      opacity: 0,\
+                      y: 100,\
+                      scale: 0,\
+                      rotateX: 90,\
+                      rotateY: 180,\
+                    }}\
+                    transition={{\
+                      delay: index * 0.15,\
+                      type: \"spring\",
+                      damping: 15,\
+                      stiffness: 200,\
+                      duration: 0.8,\
+                    }}\
+                    whileHover={{
+                      scale: 1.15,
+                      y: -10,
+                      rotateX: -15,
+                      rotateY: 15,
+                      transition: { duration: 0.2 },
+                    }}
+                    whileTap={{
+                      scale: 0.9,
+                      y: 5,
+                      rotateX: 10,
+                      rotateY: -10,
+                    }}
+                    onClick={() => {
+                      if (item.action) {
+                        // Use action if defined
+                        item.action()
+                      } else if (item.href) {
+                        router.push(item.href)
+                      }
+                      setIsMenuOpen(false)
+                    }}
+                    className="group pointer-events-auto relative"
+                    style={{
+                      transformStyle: "preserve-3d",
+                    }}
+                  >
+                    {/* 3D Icon Container with Glow */}
+                    <motion.div
+                      className="w-20 h-20 bg-gradient-to-br from-gray-800/90 to-gray-900/95 backdrop-blur-xl border border-gray-600/50 rounded-lg flex items-center justify-center shadow-xl" // Aumentado w-16 h-16 para w-20 h-20
                       style={{
                         transformStyle: "preserve-3d",
+                        boxShadow: "0 8px 16px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.1)", // Reduced shadow
+                      }}
+                      animate={{
+                        rotateZ: [0, 5, -5, 0],
+                      }}
+                      transition={{
+                        duration: 4,
+                        repeat: Number.POSITIVE_INFINITY,
+                        ease: "easeInOut",
+                        delay: index * 0.5,
                       }}
                     >
-                      {/* 3D Icon Container with Glow */}
+                      {/* Pulsing Glow Ring */}
                       <motion.div
-                        className="w-10 h-10 bg-gradient-to-br from-gray-800/90 to-gray-900/95 backdrop-blur-xl border border-gray-600/50 rounded-xl flex items-center justify-center shadow-2xl"
-                        style={{
-                          transformStyle: "preserve-3d",
-                          boxShadow: "0 8px 15px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.1)",
-                        }}
+                        className="absolute inset-0 bg-gradient-to-r from-blue-400/30 to-purple-400/30 rounded-lg blur-sm" // Rounded-lg
                         animate={{
-                          rotateZ: [0, 5, -5, 0],
+                          scale: [1, 1.3, 1],
+                          opacity: [0.3, 0.7, 0.3],
                         }}
                         transition={{
-                          duration: 4,
+                          duration: 2,
                           repeat: Number.POSITIVE_INFINITY,
                           ease: "easeInOut",
-                          delay: index * 0.5,
+                          delay: index * 0.3,
                         }}
-                      >
-                        {/* Pulsing Glow Ring */}
-                        <motion.div
-                          className="absolute inset-0 bg-gradient-to-r from-blue-400/30 to-purple-400/30 rounded-lg blur-sm"
-                          animate={{
-                            scale: [1, 1.3, 1],
-                            opacity: [0.3, 0.7, 0.3],
-                          }}
-                          transition={{
-                            duration: 2,
-                            repeat: Number.POSITIVE_INFINITY,
-                            ease: "easeInOut",
-                            delay: index * 0.3,
-                          }}
-                        />
+                      />
 
-                        {/* Inner Glow */}
-                        <div
-                          className="absolute inset-1 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                          style={{ transform: "translateZ(2px)" }}
-                        />
-
-                        {/* 3D Icon with Floating Animation */}
-                        <motion.div
-                          style={{
-                            transformStyle: "preserve-3d",
-                            transform: "translateZ(3px)",
-                          }}
-                          animate={{
-                            y: [0, -2, 0],
-                            rotateY: [0, 10, -10, 0],
-                          }}
-                          transition={{
-                            duration: 3,
-                            repeat: Number.POSITIVE_INFINITY,
-                            ease: "easeInOut",
-                            delay: index * 0.4,
-                          }}
-                        >
-                          <item.icon className="w-5 h-5 text-white drop-shadow-lg" />
-                        </motion.div>
-
-                        {/* Outer Glow Effect */}
-                        <div
-                          className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-xl blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                          style={{ transform: "translateZ(-5px)" }}
-                        />
-                      </motion.div>
-
-                      {/* Floating Label */}
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.15 + 0.3 }}
-                        className="absolute -bottom-7 left-1/2 transform -translate-x-1/2 whitespace-nowrap"
+                      {/* Inner Glow */}
+                      <div
+                        className="absolute inset-1 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" // Rounded-md
                         style={{ transform: "translateZ(2px)" }}
+                      />
+
+                      {/* 3D Icon with Floating Animation */}
+                      <motion.div
+                        style={{
+                          transformStyle: "preserve-3d",
+                          transform: "translateZ(6px)",
+                        }}
+                        animate={{
+                          y: [0, -3, 0],
+                          rotateY: [0, 10, -10, 0],
+                        }}
+                        transition={{
+                          duration: 3,
+                          repeat: Number.POSITIVE_INFINITY,
+                          ease: "easeInOut",
+                          delay: index * 0.4,
+                        }}
                       >
-                        <div className="px-2.5 py-1 bg-gray-800/80 backdrop-blur-md border border-gray-700/50 rounded-full">
-                          <span className="text-white text-xs font-medium drop-shadow-lg">
-                            {t.navigation[item.labelKey]}
-                          </span>
-                        </div>
+                        <item.icon className="w-8 h-8 text-white drop-shadow-2xl" />{" "}
+                        {/* Aumentado w-6 h-6 para w-8 h-8 */}
                       </motion.div>
 
-                      {/* Particle Effect on Hover */}
-                      <motion.div
-                        className="absolute inset-0 pointer-events-none"
-                        whileHover={{
-                          scale: [1, 1.5, 1],
-                          opacity: [0, 1, 0],
-                        }}
-                        transition={{ duration: 0.6 }}
-                      >
-                        {[...Array(6)].map((_, particleIndex) => (
-                          <motion.div
-                            key={particleIndex}
-                            className="absolute w-1 h-1 bg-blue-400 rounded-full"
-                            style={{
-                              top: "50%",
-                              left: "50%",
-                            }}
-                            animate={{
-                              x: Math.cos((particleIndex * Math.PI * 2) / 6) * 20,
-                              y: Math.sin((particleIndex * Math.PI * 2) / 6) * 20,
-                              opacity: [0, 1, 0],
-                              scale: [0, 1, 0],
-                            }}
-                            transition={{
-                              duration: 0.8,
-                              repeat: Number.POSITIVE_INFINITY,
-                              delay: particleIndex * 0.1,
-                            }}
-                          />
-                        ))}
-                      </motion.div>
-                    </motion.button>
-                  ))}
-                </div>
+                      {/* Outer Glow Effect */}
+                      <div
+                        className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" // Rounded-lg
+                        style={{ transform: "translateZ(-10px)" }}
+                      />
+                    </motion.div>
+
+                    {/* Floating Label */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.15 + 0.3 }}
+                      className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 whitespace-nowrap" // Ajustado -bottom-8 para -bottom-10
+                      style={{ transform: "translateZ(4px)" }}
+                    >
+                      <div className="px-2 py-0.5 bg-gray-800/80 backdrop-blur-md border border-gray-700/50 rounded-full">
+                        {" "}
+                        <span className="text-white text-xs font-medium drop-shadow-lg">
+                          {" "}
+                          {t.navigation?.[item.labelKey] || item.labelKey}
+                        </span>
+                      </div>
+                    </motion.div>
+
+                    {/* Particle Effect on Hover */}
+                    <motion.div
+                      className="absolute inset-0 pointer-events-none"
+                      whileHover={{
+                        scale: [1, 1.5, 1],
+                        opacity: [0, 1, 0],
+                      }}
+                      transition={{ duration: 0.6 }}
+                    >
+                      {[...Array(6)].map((_, particleIndex) => (
+                        <motion.div
+                          key={particleIndex}
+                          className="absolute w-1 h-1 bg-blue-400 rounded-full"
+                          style={{
+                            top: "50%",
+                            left: "50%",
+                          }}
+                          animate={{
+                            x: Math.cos((particleIndex * Math.PI * 2) / 6) * 30,
+                            y: Math.sin((particleIndex * Math.PI * 2) / 6) * 30,
+                            opacity: [0, 1, 0],
+                            scale: [0, 1, 0],
+                          }}
+                          transition={{
+                            duration: 0.8,
+                            repeat: Number.POSITIVE_INFINITY,
+                            delay: particleIndex * 0.1,
+                          }}
+                        />
+                      ))}
+                    </motion.div>
+                  </motion.button>
+                ))}
               </div>
             </div>
-          </div>
-        )}
-      </AnimatePresence>
+  </div>
+        )
+}
+</AnimatePresence>
 
-      {/* Main Content */}
-      <div className="relative z-10 text-center">
-        {/* Logo with Ultra Vibrant Auras and Vibration - COMPACTED */}
-        <div className="relative mb-4 flex items-center justify-center">
-          {/* Multiple Vibrant Aura Layers with Intense Pulsing - REDUCED */}
-          <div
-            className="absolute w-64 h-64 rounded-full"
-            style={{
-              background: `radial-gradient(circle,
+{
+  /* Moving Light Lines Background */
+}
+;<div className="absolute inset-0 bg-gray-900">
+  {/* Horizontal Moving Lines */}
+  {[...Array(12)].map((_, i) => (
+    <div
+      key={`h-line-${i}`}
+      className="absolute h-px bg-gradient-to-r from-transparent via-white/60 to-transparent animate-pulse"
+      style={{
+        top: `${8 + i * 8}%`,
+        left: "-100%",
+        width: "200%",
+        animation: `moveRight 4s linear infinite`,
+        animationDelay: `${i * 0.3}s`,
+      }}
+    />
+  ))}
+</div>
+
+{
+  /* Main Content with 3D Globe */
+}
+;<div className="relative z-10 text-center">
+  {/* Logo with Ultra Vibrant Auras and Vibration - COMPACTED */}
+  <div className="relative mb-4 flex items-center justify-center">
+    {/* Multiple Vibrant Aura Layers with Intense Pulsing - REDUCED */}
+    <div
+      className="absolute w-64 h-64 rounded-full"
+      style={{
+        background: `radial-gradient(circle,
             rgba(255,255,255,0.4) 0%,
             rgba(156,163,175,0.3) 30%,
             rgba(107,114,128,0.2) 60%,
             transparent 100%)`,
-              animation: "vibrateAura 0.1s linear infinite, pulse 1s ease-in-out infinite",
-            }}
-          />
-          <div
-            className="absolute w-52 h-52 rounded-full"
-            style={{
-              background: `radial-gradient(circle,
+        animation: "vibrateAura 0.1s linear infinite, pulse 1s ease-in-out infinite",
+      }}
+    />
+    <div
+      className="absolute w-52 h-52 rounded-full"
+      style={{
+        background: `radial-gradient(circle,
             rgba(255,255,255,0.6) 0%,
             rgba(229,231,235,0.4) 40%,
             transparent 100%)`,
-              animation: "vibrateAura 0.15s linear infinite, pulse 0.8s ease-in-out infinite",
-              animationDelay: "0.05s",
-            }}
-          />
-          <div
-            className="absolute w-40 h-40 rounded-full"
-            style={{
-              background: `radial-gradient(circle,
+        animation: "vibrateAura 0.15s linear infinite, pulse 0.8s ease-in-out infinite",
+        animationDelay: "0.05s",
+      }}
+    />
+    <div
+      className="absolute w-40 h-40 rounded-full"
+      style={{
+        background: `radial-gradient(circle,
             rgba(243,244,246,0.5) 0%,
             rgba(209,213,219,0.4) 50%,
             transparent 100%)`,
-              animation: "vibrateAura 0.2s linear infinite, pulse 0.6s ease-in-out infinite",
-              animationDelay: "0.1s",
-            }}
-          />
+        animation: "vibrateAura 0.2s linear infinite, pulse 0.6s ease-in-out infinite",
+        animationDelay: "0.1s",
+      }}
+    />
 
-          {/* Intense Vibrating Rings - REDUCED */}
-          <div
-            className="absolute w-48 h-48 border-2 border-gray-300/60 rounded-full"
-            style={{
-              animation: "vibrateRing 0.1s linear infinite, spin 8s linear infinite",
-              boxShadow: "0 0 30px rgba(255,255,255,0.8), inset 0 0 30px rgba(229,231,235,0.5)",
-            }}
-          />
-          <div
-            className="absolute w-36 h-36 border border-gray-400/70 rounded-full"
-            style={{
-              animation: "vibrateRing 0.12s linear infinite, spin 6s linear infinite reverse",
-              boxShadow: "0 0 20px rgba(255,255,255,1)",
-            }}
-          />
+    {/* Intense Vibrating Rings - REDUCED */}
+    <div
+      className="absolute w-48 h-48 border-2 border-gray-300/60 rounded-full"
+      style={{
+        animation: "vibrateRing 0.1s linear infinite, spin 8s linear infinite",
+        boxShadow: "0 0 30px rgba(255,255,255,0.8), inset 0 0 30px rgba(229,231,235,0.5)",
+      }}
+    />
+    <div
+      className="absolute w-36 h-36 border border-gray-400/70 rounded-full"
+      style={{
+        animation: "vibrateRing 0.12s linear infinite, spin 6s linear infinite reverse",
+        boxShadow: "0 0 20px rgba(255,255,255,1)",
+      }}
+    />
 
-          {/* Vibrating Logo Container with REAL TPF Logo - REDUCED */}
-          <div
-            className="relative w-20 h-20 flex items-center justify-center"
-            style={{
-              animation: "vibrateLogo 0.08s linear infinite",
-            }}
-          >
-            <div
-              className="absolute inset-0 bg-white rounded-full shadow-2xl"
-              style={{
-                boxShadow: `
+    {/* Vibrating Logo Container with REAL TPF Logo - REDUCED */}
+    <div
+      className="relative w-20 h-20 flex items-center justify-center"
+      style={{
+        animation: "vibrateLogo 0.08s linear infinite",
+      }}
+    >
+      <div
+        className="absolute inset-0 bg-white rounded-full shadow-2xl"
+        style={{
+          boxShadow: `
       0 0 30px rgba(255,255,255,1),
       0 0 60px rgba(229,231,235,0.8),
       0 0 90px rgba(209,213,219,0.6),
       0 0 120px rgba(156,163,175,0.4)
     `,
-                animation: "pulse 0.5s ease-in-out infinite",
-              }}
-            />
-            {/* REAL TPF LOGO - REDUCED */}
-            <div className="relative z-10 w-16 h-16 rounded-full overflow-hidden bg-white p-1.5">
-              <Image
-                src="/images/logo-tpf.png"
-                alt="TPulseFi Logo"
-                width={64}
-                height={64}
-                className="w-full h-full object-contain"
-                style={{
-                  animation: "vibrateLogoImage 0.1s linear infinite",
-                }}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Brand Name - COMPACTED */}
-        <h1 className="text-3xl md:text-4xl font-bold mb-4 tracking-wider">
-          <span className="bg-gradient-to-r from-white via-cyan-200 to-blue-200 bg-clip-text text-transparent">
-            TPulseFi
-          </span>
-        </h1>
-
-        {/* Animated Subtitle - COMPACTED */}
-        <div className="h-6 flex items-center justify-center mb-8">
-          <div className="flex items-center space-x-3">
-            <div className="h-px w-8 bg-gradient-to-r from-transparent to-white/50" />
-            <p className="text-sm md:text-base text-gray-300 font-light tracking-widest uppercase min-w-[300px] text-center">
-              {displayText}
-              <span className="animate-pulse">|</span>
-            </p>
-            <div className="h-px w-8 bg-gradient-to-l from-transparent to-white/50" />
-          </div>
-        </div>
-
-        {/* New Social Media Icons */}
-        <div className="flex items-center justify-center gap-3 mb-8 z-20 relative">
-          <a
-            href="https://x.com/TradePulseToken?t=N-8tJuaN9E4asIH0A-gGEg&s=09"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="relative group"
-          >
-            <div className="px-2 py-1 bg-black/20 backdrop-blur-md border border-white/10 rounded-full flex items-center space-x-1.5 hover:bg-white/10 transition-all duration-300">
-              <div className="absolute inset-0 bg-gradient-to-r from-gray-400/10 to-gray-600/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <X className="w-3 h-3 text-gray-300 relative z-10" />
-              <span className="text-white text-xs font-medium relative z-10">Follow Us</span>
-            </div>
-          </a>
-          <a href="https://t.me/tpulsefi" target="_blank" rel="noopener noreferrer" className="relative group">
-            <div className="px-2 py-1 bg-black/20 backdrop-blur-md border border-white/10 rounded-full flex items-center space-x-1.5 hover:bg-white/10 transition-all duration-300">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-400/10 to-cyan-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <Send className="w-3 h-3 text-blue-300 relative z-10" />
-              <span className="text-white text-xs font-medium relative z-10">Join Telegram</span>
-            </div>
-          </a>
-        </div>
-
-        {/* Motivational Words Animation - COMPACTED */}
-        <div className="flex items-center justify-center mb-6 z-20 relative">
-          <div className="h-8 flex items-center justify-center">
-            <AnimatePresence mode="wait">
-              {showWord && (
-                <motion.p
-                  key={currentWordIndex}
-                  initial={{ opacity: 0, y: 15, scale: 0.8 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -15, scale: 0.8 }}
-                  transition={{ duration: 0.5, ease: "easeInOut" }}
-                  className="text-sm md:text-base text-white font-medium text-center max-w-sm px-3"
-                  style={{
-                    textShadow: "0 0 15px rgba(255,255,255,0.5)",
-                    animation: showWord ? "pulse 2s ease-in-out infinite" : "none",
-                  }}
-                >
-                  {t.motivationalWords[currentWordIndex]}
-                </motion.p>
-              )}
-            </AnimatePresence>
-          </div>
-        </div>
-
-        {/* Invite Button */}
-        <div className="flex items-center justify-center mb-12 z-20 relative">
-          <button onClick={() => setShowShareModal(true)} className="relative group">
-            <div className="px-3 py-1.5 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-full flex items-center space-x-1.5 transition-all duration-300 transform hover:scale-105 shadow-lg">
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <Share2 className="w-4 h-4 text-white relative z-10" />
-              <span className="text-white text-sm font-bold relative z-10 tracking-wide">
-                {t.common?.invite || "INVITE"}
-              </span>
-            </div>
-          </button>
-        </div>
+          animation: "pulse 0.5s ease-in-out infinite",
+        }}
+      />
+      {/* REAL TPF LOGO - REDUCED */}
+      <div className="relative z-10 w-16 h-16 rounded-full overflow-hidden bg-white p-1.5">
+        <Image
+          src="/images/logo-tpf.png"
+          alt="TPulseFi Logo"
+          width={64}
+          height={64}
+          className="w-full h-full object-contain"
+          style={{
+            animation: "vibrateLogoImage 0.1s linear infinite",
+          }}
+        />
       </div>
     </div>
+  </div>
+
+  {/* Brand Name - COMPACTED */}
+  <h1 className="text-3xl md:text-4xl font-bold mb-4 tracking-wider">
+    <span className="bg-gradient-to-r from-white via-cyan-200 to-blue-200 bg-clip-text text-transparent">TPulseFi</span>
+  </h1>
+
+  {/* Animated Subtitle - COMPACTED */}
+  <div className="h-6 flex items-center justify-center mb-8">
+    <div className="flex items-center space-x-3">
+      <div className="h-px w-8 bg-gradient-to-r from-transparent to-white/50" />
+      <p className="text-sm md:text-base text-gray-300 font-light tracking-widest uppercase min-w-[300px] text-center">
+        {displayText}
+        <span className="animate-pulse">|</span>
+      </p>
+      <div className="h-px w-8 bg-gradient-to-l from-transparent to-white/50" />
+    </div>
+  </div>
+
+  {/* New Social Media Icons */}
+  <div className="flex items-center justify-center gap-3 mb-8 z-20 relative">
+    <a
+      href="https://x.com/TradePulseToken?t=N-8tJuaN9E4asIH0A-gGEg&s=09"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="relative group"
+    >
+      <div className="px-2 py-1 bg-black/20 backdrop-blur-md border border-white/10 rounded-full flex items-center space-x-1.5 hover:bg-white/10 transition-all duration-300">
+        <div className="absolute inset-0 bg-gradient-to-r from-gray-400/10 to-gray-600/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <X className="w-3 h-3 text-gray-300 relative z-10" />
+        <span className="text-white text-xs font-medium relative z-10">Follow Us</span>
+      </div>
+    </a>
+    <a href="https://t.me/tpulsefi" target="_blank" rel="noopener noreferrer" className="relative group">
+      <div className="px-2 py-1 bg-black/20 backdrop-blur-md border border-white/10 rounded-full flex items-center space-x-1.5 hover:bg-white/10 transition-all duration-300">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-400/10 to-cyan-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <Send className="w-3 h-3 text-blue-300 relative z-10" />
+        <span className="text-white text-xs font-medium relative z-10">Join Telegram</span>
+      </div>
+    </a>
+  </div>
+
+  {/* Motivational Words Animation - COMPACTED */}
+  <div className="flex items-center justify-center mb-6 z-20 relative">
+    <div className="h-8 flex items-center justify-center">
+      <AnimatePresence mode="wait">
+        {showWord && (
+          <motion.p
+            key={currentWordIndex}
+            initial={{ opacity: 0, y: 15, scale: 0.8 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -15, scale: 0.8 }}
+            transition={{ duration: 0.5, ease: "easeInOut" }}
+            className="text-sm md:text-base text-white font-medium text-center max-w-sm px-3"
+            style={{
+              textShadow: "0 0 15px rgba(255,255,255,0.5)",
+              animation: showWord ? "pulse 2s ease-in-out infinite" : "none",
+            }}
+          >
+            {t.motivationalWords[currentWordIndex]}
+          </motion.p>
+        )}
+      </AnimatePresence>
+    </div>
+  </div>
+
+  {/* Invite Button */}
+  <div className="flex items-center justify-center mb-12 z-20 relative">
+    <button onClick={() => setShowShareModal(true)} className="relative group">
+      <div className="px-3 py-1.5 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-full flex items-center space-x-1.5 transition-all duration-300 transform hover:scale-105 shadow-lg">
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <Share2 className="w-4 h-4 text-white relative z-10" />
+        <span className="text-white text-sm font-bold relative z-10 tracking-wide">{t.common?.invite || "INVITE"}</span>
+      </div>
+    </button>
+  </div>
+</div>
+
+{
+  /* Add custom CSS for animations */
+}
+;<style jsx>{`
+        @keyframes moveRight {
+          0% {
+            transform: translateX(-100%);
+            opacity: 0;
+          }
+          10% {
+            opacity: 1;
+          }
+          90% {
+            opacity: 1;
+          }
+          100% {
+            transform: translateX(100vw);
+            opacity: 0;
+          }
+        }
+        @keyframes vibrateAura {
+          0% {
+            transform: translateX(0px) translateY(0px);
+          }
+          25% {
+            transform: translateX(0.5px) translateY(-0.5px);
+          }
+          50% {
+            transform: translateX(0px) translateY(0.5px);
+          }
+          75% {
+            transform: translateX(-0.5px) translateY(0px);
+          }
+          100% {
+            transform: translateX(0px) translateY(0px);
+          }
+        }
+
+        @keyframes vibrateRing {
+          0% {
+            transform: translateX(0px) translateY(0px) rotate(0deg);
+          }
+          25% {
+            transform: translateX(-0.3px) translateY(0.3px) rotate(0.5deg);
+          }
+          50% {
+            transform: translateX(0.5px) translateY(0px) rotate(-0.3deg);
+          }
+          75% {
+            transform: translateX(0px) translateY(-0.5px) rotate(0deg);
+          }
+          100% {
+            transform: translateX(0px) translateY(0px) rotate(0deg);
+          }
+        }
+
+        @keyframes vibrateLogo {
+          0% {
+            transform: translateX(0px) translateY(0px);
+          }
+          50% {
+            transform: translateX(0.3px) translateY(-0.3px);
+          }
+          100% {
+            transform: translateX(0px) translateY(0px);
+          }
+        }
+
+        @keyframes vibrateLogoImage {
+          0% {
+            transform: rotate(0deg);
+          }
+            50% {
+            transform: rotate(-0.2deg);
+          }
+          100% {
+            transform: rotate(0deg);
+          }
+        }
+
+        @keyframes pulse {
+          0%,
+          100% {
+            opacity: 0.8;
+          }
+          50% {
+            opacity: 1;
+          }
+        }
+
+        @keyframes spin {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
+        }
+      `}</style>
+</div>
   )
 }
 
