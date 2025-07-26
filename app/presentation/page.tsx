@@ -101,7 +101,6 @@ const translations = {
       membership: "Membership",
       partnerships: "Partnerships",
       about: "About",
-      empty: "", // Added for empty slots
     },
     common: {
       wallet: "Wallet",
@@ -156,7 +155,6 @@ const translations = {
       membership: "Membros",
       partnerships: "Parcerias",
       about: "Sobre",
-      empty: "", // Added for empty slots
     },
     common: {
       wallet: "Carteira",
@@ -211,7 +209,6 @@ const translations = {
       membership: "Membresía",
       partnerships: "Asociaciones",
       about: "Acerca de",
-      empty: "", // Added for empty slots
     },
     common: {
       wallet: "Billetera",
@@ -267,7 +264,6 @@ const translations = {
       membership: "Keanggotaan",
       partnerships: "Kemitraan",
       about: "Tentang",
-      empty: "", // Added for empty slots
     },
     common: {
       wallet: "Dompet",
@@ -496,20 +492,12 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
     return () => clearTimeout(timeout)
   }, [displayText, isDeleting, fullText])
 
-  // Componente para ícones vazios
-  const EmptyIcon: React.FC = () => <div className="w-6 h-6" />
-
   const navigationItems: NavItem[] = [
     {
-      id: "empty-left-1",
-      labelKey: "empty", // Usar uma chave vazia para o label
-      icon: EmptyIcon,
-    },
-    {
-      id: "pulsecode",
-      labelKey: "codepulse",
-      icon: Code,
-      href: "/codepulse",
+      id: "pulsecode", // Changed from wallet
+      labelKey: "codepulse", // Changed label key
+      icon: Code, // Changed icon to Code
+      href: "/codepulse", // New href
     },
     {
       id: "news",
@@ -553,11 +541,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
       icon: Info,
       href: "/about",
     },
-    {
-      id: "empty-right-1",
-      labelKey: "empty", // Usar uma chave vazia para o label
-      icon: EmptyIcon,
-    },
   ]
 
   const handleLanguageChange = (newLanguage: keyof typeof translations) => {
@@ -596,7 +579,11 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                 {/* Reduced padding and space-x */}
                 <div className="absolute inset-0 bg-gradient-to-r from-orange-400/10 to-red-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <Calendar className="w-3 h-3 text-orange-300 relative z-10" /> {/* Reduced icon size */}
-                <span className="text-xs font-medium relative z-10"> {t.events?.eventButton || "Evento"}</span>
+                <span className="text-xs font-medium relative z-10">
+                  {" "}
+                  {/* Reduced text size */}
+                  {t.events?.eventButton || "Evento"}
+                </span>
                 {/* Live Indicator */}
                 <div className="flex items-center space-x-0.5">
                   {" "}
@@ -1139,15 +1126,12 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                       }}
                       // Removed whileHover and whileTap effects
                       onClick={() => {
-                        // Only navigate if it's not an empty placeholder
-                        if (!item.id.startsWith("empty-")) {
-                          console.log(`Clicked item: ${item.id}`)
-                          setIsMenuOpen(false) // Close menu immediately
-                          if (item.action) {
-                            item.action()
-                          } else if (item.href) {
-                            router.push(item.href)
-                          }
+                        console.log(`Clicked item: ${item.id}`)
+                        setIsMenuOpen(false) // Close menu immediately
+                        if (item.action) {
+                          item.action()
+                        } else if (item.href) {
+                          router.push(item.href)
                         }
                       }}
                       className="group pointer-events-auto relative flex-shrink-0 w-16 h-16" // Fixed width and height
@@ -1224,14 +1208,11 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                         className="absolute -bottom-7 left-1/2 transform -translate-x-1/2 whitespace-nowrap"
                         style={{ transform: "translateZ(2px)" }}
                       >
-                        {/* Conditionally render label only for non-empty items */}
-                        {item.labelKey !== "empty" && (
-                          <div className="px-2.5 py-1 bg-gray-800/80 backdrop-blur-md border border-gray-700/50 rounded-full">
-                            <span className="text-white text-[0.6rem] font-medium drop-shadow-lg">
-                              {t.navigation[item.labelKey]}
-                            </span>
-                          </div>
-                        )}
+                        <div className="px-2.5 py-1 bg-gray-800/80 backdrop-blur-md border border-gray-700/50 rounded-full">
+                          <span className="text-white text-[0.6rem] font-medium drop-shadow-lg">
+                            {t.navigation[item.labelKey]}
+                          </span>
+                        </div>
                       </motion.div>
                       {/* Particle Effect on Hover */}
                       <motion.div
@@ -1283,10 +1264,10 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             className="absolute w-64 h-64 rounded-full"
             style={{
               background: `radial-gradient(circle,
-            rgba(255,255,255,0.4) 0%,
-            rgba(156,163,175,0.3) 30%,
-            rgba(107,114,128,0.2) 60%,
-            transparent 100%)`,
+              rgba(255,255,255,0.4) 0%,
+              rgba(156,163,175,0.3) 30%,
+              rgba(107,114,128,0.2) 60%,
+              transparent 100%)`,
               animation: "vibrateAura 0.1s linear infinite, pulse 1s ease-in-out infinite",
             }}
           />
@@ -1294,9 +1275,9 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             className="absolute w-52 h-52 rounded-full"
             style={{
               background: `radial-gradient(circle,
-            rgba(255,255,255,0.6) 0%,
-            rgba(229,231,235,0.4) 40%,
-            transparent 100%)`,
+              rgba(255,255,255,0.6) 0%,
+              rgba(229,231,235,0.4) 40%,
+              transparent 100%)`,
               animation: "vibrateAura 0.15s linear infinite, pulse 0.8s ease-in-out infinite",
               animationDelay: "0.05s",
             }}
@@ -1305,9 +1286,9 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             className="absolute w-40 h-40 rounded-full"
             style={{
               background: `radial-gradient(circle,
-            rgba(243,244,246,0.5) 0%,
-            rgba(209,213,219,0.4) 50%,
-            transparent 100%)`,
+              rgba(243,244,246,0.5) 0%,
+              rgba(209,213,219,0.4) 50%,
+              transparent 100%)`,
               animation: "vibrateAura 0.2s linear infinite, pulse 0.6s ease-in-out infinite",
               animationDelay: "0.1s",
             }}
