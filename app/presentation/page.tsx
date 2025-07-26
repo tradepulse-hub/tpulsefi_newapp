@@ -101,6 +101,7 @@ const translations = {
       membership: "Membership",
       partnerships: "Partnerships",
       about: "About",
+      empty: "", // Added for empty slots
     },
     common: {
       wallet: "Wallet",
@@ -155,6 +156,7 @@ const translations = {
       membership: "Membros",
       partnerships: "Parcerias",
       about: "Sobre",
+      empty: "", // Added for empty slots
     },
     common: {
       wallet: "Carteira",
@@ -209,6 +211,7 @@ const translations = {
       membership: "Membresía",
       partnerships: "Asociaciones",
       about: "Acerca de",
+      empty: "", // Added for empty slots
     },
     common: {
       wallet: "Billetera",
@@ -264,6 +267,7 @@ const translations = {
       membership: "Keanggotaan",
       partnerships: "Kemitraan",
       about: "Tentang",
+      empty: "", // Added for empty slots
     },
     common: {
       wallet: "Dompet",
@@ -492,12 +496,25 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
     return () => clearTimeout(timeout)
   }, [displayText, isDeleting, fullText])
 
+  // Componente para ícones vazios
+  const EmptyIcon: React.FC = () => <div className="w-6 h-6" />
+
   const navigationItems: NavItem[] = [
     {
-      id: "pulsecode", // Changed from wallet
-      labelKey: "codepulse", // Changed label key
-      icon: Code, // Changed icon to Code
-      href: "/codepulse", // New href
+      id: "empty-left-1",
+      labelKey: "empty", // Usar uma chave vazia para o label
+      icon: EmptyIcon,
+    },
+    {
+      id: "empty-left-2",
+      labelKey: "empty", // Usar uma chave vazia para o label
+      icon: EmptyIcon,
+    },
+    {
+      id: "pulsecode",
+      labelKey: "codepulse",
+      icon: Code,
+      href: "/codepulse",
     },
     {
       id: "news",
@@ -540,6 +557,16 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
       labelKey: "about",
       icon: Info,
       href: "/about",
+    },
+    {
+      id: "empty-right-1",
+      labelKey: "empty", // Usar uma chave vazia para o label
+      icon: EmptyIcon,
+    },
+    {
+      id: "empty-right-2",
+      labelKey: "empty", // Usar uma chave vazia para o label
+      icon: EmptyIcon,
     },
   ]
 
@@ -1126,12 +1153,15 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                       }}
                       // Removed whileHover and whileTap effects
                       onClick={() => {
-                        console.log(`Clicked item: ${item.id}`)
-                        setIsMenuOpen(false) // Close menu immediately
-                        if (item.action) {
-                          item.action()
-                        } else if (item.href) {
-                          router.push(item.href)
+                        // Only navigate if it's not an empty placeholder
+                        if (!item.id.startsWith("empty-")) {
+                          console.log(`Clicked item: ${item.id}`)
+                          setIsMenuOpen(false) // Close menu immediately
+                          if (item.action) {
+                            item.action()
+                          } else if (item.href) {
+                            router.push(item.href)
+                          }
                         }
                       }}
                       className="group pointer-events-auto relative flex-shrink-0 w-16 h-16" // Fixed width and height
@@ -1208,11 +1238,14 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                         className="absolute -bottom-7 left-1/2 transform -translate-x-1/2 whitespace-nowrap"
                         style={{ transform: "translateZ(2px)" }}
                       >
-                        <div className="px-2.5 py-1 bg-gray-800/80 backdrop-blur-md border border-gray-700/50 rounded-full">
-                          <span className="text-white text-[0.6rem] font-medium drop-shadow-lg">
-                            {t.navigation[item.labelKey]}
-                          </span>
-                        </div>
+                        {/* Conditionally render label only for non-empty items */}
+                        {item.labelKey !== "empty" && (
+                          <div className="px-2.5 py-1 bg-gray-800/80 backdrop-blur-md border border-gray-700/50 rounded-full">
+                            <span className="text-white text-[0.6rem] font-medium drop-shadow-lg">
+                              {t.navigation[item.labelKey]}
+                            </span>
+                          </div>
+                        )}
                       </motion.div>
                       {/* Particle Effect on Hover */}
                       <motion.div
