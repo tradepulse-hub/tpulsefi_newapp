@@ -201,12 +201,9 @@ export function TechGlobe() {
       })
       const logoMesh = new THREE.Mesh(logoGeometry, logoMaterial)
 
-      // Posição inicial do logo (no centro do globo, ligeiramente para cima e para a direita)
-      // Ajustado o Z para que o logo fique na frente da esfera principal (raio 0.7)
-      const initialLogoX = 0.1
-      const initialLogoY = 0.1
-      const initialLogoZ = 0.75 // Movido para a frente da esfera principal
-      logoMesh.position.set(initialLogoX, initialLogoY, initialLogoZ)
+      // Posição do logo no centro (0,0) e ligeiramente à frente da esfera principal (raio 0.7)
+      const initialLogoZ = 0.75
+      logoMesh.position.set(0, 0, initialLogoZ) // Logo parado no centro
 
       globeGroup.add(logoMesh)
       logoMeshRef.current = logoMesh
@@ -240,21 +237,18 @@ export function TechGlobe() {
         })
       }
 
-      // Animações do logo 3D
-      if (logoMeshRef.current) {
-        // Animação de pulsação (escala)
-        const pulseScale = 1 + Math.sin(time * 5) * 0.05 // Escala entre 1 e 1.1
-        logoMeshRef.current.scale.setScalar(pulseScale)
-
-        // Animação de vibração (pequenas mudanças de posição)
-        const vibrateOffset = 0.002 // Offset muito pequeno
-        const initialLogoX = 0.1 // Posição X base
-        const initialLogoY = 0.1 // Posição Y base
-        const initialLogoZ = 0.75 // Mantém a posição Z
-        logoMeshRef.current.position.x = initialLogoX + Math.sin(time * 100) * vibrateOffset
-        logoMeshRef.current.position.y = initialLogoY + Math.cos(time * 100) * vibrateOffset
-        logoMeshRef.current.position.z = initialLogoZ // Garante que Z não seja resetado
-      }
+      // O logo agora está parado, então removemos as animações de pulsação e vibração
+      // if (logoMeshRef.current) {
+      //   const pulseScale = 1 + Math.sin(time * 5) * 0.05
+      //   logoMeshRef.current.scale.setScalar(pulseScale)
+      //   const vibrateOffset = 0.002
+      //   const initialLogoX = 0.1
+      //   const initialLogoY = 0.1
+      //   const initialLogoZ = 0.75
+      //   logoMeshRef.current.position.x = initialLogoX + Math.sin(time * 100) * vibrateOffset
+      //   logoMeshRef.current.position.y = initialLogoY + Math.cos(time * 100) * vibrateOffset
+      //   logoMeshRef.current.position.z = initialLogoZ
+      // }
 
       renderer.render(scene, camera)
     }
