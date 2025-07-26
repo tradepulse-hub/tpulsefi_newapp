@@ -11,7 +11,7 @@ export function TechGlobe() {
   const sceneRef = useRef<THREE.Scene | null>(null)
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null)
   const globeGroupRef = useRef<THREE.Group | null>(null)
-  const wireframeGroupRef = useRef<THREE.Group | null>(null) // Reintroduzido
+  const wireframeGroupRef = useRef<THREE.Group | null>(null)
   const particlesRef = useRef<THREE.Points | null>(null)
   const ringsGroupRef = useRef<THREE.Group | null>(null)
   const logoMeshRef = useRef<THREE.Mesh | null>(null) // Ref para o objeto 3D do logo
@@ -84,7 +84,7 @@ export function TechGlobe() {
     const outerGlowSphere = new THREE.Mesh(outerGlowGeometry, outerGlowMaterial)
     globeGroup.add(outerGlowSphere)
 
-    // Wireframe Globe Layers - REINTRODUZIDOS
+    // Wireframe Globe Layers
     const wireframeGroup = new THREE.Group()
     wireframeGroupRef.current = wireframeGroup
     globeGroup.add(wireframeGroup)
@@ -144,7 +144,7 @@ export function TechGlobe() {
     particlesRef.current = particles
     scene.add(particles)
 
-    // Rotating Tech Rings - REINTRODUZIDOS (exceto o ring1 problemático)
+    // Rotating Tech Rings
     const ringsGroup = new THREE.Group()
     ringsGroupRef.current = ringsGroup
     scene.add(ringsGroup)
@@ -158,14 +158,15 @@ export function TechGlobe() {
         emissiveIntensity: 0.1, // Reduced emissive intensity
       })
 
-    // O ring1 (horizontal) foi removido para evitar a linha reta que corta o logo
+    // O ring1 (horizontal) já foi removido
     // const ring1 = new THREE.Mesh(new THREE.TorusGeometry(1.0, 0.015, 8, 100), ringMaterial(0.4))
     // ring1.rotation.x = Math.PI / 2
     // ringsGroup.add(ring1)
 
-    const ring2 = new THREE.Mesh(new THREE.TorusGeometry(1.1, 0.015, 8, 100), ringMaterial(0.3))
-    ring2.rotation.y = Math.PI / 2
-    ringsGroup.add(ring2)
+    // REMOVIDO: ring2 que causava a linha reta vertical
+    // const ring2 = new THREE.Mesh(new THREE.TorusGeometry(1.1, 0.015, 8, 100), ringMaterial(0.3))
+    // ring2.rotation.y = Math.PI / 2
+    // ringsGroup.add(ring2)
 
     const ring3 = new THREE.Mesh(new THREE.TorusGeometry(1.2, 0.015, 8, 100), ringMaterial(0.2))
     ring3.rotation.set(Math.PI / 4, Math.PI / 4, 0)
@@ -175,7 +176,7 @@ export function TechGlobe() {
     ring4.rotation.set(-Math.PI / 4, -Math.PI / 4, Math.PI / 2)
     ringsGroup.add(ring4)
 
-    // Data Streams - Curved Lines - REINTRODUZIDOS
+    // Data Streams - Curved Lines
     for (let i = 0; i < 6; i++) {
       const streamGeometry = new THREE.TorusGeometry(1.4 + i * 0.03, 0.003, 4, 50)
       const streamMaterial = new THREE.MeshBasicMaterial({
