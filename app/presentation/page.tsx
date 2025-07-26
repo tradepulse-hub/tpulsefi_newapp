@@ -1081,22 +1081,22 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: "100%", opacity: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed bottom-20 z-40 !w-screen" // Changed from left-0 right-0 to !w-screen
+            className="fixed bottom-20 z-40 !w-screen"
             style={{ perspective: "1000px" }}
           >
             <div className="bg-gradient-to-br from-gray-100 to-white backdrop-blur-xl border border-gray-200 rounded-2xl w-full">
-              {" "}
-              {/* Added w-full here */}
               {/* Menu Handle */}
               <div className="flex justify-center pt-3 pb-1">
                 <div className="w-8 h-0.5 bg-gray-500 rounded-full" />
               </div>
-              {/* Menu Content - Increased padding for larger window */}
-              <div className="py-24">
+              {/* Menu Content - Reduced overall padding */}
+              <div className="py-8">
                 {" "}
-                {/* Changed from py-12 to py-24 to double the size */}
-                {/* Menu Items Grid */}
-                <div className="relative z-10 flex overflow-x-auto whitespace-nowrap justify-start gap-3 mb-3 no-scrollbar">
+                {/* Changed from py-24 to py-8 */}
+                {/* Menu Items Grid - Added vertical padding to this specific container */}
+                <div className="relative z-10 flex overflow-x-auto whitespace-nowrap justify-start gap-3 mb-3 no-scrollbar py-6">
+                  {" "}
+                  {/* Added py-6 here */}
                   {navigationItems.map((item, index) => (
                     <motion.button
                       key={item.id}
