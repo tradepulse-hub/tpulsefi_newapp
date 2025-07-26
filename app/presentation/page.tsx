@@ -991,8 +991,10 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
         {isMenuOpen && (
           <div className="fixed inset-0 z-40 pointer-events-none">
             {/* Menu Items as Floating 3D Icons */}
-            <div className="absolute bottom-32 left-1/2 transform -translate-x-1/2">
-              <div className="relative flex flex-wrap justify-center gap-3 max-w-md">
+            <div className="absolute bottom-28 left-1/2 transform -translate-x-1/2">
+              {" "}
+              {/* Adjusted bottom position */}
+              <div className="relative flex flex-wrap justify-center gap-2 max-w-lg">
                 {" "}
                 {/* Reduced gap, increased max-w */}
                 {navigationItems.map((item, index) => (
@@ -1055,10 +1057,10 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                   >
                     {/* 3D Icon Container with Glow */}
                     <motion.div
-                      className="w-14 h-14 bg-gradient-to-br from-gray-800/90 to-gray-900/95 backdrop-blur-xl border border-gray-600/50 rounded-xl flex items-center justify-center shadow-2xl" // Reduced size, rounded-xl
+                      className="w-12 h-12 bg-gradient-to-br from-gray-800/90 to-gray-900/95 backdrop-blur-xl border border-gray-600/50 rounded-lg flex items-center justify-center shadow-xl" // Reduced size, rounded-lg, reduced shadow
                       style={{
                         transformStyle: "preserve-3d",
-                        boxShadow: "0 10px 20px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.1)", // Reduced shadow
+                        boxShadow: "0 8px 16px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.1)", // Reduced shadow
                       }}
                       animate={{
                         rotateZ: [0, 5, -5, 0],
@@ -1072,7 +1074,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                     >
                       {/* Pulsing Glow Ring */}
                       <motion.div
-                        className="absolute inset-0 bg-gradient-to-r from-blue-400/30 to-purple-400/30 rounded-xl blur-sm" // Rounded-xl
+                        className="absolute inset-0 bg-gradient-to-r from-blue-400/30 to-purple-400/30 rounded-lg blur-sm" // Rounded-lg
                         animate={{
                           scale: [1, 1.3, 1],
                           opacity: [0.3, 0.7, 0.3],
@@ -1087,7 +1089,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
 
                       {/* Inner Glow */}
                       <div
-                        className="absolute inset-1 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" // Rounded-lg
+                        className="absolute inset-1 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" // Rounded-md
                         style={{ transform: "translateZ(2px)" }}
                       />
 
@@ -1108,12 +1110,12 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                           delay: index * 0.4,
                         }}
                       >
-                        <item.icon className="w-7 h-7 text-white drop-shadow-2xl" /> {/* Reduced icon size */}
+                        <item.icon className="w-6 h-6 text-white drop-shadow-2xl" /> {/* Reduced icon size */}
                       </motion.div>
 
                       {/* Outer Glow Effect */}
                       <div
-                        className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" // Rounded-xl
+                        className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" // Rounded-lg
                         style={{ transform: "translateZ(-10px)" }}
                       />
                     </motion.div>
@@ -1123,13 +1125,13 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.15 + 0.3 }}
-                      className="absolute -bottom-7 left-1/2 transform -translate-x-1/2 whitespace-nowrap" // Adjusted bottom
+                      className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 whitespace-nowrap" // Adjusted bottom
                       style={{ transform: "translateZ(4px)" }}
                     >
-                      <div className="px-2 py-0.5 bg-gray-800/80 backdrop-blur-md border border-gray-700/50 rounded-full">
+                      <div className="px-1.5 py-0.5 bg-gray-800/80 backdrop-blur-md border border-gray-700/50 rounded-full">
                         {" "}
                         {/* Reduced padding */}
-                        <span className="text-white text-[10px] font-medium drop-shadow-lg">
+                        <span className="text-white text-[9px] font-medium drop-shadow-lg">
                           {" "}
                           {/* Reduced font size */}
                           {t.navigation?.[item.labelKey] || item.labelKey}
