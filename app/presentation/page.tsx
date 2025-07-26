@@ -325,7 +325,7 @@ interface PresentationProps {
 
 const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy }) => {
   const [displayText, setDisplayText] = useState("")
-  const [isDeleting, setIsDeleting] = useState(isDeleting)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [showMiniWallet, setShowMiniWallet] = useState(false)
   const [showLanguageMenu, setShowLanguageMenu] = useState(false)
@@ -1283,10 +1283,10 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             className="absolute w-64 h-64 rounded-full"
             style={{
               background: `radial-gradient(circle,
-              rgba(255,255,255,0.4) 0%,
-              rgba(156,163,175,0.3) 30%,
-              rgba(107,114,128,0.2) 60%,
-              transparent 100%)`,
+            rgba(255,255,255,0.4) 0%,
+            rgba(156,163,175,0.3) 30%,
+            rgba(107,114,128,0.2) 60%,
+            transparent 100%)`,
               animation: "vibrateAura 0.1s linear infinite, pulse 1s ease-in-out infinite",
             }}
           />
@@ -1294,9 +1294,9 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             className="absolute w-52 h-52 rounded-full"
             style={{
               background: `radial-gradient(circle,
-              rgba(255,255,255,0.6) 0%,
-              rgba(229,231,235,0.4) 40%,
-              transparent 100%)`,
+            rgba(255,255,255,0.6) 0%,
+            rgba(229,231,235,0.4) 40%,
+            transparent 100%)`,
               animation: "vibrateAura 0.15s linear infinite, pulse 0.8s ease-in-out infinite",
               animationDelay: "0.05s",
             }}
@@ -1305,9 +1305,9 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             className="absolute w-40 h-40 rounded-full"
             style={{
               background: `radial-gradient(circle,
-              rgba(243,244,246,0.5) 0%,
-              rgba(209,213,219,0.4) 50%,
-              transparent 100%)`,
+            rgba(243,244,246,0.5) 0%,
+            rgba(209,213,219,0.4) 50%,
+            transparent 100%)`,
               animation: "vibrateAura 0.2s linear infinite, pulse 0.6s ease-in-out infinite",
               animationDelay: "0.1s",
             }}
