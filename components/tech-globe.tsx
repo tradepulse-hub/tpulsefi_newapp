@@ -34,68 +34,62 @@ export function TechGlobe() {
     rendererRef.current = renderer
 
     // Adjusted camera position for a much more compact globe
-    camera.position.set(0, 0, 2.5) // Further reduced from 3.5
+    camera.position.set(0, 0, 2.5)
 
-    // Lighting
-    scene.add(new THREE.AmbientLight(0xffffff, 0.2))
+    // Lighting - Removed colored point lights
+    scene.add(new THREE.AmbientLight(0xffffff, 0.4)) // Increased ambient light slightly
     const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8)
     directionalLight.position.set(10, 10, 5)
     scene.add(directionalLight)
-    const pointLight1 = new THREE.PointLight(0x00ffff, 0.6)
-    pointLight1.position.set(-10, -10, -5)
-    scene.add(pointLight1)
-    const pointLight2 = new THREE.PointLight(0xff6b6b, 0.4)
-    pointLight2.position.set(5, -5, 10)
-    scene.add(pointLight2)
 
     // Main Globe Group
     const globeGroup = new THREE.Group()
     globeGroupRef.current = globeGroup
     scene.add(globeGroup)
 
-    // Core Sphere - Made even more compact
-    const coreGeometry = new THREE.SphereGeometry(0.7, 64, 64) // Reduced from 1.0
+    // Core Sphere - Adjusted to be dark gray/black with subtle emissive
+    const coreGeometry = new THREE.SphereGeometry(0.7, 64, 64)
     const coreMaterial = new THREE.MeshPhongMaterial({
-      color: 0x0a0a1a,
+      color: 0x1a1a1a, // Dark gray/almost black
       transparent: true,
       opacity: 0.9,
-      emissive: 0x1a237e,
+      emissive: 0x050505, // Very subtle dark gray emissive
       emissiveIntensity: 0.3,
       shininess: 100,
     })
     const coreSphere = new THREE.Mesh(coreGeometry, coreMaterial)
     globeGroup.add(coreSphere)
 
-    // Inner Glow Layer - Adjusted for compactness
-    const innerGlowGeometry = new THREE.SphereGeometry(0.75, 32, 32) // Reduced from 1.05
+    // Inner Glow Layer - Changed to white and adjusted opacity
+    const innerGlowGeometry = new THREE.SphereGeometry(0.75, 32, 32)
     const innerGlowMaterial = new THREE.MeshBasicMaterial({
-      color: 0x4fc3f7,
+      color: 0xffffff, // White
       transparent: true,
-      opacity: 0.15,
+      opacity: 0.1, // Slightly reduced opacity
       side: THREE.BackSide,
     })
     const innerGlowSphere = new THREE.Mesh(innerGlowGeometry, innerGlowMaterial)
     globeGroup.add(innerGlowSphere)
 
-    // Outer Glow Layer - Adjusted for compactness
-    const outerGlowGeometry = new THREE.SphereGeometry(0.85, 32, 32) // Reduced from 1.2
+    // Outer Glow Layer - Changed to white and adjusted opacity
+    const outerGlowGeometry = new THREE.SphereGeometry(0.85, 32, 32)
     const outerGlowMaterial = new THREE.MeshBasicMaterial({
-      color: 0x00e5ff,
+      color: 0xffffff, // White
       transparent: true,
-      opacity: 0.08,
+      opacity: 0.05, // Slightly reduced opacity
       side: THREE.BackSide,
     })
     const outerGlowSphere = new THREE.Mesh(outerGlowGeometry, outerGlowMaterial)
     globeGroup.add(outerGlowSphere)
 
-    // Wireframe Globe Layers - Adjusted for compactness
+    // Wireframe Globe Layers - Confirmed white
     const wireframeGroup = new THREE.Group()
     wireframeGroupRef.current = wireframeGroup
-    globeGroup.add(wireframeGroup) // Attach wireframe to globeGroup for unified rotation
+    globeGroup.add(wireframeGroup)
 
-    const primaryWireframeGeometry = new THREE.SphereGeometry(0.9, 24, 12) // Reduced from 1.3
+    const primaryWireframeGeometry = new THREE.SphereGeometry(0.9, 24, 12)
     const primaryWireframeMaterial = new THREE.MeshBasicMaterial({
-      color: 0xffffff, // Changed to white
+      color: 0xffffff, // White
       wireframe: true,
       transparent: true,
       opacity: 0.4,
@@ -103,23 +97,23 @@ export function TechGlobe() {
     const primaryWireframe = new THREE.Mesh(primaryWireframeGeometry, primaryWireframeMaterial)
     wireframeGroup.add(primaryWireframe)
 
-    const secondaryWireframeGeometry = new THREE.SphereGeometry(0.95, 16, 8) // Reduced from 1.4
+    const secondaryWireframeGeometry = new THREE.SphereGeometry(0.95, 16, 8)
     const secondaryWireframeMaterial = new THREE.MeshBasicMaterial({
       wireframe: true,
-      color: 0xffffff, // Changed to white
+      color: 0xffffff, // White
       transparent: true,
       opacity: 0.2,
     })
     const secondaryWireframe = new THREE.Mesh(secondaryWireframeGeometry, secondaryWireframeMaterial)
     wireframeGroup.add(secondaryWireframe)
 
-    // Enhanced Particle Field - Adjusted for compactness
-    const particleCount = 1000 // Reduced particle count
+    // Enhanced Particle Field - Changed to white and adjusted size/opacity
+    const particleCount = 1000
     const positions = new Float32Array(particleCount * 3)
     const colors = new Float32Array(particleCount * 3)
 
     for (let i = 0; i < particleCount; i++) {
-      const radius = 1.0 + Math.random() * 0.5 // Reduced from 1.5 + Math.random() * 1.0
+      const radius = 1.0 + Math.random() * 0.5
       const theta = Math.random() * Math.PI * 2
       const phi = Math.random() * Math.PI
 
@@ -127,30 +121,20 @@ export function TechGlobe() {
       positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta)
       positions[i * 3 + 2] = radius * Math.cos(phi)
 
-      const colorChoice = Math.random()
-      if (colorChoice < 0.33) {
-        colors[i * 3] = 0 // R
-        colors[i * 3 + 1] = 1 // G (cyan)
-        colors[i * 3 + 2] = 1 // B
-      } else if (colorChoice < 0.66) {
-        colors[i * 3] = 1 // R (magenta)
-        colors[i * 3 + 1] = 0 // G
-        colors[i * 3 + 2] = 1 // B
-      } else {
-        colors[i * 3] = 0 // R (blue)
-        colors[i * 3 + 1] = 0.5 // G
-        colors[i * 3 + 2] = 1 // B
-      }
+      // Set all particles to white
+      colors[i * 3] = 1 // R
+      colors[i * 3 + 1] = 1 // G
+      colors[i * 3 + 2] = 1 // B
     }
 
     const particlesGeometry = new THREE.BufferGeometry()
     particlesGeometry.setAttribute("position", new THREE.BufferAttribute(positions, 3))
     particlesGeometry.setAttribute("color", new THREE.BufferAttribute(colors, 3))
     const particlesMaterial = new THREE.PointsMaterial({
-      size: 0.02, // Smaller particles
+      size: 0.015, // Smaller particles
       vertexColors: true,
       transparent: true,
-      opacity: 0.8,
+      opacity: 0.6, // Slightly reduced opacity
       sizeAttenuation: true,
       blending: THREE.AdditiveBlending,
     })
@@ -158,55 +142,54 @@ export function TechGlobe() {
     particlesRef.current = particles
     scene.add(particles)
 
-    // Rotating Tech Rings - Adjusted for compactness
+    // Rotating Tech Rings - Changed to white and adjusted opacity
     const ringsGroup = new THREE.Group()
     ringsGroupRef.current = ringsGroup
     scene.add(ringsGroup)
 
-    const ringMaterial = (color: number, opacity: number) =>
+    const ringMaterial = (opacity: number) =>
       new THREE.MeshBasicMaterial({
-        color: color,
+        color: 0xffffff, // White
         transparent: true,
         opacity: opacity,
-        emissive: color,
-        emissiveIntensity: 0.2,
+        emissive: 0xffffff, // White emissive
+        emissiveIntensity: 0.1, // Reduced emissive intensity
       })
 
-    const ring1 = new THREE.Mesh(new THREE.TorusGeometry(1.0, 0.015, 8, 100), ringMaterial(0xffffff, 0.6)) // Changed to white
+    const ring1 = new THREE.Mesh(new THREE.TorusGeometry(1.0, 0.015, 8, 100), ringMaterial(0.4)) // Reduced opacity
     ring1.rotation.x = Math.PI / 2
     ringsGroup.add(ring1)
 
-    const ring2 = new THREE.Mesh(new THREE.TorusGeometry(1.1, 0.015, 8, 100), ringMaterial(0xffffff, 0.5)) // Changed to white
+    const ring2 = new THREE.Mesh(new THREE.TorusGeometry(1.1, 0.015, 8, 100), ringMaterial(0.3)) // Reduced opacity
     ring2.rotation.y = Math.PI / 2
     ringsGroup.add(ring2)
 
-    const ring3 = new THREE.Mesh(new THREE.TorusGeometry(1.2, 0.015, 8, 100), ringMaterial(0xffffff, 0.4)) // Changed to white
+    const ring3 = new THREE.Mesh(new THREE.TorusGeometry(1.2, 0.015, 8, 100), ringMaterial(0.2)) // Reduced opacity
     ring3.rotation.set(Math.PI / 4, Math.PI / 4, 0)
     ringsGroup.add(ring3)
 
-    const ring4 = new THREE.Mesh(new THREE.TorusGeometry(1.3, 0.01, 8, 100), ringMaterial(0xffffff, 0.3)) // Changed to white
+    const ring4 = new THREE.Mesh(new THREE.TorusGeometry(1.3, 0.01, 8, 100), ringMaterial(0.1)) // Reduced opacity
     ring4.rotation.set(-Math.PI / 4, -Math.PI / 4, Math.PI / 2)
     ringsGroup.add(ring4)
 
-    // Data Streams - Curved Lines - Adjusted for compactness
+    // Data Streams - Curved Lines - Changed to white and adjusted opacity
     for (let i = 0; i < 6; i++) {
-      // Reduced number of streams
-      const streamGeometry = new THREE.TorusGeometry(1.4 + i * 0.03, 0.003, 4, 50) // Reduced from 2.2 + i * 0.05
+      const streamGeometry = new THREE.TorusGeometry(1.4 + i * 0.03, 0.003, 4, 50)
       const streamMaterial = new THREE.MeshBasicMaterial({
-        color: 0xffffff, // Changed to white
+        color: 0xffffff, // White
         transparent: true,
-        opacity: 0.6,
+        opacity: 0.4, // Reduced opacity
       })
       const stream = new THREE.Mesh(streamGeometry, streamMaterial)
-      stream.rotation.y = (i * Math.PI) / 3 // Adjusted rotation for fewer streams
-      globeGroup.add(stream) // Attach streams to globeGroup for unified rotation
+      stream.rotation.y = (i * Math.PI) / 3
+      globeGroup.add(stream)
     }
 
     // Animation loop
     const animate = () => {
       requestAnimationFrame(animate)
 
-      const time = performance.now() * 0.001 // Convert to seconds
+      const time = performance.now() * 0.001
 
       if (globeGroupRef.current) {
         globeGroupRef.current.rotation.y += 0.005
@@ -247,25 +230,28 @@ export function TechGlobe() {
     // Cleanup
     return () => {
       window.removeEventListener("resize", handleResize)
-      if (mountRef.current && renderer.domElement) {
-        mountRef.current.removeChild(renderer.domElement)
+      if (mountRef.current && rendererRef.current) {
+        mountRef.current.removeChild(rendererRef.current.domElement)
       }
-      renderer.dispose()
-      // Dispose geometries and materials to prevent memory leaks
-      scene.traverse((object) => {
-        if (object instanceof THREE.Mesh || object instanceof THREE.Points) {
-          if (object.geometry) {
-            object.geometry.dispose()
-          }
-          if (object.material) {
-            if (Array.isArray(object.material)) {
-              object.material.forEach((material) => material.dispose())
-            } else {
-              object.material.dispose()
+      if (rendererRef.current) {
+        rendererRef.current.dispose()
+      }
+      if (sceneRef.current) {
+        sceneRef.current.traverse((object) => {
+          if (object instanceof THREE.Mesh || object instanceof THREE.Points) {
+            if (object.geometry) {
+              object.geometry.dispose()
+            }
+            if (object.material) {
+              if (Array.isArray(object.material)) {
+                object.material.forEach((mat) => mat.dispose())
+              } else {
+                object.material.dispose()
+              }
             }
           }
-        }
-      })
+        })
+      }
     }
   }, [])
 
@@ -273,7 +259,7 @@ export function TechGlobe() {
     <div ref={mountRef} className="w-full h-full relative flex items-center justify-center">
       {/* Logo and Vibration Effect inside the globe container */}
       <div
-        className="absolute w-24 h-24 flex items-center justify-center top-1/2 -translate-y-1/2 right-0 mr-20" /* Adjusted: mr-20 */
+        className="absolute w-24 h-24 flex items-center justify-center top-1/2 -translate-y-1/2 right-0 mr-20"
         style={{
           animation: "vibrateLogo 0.08s linear infinite",
         }}
