@@ -296,7 +296,7 @@ const translations = {
       "Kepercayaan",
       "Fokus jangka panjang",
       "Komitmen",
-      "adalah kata-kata yang masuk aká para kami",
+      "adalah kata-kata que masuk aká para kami",
       "dukung proyek kami",
       "undang teman dan keluarga",
       "dan mari",
@@ -1081,10 +1081,12 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: "100%", opacity: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed bottom-20 left-0 right-0 z-40"
+            className="fixed bottom-20 z-40 !w-screen" // Changed from left-0 right-0 to !w-screen
             style={{ perspective: "1000px" }}
           >
-            <div className="bg-gradient-to-br from-gray-100 to-white backdrop-blur-xl border border-gray-200 rounded-2xl">
+            <div className="bg-gradient-to-br from-gray-100 to-white backdrop-blur-xl border border-gray-200 rounded-2xl w-full">
+              {" "}
+              {/* Added w-full here */}
               {/* Menu Handle */}
               <div className="flex justify-center pt-3 pb-1">
                 <div className="w-8 h-0.5 bg-gray-500 rounded-full" />
