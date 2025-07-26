@@ -116,7 +116,7 @@ const SOFT_STAKING_ABI = [
   {
     inputs: [{ internalType: "address", name: "_user", type: "address" }],
     name: "calculateRewardsPerSecond",
-    outputs: [{ internalType: "uint256", name: "", type: "function" }],
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
     stateMutability: "view",
     type: "function",
   },
@@ -453,7 +453,7 @@ const pageTranslations = {
       amountToBurn: "Jumlah PSC yang akan dibakar",
       furnaceInfo: "Informasi Tungku",
       deflation:
-        "Deflasi: Setiap token yang dibakar dikirim ke dompet mati (0x000...dEaD) dan dihapus secara permanen dari peredaran.",
+        "Deflasi: Setiap token yang dibakar dikirim ke dompet mati (0x000...dEaD) e dihapus secara permanen dari peredaran.",
     },
     staking: {
       claimFailed: "Gagal mengklaim hadiah.",
