@@ -1092,9 +1092,9 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                 <div className="w-8 h-0.5 bg-gray-500 rounded-full" />
               </div>
               {/* Menu Content - Increased padding for larger window */}
-              <div className="py-12">
+              <div className="py-24">
                 {" "}
-                {/* Changed from py-28 to py-12 */}
+                {/* Changed from py-12 to py-24 to double the size */}
                 {/* Menu Items Grid */}
                 <div className="relative z-10 flex overflow-x-auto whitespace-nowrap justify-start gap-3 mb-3 no-scrollbar">
                   {navigationItems.map((item, index) => (
