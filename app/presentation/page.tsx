@@ -562,10 +562,10 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
     window.open(currentPartner.url, "_blank")
   }
 
-  // Effect to handle navigation after menu closes
-  useEffect(() => {
+  // Function to handle navigation after menu animation completes
+  const handleMenuAnimationComplete = () => {
     if (!isMenuOpen && pendingNavigation) {
-      console.log("Menu closed, initiating pending navigation:", pendingNavigation)
+      console.log("Menu exit animation complete, initiating pending navigation:", pendingNavigation)
       if (pendingNavigation.action) {
         pendingNavigation.action()
       } else if (pendingNavigation.href) {
@@ -573,7 +573,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
       }
       setPendingNavigation(null) // Clear pending navigation
     }
-  }, [isMenuOpen, pendingNavigation, router])
+  }
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden flex items-center justify-center">
@@ -1096,6 +1096,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
             className="fixed bottom-20 z-40 !w-screen"
             style={{ perspective: "1000px" }}
+            onAnimationComplete={handleMenuAnimationComplete} // Add this prop
           >
             <div className="bg-gradient-to-br from-black/90 to-gray-950/90 backdrop-blur-xl border border-white/10 rounded-2xl w-full">
               {/* Menu Handle */}
