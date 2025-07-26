@@ -296,7 +296,7 @@ const translations = {
       "Kepercayaan",
       "Fokus jangka panjang",
       "Komitmen",
-      "adalah kata-kata yang masuk akal bagi kami",
+      "adalah kata-kata yang masuk aká para kami",
       "dukung proyek kami",
       "undang teman dan keluarga",
       "dan mari",
@@ -1090,9 +1090,9 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                 <div className="w-8 h-0.5 bg-gray-500 rounded-full" />
               </div>
               {/* Menu Content - Increased padding for larger window */}
-              <div className="py-20 px-4">
+              <div className="py-20">
                 {" "}
-                {/* Increased vertical padding to py-20 */}
+                {/* Removed px-4 to maximize horizontal space */}
                 {/* Menu Items Grid */}
                 <div className="relative z-10 flex overflow-x-auto whitespace-nowrap justify-start gap-3 mb-3 no-scrollbar">
                   {navigationItems.map((item, index) => (
