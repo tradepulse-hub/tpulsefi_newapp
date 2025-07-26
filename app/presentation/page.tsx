@@ -54,14 +54,14 @@ const PARTNERSHIPS = [
   {
     id: "holdstation",
     name: "HoldStation",
-    image: "/images/holdstation-logo.jpg",
+    image: "/images/holdstation-logo.png",
     gradient: "from-blue-500 to-purple-600",
     url: "https://world.org/mini-app?app_id=app_0d4b759921490adc1f2bd569fda9b53a&path=/ref/f5S3wA",
   },
   {
     id: "axo",
     name: "AXO",
-    image: "/images/axo.jpg",
+    image: "/images/axo.png",
     gradient: "from-pink-500 to-rose-600",
     url: "https://worldcoin.org/mini-app?app_id=app_8aeb55d57b7be834fb8d67e2f803d258&app_mode=mini-app",
   },
@@ -75,7 +75,7 @@ const PARTNERSHIPS = [
   {
     id: "humantap",
     name: "Human Tap",
-    image: "/images/human-tap.jpg",
+    image: "/images/human-tap.png",
     gradient: "from-green-500 to-emerald-600",
     url: "https://worldcoin.org/mini-app?app_id=app_25cf6ee1d9660721e651d43cf126953a&app_mode=mini-app",
   },
@@ -1099,9 +1099,9 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                 <div className="w-8 h-0.5 bg-gray-500 rounded-full" />
               </div>
               {/* Menu Content */}
-              <div className="p-4 pb-4">
+              <div className="p-3 pb-3">
                 {/* Menu Items Grid */}
-                <div className="relative z-10 grid grid-cols-2 gap-3 mb-4">
+                <div className="relative z-10 flex flex-wrap justify-center gap-2 mb-3">
                   {navigationItems.map((item, index) => (
                     <motion.button
                       key={item.id}
@@ -1111,17 +1111,17 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                       onClick={() => {
                         if (item.action) {
                           item.action()
-                          setIsMenuOpen(false)
+                          setIsMenuOpen(false) // Close menu after action
                         } else if (item.href) {
                           router.push(item.href)
                           setIsMenuOpen(false)
                         }
                       }}
-                      className="group p-2 bg-gray-50/50 backdrop-blur-sm border border-gray-200 rounded-lg hover:bg-gray-100/70 transition-all duration-300"
+                      className="group px-3 py-2 bg-gray-50/50 backdrop-blur-sm border border-gray-200 rounded-lg hover:bg-gray-100/70 transition-all duration-300 flex-shrink-0"
                     >
                       <div className="flex flex-col items-center space-y-1">
-                        <div className="w-6 h-6 bg-gradient-to-r from-gray-200 to-gray-300 rounded-full flex items-center justify-center group-hover:from-gray-300 group-hover:to-gray-400 transition-all duration-300">
-                          <item.icon className="w-3 h-3 text-gray-600 group-hover:text-black transition-colors" />
+                        <div className="w-5 h-5 bg-gradient-to-r from-gray-200 to-gray-300 rounded-full flex items-center justify-center group-hover:from-gray-300 group-hover:to-gray-400 transition-all duration-300">
+                          <item.icon className="w-2.5 h-2.5 text-gray-600 group-hover:text-black transition-colors" />
                         </div>
                         <span className="text-gray-800 group-hover:text-black font-medium text-xs tracking-wide">
                           {t.navigation?.[item.labelKey] || item.labelKey}
