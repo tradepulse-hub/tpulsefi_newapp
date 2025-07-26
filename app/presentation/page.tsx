@@ -333,6 +333,9 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
   const router = useRouter()
   const isMobile = useMobile()
 
+  // Adiciona um novo estado para controlar a navegação pendente
+  const [pendingNavigation, setPendingNavigation] = useState<{ href?: string; action?: () => void } | null>(null)
+
   // Adiciona um novo estado para controlar as palavras que aparecem:
   const [currentWordIndex, setCurrentWordIndex] = useState(0)
   const [showWord, setShowWord] = useState(true)
@@ -609,11 +612,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                   {/* Reduced padding and space-x */}
                   <div className="absolute inset-0 bg-gradient-to-r from-green-400/10 to-emerald-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   <Eye className="w-3 h-3 text-green-300 relative z-10" /> {/* Reduced icon size */}
-                  <span className="text-xs font-medium relative z-10">
-                    {" "}
-                    {/* Reduced text size */}
-                    {t.common?.wallet || "Wallet"}
-                  </span>
+                  <span className="text-xs font-medium relative z-10"> {t.common?.wallet || "Wallet"}</span>
                 </div>
               </button>
             )}
@@ -627,7 +626,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                   <Wallet className="w-4 h-4 text-cyan-300 relative z-10" /> {/* Reduced icon size */}
                   <span className="text-sm font-medium relative z-10">
                     {" "}
-                    {/* Reduced text size */}
                     {isLoading ? t.common?.loading || "Loading..." : t.presentation?.connectWallet || "Connect Wallet"}
                   </span>
                 </div>
@@ -645,7 +643,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                 <Globe className="w-3 h-3 text-purple-300 relative z-10" /> {/* Reduced icon size */}
                 <span className="text-xs font-medium relative z-10">
                   {" "}
-                  {/* Reduced text size */}
                   {currentLanguage?.flag} {currentLanguage?.code.toUpperCase()}
                 </span>
               </div>
@@ -1093,6 +1090,17 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
             className="fixed bottom-20 z-40 !w-screen"
             style={{ perspective: "1000px" }}
+            onAnimationComplete={() => {
+              if (!isMenuOpen && pendingNavigation) {
+                // Only navigate if menu is closing and there's a pending action
+                if (pendingNavigation.action) {
+                  pendingNavigation.action()
+                } else if (pendingNavigation.href) {
+                  router.push(pendingNavigation.href)
+                }
+                setPendingNavigation(null) // Clear pending navigation
+              }
+            }}
           >
             <div className="bg-gradient-to-br from-black/90 to-gray-950/90 backdrop-blur-xl border border-white/10 rounded-2xl w-full">
               {/* Menu Handle */}
@@ -1152,13 +1160,8 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                         rotateY: -10,
                       }}
                       onClick={() => {
-                        if (item.action) {
-                          item.action()
-                          setIsMenuOpen(false) // Close menu after action
-                        } else if (item.href) {
-                          router.push(item.href)
-                          setIsMenuOpen(false)
-                        }
+                        setIsMenuOpen(false) // Close menu immediately
+                        setPendingNavigation({ href: item.href, action: item.action }) // Store navigation
                       }}
                       className="group pointer-events-auto relative flex-shrink-0 w-16 h-16" // Fixed width and height
                       style={{
@@ -1346,12 +1349,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             <div
               className="absolute inset-0 bg-white rounded-full shadow-2xl"
               style={{
-                boxShadow: `
-        0 0 30px rgba(255,255,255,1),
-        0 0 60px rgba(229,231,235,0.8),
-        0 0 90px rgba(209,213,219,0.6),
-        0 0 120px rgba(156,163,175,0.4)
-`,
+                boxShadow: `0 0 30px rgba(255,255,255,1),0 0 60px rgba(229,231,235,0.8),0 0 90px rgba(209,213,219,0.6),0 0 120px rgba(156,163,175,0.4)`,
                 animation: "pulse 0.5s ease-in-out infinite",
               }}
             />
