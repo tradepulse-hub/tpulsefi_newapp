@@ -1,16 +1,16 @@
 "use client"
 
 import Image from "next/image"
-import { ArrowLeft, Info, Hammer, Flame } from "lucide-react" // Re-adicionado Info, Flame
+import { ArrowLeft, Info, Hammer, Flame } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState, useRef, useCallback } from "react"
-import { Button } from "@/components/ui/button" // Re-adicionado Button
+import { Button } from "@/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
 import { MiniKit } from "@worldcoin/minikit-js"
 import { ethers } from "ethers"
 import { useMiniKit } from "../../hooks/use-minikit"
-import { TechGlobe } from "../../components/tech-globe" // Re-adicionado TechGlobe
-import { BackgroundEffect } from "../../components/background-effect" // Re-adicionado BackgroundEffect
+import { TechGlobe } from "../../components/tech-globe"
+import { BackgroundEffect } from "../../components/background-effect"
 
 // Endereço da carteira morta (burn address)
 const DEAD_WALLET = "0x000000000000000000000000000000000000dEaD"
@@ -288,6 +288,8 @@ const pageTranslations = {
     pulsecode: {
       title: "PulseCode: The Project Unifier",
       subtitle: "Innovation and Growth in the Web3 Ecosystem",
+      aboutTitle: "PulseCode", // New
+      aboutSubtitle: "The project that unites projects", // New
       description:
         "PulseCode is an initiative dedicated to driving the development of innovative projects within the WorldApp. Through a unique funding model, we ensure the sustainability and continuous growth of our ecosystem.",
       ourMissionTitle: "Our Mission",
@@ -334,6 +336,8 @@ const pageTranslations = {
     pulsecode: {
       title: "PulseCode: O Unificador de Projetos",
       subtitle: "Inovação e Crescimento no Ecossistema Web3",
+      aboutTitle: "PulseCode", // New
+      aboutSubtitle: "O projeto que une projetos", // New
       description:
         "A PulseCode é uma iniciativa dedicada a impulsionar o desenvolvimento de projetos inovadores dentro da WorldApp. Através de um modelo de financiamento único, garantimos a sustentabilidade e o crescimento contínuo do nosso ecossistema.",
       ourMissionTitle: "A Nossa Missão",
@@ -380,6 +384,8 @@ const pageTranslations = {
     pulsecode: {
       title: "PulseCode: El Unificador de Proyectos",
       subtitle: "Innovación y Crecimiento en el Ecosistema Web3",
+      aboutTitle: "PulseCode", // New
+      aboutSubtitle: "El proyecto que une proyectos", // New
       description:
         "PulseCode es una iniciativa dedicada a impulsar el desarrollo de proyectos innovadores dentro de WorldApp. A través de un modelo de financiación único, aseguramos la sostenibilidad y el crecimiento continuo de nuestro ecosistema.",
       ourMissionTitle: "Nuestra Misión",
@@ -426,6 +432,8 @@ const pageTranslations = {
     pulsecode: {
       title: "PulseCode: Penyatuan Proyek",
       subtitle: "Inovasi dan Pertumbuhan dalam Ekosistem Web3",
+      aboutTitle: "PulseCode", // New
+      aboutSubtitle: "The project that unites projects", // New
       description:
         "PulseCode adalah inisiatif yang didedikasikan untuk mendorong pengembangan proyek-proyek inovatif di dalam WorldApp. Melalui model pendanaan yang unik, kami memastikan keberlanjutan dan pertumbuhan ekosistem kami yang berkelanjutan.",
       ourMissionTitle: "Misi Kami",
@@ -495,6 +503,11 @@ export default function PulseCodePage() {
   // Translations
   const [translations, setTranslations] = useState(pageTranslations[currentLang])
 
+  // Typewriter effect states
+  const [displayedAboutTitle, setDisplayedAboutTitle] = useState("")
+  const [displayedAboutSubtitle, setDisplayedAboutSubtitle] = useState("")
+  const [aboutTitleAnimationComplete, setAboutTitleAnimationComplete] = useState(false)
+
   useEffect(() => {
     const savedLanguage = localStorage.getItem("preferred-language") as SupportedLanguage
     const initialLang = savedLanguage && SUPPORTED_LANGUAGES.includes(savedLanguage) ? savedLanguage : "en"
@@ -511,6 +524,58 @@ export default function PulseCodePage() {
 
   // State for active footer tab
   const [activeFooterTab, setActiveFooterTab] = useState<"about" | "projects" | "burn">("about")
+
+  // Typewriter effect logic
+  useEffect(() => {
+    let titleTimeout: NodeJS.Timeout | undefined
+    let subtitleTimeout: NodeJS.Timeout | undefined
+
+    const startTypewriter = () => {
+      const fullTitle = t.pulsecode?.aboutTitle || "PulseCode"
+      const fullSubtitle = t.pulsecode?.aboutSubtitle || "O projeto que une projetos"
+      let titleIndex = 0
+      let subtitleIndex = 0
+
+      setDisplayedAboutTitle("")
+      setDisplayedAboutSubtitle("")
+      setAboutTitleAnimationComplete(false)
+
+      const typeTitle = () => {
+        if (titleIndex < fullTitle.length) {
+          setDisplayedAboutTitle((prev) => prev + fullTitle.charAt(titleIndex))
+          titleIndex++
+          titleTimeout = setTimeout(typeTitle, 100) // Velocidade da digitação do título
+        } else {
+          setAboutTitleAnimationComplete(true)
+          subtitleTimeout = setTimeout(typeSubtitle, 500) // Atraso antes do subtítulo começar
+        }
+      }
+
+      const typeSubtitle = () => {
+        if (subtitleIndex < fullSubtitle.length) {
+          setDisplayedAboutSubtitle((prev) => prev + fullSubtitle.charAt(subtitleIndex))
+          subtitleIndex++
+          subtitleTimeout = setTimeout(typeSubtitle, 50) // Velocidade da digitação do subtítulo
+        }
+      }
+
+      typeTitle() // Inicia a digitação do título
+    }
+
+    if (activeFooterTab === "about") {
+      startTypewriter()
+    } else {
+      // Reset text when not on "about" tab
+      setDisplayedAboutTitle("")
+      setDisplayedAboutSubtitle("")
+      setAboutTitleAnimationComplete(false)
+    }
+
+    return () => {
+      clearTimeout(titleTimeout)
+      clearTimeout(subtitleTimeout)
+    }
+  }, [activeFooterTab, t]) // Depende da aba ativa e das traduções
 
   useEffect(() => {
     if (doorOpen) {
@@ -824,7 +889,26 @@ export default function PulseCodePage() {
 
     switch (activeFooterTab) {
       case "about":
-        return <></>
+        return (
+          <div className="flex flex-col items-center justify-center text-center h-full">
+            <h1 className="text-5xl md:text-7xl font-extrabold mb-4 tracking-tight">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-cyan-200 to-blue-200">
+                {displayedAboutTitle}
+              </span>
+            </h1>
+            <p className="text-lg md:text-xl text-gray-300 leading-relaxed max-w-2xl">
+              {displayedAboutSubtitle}
+              {aboutTitleAnimationComplete && (
+                <motion.span
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5, repeat: Number.POSITIVE_INFINITY, repeatType: "reverse" }}
+                  className="inline-block w-2 h-6 bg-white ml-1 align-middle" // Blinking cursor
+                />
+              )}
+            </p>
+          </div>
+        )
       case "projects":
         return (
           <div className="flex flex-col items-center justify-center text-center">
@@ -1461,8 +1545,6 @@ export default function PulseCodePage() {
 
       {/* 3D Globe Container (z-index: 1) */}
       <div className="absolute inset-0 z-10 flex items-center justify-center">
-        {" "}
-        {/* Adjusted: justify-start and pl-32 */}
         <div className="relative w-[250px] h-[250px]">{activeFooterTab === "about" && <TechGlobe />}</div>
       </div>
 
