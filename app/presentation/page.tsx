@@ -333,9 +333,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
   const router = useRouter()
   const isMobile = useMobile()
 
-  // Adiciona um novo estado para controlar a navegação pendente
-  const [pendingNavigation, setPendingNavigation] = useState<{ href?: string; action?: () => void } | null>(null)
-
   // Adiciona um novo estado para controlar as palavras que aparecem:
   const [currentWordIndex, setCurrentWordIndex] = useState(0)
   const [showWord, setShowWord] = useState(true)
@@ -1090,17 +1087,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
             className="fixed bottom-20 z-40 !w-screen"
             style={{ perspective: "1000px" }}
-            onAnimationComplete={() => {
-              if (!isMenuOpen && pendingNavigation) {
-                // Only navigate if menu is closing and there's a pending action
-                if (pendingNavigation.action) {
-                  pendingNavigation.action()
-                } else if (pendingNavigation.href) {
-                  router.push(pendingNavigation.href)
-                }
-                setPendingNavigation(null) // Clear pending navigation
-              }
-            }}
+            // Removed onAnimationComplete as we're using setTimeout now
           >
             <div className="bg-gradient-to-br from-black/90 to-gray-950/90 backdrop-blur-xl border border-white/10 rounded-2xl w-full">
               {/* Menu Handle */}
@@ -1161,7 +1148,17 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                       }}
                       onClick={() => {
                         setIsMenuOpen(false) // Close menu immediately
-                        setPendingNavigation({ href: item.href, action: item.action }) // Store navigation
+                        const delay = 300 // Delay navigation to allow menu to close visually
+
+                        if (item.action) {
+                          setTimeout(() => {
+                            item.action()
+                          }, delay)
+                        } else if (item.href) {
+                          setTimeout(() => {
+                            router.push(item.href)
+                          }, delay)
+                        }
                       }}
                       className="group pointer-events-auto relative flex-shrink-0 w-16 h-16" // Fixed width and height
                       style={{
