@@ -1020,9 +1020,9 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             <div className="absolute bottom-28 left-1/2 transform -translate-x-1/2">
               {" "}
               {/* Adjusted bottom position */}
-              <div className="relative flex flex-wrap justify-center gap-6 max-w-2xl">
+              <div className="relative flex justify-center gap-6">
                 {" "}
-                {/* Increased gap, increased max-w */}
+                {/* Removed flex-wrap to ensure single line */}
                 {navigationItems.slice(0, 4).map((item, index) => (
                   <motion.button
                     key={item.id}
@@ -1462,7 +1462,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
           0% {
             transform: rotate(0deg);
           }
-          50% {
+            50% {
             transform: rotate(-0.2deg);
           }
           100% {
