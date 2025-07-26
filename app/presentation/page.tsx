@@ -325,7 +325,7 @@ interface PresentationProps {
 
 const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy }) => {
   const [displayText, setDisplayText] = useState("")
-  const [isDeleting, setIsDeleting] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(isDeleting)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [showMiniWallet, setShowMiniWallet] = useState(false)
   const [showLanguageMenu, setShowLanguageMenu] = useState(false)
@@ -506,11 +506,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
       icon: EmptyIcon,
     },
     {
-      id: "empty-left-2",
-      labelKey: "empty", // Usar uma chave vazia para o label
-      icon: EmptyIcon,
-    },
-    {
       id: "pulsecode",
       labelKey: "codepulse",
       icon: Code,
@@ -563,11 +558,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
       labelKey: "empty", // Usar uma chave vazia para o label
       icon: EmptyIcon,
     },
-    {
-      id: "empty-right-2",
-      labelKey: "empty", // Usar uma chave vazia para o label
-      icon: EmptyIcon,
-    },
   ]
 
   const handleLanguageChange = (newLanguage: keyof typeof translations) => {
@@ -606,11 +596,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                 {/* Reduced padding and space-x */}
                 <div className="absolute inset-0 bg-gradient-to-r from-orange-400/10 to-red-400/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <Calendar className="w-3 h-3 text-orange-300 relative z-10" /> {/* Reduced icon size */}
-                <span className="text-xs font-medium relative z-10">
-                  {" "}
-                  {/* Reduced text size */}
-                  {t.events?.eventButton || "Evento"}
-                </span>
+                <span className="text-xs font-medium relative z-10"> {t.events?.eventButton || "Evento"}</span>
                 {/* Live Indicator */}
                 <div className="flex items-center space-x-0.5">
                   {" "}
