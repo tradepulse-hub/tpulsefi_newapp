@@ -1548,7 +1548,7 @@ export default function PulseCodePage() {
             transition={{ duration: 0.5 }}
             className="absolute top-36 left-12 text-left z-30 w-full px-4"
           >
-            <h1 className="text-5xl md:text-7xl font-extrabold mb-4 tracking-tight ml-8">
+            <h1 className="text-5xl md:text-7xl font-extrabold mb-4 tracking-tight ml-4">
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-cyan-200 to-blue-200">
                 {displayedAboutTitle}
               </span>
