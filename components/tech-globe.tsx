@@ -91,11 +91,11 @@ export function TechGlobe() {
     // Wireframe Globe Layers - Adjusted for compactness
     const wireframeGroup = new THREE.Group()
     wireframeGroupRef.current = wireframeGroup
-    scene.add(wireframeGroup)
+    globeGroup.add(wireframeGroup) // Attach wireframe to globeGroup for unified rotation
 
     const primaryWireframeGeometry = new THREE.SphereGeometry(0.9, 24, 12) // Reduced from 1.3
     const primaryWireframeMaterial = new THREE.MeshBasicMaterial({
-      color: 0x00ffff,
+      color: 0xffffff,
       wireframe: true,
       transparent: true,
       opacity: 0.4,
@@ -105,8 +105,8 @@ export function TechGlobe() {
 
     const secondaryWireframeGeometry = new THREE.SphereGeometry(0.95, 16, 8) // Reduced from 1.4
     const secondaryWireframeMaterial = new THREE.MeshBasicMaterial({
-      color: 0xff6b6b,
       wireframe: true,
+      color: 0xffffff,
       transparent: true,
       opacity: 0.2,
     })
@@ -194,12 +194,13 @@ export function TechGlobe() {
       const streamGeometry = new THREE.TorusGeometry(1.4 + i * 0.03, 0.003, 4, 50) // Reduced from 2.2 + i * 0.05
       const streamMaterial = new THREE.MeshBasicMaterial({
         color: new THREE.Color(`hsl(${180 + i * 30}, 70%, 60%)`).getHex(),
+        color: 0xffffff, // Changed to white
         transparent: true,
         opacity: 0.6,
       })
       const stream = new THREE.Mesh(streamGeometry, streamMaterial)
       stream.rotation.y = (i * Math.PI) / 3 // Adjusted rotation for fewer streams
-      scene.add(stream)
+      globeGroup.add(stream) // Attach streams to globeGroup for unified rotation
     }
 
     // Animation loop
