@@ -163,7 +163,7 @@ const translations = {
       close: "Fechar",
       back: "Voltar",
       invite: "CONVIDAR",
-      linkCopied: "Link copiado!",
+      linkCopiado: "Link copiado!",
       shareVia: "Partilhar via",
       copyLink: "Copiar Link",
     },
@@ -1150,14 +1150,14 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                           setIsMenuOpen(false)
                         }
                       }}
-                      className="group pointer-events-auto relative flex-shrink-0 w-16 h-16" // Fixed width and height
+                      className="group pointer-events-auto relative flex-shrink-0 w-16 h-16 flex flex-col items-center justify-between" // Fixed width and height
                       style={{
                         transformStyle: "preserve-3d",
                       }}
                     >
                       {/* 3D Icon Container with Glow */}
                       <motion.div
-                        className="w-full h-full bg-gradient-to-br from-gray-800/90 to-gray-900/95 backdrop-blur-xl border border-gray-600/50 rounded-xl flex items-center justify-center shadow-2xl"
+                        className="w-12 h-12 bg-gradient-to-br from-gray-800/90 to-gray-900/95 backdrop-blur-xl border border-gray-600/50 rounded-xl flex items-center justify-center shadow-2xl"
                         style={{
                           transformStyle: "preserve-3d",
                           boxShadow: "0 8px 15px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.1)",
@@ -1218,14 +1218,11 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                       </motion.div>
                       {/* Floating Label */}
                       <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.15 + 0.3 }}
-                        className="absolute -bottom-7 left-1/2 transform -translate-x-1/2 whitespace-nowrap"
+                        className="whitespace-nowrap"
                         style={{ transform: "translateZ(2px)" }}
                       >
                         <div className="px-2.5 py-1 bg-gray-800/80 backdrop-blur-md border border-gray-700/50 rounded-full">
-                          <span className="text-white text-xs font-medium drop-shadow-lg">
+                          <span className="text-white text-[0.65rem] font-medium drop-shadow-lg">
                             {t.navigation[item.labelKey]}
                           </span>
                         </div>
@@ -1332,7 +1329,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             style={{
               animation: "vibrateLogo 0.08s linear infinite",
             }}
-          >
+          />
             <div
               className="absolute inset-0 bg-white rounded-full shadow-2xl"
               style={{
@@ -1353,9 +1350,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                 width={64}
                 height={64}
                 className="w-full h-full object-contain"
-                style={{
-                  animation: "vibrateLogoImage 0.1s linear infinite",
-                }}
               />
             </div>
           </div>
@@ -1440,7 +1434,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
           </button>
         </div>
       </div>
-    </div>
+  </div>
   )
 }
 
