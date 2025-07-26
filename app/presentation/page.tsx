@@ -288,7 +288,7 @@ const translations = {
       liveEvent: "ACARA LANGSUNG",
       eventTitle: "Acara Peningkatan FiStaking",
       eventDescription: "Sampai tanggal 20 bulan depan dua token FiStaking meningkatkan % keuntungan, manfaatkan.",
-      eventDetails: "Semakin banyak TPF yang Anda miliki, semakin banyak yang Anda peroleh.",
+      eventDetails: "Semakin banyak TPF yang Anda milen, semakin banyak yang Anda peroleh.",
       eventWarning: "Jangan lewatkan kesempatan terbatas ini untuk memaksimalkan hadiah FiStaking Anda!",
       eventPeriod: "Periode Acara",
       eventDates: "15 Juli, 2025 - 15 Agustus, 2025",
@@ -480,7 +480,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
   const handleCodePulseMenuClick = () => {
     // This action will navigate to the CodePulse page
     router.push("/codepulse")
-    setIsMenuOpen(false) // Close the menu after navigation
+    setIsMenuOpen(false) // Close the modal after navigation
   }
 
   // Typewriter effect
@@ -560,7 +560,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
     setCurrentLang(newLanguage)
     localStorage.setItem("preferred-language", newLanguage)
     setShowLanguageMenu(false)
-    setIsMenuOpen(false) // Close the menu after language change
+    setIsMenuOpen(false) // Close the modal after language change
   }
 
   const currentLanguage = LANGUAGES.find((lang) => lang.code === currentLang)
@@ -1042,189 +1042,114 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
         </button>
       </div>
 
-      {/* 3D Floating Icons Menu - No Background */}
+      {/* Menu Modal */}
       <AnimatePresence>
         {isMenuOpen && (
-          <div className="fixed inset-0 z-40 pointer-events-none">
-            {/* Menu Items as Floating 3D Icons in a Row */}
-            <div className="absolute bottom-48 left-1/2 transform -translate-x-1/2">
-              <div className="relative flex justify-center gap-8">
-                {" "}
-                {/* Changed to flex for row layout */}
+          <motion.div
+            initial={{ opacity: 0, y: "100%" }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: "100%" }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="fixed bottom-0 left-0 right-0 z-45 flex flex-col" // Changed to bottom-0, left-0, right-0 and flex-col
+            onClick={() => setIsMenuOpen(false)} // Close modal on backdrop click
+          >
+            {/* Backdrop with black and white effect */}
+            <div className="absolute inset-0 bg-gradient-to-br from-black/90 via-gray-900/80 to-black/90 backdrop-blur-sm" />
+            <div
+              className="absolute inset-0 opacity-20"
+              style={{
+                background: `
+                radial-gradient(circle at 20% 80%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                linear-gradient(45deg, rgba(255,255,255,0.05) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.05) 75%, rgba(255,255,255,0.05) 100%),
+                linear-gradient(-45deg, rgba(255,255,255,0.05) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.05) 75%, rgba(255,255,255,0.05) 100%)
+              `,
+                backgroundSize: "40px 40px",
+              }}
+            />
+
+            {/* Modal Content */}
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="relative bg-gray-800/90 backdrop-blur-xl border border-gray-700/50 rounded-t-2xl p-6 w-full mx-auto shadow-2xl mt-auto max-h-[70vh] overflow-y-auto" // Adjusted for bottom-up and max-height
+              onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside modal
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => setIsMenuOpen(false)}
+                className="absolute top-4 right-4 w-8 h-8 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all duration-200 z-10"
+              >
+                <X className="w-4 h-4 text-white" />
+              </button>
+
+              <h2 className="text-xl font-bold text-white text-center mb-6">Navigation</h2>
+
+              {/* Menu Items Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 {navigationItems.map((item, index) => (
                   <motion.button
                     key={item.id}
-                    initial={{
-                      opacity: 0,
-                      y: 100,
-                      scale: 0,
-                      rotateX: 90,
-                      rotateY: 180,
-                    }}
-                    animate={{
-                      opacity: 1,
-                      y: [100, -20, 0], // Jumping effect
-                      scale: [0, 1.2, 1],
-                      rotateX: [90, -10, 0],
-                      rotateY: [180, 10, 0],
-                    }}
-                    exit={{
-                      opacity: 0,
-                      y: 100,
-                      scale: 0,
-                      rotateX: 90,
-                      rotateY: 180,
-                    }}
+                    initial={{ opacity: 0, y: 20, rotateX: 90, scale: 0.8 }}
+                    animate={{ opacity: 1, y: 0, rotateX: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 20, rotateX: 90, scale: 0.8 }}
                     transition={{
-                      delay: index * 0.15,
+                      delay: index * 0.08,
                       type: "spring",
                       damping: 15,
                       stiffness: 200,
-                      duration: 0.8,
                     }}
                     whileHover={{
-                      scale: 1.15,
-                      y: -10,
-                      rotateX: -15,
-                      rotateY: 15,
+                      scale: 1.05,
+                      y: -5,
+                      rotateX: -5,
+                      rotateY: 5,
                       transition: { duration: 0.2 },
                     }}
                     whileTap={{
-                      scale: 0.9,
-                      y: 5,
-                      rotateX: 10,
-                      rotateY: -10,
+                      scale: 0.95,
+                      y: 2,
+                      rotateX: 2,
+                      rotateY: -2,
                     }}
                     onClick={() => {
                       if (item.action) {
-                        // Use action if defined
                         item.action()
                       } else if (item.href) {
                         router.push(item.href)
                       }
-                      setIsMenuOpen(false)
+                      setIsMenuOpen(false) // Close modal after item click
                     }}
-                    className="group pointer-events-auto relative"
-                    style={{
-                      transformStyle: "preserve-3d",
-                    }}
+                    className="group p-3 bg-gray-700/50 backdrop-blur-sm border border-gray-600/50 rounded-lg hover:bg-gray-600/70 transition-all duration-300 flex flex-col items-center justify-center space-y-2"
+                    style={{ transformStyle: "preserve-3d" }}
                   >
-                    {/* 3D Icon Container with Glow */}
                     <motion.div
-                      className="w-20 h-20 bg-gradient-to-br from-gray-800/90 to-gray-900/95 backdrop-blur-xl border border-gray-600/50 rounded-lg flex items-center justify-center shadow-xl"
-                      style={{
-                        transformStyle: "preserve-3d",
-                        boxShadow: "0 8px 16px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.1)", // Reduced shadow
-                      }}
+                      className="w-10 h-10 bg-gradient-to-r from-gray-600 to-gray-700 rounded-full flex items-center justify-center group-hover:from-gray-500 group-hover:to-gray-600 transition-all duration-300 shadow-md"
+                      style={{ transform: "translateZ(10px)" }} // Push icon container forward in 3D space
                       animate={{
-                        rotateZ: [0, 5, -5, 0],
+                        y: [0, -3, 0], // Jumping effect
+                        rotateX: [0, 5, 0],
+                        rotateY: [0, -5, 0],
                       }}
                       transition={{
-                        duration: 4,
+                        duration: 2,
                         repeat: Number.POSITIVE_INFINITY,
                         ease: "easeInOut",
-                        delay: index * 0.5,
+                        delay: index * 0.15,
                       }}
                     >
-                      {/* Pulsing Glow Ring */}
-                      <motion.div
-                        className="absolute inset-0 bg-gradient-to-r from-blue-400/30 to-purple-400/30 rounded-lg blur-sm"
-                        animate={{
-                          scale: [1, 1.3, 1],
-                          opacity: [0.3, 0.7, 0.3],
-                        }}
-                        transition={{
-                          duration: 2,
-                          repeat: Number.POSITIVE_INFINITY,
-                          ease: "easeInOut",
-                          delay: index * 0.3,
-                        }}
-                      />
-
-                      {/* Inner Glow */}
-                      <div
-                        className="absolute inset-1 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                        style={{ transform: "translateZ(2px)" }}
-                      />
-
-                      {/* 3D Icon with Floating Animation */}
-                      <motion.div
-                        style={{
-                          transformStyle: "preserve-3d",
-                          transform: "translateZ(6px)",
-                        }}
-                        animate={{
-                          y: [0, -3, 0],
-                          rotateY: [0, 10, -10, 0],
-                        }}
-                        transition={{
-                          duration: 3,
-                          repeat: Number.POSITIVE_INFINITY,
-                          ease: "easeInOut",
-                          delay: index * 0.4,
-                        }}
-                      >
-                        <item.icon className="w-4 h-4 text-white drop-shadow-2xl" />
-                      </motion.div>
-
-                      {/* Outer Glow Effect */}
-                      <div
-                        className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                        style={{ transform: "translateZ(-10px)" }}
-                      />
+                      <item.icon className="w-5 h-5 text-white group-hover:text-gray-200 transition-colors" />
                     </motion.div>
-
-                    {/* Floating Label */}
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.15 + 0.3 }}
-                      className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 whitespace-nowrap"
-                      style={{ transform: "translateZ(4px)" }}
-                    >
-                      <div className="px-2 py-0.5 bg-gray-800/80 backdrop-blur-md border border-gray-700/50 rounded-full">
-                        <span className="text-white text-[9px] font-medium drop-shadow-lg">
-                          {t.navigation?.[item.labelKey] || item.labelKey}
-                        </span>
-                      </div>
-                    </motion.div>
-
-                    {/* Particle Effect on Hover */}
-                    <motion.div
-                      className="absolute inset-0 pointer-events-none"
-                      whileHover={{
-                        scale: [1, 1.5, 1],
-                        opacity: [0, 1, 0],
-                      }}
-                      transition={{ duration: 0.6 }}
-                    >
-                      {[...Array(6)].map((_, particleIndex) => (
-                        <motion.div
-                          key={particleIndex}
-                          className="absolute w-1 h-1 bg-blue-400 rounded-full"
-                          style={{
-                            top: "50%",
-                            left: "50%",
-                          }}
-                          animate={{
-                            x: Math.cos((particleIndex * Math.PI * 2) / 6) * 30,
-                            y: Math.sin((particleIndex * Math.PI * 2) / 6) * 30,
-                            opacity: [0, 1, 0],
-                            scale: [0, 1, 0],
-                          }}
-                          transition={{
-                            duration: 0.8,
-                            repeat: Number.POSITIVE_INFINITY,
-                            delay: particleIndex * 0.1,
-                          }}
-                        />
-                      ))}
-                    </motion.div>
+                    <span className="text-white group-hover:text-gray-100 font-medium text-sm tracking-wide">
+                      {t.navigation?.[item.labelKey] || item.labelKey}
+                    </span>
                   </motion.button>
                 ))}
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
 
