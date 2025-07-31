@@ -850,7 +850,7 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
             >
               {/* Banner de Promoção */}
               <Image
-                src="/images/promotion_banner.jpg"
+                src="/images/promotion-banner.jpg"
                 alt="Swap Reward Prize Pool Banner"
                 width={350} // Ajuste a largura conforme necessário
                 height={100} // Ajuste a altura para manter a proporção
