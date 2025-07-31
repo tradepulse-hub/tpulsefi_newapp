@@ -22,6 +22,7 @@ import {
   Send,
   Wallet,
 } from "lucide-react"
+import Image from "next/image" // Importar o componente Image
 import { useCallback, useEffect, useState } from "react"
 
 import { Client, Multicall3 } from "@holdstation/worldchain-ethers-v6"
@@ -847,6 +848,16 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
               exit={{ opacity: 0, x: -20 }}
               className="p-4"
             >
+              {/* Banner de Promoção */}
+              <Image
+                src="/images/promotion_banner.jpg"
+                alt="Swap Reward Prize Pool Banner"
+                width={350} // Ajuste a largura conforme necessário
+                height={100} // Ajuste a altura para manter a proporção
+                className="w-full rounded-lg mb-4"
+                priority={true} // Prioriza o carregamento do banner [^3]
+              />
+
               {/* Header */}
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
