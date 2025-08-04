@@ -1,10 +1,12 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Bell, Calendar, ChevronRight, ArrowLeft, Users, Gift, Copy } from "lucide-react"
+import { Bell, Calendar, ChevronRight, ArrowLeft, Users, Gift, Copy } from "lucide-react" // Removed Share2 icon as it's no longer needed for the simplified section
 import { motion } from "framer-motion"
 import { useRouter } from "next/navigation"
-import { BackgroundEffect } from "@/components/background-effect" // Import BackgroundEffect
+import { BackgroundEffect } from "@/components/background-effect"
+import Image from "next/image"
+import Link from "next/link"
 
 // Supported languages
 const SUPPORTED_LANGUAGES = ["en", "pt", "es", "id"] as const
@@ -41,6 +43,7 @@ const translations = {
     incentiveDistributionBullet1: "50% for buyback and burn (adding value to our token through scarcity and buyback)",
     incentiveDistributionBullet2: "25% for liquidity addition (for token sustainability)",
     incentiveDistributionBullet3: "25% for the team (for development and emergency reserve)",
+    postButton: "Post", // Keep this translation for the button text
   },
   pt: {
     title: "Notícias",
@@ -72,6 +75,7 @@ const translations = {
       "50% destinado à recompra e queima (adicionando valor ao nosso token por escassez e recompra)",
     incentiveDistributionBullet2: "25% destinado à adição de liquidez (para sustentabilidade do token)",
     incentiveDistributionBullet3: "25% destinado à equipe (para desenvolvimento e reserva de emergência)",
+    postButton: "Post", // Keep this translation for the button text
   },
   es: {
     title: "Noticias",
@@ -103,6 +107,7 @@ const translations = {
       "50% destinado a la recompra y quema (añadiendo valor a nuestro token por escasez y recompra)",
     incentiveDistributionBullet2: "25% destinado a la adición de liquidez (para la sostenibilidad del token)",
     incentiveDistributionBullet3: "25% destinado al equipo (para desarrollo y reserva de emergencia)",
+    postButton: "Post", // Keep this translation for the button text
   },
   id: {
     title: "Berita",
@@ -200,11 +205,36 @@ export default function NewsPage() {
 
           {/* News Content */}
           <div className="w-full max-w-md space-y-6">
-            {/* Referral Program Announcement */}
+            {/* New Latest Post Announcement (First Section - Image and Button Only) */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
+              className="bg-black/30 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl flex flex-col items-center justify-center" // Added flexbox for centering
+            >
+              <Image
+                src="/images/post.png"
+                alt="Post Image"
+                width={400}
+                height={200}
+                className="rounded-lg object-cover w-full h-auto mb-4 shadow-lg"
+              />
+              <Link
+                href="https://x.com/TradePulseToken/status/1952306608643375449?t=3fUZGU__pWdnEmsrHEVbWw&s=19"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-full shadow-lg hover:from-blue-600 hover:to-cyan-600 transition-all duration-300 text-base font-semibold"
+              >
+                <span>{t.postButton}</span>
+                <ChevronRight className="ml-2 h-5 w-5" />
+              </Link>
+            </motion.div>
+
+            {/* Referral Program Announcement */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }} // Adjusted delay
               className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 backdrop-blur-xl border border-green-500/20 rounded-2xl p-6 shadow-2xl"
             >
               <div className="flex items-start">
@@ -268,7 +298,7 @@ export default function NewsPage() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
+              transition={{ duration: 0.6, delay: 0.3 }} // Adjusted delay
               className="bg-black/30 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl"
             >
               <div className="flex items-start">
@@ -301,7 +331,7 @@ export default function NewsPage() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
               className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl border border-purple-500/20 rounded-2xl p-6 shadow-2xl"
             >
               <div className="flex items-start">
@@ -338,7 +368,7 @@ export default function NewsPage() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
               className="bg-black/30 backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-center shadow-2xl"
             >
               <div className="w-16 h-16 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
