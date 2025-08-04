@@ -213,7 +213,7 @@ export default function NewsPage() {
               className="bg-black/30 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl flex flex-col items-center justify-center" // Added flexbox for centering
             >
               <Image
-                src="/images/post.png"
+                src="/images/post.jpg"
                 alt="Post Image"
                 width={400}
                 height={200}
