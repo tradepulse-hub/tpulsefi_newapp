@@ -56,6 +56,14 @@ const TOKENS = [
     logo: "/images/keplerpay-logo.png",
     color: "#6A0DAD", // Deep purple color
   },
+  {
+    address: "0x6cD6867C5FE922230667BCCCa2FE844f0a3C37de",
+    symbol: "EDEN",
+    name: "Eden Project",
+    decimals: 18,
+    logo: "/images/eden-logo.png",
+    color: "#4CAF50", // A shade of green for Eden Project
+  },
 ]
 
 // --- Provider and SDK setup ---
