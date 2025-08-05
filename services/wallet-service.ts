@@ -97,7 +97,7 @@ const TOKENS_INFO = {
   EDEN: {
     symbol: "EDEN",
     name: "Eden Project",
-    address: "0x6cD6867C5FE922230667BCCCa2FE844f0a3C37de",
+    address: "0xbF0B23Ec1b8F8505b4F1772517151B2df4A27703", // Novo endereço para EDEN
     logo: "/images/eden-logo.png",
     decimals: 18,
   },
