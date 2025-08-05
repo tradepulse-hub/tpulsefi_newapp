@@ -94,6 +94,13 @@ const TOKENS_INFO = {
     logo: "/images/keplerpay-logo.png",
     decimals: 18,
   },
+  EDEN: {
+    symbol: "EDEN",
+    name: "Eden Project",
+    address: "0x6cD6867C5FE922230667BCCCa2FE844f0a3C37de",
+    logo: "/images/eden-logo.png",
+    decimals: 18,
+  },
 }
 
 interface TokenBalance {
