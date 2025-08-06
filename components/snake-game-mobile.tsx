@@ -394,7 +394,7 @@ export default function SnakeGameMobile({ onClose }: SnakeGameMobileProps) {
       </div>
 
       {/* Game Area - Adjusted to be higher */}
-      <div className="flex-1 flex flex-col items-center justify-center p-4 pt-10"> {/* Added pt-10 and flex-col */}
+      <div className="flex-1 flex flex-col items-center justify-start p-4 pt-16"> {/* Changed justify-center to justify-start and increased pt */}
         <div className="relative">
           <canvas
             ref={canvasRef}
@@ -410,7 +410,7 @@ export default function SnakeGameMobile({ onClose }: SnakeGameMobileProps) {
               <div className="text-center text-white p-6">
                 <div className="mb-4">
                   <Image
-                    src="/images/snakegame-logo.png" // Added Snake Game Logo
+                    src="/images/snakegame-logo.jpg" // Added Snake Game Logo
                     alt="Snake Game Logo"
                     width={100}
                     height={100}
