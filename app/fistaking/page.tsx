@@ -9,6 +9,7 @@ import { useMiniKit } from "../../hooks/use-minikit"
 import Image from "next/image"
 import { BackgroundEffect } from "@/components/background-effect"
 import { AnimatedText } from "@/components/animated-text"
+import { InfoBox } from "@/components/info-box" // Import the InfoBox component
 
 // Supported languages
 const SUPPORTED_LANGUAGES = ["en", "pt", "es", "id"] as const
@@ -32,6 +33,7 @@ const translations = {
     noFutureClaims: "No future claims available at this time.",
     futureClaimsInfo: "These tokens will be available for staking in the future. Stay tuned!",
     marqueeText: "Only TPF holders have these benefits. If you don't have them yet, acquire them now in our wallet (the more you have, the more you earn!)",
+    contactInfo: "For token listing inquiries, please contact us at support@tradepulsetoken.com",
   },
   pt: {
     title: "FiStaking",
@@ -49,6 +51,7 @@ const translations = {
     noFutureClaims: "Nenhuma recompensa futura disponível no momento.",
     futureClaimsInfo: "Esses tokens estarão disponíveis para staking no futuro. Fique ligado!",
     marqueeText: "Apenas detentores de TPF tem estes benificios, se ainda não tens adquire já na nossa wallet (quanto mais tiveres, mais ganhas!)",
+    contactInfo: "Para dúvidas sobre listagem de tokens, entre em contato conosco em support@tradepulsetoken.com",
   },
   es: {
     title: "FiStaking",
@@ -66,6 +69,7 @@ const translations = {
     noFutureClaims: "No hay reclamaciones futuras disponibles en este momento.",
     futureClaimsInfo: "Estos tokens estarán disponibles para staking en el futuro. ¡Mantente informado!",
     marqueeText: "Solo los titulares de TPF tienen estos beneficios. Si aún no los tienes, adquiérelos ahora en nuestra billetera (¡cuanto más tengas, más ganas!)",
+    contactInfo: "Para consultas sobre listado de tokens, contáctenos en support@tradepulsetoken.com",
   },
   id: {
     title: "FiStaking",
@@ -83,6 +87,7 @@ const translations = {
     noFutureClaims: "Tidak ada klaim mendatang yang tersedia saat ini.",
     futureClaimsInfo: "Token ini akan tersedia untuk staking di masa mendatang. Nantikan!",
     marqueeText: "Hanya pemegang TPF yang memiliki manfaat ini. Jika Anda belum memilikinya, dapatkan sekarang di dompet kami (semakin banyak Anda miliki, semakin banyak yang Anda hasilkan!)",
+    contactInfo: "Untuk pertanyaan daftar token, silakan hubungi kami di support@tradepulsetoken.com",
   },
 }
 
@@ -174,7 +179,7 @@ const FUTURE_STAKING_CONTRACTS: Record<string, StakingContract> = {
     name: "Fides Aeterna",
     symbol: "$Fides",
     address: "0x83fe342771839409A36Bb9320d9De869291FEe28",
-    image: "/images/fides-aeterna.png",
+    image: "/images/fides-aeterna.jpg",
     holderType: "psc_holder", // Assuming a default holder type for future claims
   },
 }
@@ -734,9 +739,8 @@ export default function FiStakingPage() {
                                     ) : (
                                       <>
                                         <Gift className="w-4 h-4 text-black" />
-                                        <span>
-                                          {t.claim} {button.name}
-                                        </span>
+                                        {/* Modified: Removed t.claim */}
+                                        <span>{button.name}</span>
                                       </>
                                     )}
                                   </motion.button>
@@ -847,6 +851,8 @@ export default function FiStakingPage() {
                 )}
               </motion.div>
             )}
+            {/* InfoBox at the bottom */}
+            <InfoBox text={t.contactInfo} />
           </>
         )}
       </div>
