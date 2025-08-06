@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ArrowLeft, TrendingUp, Gift, Loader2, CheckCircle } from "lucide-react"
+import { ArrowLeft, TrendingUp, Gift, Loader2, CheckCircle } from 'lucide-react'
 import { motion, AnimatePresence } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { MiniKit } from "@worldcoin/minikit-js"
@@ -664,120 +664,97 @@ export default function FiStakingPage() {
             >
               <p>{t.instructionText}</p>
             </motion.div>
+            <div className="grid grid-cols-2 gap-4">
+              {Object.entries(STAKING_CONTRACTS).map(([key, entry], index) => {
+                const isGroup = "isGroup" in entry && entry.isGroup
+                const item = isGroup ? (entry as StakingGroup) : (entry as StakingContract)
+                const isClaimingThis = claiming === key || (isGroup && claiming?.startsWith(`${key}-`))
 
-            {/* Staking Tokens - Compact */}
-            {Object.entries(STAKING_CONTRACTS).map(([key, entry], index) => {
-              if ("isGroup" in entry && entry.isGroup) {
-                const group = entry as StakingGroup
                 return (
                   <motion.div
                     key={key}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.3, delay: index * 0.05 }}
-                    className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-lg p-3"
+                    className="relative aspect-square rounded-lg overflow-hidden border border-gray-700/50 shadow-lg flex flex-col justify-end p-3"
                   >
-                    <div className="flex items-center space-x-2 mb-3">
-                      <Image
-                        src={group.image || "/placeholder.svg"}
-                        alt={group.name}
-                        width={32}
-                        height={32}
-                        className="w-8 h-8 rounded-full"
-                      />
-                      <div>
-                        <h3 className="text-white font-medium text-sm">{group.symbol}</h3>
-                        <p className="text-gray-400 text-[10px]">{group.name}</p>
-                      </div>
-                    </div>
-                    <div className="flex flex-col gap-2">
-                      {group.buttons.map((button) => {
-                        const isClaimingThis = claiming === `${key}-${button.key}`
-                        return (
-                          <button
-                            key={button.key}
-                            onClick={() => handleClaim(key, button.key)}
-                            disabled={isClaimingThis}
-                            className={`py-1.5 px-4 rounded-md font-medium text-xs transition-all duration-300 flex items-center justify-center space-x-1 ${
-                              isClaimingThis
-                                ? "bg-gray-600/50 text-gray-400 cursor-not-allowed"
-                                : button.holderType === "tpf_holder"
-                                  ? "bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white" // Blue for TPF holders
-                                  : "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white" // Green for PSC holders
-                            }`}
-                          >
-                            {isClaimingThis ? (
-                              <>
-                                <Loader2 className="w-3 h-3 animate-spin" />
-                                <span>{t.claiming}</span>
-                              </>
-                            ) : (
-                              <>
-                                <Gift className="w-3 h-3" />
-                                <span>
-                                  {t.claim} {button.name}
-                                </span>
-                              </>
-                            )}
-                          </button>
-                        )
-                      })}
-                    </div>
-                  </motion.div>
-                )
-              } else {
-                const contract = entry as StakingContract
-                const isClaimingThis = claiming === key
-                return (
-                  <motion.div
-                    key={key}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: index * 0.05 }}
-                    className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-lg p-3"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <Image
-                          src={contract.image || "/placeholder.svg"}
-                          alt={contract.name}
-                          width={32}
-                          height={32}
-                          className="w-8 h-8 rounded-full"
-                        />
-                        <div>
-                          <h3 className="text-white font-medium text-sm">{contract.symbol}</h3>
-                          <p className="text-gray-400 text-[10px]">{contract.name}</p>
+                    {/* Background Image */}
+                    <Image
+                      src={item.image || "/placeholder.svg"}
+                      alt={item.name}
+                      layout="fill"
+                      objectFit="cover"
+                      className="absolute inset-0 z-0 opacity-30"
+                    />
+                    {/* Overlay for readability */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent z-10" />
+
+                    <div className="relative z-20 text-white">
+                      <h3 className="font-bold text-lg">{item.symbol}</h3>
+                      <p className="text-gray-300 text-xs mb-3">{item.name}</p>
+
+                      {isGroup ? (
+                        <div className="flex flex-col gap-2">
+                          {(item as StakingGroup).buttons.map((button) => {
+                            const isButtonClaiming = claiming === `${key}-${button.key}`
+                            return (
+                              <button
+                                key={button.key}
+                                onClick={() => handleClaim(key, button.key)}
+                                disabled={isButtonClaiming}
+                                className={`py-1.5 px-3 rounded-md font-medium text-xs transition-all duration-300 flex items-center justify-center space-x-1 ${
+                                  isButtonClaiming
+                                    ? "bg-gray-600/50 text-gray-400 cursor-not-allowed"
+                                    : button.holderType === "tpf_holder"
+                                      ? "bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white" // Blue for TPF holders
+                                      : "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white" // Green for PSC holders
+                                }`}
+                              >
+                                {isButtonClaiming ? (
+                                  <>
+                                    <Loader2 className="w-3 h-3 animate-spin" />
+                                    <span>{t.claiming}</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Gift className="w-3 h-3" />
+                                    <span>
+                                      {t.claim} {button.name}
+                                    </span>
+                                  </>
+                                )}
+                              </button>
+                            )
+                          })}
                         </div>
-                      </div>
-
-                      {/* Claim Button - Compact */}
-                      <button
-                        onClick={() => handleClaim(key)}
-                        disabled={isClaimingThis}
-                        className={`py-1.5 px-4 rounded-md font-medium text-xs transition-all duration-300 flex items-center justify-center space-x-1 ${
-                          isClaimingThis
-                            ? "bg-gray-600/50 text-gray-400 cursor-not-allowed"
-                            : "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
-                        }`}
-                      >
-                        {isClaimingThis ? (
-                          <>
-                            <Loader2 className="w-3 h-3 animate-spin" />
-                            <span>{t.claiming}</span>
-                          </>
-                        ) : (
-                          <>
-                            <Gift className="w-3 h-3" />
-                            <span>{t.claim}</span>
-                          </>
-                        )}
-                      </button>
+                      ) : (
+                        <button
+                          onClick={() => handleClaim(key)}
+                          disabled={isClaimingThis}
+                          className={`w-full py-1.5 px-3 rounded-md font-medium text-xs transition-all duration-300 flex items-center justify-center space-x-1 ${
+                            isClaimingThis
+                              ? "bg-gray-600/50 text-gray-400 cursor-not-allowed"
+                              : "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+                          }`}
+                        >
+                          {isClaimingThis ? (
+                            <>
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                              <span>{t.claiming}</span>
+                            </>
+                          ) : (
+                            <>
+                              <Gift className="w-3 h-3" />
+                              <span>{t.claim}</span>
+                            </>
+                          )}
+                        </button>
+                      )}
                     </div>
                   </motion.div>
                 )
-              }
-            })}
+              })}
+            </div>
           </>
         )}
       </div>
