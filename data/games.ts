@@ -27,7 +27,7 @@ export const allGames: Game[] = [
     id: "snake-game",
     title: "Snake Game",
     description: "Test your limits! Grow your snake by eating food, but don't hit the walls or yourself.",
-    image: "/images/snakegame-logo.png",
+    image: "/images/snakegame-logo.jpg", // Updated to use the new JPG logo
     category: "skill",
     playable: true,
     component: SnakeGameMobile, // Corrected to SnakeGameMobile
