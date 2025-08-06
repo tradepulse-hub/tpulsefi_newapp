@@ -18,8 +18,6 @@ type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number]
 const translations = {
   en: {
     title: "FiStaking",
-    infoBoxText: "TPulseFi: Earn passive rewards. Your TPF increases your earnings.",
-    supportContact: "For token listing on our app, contact support@tradepulsetoken.com",
     back: "Back",
     claim: "Claim",
     claiming: "Claiming...",
@@ -29,17 +27,14 @@ const translations = {
     connectWalletFirst: "Connect your wallet first",
     pendingRewards: "Pending Rewards",
     dismiss: "Dismiss",
-    powerActivated: "Power Activated",
-    instructionText: "Blue button - TPF Holders, Green button - PSC Holders.",
     availableClaims: "Available Claims",
     futureClaims: "Future Claims",
     noFutureClaims: "No future claims available at this time.",
     futureClaimsInfo: "These tokens will be available for staking in the future. Stay tuned!",
+    marqueeText: "Only TPF holders have these benefits. If you don't have them yet, acquire them now in our wallet (the more you have, the more you earn!)",
   },
   pt: {
     title: "FiStaking",
-    infoBoxText: "TPulseFi: Ganhe recompensas passivas. Seu TPF aumenta seus ganhos.",
-    supportContact: "Para listagem de um token no nosso aplicativo contacte a equipa de suporte - support@tradepulsetoken.com",
     back: "Voltar",
     claim: "Reclamar",
     claiming: "Reclamando...",
@@ -49,17 +44,14 @@ const translations = {
     connectWalletFirst: "Conecte sua carteira primeiro",
     pendingRewards: "Recompensas Pendentes",
     dismiss: "Dispensar",
-    powerActivated: "Energia Ativada",
-    instructionText: "Botão azul - Holders TPF, Botão verde - Holders PSC.",
     availableClaims: "Recompensas Disponíveis",
     futureClaims: "Recompensas Futuras",
     noFutureClaims: "Nenhuma recompensa futura disponível no momento.",
     futureClaimsInfo: "Esses tokens estarão disponíveis para staking no futuro. Fique ligado!",
+    marqueeText: "Apenas detentores de TPF tem estes benificios, se ainda não tens adquire já na nossa wallet (quanto mais tiveres, mais ganhas!)",
   },
   es: {
     title: "FiStaking",
-    infoBoxText: "TPulseFi: Gana recompensas pasivas. Tu TPF aumenta tus ganancias.",
-    supportContact: "Para listar un token en nuestra aplicación, contacte a support@tradepulsetoken.com",
     back: "Volver",
     claim: "Reclamar",
     claiming: "Reclamando...",
@@ -69,17 +61,14 @@ const translations = {
     connectWalletFirst: "Conecta tu billetera primero",
     pendingRewards: "Recompensas Pendientes",
     dismiss: "Descartar",
-    powerActivated: "Energía Activada",
-    instructionText: "Botón azul - Holders TPF, Botón verde - Holders PSC.",
     availableClaims: "Reclamaciones Disponibles",
     futureClaims: "Reclamaciones Futuras",
     noFutureClaims: "No hay reclamaciones futuras disponibles en este momento.",
     futureClaimsInfo: "Estos tokens estarán disponibles para staking en el futuro. ¡Mantente informado!",
+    marqueeText: "Solo los titulares de TPF tienen estos beneficios. Si aún no los tienes, adquiérelos ahora en nuestra billetera (¡cuanto más tengas, más ganas!)",
   },
   id: {
     title: "FiStaking",
-    infoBoxText: "TPulseFi: Dapatkan hadiah pasif. TPF Anda meningkatkan penghasilan Anda.",
-    supportContact: "Untuk daftar token di aplikasi kami, hubungi support@tradepulsetoken.com",
     back: "Kembali",
     claim: "Klaim",
     claiming: "Mengklaim...",
@@ -89,12 +78,11 @@ const translations = {
     connectWalletFirst: "Hubungkan dompet Anda terlebih dahulu",
     pendingRewards: "Hadiah Tertunda",
     dismiss: "Tutup",
-    powerActivated: "Daya Diaktifkan",
-    instructionText: "Tombol biru - Pemegang TPF, Tombol hijau - Pemegang PSC.",
     availableClaims: "Klaim Tersedia",
     futureClaims: "Klaim Mendatang",
     noFutureClaims: "Tidak ada klaim mendatang yang tersedia saat ini.",
     futureClaimsInfo: "Token ini akan tersedia untuk staking di masa mendatang. Nantikan!",
+    marqueeText: "Hanya pemegang TPF yang memiliki manfaat ini. Jika Anda belum memilikinya, dapatkan sekarang di dompet kami (semakin banyak Anda miliki, semakin banyak yang Anda hasilkan!)",
   },
 }
 
@@ -437,67 +425,6 @@ interface StakingInfo {
   canClaim: boolean
 }
 
-// Battery Component
-function BatteryIndicator({ currentLang }: { currentLang: SupportedLanguage }) {
-  const [batteryLevel, setBatteryLevel] = useState(0)
-  const t = translations[currentLang]
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setBatteryLevel((prev) => {
-        if (prev >= 100) return 0
-        return prev + 2
-      })
-    }, 100)
-
-    return () => clearInterval(interval)
-  }, [])
-
-  return (
-    <div className="flex flex-col items-center">
-      {/* Battery */}
-      <div className="relative w-8 h-4 border border-green-400 rounded-sm bg-black/50">
-        {/* Battery tip */}
-        <div className="absolute -right-1 top-1 w-1 h-2 bg-green-400 rounded-r-sm"></div>
-        {/* Battery fill */}
-        <div
-          className="h-full bg-gradient-to-r from-green-500 to-green-300 rounded-sm transition-all duration-100"
-          style={{ width: `${batteryLevel}%` }}
-        ></div>
-        {/* Battery percentage text */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-[6px] font-bold text-white drop-shadow-sm">{batteryLevel}%</span>
-        </div>
-      </div>
-      {/* Power Activated text */}
-      <div className="text-green-400 text-[8px] font-medium mt-1 text-center">{t.powerActivated}</div>
-    </div>
-  )
-}
-
-// Info Box Component
-function InfoBox({ currentLang }: { currentLang: SupportedLanguage }) {
-  const t = translations[currentLang]
-  return (
-    <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.5, delay: 0.2 }}
-      className="absolute top-4 right-4 z-20 bg-gray-900/70 backdrop-blur-sm rounded-lg p-2 flex flex-col items-center space-y-2 border border-gray-700/50 shadow-lg"
-    >
-      <div className="flex items-center space-x-2">
-        <BatteryIndicator currentLang={currentLang} />
-        <p className="text-gray-300 text-[10px] leading-tight max-w-[120px]">
-          {t.infoBoxText}
-        </p>
-      </div>
-      <p className="text-gray-400 text-[9px] text-center leading-tight px-1">
-        {t.supportContact}
-      </p>
-    </motion.div>
-  )
-}
-
 export default function FiStakingPage() {
   const router = useRouter()
   const { user, isAuthenticated } = useMiniKit()
@@ -607,8 +534,6 @@ export default function FiStakingPage() {
   return (
     <main className="min-h-screen bg-black relative overflow-hidden flex flex-col items-center pt-4 pb-6">
       <BackgroundEffect /> {/* Adicionado BackgroundEffect component */}
-      {/* Info Box - Top Right */}
-      <InfoBox currentLang={currentLang} />
       {/* Back Button */}
       <motion.div
         initial={{ opacity: 0, x: -20 }}
@@ -722,18 +647,21 @@ export default function FiStakingPage() {
               </button>
             </div>
 
+            {/* Marquee Text */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.1 }}
+              className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-lg p-3 text-center text-xs text-gray-300 mb-4 overflow-hidden"
+            >
+              <div className="whitespace-nowrap animate-marquee">
+                {t.marqueeText}
+              </div>
+            </motion.div>
+
             {/* Content based on active tab */}
             {activeTab === 'available' ? (
               <>
-                {/* Instruction Text */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.1 }}
-                  className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-lg p-3 text-center text-xs text-gray-300 mb-4"
-                >
-                  <p>{t.instructionText}</p>
-                </motion.div>
                 <div className="grid grid-cols-2 gap-4">
                   {Object.entries(STAKING_CONTRACTS).map(([key, entry], index) => {
                     const isGroup = "isGroup" in entry && entry.isGroup
@@ -765,9 +693,6 @@ export default function FiStakingPage() {
                         }}
                         className="relative aspect-square rounded-lg overflow-hidden border border-gray-700/50 shadow-lg flex flex-col justify-end p-3"
                       >
-                        {/* Decorative Bar at the top */}
-                        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-purple-500 to-pink-500 z-20" />
-
                         {/* Background Image */}
                         <Image
                           src={item.image || "/placeholder.svg"}
@@ -794,7 +719,7 @@ export default function FiStakingPage() {
                                     disabled={isButtonClaiming}
                                     whileTap={{ scale: 0.95 }} // Added tap animation
                                     whileHover={{ scale: 1.02 }} // Subtle hover scale
-                                    className={`py-2 px-3 rounded-md font-bold text-sm transition-all duration-300 flex items-center justify-center space-x-1 shadow-md border border-gray-400
+                                    className={`py-2 px-3 rounded-md font-bold text-[10px] transition-all duration-300 flex items-center justify-center space-x-1 shadow-md border border-gray-400 w-full
                                       ${
                                         isButtonClaiming
                                           ? "bg-gray-600/50 text-gray-400 cursor-not-allowed"
@@ -890,9 +815,6 @@ export default function FiStakingPage() {
                       }}
                       className="relative aspect-square rounded-lg overflow-hidden border border-gray-700/50 shadow-lg flex flex-col justify-end p-3"
                     >
-                      {/* Decorative Bar at the top */}
-                      <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-purple-500 to-pink-500 z-20" />
-
                       {/* Background Image */}
                       <Image
                         src={item.image || "/placeholder.svg"}
