@@ -179,7 +179,7 @@ const FUTURE_STAKING_CONTRACTS: Record<string, StakingContract> = {
     name: "Fides Aeterna",
     symbol: "$Fides",
     address: "0x83fe342771839409A36Bb9320d9De869291FEe28",
-    image: "/images/fides-aeterna.jpg",
+    image: "/images/fides-aeterna.png",
     holderType: "psc_holder", // Assuming a default holder type for future claims
   },
 }
