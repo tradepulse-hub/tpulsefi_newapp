@@ -21,7 +21,7 @@ export const allGames: Game[] = [
     image: "/images/spaceshooter-logo.png",
     category: "action",
     playable: true,
-    component: SnakeGameMobile, // Placeholder component for modal
+    component: SpaceShooterMobile, // Corrected to SpaceShooterMobile
   },
   {
     id: "snake-game",
@@ -30,7 +30,7 @@ export const allGames: Game[] = [
     image: "/images/snakegame-logo.png",
     category: "skill",
     playable: true,
-    component: MahjongGameMobile, // Placeholder component for modal
+    component: SnakeGameMobile, // Corrected to SnakeGameMobile
   },
   {
     id: "mahjong-solitaire",
@@ -39,7 +39,7 @@ export const allGames: Game[] = [
     image: "/images/mahjonggame-logo.png",
     category: "mahjong",
     playable: true,
-    component: SpaceShooterMobile, // Placeholder component for modal
+    component: MahjongGameMobile, // Corrected to MahjongGameMobile
   },
   {
     id: "fruit-crush",
