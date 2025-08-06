@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { motion } from "framer-motion"
 import { ArrowLeft, Pause, Play, RotateCcw } from 'lucide-react'
+import Image from "next/image" // Import Image component
 
 interface Position {
   x: number
@@ -392,8 +393,8 @@ export default function SnakeGameMobile({ onClose }: SnakeGameMobileProps) {
         </div>
       </div>
 
-      {/* Game Area */}
-      <div className="flex-1 flex items-center justify-center p-4">
+      {/* Game Area - Adjusted to be higher */}
+      <div className="flex-1 flex flex-col items-center justify-center p-4 pt-10"> {/* Added pt-10 and flex-col */}
         <div className="relative">
           <canvas
             ref={canvasRef}
@@ -407,7 +408,15 @@ export default function SnakeGameMobile({ onClose }: SnakeGameMobileProps) {
           {!gameState.gameStarted && (
             <div className="absolute inset-0 bg-black/80 flex items-center justify-center rounded-lg">
               <div className="text-center text-white p-6">
-                <div className="text-4xl mb-4">🐍</div>
+                <div className="mb-4">
+                  <Image
+                    src="/images/snakegame-logo.png" // Added Snake Game Logo
+                    alt="Snake Game Logo"
+                    width={100}
+                    height={100}
+                    className="mx-auto mb-4"
+                  />
+                </div>
                 <h2 className="text-2xl font-bold mb-4">Snake Game</h2>
                 <p className="text-sm mb-4 text-gray-300">Swipe to control the snake</p>
                 <p className="text-xs mb-6 text-gray-400">Collect red food to grow!</p>
