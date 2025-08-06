@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react"
 import { motion } from "framer-motion"
-import { ArrowLeft, Pause, Play, RotateCcw } from "lucide-react"
+import { ArrowLeft, Pause, Play, RotateCcw } from 'lucide-react'
 
 interface Position {
   x: number
@@ -64,11 +64,17 @@ export default function SnakeGameMobile({ onClose }: SnakeGameMobileProps) {
   const generateFood = useCallback((): Position => {
     const maxX = Math.floor(CANVAS_WIDTH / GRID_SIZE)
     const maxY = Math.floor(CANVAS_HEIGHT / GRID_SIZE)
-    return {
-      x: Math.floor(Math.random() * maxX),
-      y: Math.floor(Math.random() * maxY),
-    }
-  }, [])
+    let newFood: Position
+    do {
+      newFood = {
+        x: Math.floor(Math.random() * maxX),
+        y: Math.floor(Math.random() * maxY),
+      }
+    } while (
+      gameState.snake.some((segment) => segment.x === newFood.x && segment.y === newFood.y)
+    )
+    return newFood
+  }, [gameState.snake])
 
   const resetGame = useCallback(() => {
     setGameState({
@@ -86,7 +92,7 @@ export default function SnakeGameMobile({ onClose }: SnakeGameMobileProps) {
     setGameState((prev) => ({
       ...prev,
       gameStarted: true,
-      direction: { x: 1, y: 0 },
+      direction: { x: 1, y: 0 }, // Initial direction
       isPaused: false,
     }))
   }, [])
@@ -150,7 +156,6 @@ export default function SnakeGameMobile({ onClose }: SnakeGameMobileProps) {
           setGameState((prev) => ({ ...prev, direction: { x: 0, y: -1 } }))
         }
       }
-
       touchStartRef.current = null
     }
 
@@ -161,7 +166,7 @@ export default function SnakeGameMobile({ onClose }: SnakeGameMobileProps) {
       canvas.removeEventListener("touchstart", handleTouchStart)
       canvas.removeEventListener("touchend", handleTouchEnd)
     }
-  }, [gameState.gameStarted, gameState.gameOver, gameState.isPaused, startGame, togglePause])
+  }, [gameState.gameStarted, gameState.gameOver, gameState.isPaused, startGame, togglePause, gameState.direction])
 
   // Game loop
   useEffect(() => {
@@ -185,7 +190,6 @@ export default function SnakeGameMobile({ onClose }: SnakeGameMobileProps) {
         // Check wall collision
         const maxX = Math.floor(CANVAS_WIDTH / GRID_SIZE)
         const maxY = Math.floor(CANVAS_HEIGHT / GRID_SIZE)
-
         if (newHead.x < 0 || newHead.x >= maxX || newHead.y < 0 || newHead.y >= maxY) {
           return { ...prev, gameOver: true }
         }
@@ -222,13 +226,12 @@ export default function SnakeGameMobile({ onClose }: SnakeGameMobileProps) {
         clearInterval(gameLoopRef.current)
       }
     }
-  }, [gameState.gameStarted, gameState.gameOver, gameState.isPaused, generateFood])
+  }, [gameState.gameStarted, gameState.gameOver, gameState.isPaused, generateFood, gameState.direction])
 
   // Canvas rendering
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-
     const ctx = canvas.getContext("2d")
     if (!ctx) return
 
@@ -263,6 +266,7 @@ export default function SnakeGameMobile({ onClose }: SnakeGameMobileProps) {
         ctx.fillStyle = "#000"
         const eyeSize = 2
         const eyeOffset = 3
+
         if (gameState.direction.x === 1) {
           // Moving right
           ctx.fillRect(
@@ -360,7 +364,6 @@ export default function SnakeGameMobile({ onClose }: SnakeGameMobileProps) {
           <ArrowLeft className="w-5 h-5" />
           <span>Back</span>
         </button>
-
         <div className="flex items-center space-x-4">
           <div className="text-center">
             <div className="text-sm text-gray-400">Score</div>
@@ -371,7 +374,6 @@ export default function SnakeGameMobile({ onClose }: SnakeGameMobileProps) {
             <div className="text-lg font-bold text-yellow-400">{highScore}</div>
           </div>
         </div>
-
         <div className="flex items-center space-x-2">
           {gameState.gameStarted && !gameState.gameOver && (
             <button
