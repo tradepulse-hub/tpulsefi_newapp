@@ -2,87 +2,41 @@
 
 import { useState, useEffect, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { ArrowLeft, Zap, Heart, Target, Sparkles, Car, Trophy, Puzzle, Brain, ChevronLeft, ChevronRight, X, Gamepad2, Play, Search } from 'lucide-react'
+import { ArrowLeft, Zap, Heart, Target, Sparkles, Car, Trophy, Puzzle, Brain, ChevronLeft, ChevronRight, Play } from 'lucide-react'
 import { useRouter } from "next/navigation"
 import Image from "next/image"
-import SnakeGameMobile from "@/components/snake-game-mobile"
-import MahjongGameMobile from "@/components/mahjong-game-mobile"
-import SpaceShooterMobile from "@/components/space-shooter-mobile"
-// import FruitCrushGameMobile from "@/components/fruit-crush-game-mobile" // Removed old import
 import CategoryMenu from "@/components/category-menu"
 import SearchBar from "@/components/search-bar"
+import GameModal from "@/components/game-modal" // Import the new GameModal
 import { allGames, Game } from "@/data/games"
-import { useI18n } from "@/i18n/use-i18n" // Import useI18n
 
-// Game categories with translations
-const gameCategories = {
-  en: [
-    { id: "action", name: "Action", icon: Zap, gradient: "from-red-500 to-orange-500", emoji: "⚡", playable: true },
-    { id: "animals", name: "Animals", icon: Heart, gradient: "from-green-500 to-emerald-500", emoji: "🐾", playable: false },
-    { id: "adventure", name: "Adventure", icon: Target, gradient: "from-purple-500 to-violet-500", emoji: "🗺️", playable: false },
-    { id: "bubbles", name: "Bubbles", icon: Sparkles, gradient: "from-cyan-500 to-blue-500", emoji: "🫧", playable: false },
-    { id: "racing", name: "Racing", icon: Car, gradient: "from-yellow-500 to-orange-500", emoji: "🏎️", playable: false },
-    { id: "sports", name: "Sports", icon: Trophy, gradient: "from-blue-500 to-indigo-500", emoji: "⚽", playable: false },
-    { id: "skill", name: "Skill", icon: Target, gradient: "from-pink-500 to-rose-500", emoji: "🎯", playable: true },
-    { id: "mahjong", name: "Mahjong", icon: Puzzle, gradient: "from-red-500 to-orange-500", emoji: "🀄", playable: true },
-    { id: "match3", name: "Match 3", icon: Sparkles, gradient: "from-orange-500 to-yellow-500", emoji: "🍬", playable: true },
-    { id: "girls", name: "Girls", icon: Heart, gradient: "from-pink-500 to-purple-500", emoji: "👧", playable: false },
-    { id: "logic", name: "Logic", icon: Brain, gradient: "from-teal-500 to-cyan-500", emoji: "🧠", playable: false },
-  ],
-  pt: [
-    { id: "action", name: "Acção", icon: Zap, gradient: "from-red-500 to-orange-500", emoji: "⚡", playable: true },
-    { id: "animals", name: "Animais", icon: Heart, gradient: "from-green-500 to-emerald-500", emoji: "🐾", playable: false },
-    { id: "adventure", name: "Aventura", icon: Target, gradient: "from-purple-500 to-violet-500", emoji: "🗺️", playable: false },
-    { id: "bubbles", name: "Bubbles", icon: Sparkles, gradient: "from-cyan-500 to-blue-500", emoji: "🫧", playable: false },
-    { id: "racing", name: "Corridas", icon: Car, gradient: "from-yellow-500 to-orange-500", emoji: "🏎️", playable: false },
-    { id: "sports", name: "Desporto", icon: Trophy, gradient: "from-blue-500 to-indigo-500", emoji: "⚽", playable: false },
-    { id: "skill", name: "Habilidade", icon: Target, gradient: "from-pink-500 to-rose-500", emoji: "🎯", playable: true },
-    { id: "mahjong", name: "Mahjong", icon: Puzzle, gradient: "from-red-500 to-orange-500", emoji: "🀄", playable: true },
-    { id: "match3", name: "Match 3", icon: Sparkles, gradient: "from-orange-500 to-yellow-500", emoji: "🍬", playable: true },
-    { id: "girls", name: "Meninas", icon: Heart, gradient: "from-pink-500 to-purple-500", emoji: "👧", playable: false },
-    { id: "logic", name: "Raciocínio", icon: Brain, gradient: "from-teal-500 to-cyan-500", emoji: "🧠", playable: false },
-  ],
-  es: [
-    { id: "action", name: "Acción", icon: Zap, gradient: "from-red-500 to-orange-500", emoji: "⚡", playable: true },
-    { id: "animals", name: "Animales", icon: Heart, gradient: "from-green-500 to-emerald-500", emoji: "🐾", playable: false },
-    { id: "adventure", name: "Aventura", icon: Target, gradient: "from-purple-500 to-violet-500", emoji: "🗺️", playable: false },
-    { id: "bubbles", name: "Burbujas", icon: Sparkles, gradient: "from-cyan-500 to-blue-500", emoji: "🫧", playable: false },
-    { id: "racing", name: "Carreras", icon: Car, gradient: "from-yellow-500 to-orange-500", emoji: "🏎️", playable: false },
-    { id: "sports", name: "Deportes", icon: Trophy, gradient: "from-blue-500 to-indigo-500", emoji: "⚽", playable: false },
-    { id: "skill", name: "Habilidad", icon: Target, gradient: "from-pink-500 to-rose-500", emoji: "🎯", playable: true },
-    { id: "mahjong", name: "Mahjong", icon: Puzzle, gradient: "from-red-500 to-orange-500", emoji: "🀄", playable: true },
-    { id: "match3", name: "Match 3", icon: Sparkles, gradient: "from-orange-500 to-yellow-500", emoji: "🍬", playable: true },
-    { id: "girls", name: "Chicas", icon: Heart, gradient: "from-pink-500 to-purple-500", emoji: "👧", playable: false },
-    { id: "logic", name: "Lógica", icon: Brain, gradient: "from-teal-500 to-cyan-500", emoji: "🧠", playable: false },
-  ],
-  id: [
-    { id: "action", name: "Aksi", icon: Zap, gradient: "from-red-500 to-orange-500", emoji: "⚡", playable: true },
-    { id: "animals", name: "Hewan", icon: Heart, gradient: "from-green-500 to-emerald-500", emoji: "🐾", playable: false },
-    { id: "adventure", name: "Petualangan", icon: Target, gradient: "from-purple-500 to-violet-500", emoji: "🗺️", playable: false },
-    { id: "bubbles", name: "Gelembung", icon: Sparkles, gradient: "from-cyan-500 to-blue-500", emoji: "🫧", playable: false },
-    { id: "racing", name: "Balap", icon: Car, gradient: "from-yellow-500 to-orange-500", emoji: "🏎️", playable: false },
-    { id: "sports", name: "Olahraga", icon: Trophy, gradient: "from-blue-500 to-indigo-500", emoji: "⚽", playable: false },
-    { id: "skill", name: "Keterampilan", icon: Target, gradient: "from-pink-500 to-rose-500", emoji: "🎯", playable: true },
-    { id: "mahjong", name: "Mahjong", icon: Puzzle, gradient: "from-red-500 to-orange-500", emoji: "🀄", playable: true },
-    { id: "match3", name: "Match 3", icon: Sparkles, gradient: "from-orange-500 to-yellow-500", emoji: "🍬", playable: true },
-    { id: "girls", name: "Gadis", icon: Heart, gradient: "from-pink-500 to-purple-500", emoji: "👧", playable: false },
-    { id: "logic", name: "Logika", icon: Brain, gradient: "from-teal-500 to-cyan-500", emoji: "🧠", playable: false },
-  ],
-}
+// Game categories (now hardcoded to English)
+const gameCategories = [
+  { id: "action", name: "Action", icon: Zap, gradient: "from-red-500 to-orange-500", emoji: "⚡", playable: true },
+  { id: "animals", name: "Animals", icon: Heart, gradient: "from-green-500 to-emerald-500", emoji: "🐾", playable: false },
+  { id: "adventure", name: "Adventure", icon: Target, gradient: "from-purple-500 to-violet-500", emoji: "🗺️", playable: false },
+  { id: "bubbles", name: "Bubbles", icon: Sparkles, gradient: "from-cyan-500 to-blue-500", emoji: "🫧", playable: false },
+  { id: "racing", name: "Racing", icon: Car, gradient: "from-yellow-500 to-orange-500", emoji: "🏎️", playable: false },
+  { id: "sports", name: "Sports", icon: Trophy, gradient: "from-blue-500 to-indigo-500", emoji: "⚽", playable: false },
+  { id: "skill", name: "Skill", icon: Target, gradient: "from-pink-500 to-rose-500", emoji: "🎯", playable: true },
+  { id: "mahjong", name: "Mahjong", icon: Puzzle, gradient: "from-red-500 to-orange-500", emoji: "🀄", playable: true },
+  { id: "match3", name: "Match 3", icon: Sparkles, gradient: "from-orange-500 to-yellow-500", emoji: "🍬", playable: true },
+  { id: "girls", name: "Girls", icon: Heart, gradient: "from-pink-500 to-purple-500", emoji: "👧", playable: false },
+  { id: "logic", name: "Logic", icon: Brain, gradient: "from-teal-500 to-cyan-500", emoji: "🧠", playable: false },
+]
 
-// Featured games for slideshow - Now references allGames and only playable ones
-const featuredGamesIds = ["space-shooter", "snake-game", "mahjong-solitaire", "fruit-crush"] // Updated to only include fruit-crush
+// Featured games for slideshow
+const featuredGamesIds = ["space-shooter", "snake-game", "mahjong-solitaire", "fruit-crush"]
 
 export default function FiGamesPage() {
   const router = useRouter()
-  const { currentLang, t, setLanguage } = useI18n() // Use the i18n hook
   const [currentSlide, setCurrentSlide] = useState(0)
   const [selectedCategory, setSelectedCategory] = useState<string>("all") // Default to "all"
   const [searchQuery, setSearchQuery] = useState<string>("")
   const [gameLoading, setGameLoading] = useState(false)
   const [loadingProgress, setLoadingProgress] = useState(0)
   const [loadingGame, setLoadingGame] = useState<Game | null>(null)
-  const [activeGameComponent, setActiveGameComponent] = useState<React.ComponentType<{ onClose: () => void }> | null>(null)
+  const [activeGameId, setActiveGameId] = useState<string | null>(null) // Changed to store game ID
 
   // Auto-advance slideshow every 3 seconds
   useEffect(() => {
@@ -93,17 +47,17 @@ export default function FiGamesPage() {
     return () => clearInterval(interval)
   }, [])
 
-  const categories = gameCategories[currentLang].filter(cat => allGames.some(game => game.category === cat.id && game.playable)); // Only show categories with playable games
-  const featuredGames = useMemo(() => featuredGamesIds.map(id => allGames.find(game => game.id === id && game.playable)).filter(Boolean) as Game[], [currentLang]);
+  const categories = gameCategories.filter(cat => allGames.some(game => game.category === cat.id && game.playable)); // Only show categories with playable games
+  const featuredGames = useMemo(() => featuredGamesIds.map(id => allGames.find(game => game.id === id && game.playable)).filter(Boolean) as Game[], []);
 
   const filteredGames = useMemo(() => {
-    let games = allGames.filter(game => game.playable && game.title[currentLang].toLowerCase().includes(searchQuery.toLowerCase()));
+    let games = allGames.filter(game => game.playable && game.title.toLowerCase().includes(searchQuery.toLowerCase()));
 
     if (selectedCategory !== "all") {
       games = games.filter(game => game.category === selectedCategory);
     }
     return games;
-  }, [selectedCategory, searchQuery, currentLang]);
+  }, [selectedCategory, searchQuery]);
 
 
   const nextSlide = () => {
@@ -115,35 +69,52 @@ export default function FiGamesPage() {
   }
 
   const handlePlayGame = (game: Game) => {
-    if (!game.playable || !game.component) {
-      console.warn("Attempted to play a non-playable game or a game without a component:", game.id);
+    if (!game.playable) {
+      console.warn("Attempted to play a non-playable game:", game.id);
       return;
     }
 
-    setLoadingGame(game)
-    setGameLoading(true)
-    setLoadingProgress(0)
+    // Special handling for Fruit Crush to open as a page
+    if (game.id === "fruit-crush") {
+      setLoadingGame(game)
+      setGameLoading(true)
+      setLoadingProgress(0)
 
-    const interval = setInterval(() => {
-      setLoadingProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval)
-          setGameLoading(false)
-          // If the game component is a full page, navigate to it
-          if (game.id === "fruit-crush") { // Special handling for Fruit Crush page
-            router.push(`/fruit-crush`);
-          } else {
-            setActiveGameComponent(() => game.component!); // Set the component to render as modal
+      const interval = setInterval(() => {
+        setLoadingProgress((prev) => {
+          if (prev >= 100) {
+            clearInterval(interval)
+            setGameLoading(false)
+            router.push('/fruit-crush'); // Navigate to the dedicated page
+            return 100
           }
-          return 100
-        }
-        return prev + Math.random() * 15 + 5
-      })
-    }, 100)
+          return prev + Math.random() * 15 + 5
+        })
+      }, 100)
+    } else if (game.component) {
+      // For other games, open as a modal
+      setLoadingGame(game)
+      setGameLoading(true)
+      setLoadingProgress(0)
+
+      const interval = setInterval(() => {
+        setLoadingProgress((prev) => {
+          if (prev >= 100) {
+            clearInterval(interval)
+            setGameLoading(false)
+            setActiveGameId(game.id); // Set the ID of the game to be active
+            return 100
+          }
+          return prev + Math.random() * 15 + 5
+        })
+      }, 100)
+    } else {
+      console.warn("Game has no component or is not configured as a page:", game.id);
+    }
   }
 
   const handleCloseGame = () => {
-    setActiveGameComponent(null)
+    setActiveGameId(null) // Clear the active game ID
     setLoadingGame(null)
   }
 
@@ -200,19 +171,8 @@ export default function FiGamesPage() {
             className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
-            <span className="text-sm md:text-base">{t("back")}</span>
+            <span className="text-sm md:text-base">Back</span>
           </button>
-          {/* Language Selector (Optional, can be added here) */}
-          <select
-            value={currentLang}
-            onChange={(e) => setLanguage(e.target.value as 'en' | 'pt' | 'es' | 'id')}
-            className="bg-white/10 text-white rounded-md px-2 py-1 text-sm"
-          >
-            <option value="en">English</option>
-            <option value="pt">Português</option>
-            <option value="es">Español</option>
-            <option value="id">Bahasa Indonesia</option>
-          </select>
         </div>
 
         {/* Intro Video */}
@@ -243,7 +203,7 @@ export default function FiGamesPage() {
           transition={{ duration: 0.8, delay: 0.4 }}
           className="mb-8 md:mb-12"
         >
-          <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6 text-center">{t("featured")}</h2>
+          <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6 text-center">Featured Games</h2>
           <div className="relative max-w-4xl mx-auto">
             <div className="relative h-48 md:h-64 rounded-2xl overflow-hidden">
               <AnimatePresence mode="wait">
@@ -255,31 +215,31 @@ export default function FiGamesPage() {
                     exit={{ opacity: 0, x: -300 }}
                     transition={{ duration: 0.5 }}
                     className={`absolute inset-0 bg-gradient-to-r ${
-                      gameCategories[currentLang].find(cat => cat.id === featuredGames[currentSlide]?.category)?.gradient || "from-gray-600 to-gray-800"
-                    } rounded-2xl`}
+                      gameCategories.find(cat => cat.id === featuredGames[currentSlide]?.category)?.gradient || "from-gray-600 to-gray-800"
+                    }`}
                   >
                     <div className="absolute inset-0 bg-black/40" />
                     <div className="relative z-10 h-full flex items-center justify-between p-4 md:p-8">
                       <div className="flex-1">
-                        <h3 className="text-xl md:text-3xl font-bold mb-2">{featuredGames[currentSlide].title[currentLang]}</h3>
+                        <h3 className="text-xl md:text-3xl font-bold mb-2">{featuredGames[currentSlide].title}</h3>
                         <p className="text-sm md:text-lg text-gray-200 mb-4">
-                          {featuredGames[currentSlide].description[currentLang]}
+                          {featuredGames[currentSlide].description}
                         </p>
                         <button
                           onClick={() => handlePlayGame(featuredGames[currentSlide])}
                           className={`bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30 text-white px-4 md:px-6 py-2 rounded-lg transition-all duration-300 flex items-center space-x-2 text-sm md:text-base`}
                         >
                           <Play className="w-4 h-4" />
-                          <span>{t("playNow")}</span>
+                          <span>Play Now</span>
                         </button>
                       </div>
                       <div className="w-24 h-16 md:w-48 md:h-32 bg-white/10 rounded-lg flex items-center justify-center ml-4 md:ml-8 overflow-hidden">
                         <Image
                           src={featuredGames[currentSlide].image || "/placeholder.svg"}
-                          alt={featuredGames[currentSlide].title[currentLang]}
+                          alt={featuredGames[currentSlide].title}
                           width={192}
                           height={128}
-                          className="rounded-lg object-cover w-full h-full"
+                          className="object-cover w-full h-full"
                         />
                       </div>
                     </div>
@@ -323,7 +283,6 @@ export default function FiGamesPage() {
         categories={categories}
         selectedCategory={selectedCategory}
         onSelectCategory={setSelectedCategory}
-        translations={t}
       />
 
       {/* Search Bar */}
@@ -331,7 +290,7 @@ export default function FiGamesPage() {
         <SearchBar
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
-          placeholder={t("searchPlaceholder")}
+          placeholder="Search games..."
         />
 
         {/* Game Grid */}
@@ -341,7 +300,7 @@ export default function FiGamesPage() {
           transition={{ duration: 0.8, delay: 0.6 }}
         >
           <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6 text-center">
-            {selectedCategory === "all" ? t("categories") : gameCategories[currentLang].find(cat => cat.id === selectedCategory)?.name || t("categories")}
+            {selectedCategory === "all" ? "Game Categories" : gameCategories.find(cat => cat.id === selectedCategory)?.name || "Game Categories"}
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4 max-w-6xl mx-auto">
             {filteredGames.map((game, index) => (
@@ -357,13 +316,13 @@ export default function FiGamesPage() {
                 <div className="w-20 h-20 md:w-24 md:h-24 rounded-lg overflow-hidden mb-2 md:mb-3 flex items-center justify-center bg-white/5">
                   <Image
                     src={game.image || "/placeholder.svg"}
-                    alt={game.title[currentLang]}
+                    alt={game.title}
                     width={96}
                     height={96}
                     className="object-cover w-full h-full"
                   />
                 </div>
-                <span className="text-xs md:text-sm font-medium text-white">{game.title[currentLang]}</span>
+                <span className="text-xs md:text-sm font-medium text-white">{game.title}</span>
                 <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl">
                   <Play className="w-8 h-8 text-white" />
                 </div>
@@ -396,19 +355,19 @@ export default function FiGamesPage() {
               <div className="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden">
                 <Image
                   src={loadingGame.image || "/placeholder.svg"}
-                  alt={`${loadingGame.title[currentLang]} Logo`}
+                  alt={`${loadingGame.title} Logo`}
                   width={80}
                   height={80}
                   className="w-full h-full object-cover"
                 />
               </div>
-              <h3 className="text-2xl font-bold mb-4">{t("loading")}</h3>
+              <h3 className="text-2xl font-bold mb-4">Loading Game...</h3>
 
               {/* Loading Bar */}
               <div className="w-full bg-gray-700 rounded-full h-4 mb-4 overflow-hidden">
                 <motion.div
                   className={`h-full rounded-full ${
-                    gameCategories[currentLang].find(cat => cat.id === loadingGame.category)?.gradient || "bg-gray-500"
+                    gameCategories.find(cat => cat.id === loadingGame.category)?.gradient || "bg-gray-500"
                   }`}
                   initial={{ width: "0%" }}
                   animate={{ width: `${loadingProgress}%` }}
@@ -418,7 +377,7 @@ export default function FiGamesPage() {
 
               <div
                 className={`text-lg font-semibold ${
-                  gameCategories[currentLang].find(cat => cat.id === loadingGame.category)?.gradient.split(' ')[0].replace('from-', 'text-').replace('-500', '-400') || "text-gray-400"
+                  gameCategories.find(cat => cat.id === loadingGame.category)?.gradient.split(' ')[0].replace('from-', 'text-').replace('-500', '-400') || "text-gray-400"
                 }`}
               >
                 {Math.round(loadingProgress)}%
@@ -428,16 +387,16 @@ export default function FiGamesPage() {
         )}
       </AnimatePresence>
 
-      {/* Active Game Component Modal (for games that are not full pages) */}
+      {/* Active Game Component Modal */}
       <AnimatePresence>
-        {activeGameComponent && (
+        {activeGameId && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4"
           >
-            {activeGameComponent({ onClose: handleCloseGame })}
+            <GameModal gameId={activeGameId} onClose={handleCloseGame} />
           </motion.div>
         )}
       </AnimatePresence>
