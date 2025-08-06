@@ -7,7 +7,8 @@ import { useRouter } from "next/navigation"
 import { MiniKit } from "@worldcoin/minikit-js"
 import { useMiniKit } from "../../hooks/use-minikit"
 import Image from "next/image"
-import { BackgroundEffect } from "@/components/background-effect" // Import BackgroundEffect
+import { BackgroundEffect } from "@/components/background-effect"
+import { AnimatedText } from "@/components/animated-text"
 
 // Supported languages
 const SUPPORTED_LANGUAGES = ["en", "pt", "es", "id"] as const
@@ -17,8 +18,8 @@ type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number]
 const translations = {
   en: {
     title: "FiStaking",
-    subtitle:
-      "Just for having TPulseFi you are entitled to passive earnings from other tokens, the more TPF you have, the more you earn!",
+    infoBoxText: "TPulseFi: Earn passive rewards. Your TPF increases your earnings.",
+    supportContact: "For token listing on our app, contact support@tradepulsetoken.com",
     back: "Back",
     claim: "Claim",
     claiming: "Claiming...",
@@ -30,11 +31,15 @@ const translations = {
     dismiss: "Dismiss",
     powerActivated: "Power Activated",
     instructionText: "Blue button - TPF Holders, Green button - PSC Holders.",
+    availableClaims: "Available Claims",
+    futureClaims: "Future Claims",
+    noFutureClaims: "No future claims available at this time.",
+    futureClaimsInfo: "These tokens will be available for staking in the future. Stay tuned!",
   },
   pt: {
     title: "FiStaking",
-    subtitle:
-      "Só por teres TPulseFi tens direito a ganhos passivos de outros tokens, quanto mais TPF tiveres, mais ganhas!",
+    infoBoxText: "TPulseFi: Ganhe recompensas passivas. Seu TPF aumenta seus ganhos.",
+    supportContact: "Para listagem de um token no nosso aplicativo contacte a equipa de suporte - support@tradepulsetoken.com",
     back: "Voltar",
     claim: "Reclamar",
     claiming: "Reclamando...",
@@ -46,11 +51,15 @@ const translations = {
     dismiss: "Dispensar",
     powerActivated: "Energia Ativada",
     instructionText: "Botão azul - Holders TPF, Botão verde - Holders PSC.",
+    availableClaims: "Recompensas Disponíveis",
+    futureClaims: "Recompensas Futuras",
+    noFutureClaims: "Nenhuma recompensa futura disponível no momento.",
+    futureClaimsInfo: "Esses tokens estarão disponíveis para staking no futuro. Fique ligado!",
   },
   es: {
     title: "FiStaking",
-    subtitle:
-      "¡Solo por tener TPulseFi tienes derecho a ganancias pasivas de otros tokens, cuanto más TPF tengas, más ganas!",
+    infoBoxText: "TPulseFi: Gana recompensas pasivas. Tu TPF aumenta tus ganancias.",
+    supportContact: "Para listar un token en nuestra aplicación, contacte a support@tradepulsetoken.com",
     back: "Volver",
     claim: "Reclamar",
     claiming: "Reclamando...",
@@ -62,11 +71,15 @@ const translations = {
     dismiss: "Descartar",
     powerActivated: "Energía Activada",
     instructionText: "Botón azul - Holders TPF, Botón verde - Holders PSC.",
+    availableClaims: "Reclamaciones Disponibles",
+    futureClaims: "Reclamaciones Futuras",
+    noFutureClaims: "No hay reclamaciones futuras disponibles en este momento.",
+    futureClaimsInfo: "Estos tokens estarán disponibles para staking en el futuro. ¡Mantente informado!",
   },
   id: {
     title: "FiStaking",
-    subtitle:
-      "Hanya dengan memiliki TPulseFi Anda berhak mendapat penghasilan pasif dari token lain, semakin banyak TPF yang Anda miliki, semakin banyak yang Anda peroleh!",
+    infoBoxText: "TPulseFi: Dapatkan hadiah pasif. TPF Anda meningkatkan penghasilan Anda.",
+    supportContact: "Untuk daftar token di aplikasi kami, hubungi support@tradepulsetoken.com",
     back: "Kembali",
     claim: "Klaim",
     claiming: "Mengklaim...",
@@ -78,6 +91,10 @@ const translations = {
     dismiss: "Tutup",
     powerActivated: "Daya Diaktifkan",
     instructionText: "Tombol biru - Pemegang TPF, Tombol hijau - Pemegang PSC.",
+    availableClaims: "Klaim Tersedia",
+    futureClaims: "Klaim Mendatang",
+    noFutureClaims: "Tidak ada klaim mendatang yang tersedia saat ini.",
+    futureClaimsInfo: "Token ini akan tersedia untuk staking di masa mendatang. Nantikan!",
   },
 }
 
@@ -104,7 +121,7 @@ interface StakingContract {
   holderType: "tpf_holder" | "psc_holder" // Added to differentiate for styling
 }
 
-// Staking contracts configuration
+// Staking contracts configuration for AVAILABLE claims
 const STAKING_CONTRACTS: Record<string, StakingContract | StakingGroup> = {
   PSC_GROUP: {
     name: "PulseCode Token",
@@ -160,6 +177,17 @@ const STAKING_CONTRACTS: Record<string, StakingContract | StakingGroup> = {
     address: "0x2aaeC7df37AA5799a9E721A1B338aa2d591acd64",
     image: "/images/keplerpay-logo.png",
     holderType: "psc_holder",
+  },
+}
+
+// Staking contracts configuration for FUTURE claims
+const FUTURE_STAKING_CONTRACTS: Record<string, StakingContract> = {
+  FIDES: {
+    name: "Fides Aeterna",
+    symbol: "$Fides",
+    address: "0x83fe342771839409A36Bb9320d9De869291FEe28",
+    image: "/images/fides-aeterna.png",
+    holderType: "psc_holder", // Assuming a default holder type for future claims
   },
 }
 
@@ -447,6 +475,29 @@ function BatteryIndicator({ currentLang }: { currentLang: SupportedLanguage }) {
   )
 }
 
+// Info Box Component
+function InfoBox({ currentLang }: { currentLang: SupportedLanguage }) {
+  const t = translations[currentLang]
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.5, delay: 0.2 }}
+      className="absolute top-4 right-4 z-20 bg-gray-900/70 backdrop-blur-sm rounded-lg p-2 flex flex-col items-center space-y-2 border border-gray-700/50 shadow-lg"
+    >
+      <div className="flex items-center space-x-2">
+        <BatteryIndicator currentLang={currentLang} />
+        <p className="text-gray-300 text-[10px] leading-tight max-w-[120px]">
+          {t.infoBoxText}
+        </p>
+      </div>
+      <p className="text-gray-400 text-[9px] text-center leading-tight px-1">
+        {t.supportContact}
+      </p>
+    </motion.div>
+  )
+}
+
 export default function FiStakingPage() {
   const router = useRouter()
   const { user, isAuthenticated } = useMiniKit()
@@ -456,6 +507,7 @@ export default function FiStakingPage() {
   const [claiming, setClaiming] = useState<string | null>(null)
   const [claimSuccess, setClaimSuccess] = useState<string | null>(null)
   const [claimError, setClaimError] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState<'available' | 'future'>('available'); // New state for tabs
 
   // Load saved language
   useEffect(() => {
@@ -555,15 +607,8 @@ export default function FiStakingPage() {
   return (
     <main className="min-h-screen bg-black relative overflow-hidden flex flex-col items-center pt-4 pb-6">
       <BackgroundEffect /> {/* Adicionado BackgroundEffect component */}
-      {/* Battery Indicator - Top Right */}
-      <motion.div
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.5 }}
-        className="absolute top-4 right-4 z-20"
-      >
-        <BatteryIndicator currentLang={currentLang} />
-      </motion.div>
+      {/* Info Box - Top Right */}
+      <InfoBox currentLang={currentLang} />
       {/* Back Button */}
       <motion.div
         initial={{ opacity: 0, x: -20 }}
@@ -587,13 +632,15 @@ export default function FiStakingPage() {
       >
         <h1 className="text-2xl font-bold tracking-tighter flex items-center justify-center">
           <TrendingUp className="w-5 h-5 mr-2 text-purple-400" />
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-gray-200 via-white to-gray-300">
-            {t.title}
-          </span>
+          <AnimatedText
+            text={t.title}
+            className="bg-clip-text text-transparent bg-gradient-to-r from-gray-200 via-white to-gray-300"
+            initialDelay={0.5}
+            delayPerWord={0.1}
+          />
         </h1>
-        <p className="text-gray-400 text-xs mt-1 leading-relaxed px-4">{t.subtitle}</p>
       </motion.div>
-      <div className="w-full max-w-sm px-4 relative z-10 space-y-3">
+      <div className="w-full max-w-md px-4 relative z-10 space-y-4">
         {/* Success Message */}
         <AnimatePresence>
           {claimSuccess && (
@@ -655,106 +702,229 @@ export default function FiStakingPage() {
           </motion.div>
         ) : (
           <>
-            {/* Instruction Text */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.1 }}
-              className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-lg p-3 text-center text-xs text-gray-300 mb-4"
-            >
-              <p>{t.instructionText}</p>
-            </motion.div>
-            <div className="grid grid-cols-2 gap-4">
-              {Object.entries(STAKING_CONTRACTS).map(([key, entry], index) => {
-                const isGroup = "isGroup" in entry && entry.isGroup
-                const item = isGroup ? (entry as StakingGroup) : (entry as StakingContract)
-                const isClaimingThis = claiming === key || (isGroup && claiming?.startsWith(`${key}-`))
-
-                return (
-                  <motion.div
-                    key={key}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.3, delay: index * 0.05 }}
-                    className="relative aspect-square rounded-lg overflow-hidden border border-gray-700/50 shadow-lg flex flex-col justify-end p-3"
-                  >
-                    {/* Background Image */}
-                    <Image
-                      src={item.image || "/placeholder.svg"}
-                      alt={item.name}
-                      layout="fill"
-                      objectFit="cover"
-                      className="absolute inset-0 z-0 opacity-30"
-                    />
-                    {/* Overlay for readability */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent z-10" />
-
-                    <div className="relative z-20 text-white">
-                      <h3 className="font-bold text-lg">{item.symbol}</h3>
-                      <p className="text-gray-300 text-xs mb-3">{item.name}</p>
-
-                      {isGroup ? (
-                        <div className="flex flex-col gap-2">
-                          {(item as StakingGroup).buttons.map((button) => {
-                            const isButtonClaiming = claiming === `${key}-${button.key}`
-                            return (
-                              <button
-                                key={button.key}
-                                onClick={() => handleClaim(key, button.key)}
-                                disabled={isButtonClaiming}
-                                className={`py-1.5 px-3 rounded-md font-medium text-xs transition-all duration-300 flex items-center justify-center space-x-1 ${
-                                  isButtonClaiming
-                                    ? "bg-gray-600/50 text-gray-400 cursor-not-allowed"
-                                    : button.holderType === "tpf_holder"
-                                      ? "bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white" // Blue for TPF holders
-                                      : "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white" // Green for PSC holders
-                                }`}
-                              >
-                                {isButtonClaiming ? (
-                                  <>
-                                    <Loader2 className="w-3 h-3 animate-spin" />
-                                    <span>{t.claiming}</span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <Gift className="w-3 h-3" />
-                                    <span>
-                                      {t.claim} {button.name}
-                                    </span>
-                                  </>
-                                )}
-                              </button>
-                            )
-                          })}
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => handleClaim(key)}
-                          disabled={isClaimingThis}
-                          className={`w-full py-1.5 px-3 rounded-md font-medium text-xs transition-all duration-300 flex items-center justify-center space-x-1 ${
-                            isClaimingThis
-                              ? "bg-gray-600/50 text-gray-400 cursor-not-allowed"
-                              : "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
-                          }`}
-                        >
-                          {isClaimingThis ? (
-                            <>
-                              <Loader2 className="w-3 h-3 animate-spin" />
-                              <span>{t.claiming}</span>
-                            </>
-                          ) : (
-                            <>
-                              <Gift className="w-3 h-3" />
-                              <span>{t.claim}</span>
-                            </>
-                          )}
-                        </button>
-                      )}
-                    </div>
-                  </motion.div>
-                )
-              })}
+            {/* Tabs */}
+            <div className="flex bg-gray-800/50 backdrop-blur-sm rounded-lg p-1 border border-gray-700/50 mb-4">
+              <button
+                className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${
+                  activeTab === 'available' ? 'bg-purple-600 text-white shadow-md' : 'text-gray-300 hover:bg-gray-700/50'
+                }`}
+                onClick={() => setActiveTab('available')}
+              >
+                {t.availableClaims}
+              </button>
+              <button
+                className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${
+                  activeTab === 'future' ? 'bg-purple-600 text-white shadow-md' : 'text-gray-300 hover:bg-gray-700/50'
+                }`}
+                onClick={() => setActiveTab('future')}
+              >
+                {t.futureClaims}
+              </button>
             </div>
+
+            {/* Content based on active tab */}
+            {activeTab === 'available' ? (
+              <>
+                {/* Instruction Text */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.1 }}
+                  className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-lg p-3 text-center text-xs text-gray-300 mb-4"
+                >
+                  <p>{t.instructionText}</p>
+                </motion.div>
+                <div className="grid grid-cols-2 gap-4">
+                  {Object.entries(STAKING_CONTRACTS).map(([key, entry], index) => {
+                    const isGroup = "isGroup" in entry && entry.isGroup
+                    const item = isGroup ? (entry as StakingGroup) : (entry as StakingContract)
+                    const isClaimingThis = claiming === key || (isGroup && claiming?.startsWith(`${key}-`))
+
+                    return (
+                      <motion.div
+                        key={key}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{
+                          opacity: 1,
+                          scale: 1,
+                          boxShadow: [
+                            "0 0 10px rgba(147, 51, 234, 0.3), 0 0 5px rgba(236, 72, 153, 0.2)",
+                            "0 0 25px rgba(147, 51, 234, 0.6), 0 0 10px rgba(236, 72, 153, 0.4)",
+                            "0 0 10px rgba(147, 51, 234, 0.3), 0 0 5px rgba(236, 72, 153, 0.2)",
+                          ],
+                        }}
+                        transition={{
+                          duration: 0.3,
+                          delay: index * 0.05,
+                          boxShadow: {
+                            duration: 2, // Duration for the glow animation
+                            ease: "easeInOut",
+                            repeat: Infinity,
+                            repeatType: "reverse",
+                          },
+                        }}
+                        className="relative aspect-square rounded-lg overflow-hidden border border-gray-700/50 shadow-lg flex flex-col justify-end p-3"
+                      >
+                        {/* Decorative Bar at the top */}
+                        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-purple-500 to-pink-500 z-20" />
+
+                        {/* Background Image */}
+                        <Image
+                          src={item.image || "/placeholder.svg"}
+                          alt={item.name}
+                          layout="fill"
+                          objectFit="cover"
+                          className="absolute inset-0 z-0 opacity-30"
+                        />
+                        {/* Overlay for readability */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent z-10" />
+
+                        <div className="relative z-20 text-white">
+                          <h3 className="font-bold text-lg">{item.symbol}</h3>
+                          <p className="text-gray-300 text-xs mb-3">{item.name}</p>
+
+                          {isGroup ? (
+                            <div className="flex flex-col gap-2">
+                              {(item as StakingGroup).buttons.map((button) => {
+                                const isButtonClaiming = claiming === `${key}-${button.key}`
+                                return (
+                                  <motion.button
+                                    key={button.key}
+                                    onClick={() => handleClaim(key, button.key)}
+                                    disabled={isButtonClaiming}
+                                    whileTap={{ scale: 0.95 }} // Added tap animation
+                                    whileHover={{ scale: 1.02 }} // Subtle hover scale
+                                    className={`py-2 px-3 rounded-md font-bold text-sm transition-all duration-300 flex items-center justify-center space-x-1 shadow-md border border-gray-400
+                                      ${
+                                        isButtonClaiming
+                                          ? "bg-gray-600/50 text-gray-400 cursor-not-allowed"
+                                          : "bg-gradient-to-br from-gray-300 to-gray-500 hover:from-gray-200 hover:to-gray-400 text-black" // Silver style
+                                      }`}
+                                  >
+                                    {isButtonClaiming ? (
+                                      <>
+                                        <Loader2 className="w-4 h-4 animate-spin text-black" />
+                                        <span>{t.claiming}</span>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Gift className="w-4 h-4 text-black" />
+                                        <span>
+                                          {t.claim} {button.name}
+                                        </span>
+                                      </>
+                                    )}
+                                  </motion.button>
+                                )
+                              })}
+                            </div>
+                          ) : (
+                            <motion.button
+                              onClick={() => handleClaim(key)}
+                              disabled={isClaimingThis}
+                              whileTap={{ scale: 0.95 }} // Added tap animation
+                              whileHover={{ scale: 1.02 }} // Subtle hover scale
+                              className={`w-full py-2 px-3 rounded-md font-bold text-sm transition-all duration-300 flex items-center justify-center space-x-1 shadow-md border border-gray-400
+                                ${
+                                  isClaimingThis
+                                    ? "bg-gray-600/50 text-gray-400 cursor-not-allowed"
+                                    : "bg-gradient-to-br from-gray-300 to-gray-500 hover:from-gray-200 hover:to-gray-400 text-black" // Silver style
+                                }`}
+                            >
+                              {isClaimingThis ? (
+                                <>
+                                  <Loader2 className="w-4 h-4 animate-spin text-black" />
+                                  <span>{t.claiming}</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Gift className="w-4 h-4 text-black" />
+                                  <span>{t.claim}</span>
+                                </>
+                              )}
+                            </motion.button>
+                          )}
+                        </div>
+                      </motion.div>
+                    )
+                  })}
+                </div>
+              </>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-4"
+              >
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.1 }}
+                  className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-lg p-3 text-center text-xs text-gray-300 mb-4"
+                >
+                  <p>{t.futureClaimsInfo}</p>
+                </motion.div>
+                <div className="grid grid-cols-2 gap-4">
+                  {Object.entries(FUTURE_STAKING_CONTRACTS).map(([key, item], index) => (
+                    <motion.div
+                      key={key}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{
+                        opacity: 1,
+                        scale: 1,
+                        boxShadow: [
+                          "0 0 10px rgba(147, 51, 234, 0.3), 0 0 5px rgba(236, 72, 153, 0.2)",
+                          "0 0 25px rgba(147, 51, 234, 0.6), 0 0 10px rgba(236, 72, 153, 0.4)",
+                          "0 0 10px rgba(147, 51, 234, 0.3), 0 0 5px rgba(236, 72, 153, 0.2)",
+                        ],
+                      }}
+                      transition={{
+                        duration: 0.3,
+                        delay: index * 0.05,
+                        boxShadow: {
+                          duration: 2, // Duration for the glow animation
+                          ease: "easeInOut",
+                          repeat: Infinity,
+                          repeatType: "reverse",
+                        },
+                      }}
+                      className="relative aspect-square rounded-lg overflow-hidden border border-gray-700/50 shadow-lg flex flex-col justify-end p-3"
+                    >
+                      {/* Decorative Bar at the top */}
+                      <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-purple-500 to-pink-500 z-20" />
+
+                      {/* Background Image */}
+                      <Image
+                        src={item.image || "/placeholder.svg"}
+                        alt={item.name}
+                        layout="fill"
+                        objectFit="cover"
+                        className="absolute inset-0 z-0 opacity-30"
+                      />
+                      {/* Overlay for readability */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent z-10" />
+
+                      <div className="relative z-20 text-white">
+                        <h3 className="font-bold text-lg">{item.symbol}</h3>
+                        <p className="text-gray-300 text-xs mb-3">{item.name}</p>
+                        <motion.button
+                          disabled
+                          className="w-full py-2 px-3 rounded-md font-bold text-sm transition-all duration-300 flex items-center justify-center space-x-1 shadow-md border border-gray-400 bg-gray-600/50 text-gray-400 cursor-not-allowed"
+                        >
+                          <Gift className="w-4 h-4" />
+                          <span>{t.soon}</span>
+                        </motion.button>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+                {Object.keys(FUTURE_STAKING_CONTRACTS).length === 0 && (
+                  <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-lg p-4 text-center text-gray-300 text-sm">
+                    {t.noFutureClaims}
+                  </div>
+                )}
+              </motion.div>
+            )}
           </>
         )}
       </div>
