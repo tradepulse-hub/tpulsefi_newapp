@@ -395,7 +395,7 @@ export default function SnakeGameMobile({ onClose }: SnakeGameMobileProps) {
 
       {/* Game Area - Adjusted to be higher */}
       <div className="flex-1 flex flex-col items-center justify-center p-4"> {/* Changed justify-start to justify-center, removed pt-16 */}
-        <div className="relative mt-[-80px]"> {/* Added negative top margin to pull it up */}
+        <div className="relative mt-[-160px]"> {/* Adjusted negative top margin to pull it up further */}
           <canvas
             ref={canvasRef}
             width={CANVAS_WIDTH}
