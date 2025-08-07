@@ -1295,21 +1295,21 @@ return (
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.8, opacity: 0, y: 50 }}
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
-          className="relative bg-black/90 backdrop-blur-xl border border-white/20 rounded-2xl p-4 max-w-4xl w-full mx-4 shadow-2xl text-white text-center" // Aumentado para max-w-4xl e p-4
+          className="relative bg-black/90 backdrop-blur-xl border border-white/20 rounded-2xl p-3 max-w-4xl w-full mx-4 shadow-2xl text-white text-center" // Reduzido p-4 para p-3
           onClick={(e) => e.stopPropagation()}
         >
           {/* Close Button */}
           <button
             onClick={handleCloseWelcomeModal}
-            className="absolute top-3 right-3 w-7 h-7 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all duration-200"
+            className="absolute top-2 right-2 w-6 h-6 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all duration-200" // Reduzido w-7 h-7 para w-6 h-6
           >
             <X className="w-3 h-3 text-white" />
           </button>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3"> {/* Reduzido gap-4 para gap-3 */}
           {/* HoldStation Section */}
-          <div className="flex flex-col items-center p-3 bg-gray-800/50 rounded-lg border border-white/10">
-            <a href="https://worldcoin.org/mini-app?app_id=app_0d4b759921490adc1f2bd569fda9b53a&app_mode=mini-app" target="_blank" rel="noopener noreferrer" className="block mb-2 w-full">
+          <div className="flex flex-col items-center p-2 bg-gray-800/50 rounded-lg border border-white/10"> {/* Reduzido p-3 para p-2 */}
+            <a href="https://worldcoin.org/mini-app?app_id=app_0d4b759921490adc1f2bd569fda9b53a&app_mode=mini-app" target="_blank" rel="noopener noreferrer" className="block mb-1 w-full"> {/* Reduzido mb-2 para mb-1 */}
               <Image
                 src="/images/holdstation-promotionpopup.jpg"
                 alt="SWAP TO EARN BIG $10,000 Rewards"
@@ -1318,18 +1318,18 @@ return (
                 className="mx-auto rounded-lg shadow-xl w-full object-contain"
               />
             </a>
-            <h2 className="text-lg font-bold mb-1">{t.popup?.title || "Grandes Recompensas na HoldStation!"}</h2>
-            <p className="text-gray-300 text-sm mb-1">
+            <h2 className="text-base font-bold mb-0.5">{t.popup?.title || "Grandes Recompensas na HoldStation!"}</h2> {/* Reduzido text-lg para text-base, mb-2 para mb-0.5 */}
+            <p className="text-gray-300 text-xs mb-0.5"> {/* Reduzido text-sm para text-xs, mb-1 para mb-0.5 */}
               {t.popup?.description || "10000$ em jogo! Vais querer perder a competição de trade do nosso parceiro HoldStation e as taxas mais baratas na World? Aproveita!"}
             </p>
-            <p className="text-gray-400 text-xs">
+            <p className="text-gray-400 text-[0.6rem]"> {/* Reduzido text-sm para text-[0.6rem] */}
               {t.popup?.moreInfo || "(Mais informações disponíveis na App HoldStation)"}
             </p>
           </div>
 
           {/* FiGames Section */}
-          <div className="flex flex-col items-center p-3 bg-gray-800/50 rounded-lg border border-white/10">
-            <div className="block mb-2 w-full">
+          <div className="flex flex-col items-center p-2 bg-gray-800/50 rounded-lg border border-white/10"> {/* Reduzido p-3 para p-2 */}
+            <div className="block mb-1 w-full"> {/* Reduzido mb-2 para mb-1 */}
               <Image
                 src="/images/figamespopup.jpg"
                 alt="FiGames - Play and Have Fun!"
@@ -1338,30 +1338,31 @@ return (
                 className="mx-auto rounded-lg shadow-xl w-full object-contain"
               />
             </div>
-            <h2 className="text-lg font-bold mt-2 mb-1">{t.popup?.figamesTitle || "FiGames - Jogabilidade Incrível!"}</h2>
-            <p className="text-gray-300 text-sm">
+            <h2 className="text-base font-bold mt-2 mb-0.5">{t.popup?.figamesTitle || "FiGames - Jogabilidade Incrível!"}</h2> {/* Reduzido text-lg para text-base, mt-4 para mt-2, mb-2 para mb-0.5 */}
+            <p className="text-gray-300 text-xs"> {/* Reduzido text-sm para text-xs */}
               {t.popup?.figamesDescription || "FiGames - Uma jogabilidade incrível no nosso aplicativo que ainda está em desenvolvimento."}
             </p>
           </div>
 
           {/* Placeholder Section 3 */}
-          <div className="flex flex-col items-center justify-center p-3 bg-gray-800/50 rounded-lg border border-white/10 min-h-[200px]">
-            <Gamepad2 className="w-12 h-12 text-gray-500 mb-2" />
-            <h3 className="text-lg font-bold text-gray-400 mb-1">Em Breve</h3>
-            <p className="text-gray-500 text-sm">Mais conteúdo emocionante a caminho!</p>
+          <div className="flex flex-col items-center justify-center p-2 bg-gray-800/50 rounded-lg border border-white/10 min-h-[150px]"> {/* Reduzido p-3 para p-2, min-h-[200px] para min-h-[150px] */}
+            <Gamepad2 className="w-8 h-8 text-gray-500 mb-1" /> {/* Reduzido w-12 h-12 para w-8 h-8, mb-2 para mb-1 */}
+            <h3 className="text-base font-bold text-gray-400 mb-0.5">Em Breve</h3> {/* Reduzido text-lg para text-base, mb-1 para mb-0.5 */}
+            <p className="text-gray-500 text-xs">Mais conteúdo emocionante a caminho!</p> {/* Reduzido text-sm para text-xs */}
           </div>
 
           {/* Placeholder Section 4 */}
-          <div className="flex flex-col items-center justify-center p-3 bg-gray-800/50 rounded-lg border border-white/10 min-h-[200px]">
-            <Star className="w-12 h-12 text-gray-500 mb-2" />
-            <h3 className="text-lg font-bold text-gray-400 mb-1">Novidades</h3>
-            <p className="text-gray-500 text-sm">Fique atento às últimas atualizações.</p>
+          <div className="flex flex-col items-center justify-center p-2 bg-gray-800/50 rounded-lg border border-white/10 min-h-[150px]"> {/* Reduzido p-3 para p-2, min-h-[200px] para min-h-[150px] */}
+            <Star className="w-8 h-8 text-gray-500 mb-1" /> {/* Reduzido w-12 h-12 para w-8 h-8, mb-2 para mb-1 */}
+            <h3 className="text-base font-bold text-gray-400 mb-0.5">Novidades</h3> {/* Reduzido text-lg para text-base, mb-1 para mb-0.5 */}
+            <p className="text-gray-500 text-xs">Fique atento às últimas atualizações.</p> {/* Reduzido text-sm para text-xs */}
           </div>
         </div>
 
         {/* CTA Button */}
         <button
-          className="mt-6 px-5 py-2.5 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg text-sm"
+          onClick={handleCloseWelcomeModal}
+          className="mt-4 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg text-xs" // Reduzido mt-6 para mt-4, px-5 py-2.5 para px-4 py-2, text-sm para text-xs
         >
           Começar
         </button>
