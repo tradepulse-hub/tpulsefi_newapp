@@ -31,8 +31,8 @@ interface SpaceShooterMobileProps {
   onClose: () => void
 }
 
-const GAME_WIDTH = 350
-const GAME_HEIGHT = 600
+const GAME_WIDTH = 300 // Diminuído de 350
+const GAME_HEIGHT = 500 // Diminuído de 600
 const BULLET_SPEED = 6
 const ENEMY_SPEED = 1.5
 
@@ -41,8 +41,8 @@ export default function SpaceShooterMobile({ onClose }: SpaceShooterMobileProps)
   const [score, setScore] = useState(0)
   const [highScore, setHighScore] = useState(0)
   const [player, setPlayer] = useState<Player>({
-    x: GAME_WIDTH / 2 - 25,
-    y: GAME_HEIGHT - 80,
+    x: GAME_WIDTH / 2 - 25, // Ajustado para o novo GAME_WIDTH
+    y: GAME_HEIGHT - 80, // Ajustado para o novo GAME_HEIGHT
     width: 50,
     height: 50,
     health: 3,
@@ -324,7 +324,6 @@ export default function SpaceShooterMobile({ onClose }: SpaceShooterMobileProps)
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      // Adjusted class to fit within GameModal
       className="flex flex-col h-full w-full bg-black text-white"
     >
       {/* Header */}
