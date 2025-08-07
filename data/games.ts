@@ -1,7 +1,8 @@
 import SnakeGameMobile from "@/components/snake-game-mobile"
 import MahjongGameMobile from "@/components/mahjong-game-mobile"
 import SpaceShooterMobile from "@/components/space-shooter-mobile"
-import FruitCrushGame from "@/components/fruit-crush-game" // Import FruitCrushGame
+import FruitCrushGame from "@/components/fruit-crush-game"
+import FlappyBirdGame from "@/components/flappy-bird-game" // Import FlappyBirdGame
 
 export interface Game {
   id: string
@@ -48,6 +49,15 @@ export const allGames: Game[] = [
     image: "/images/fruitcrush-logo.png",
     category: "match3",
     playable: true,
-    component: FruitCrushGame, // Added component property
+    component: FruitCrushGame,
+  },
+  {
+    id: "flappy-bird",
+    title: "Flappy Bird",
+    description: "Guide the bird through pipes! Tap to flap and avoid obstacles.",
+    image: "/images/flappybird-logo.png",
+    category: "skill", // Or a new category like "arcade"
+    playable: true,
+    component: FlappyBirdGame, // Added component property
   },
 ]
