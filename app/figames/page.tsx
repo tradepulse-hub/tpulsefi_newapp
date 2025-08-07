@@ -26,7 +26,7 @@ const gameCategories = [
 ]
 
 // Featured games for slideshow
-const featuredGamesIds = ["space-shooter", "snake-game", "mahjong-solitaire", "fruit-crush"]
+const featuredGamesIds = ["space-shooter", "snake-game", "mahjong-solitaire", "fruit-crush", "flappy-bird"] // Added flappy-bird
 
 export default function FiGamesPage() {
   const router = useRouter()
