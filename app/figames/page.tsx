@@ -283,7 +283,7 @@ export default function FiGamesPage() {
           transition={{ duration: 0.8, delay: 0.6 }}
         >
           <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6 text-center">
-            {selectedCategory === "all" ? "Game Categories" : gameCategories.find(cat => cat.id === selectedCategory)?.name || "Game Categories"}
+            {selectedCategory === "all" ? "All games" : gameCategories.find(cat => cat.id === selectedCategory)?.name || "All games"}
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4 max-w-6xl mx-auto">
             {filteredGames.map((game, index) => (
