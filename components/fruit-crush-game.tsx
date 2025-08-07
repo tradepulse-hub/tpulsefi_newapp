@@ -26,9 +26,7 @@ export default function FruitCrushGame({ onClose }: FruitCrushGameProps) {
         Back
       </Button>
 
-      <h1 className="text-4xl md:text-5xl font-bold mb-4 text-center bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent drop-shadow-lg z-10">
-        Fruit Crush
-      </h1>
+      {/* Removed the h1 title for Fruit Crush */}
 
       {/* Score Display */}
       <div className="absolute top-4 right-4 bg-black/70 backdrop-blur-sm rounded-full px-4 py-2 text-lg font-bold shadow-lg z-20">
