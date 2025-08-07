@@ -18,7 +18,7 @@ export const allGames: Game[] = [
     id: "space-shooter",
     title: "Super Space Shooter",
     description: "Epic space battles await! Pilot your ship through asteroid fields and defeat alien invaders.",
-    image: "/images/spaceshooter-logo.png", // <--- Caminho da imagem atualizado para .jpg
+    image: "/images/spaceshooter-logo.jpg", // <--- Caminho da imagem atualizado para .jpg
     category: "action",
     playable: true,
     component: SpaceShooterMobile,
