@@ -1,8 +1,7 @@
 "use client"
-
 import { useState, useEffect, useCallback, useRef } from "react"
 import { motion } from "framer-motion"
-import { ArrowLeft, RotateCcw, Pause } from "lucide-react"
+import { ArrowLeft, RotateCcw, Pause } from 'lucide-react'
 
 interface Position {
   x: number
@@ -52,7 +51,6 @@ export default function SpaceShooterMobile({ onClose }: SpaceShooterMobileProps)
   const [enemies, setEnemies] = useState<Enemy[]>([])
   const [lastTouchPos, setLastTouchPos] = useState<Position>({ x: 0, y: 0 })
   const [isTouching, setIsTouching] = useState(false)
-
   const gameLoopRef = useRef<number>()
   const bulletIdRef = useRef(0)
   const enemyIdRef = useRef(0)
@@ -99,23 +97,17 @@ export default function SpaceShooterMobile({ onClose }: SpaceShooterMobileProps)
     (e: TouchEvent) => {
       e.preventDefault()
       if (!isTouching || gameState !== "playing") return
-
       const touch = e.touches[0]
       const currentPos = getRelativePosition(touch.clientX, touch.clientY)
-
       const deltaX = currentPos.x - lastTouchPos.x
       const deltaY = currentPos.y - lastTouchPos.y
-
       setPlayer((prev) => {
         let newX = prev.x + deltaX
         let newY = prev.y + deltaY
-
         newX = Math.max(0, Math.min(GAME_WIDTH - prev.width, newX))
         newY = Math.max(0, Math.min(GAME_HEIGHT - prev.height, newY))
-
         return { ...prev, x: newX, y: newY }
       })
-
       setLastTouchPos(currentPos)
     },
     [isTouching, lastTouchPos, gameState],
@@ -132,7 +124,6 @@ export default function SpaceShooterMobile({ onClose }: SpaceShooterMobileProps)
       gameArea.addEventListener("touchstart", handleTouchStart, { passive: false })
       gameArea.addEventListener("touchmove", handleTouchMove, { passive: false })
       gameArea.addEventListener("touchend", handleTouchEnd, { passive: false })
-
       return () => {
         gameArea.removeEventListener("touchstart", handleTouchStart)
         gameArea.removeEventListener("touchmove", handleTouchMove)
@@ -246,7 +237,6 @@ export default function SpaceShooterMobile({ onClose }: SpaceShooterMobileProps)
         if (newScore > 0) {
           setScore((prev) => prev + newScore)
         }
-
         setEnemies(remainingEnemies)
         return remainingBullets
       })
@@ -334,7 +324,8 @@ export default function SpaceShooterMobile({ onClose }: SpaceShooterMobileProps)
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black z-50 flex flex-col"
+      // Adjusted class to fit within GameModal
+      className="flex flex-col h-full w-full bg-black text-white"
     >
       {/* Header */}
       <div className="flex items-center justify-between p-4 bg-black/90 backdrop-blur-sm border-b border-white/10">
@@ -345,7 +336,6 @@ export default function SpaceShooterMobile({ onClose }: SpaceShooterMobileProps)
           <ArrowLeft className="w-5 h-5" />
           <span>Back</span>
         </button>
-
         <div className="flex items-center space-x-4">
           <div className="text-center">
             <div className="text-sm text-gray-400">Score</div>
@@ -356,7 +346,6 @@ export default function SpaceShooterMobile({ onClose }: SpaceShooterMobileProps)
             <div className="text-lg font-bold text-yellow-400">{highScore}</div>
           </div>
         </div>
-
         <div className="flex items-center space-x-2">
           {gameState === "playing" && (
             <button
@@ -374,7 +363,6 @@ export default function SpaceShooterMobile({ onClose }: SpaceShooterMobileProps)
           </button>
         </div>
       </div>
-
       {/* Game Area */}
       <div className="flex-1 flex items-center justify-center p-4">
         <div className="relative">
@@ -401,7 +389,6 @@ export default function SpaceShooterMobile({ onClose }: SpaceShooterMobileProps)
                 />
               ))}
             </div>
-
             {gameState === "playing" && (
               <>
                 {/* Player spaceship */}
@@ -425,7 +412,6 @@ export default function SpaceShooterMobile({ onClose }: SpaceShooterMobileProps)
                       boxShadow: "inset 0 2px 4px rgba(255,255,255,0.3), 0 0 10px rgba(59,130,246,0.5)",
                     }}
                   />
-
                   {/* Cockpit */}
                   <div
                     className="absolute bg-gradient-to-t from-cyan-400 to-cyan-200 rounded-full"
@@ -437,7 +423,6 @@ export default function SpaceShooterMobile({ onClose }: SpaceShooterMobileProps)
                       boxShadow: "0 0 8px rgba(0,255,255,0.8)",
                     }}
                   />
-
                   {/* Wings */}
                   <div
                     className="absolute bg-gradient-to-r from-blue-700 to-blue-500"
@@ -449,7 +434,6 @@ export default function SpaceShooterMobile({ onClose }: SpaceShooterMobileProps)
                       clipPath: "polygon(0% 0%, 100% 20%, 100% 80%, 0% 100%)",
                     }}
                   />
-
                   <div
                     className="absolute bg-gradient-to-l from-blue-700 to-blue-500"
                     style={{
@@ -460,7 +444,6 @@ export default function SpaceShooterMobile({ onClose }: SpaceShooterMobileProps)
                       clipPath: "polygon(100% 0%, 0% 20%, 0% 80%, 100% 100%)",
                     }}
                   />
-
                   {/* Engines */}
                   <div
                     className="absolute bg-gradient-to-t from-orange-500 to-yellow-300 rounded-b-full animate-pulse"
@@ -472,7 +455,6 @@ export default function SpaceShooterMobile({ onClose }: SpaceShooterMobileProps)
                       boxShadow: "0 0 8px rgba(255,165,0,0.9)",
                     }}
                   />
-
                   <div
                     className="absolute bg-gradient-to-t from-orange-500 to-yellow-300 rounded-b-full animate-pulse"
                     style={{
@@ -483,7 +465,6 @@ export default function SpaceShooterMobile({ onClose }: SpaceShooterMobileProps)
                       boxShadow: "0 0 8px rgba(255,165,0,0.9)",
                     }}
                   />
-
                   <div
                     className="absolute bg-gradient-to-t from-red-500 to-orange-300 rounded-b-full animate-pulse"
                     style={{
@@ -495,7 +476,6 @@ export default function SpaceShooterMobile({ onClose }: SpaceShooterMobileProps)
                     }}
                   />
                 </div>
-
                 {/* Bullets */}
                 {bullets.map((bullet) => (
                   <div
@@ -510,7 +490,6 @@ export default function SpaceShooterMobile({ onClose }: SpaceShooterMobileProps)
                     }}
                   />
                 ))}
-
                 {/* Enemies */}
                 {enemies.map((enemy) => (
                   <div
@@ -534,7 +513,6 @@ export default function SpaceShooterMobile({ onClose }: SpaceShooterMobileProps)
                         boxShadow: "inset 0 -2px 4px rgba(255,255,255,0.2), 0 0 8px rgba(239,68,68,0.6)",
                       }}
                     />
-
                     {/* Enemy cockpit */}
                     <div
                       className="absolute bg-gradient-to-b from-orange-400 to-orange-200 rounded-full"
@@ -546,7 +524,6 @@ export default function SpaceShooterMobile({ onClose }: SpaceShooterMobileProps)
                         boxShadow: "0 0 6px rgba(255,165,0,0.8)",
                       }}
                     />
-
                     {/* Enemy wings */}
                     <div
                       className="absolute bg-gradient-to-r from-red-700 to-red-500"
@@ -558,7 +535,6 @@ export default function SpaceShooterMobile({ onClose }: SpaceShooterMobileProps)
                         clipPath: "polygon(0% 100%, 100% 80%, 100% 20%, 0% 0%)",
                       }}
                     />
-
                     <div
                       className="absolute bg-gradient-to-l from-red-700 to-red-500"
                       style={{
@@ -569,7 +545,6 @@ export default function SpaceShooterMobile({ onClose }: SpaceShooterMobileProps)
                         clipPath: "polygon(100% 100%, 0% 80%, 0% 20%, 100% 0%)",
                       }}
                     />
-
                     {/* Enemy engines */}
                     <div
                       className="absolute bg-gradient-to-b from-purple-500 to-blue-300 rounded-t-full animate-pulse"
@@ -581,7 +556,6 @@ export default function SpaceShooterMobile({ onClose }: SpaceShooterMobileProps)
                         boxShadow: "0 0 6px rgba(138,43,226,0.8)",
                       }}
                     />
-
                     <div
                       className="absolute bg-gradient-to-b from-purple-500 to-blue-300 rounded-t-full animate-pulse"
                       style={{
@@ -594,7 +568,6 @@ export default function SpaceShooterMobile({ onClose }: SpaceShooterMobileProps)
                     />
                   </div>
                 ))}
-
                 {/* Touch indicator */}
                 {isTouching && (
                   <div
@@ -605,7 +578,6 @@ export default function SpaceShooterMobile({ onClose }: SpaceShooterMobileProps)
                     }}
                   />
                 )}
-
                 {/* HUD */}
                 <div className="absolute top-4 left-4 right-4 flex justify-between text-white text-sm">
                   <div>Score: {score}</div>
@@ -614,7 +586,6 @@ export default function SpaceShooterMobile({ onClose }: SpaceShooterMobileProps)
               </>
             )}
           </div>
-
           {/* Game States */}
           {gameState === "menu" && (
             <div className="absolute inset-0 bg-black/90 flex items-center justify-center rounded-lg">
@@ -637,7 +608,6 @@ export default function SpaceShooterMobile({ onClose }: SpaceShooterMobileProps)
               </div>
             </div>
           )}
-
           {gameState === "paused" && (
             <div className="absolute inset-0 bg-black/80 flex items-center justify-center rounded-lg">
               <div className="text-center text-white">
@@ -652,7 +622,6 @@ export default function SpaceShooterMobile({ onClose }: SpaceShooterMobileProps)
               </div>
             </div>
           )}
-
           {gameState === "gameOver" && (
             <div className="absolute inset-0 bg-black/90 flex items-center justify-center rounded-lg">
               <div className="text-center text-white p-6">
@@ -684,7 +653,6 @@ export default function SpaceShooterMobile({ onClose }: SpaceShooterMobileProps)
           )}
         </div>
       </div>
-
       {/* Instructions */}
       <div className="p-4 text-center text-gray-400 text-sm border-t border-white/10">
         <p>Drag to move spaceship • Auto-fire • Destroy all enemies!</p>
