@@ -74,25 +74,8 @@ export default function FiGamesPage() {
       return;
     }
 
-    // Special handling for Fruit Crush to open as a page
-    if (game.id === "fruit-crush") {
-      setLoadingGame(game)
-      setGameLoading(true)
-      setLoadingProgress(0)
-
-      const interval = setInterval(() => {
-        setLoadingProgress((prev) => {
-          if (prev >= 100) {
-            clearInterval(interval)
-            setGameLoading(false)
-            router.push('/fruit-crush'); // Navigate to the dedicated page
-            return 100
-          }
-          return prev + Math.random() * 15 + 5
-        })
-      }, 100)
-    } else if (game.component) {
-      // For other games, open as a modal
+    // For all games, open as a modal
+    if (game.component) {
       setLoadingGame(game)
       setGameLoading(true)
       setLoadingProgress(0)
@@ -109,7 +92,7 @@ export default function FiGamesPage() {
         })
       }, 100)
     } else {
-      console.warn("Game has no component or is not configured as a page:", game.id);
+      console.warn("Game has no component:", game.id);
     }
   }
 
