@@ -1,7 +1,7 @@
 import SnakeGameMobile from "@/components/snake-game-mobile"
 import MahjongGameMobile from "@/components/mahjong-game-mobile"
 import SpaceShooterMobile from "@/components/space-shooter-mobile"
-// FruitCrushGame is now a page, so no need to import it as a component here
+import FruitCrushGame from "@/components/fruit-crush-game" // Import FruitCrushGame
 
 export interface Game {
   id: string
@@ -18,7 +18,7 @@ export const allGames: Game[] = [
     id: "space-shooter",
     title: "Super Space Shooter",
     description: "Epic space battles await! Pilot your ship through asteroid fields and defeat alien invaders.",
-    image: "/images/spaceshooter-logo.jpg", // <--- Caminho da imagem atualizado para .jpg
+    image: "/images/spaceshooter-logo.jpg",
     category: "action",
     playable: true,
     component: SpaceShooterMobile,
@@ -36,7 +36,7 @@ export const allGames: Game[] = [
     id: "mahjong-solitaire",
     title: "Mahjong Solitaire",
     description: "Classic tile matching puzzle! Find matching pairs to clear the board.",
-    image: "/images/mahjonggame-logo.jpg", // Updated image path
+    image: "/images/mahjonggame-logo.jpg",
     category: "mahjong",
     playable: true,
     component: MahjongGameMobile,
@@ -48,6 +48,6 @@ export const allGames: Game[] = [
     image: "/images/fruitcrush-logo.png",
     category: "match3",
     playable: true,
-    // No component property here, as it's a dedicated page
+    component: FruitCrushGame, // Added component property
   },
 ]
