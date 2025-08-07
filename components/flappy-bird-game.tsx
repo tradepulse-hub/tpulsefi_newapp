@@ -106,150 +106,139 @@ const flap = useCallback(() => {
 
 // Game loop
 const gameLoop = useCallback(() => {
+  // Se o jogo já acabou ou está pausado, apenas agende o próximo frame e retorne
   if (gameOver || isPaused) {
     gameLoopRef.current = requestAnimationFrame(gameLoop)
     return
   }
 
-  // Velocidade dinâmica baseada nas moedas coletadas (0.5% por moeda)
+  let newBird = { ...bird } // Cópia do estado atual do pássaro para modificações
+  let newPipes = [...pipes] // Cópia do estado atual dos pipes
+  let newCoins = [...coins] // Cópia do estado atual das moedas
+  let currentFrameGameOver = false // Flag para detectar Game Over neste frame
+
+  // 1. Atualizar posição do pássaro e verificar colisão com teto/chão
+  const newVelocity = newBird.velocity + GRAVITY
+  let nextBirdY = newBird.y + newVelocity
+
+  if (nextBirdY <= 0) {
+    nextBirdY = 0 // Fixa no teto
+    currentFrameGameOver = true
+  } else if (nextBirdY + BIRD_SIZE >= CANVAS_HEIGHT - GROUND_HEIGHT) {
+    nextBirdY = CANVAS_HEIGHT - GROUND_HEIGHT - BIRD_SIZE // Fixa no chão
+    currentFrameGameOver = true
+  }
+  newBird = { ...newBird, y: nextBirdY, velocity: newVelocity }
+
+  // Se Game Over devido a colisão com teto/chão, atualiza o estado e para o loop
+  if (currentFrameGameOver) {
+    setBird(newBird) // Atualiza a posição final do pássaro
+    setGameOver(true)
+    return // Interrompe a execução do game loop para este frame
+  }
+
+  // 2. Atualizar pipes e gerar novos
   const currentPipeSpeed = PIPE_SPEED * (1 + (coinsCollected * 0.005))
+  newPipes = newPipes
+    .map((pipe) => ({ ...pipe, x: pipe.x - currentPipeSpeed }))
+    .filter((pipe) => pipe.x + pipe.width > 0)
 
-  setBird((prevBird) => {
-    const newVelocity = prevBird.velocity + GRAVITY
-    let newY = prevBird.y + newVelocity
+  const now = Date.now()
+  if (now - lastPipeSpawnTimeRef.current > PIPE_INTERVAL) {
+    const minPipeY = CANVAS_HEIGHT * 0.2
+    const maxPipeY = (CANVAS_HEIGHT - GROUND_HEIGHT) * 0.8
+    const randomY = Math.random() * (maxPipeY - minPipeY - PIPE_GAP) + minPipeY + PIPE_GAP
+    newPipes.push({
+      x: CANVAS_WIDTH,
+      y: randomY,
+      width: PIPE_WIDTH,
+      gap: PIPE_GAP,
+      passed: false,
+    })
+    lastPipeSpawnTimeRef.current = now
+  }
 
-    // Check ground/ceiling collision
-    if (newY + BIRD_SIZE >= CANVAS_HEIGHT - GROUND_HEIGHT || newY <= 0) {
-      setGameOver(true)
-      return { ...prevBird, y: Math.max(0, Math.min(newY, CANVAS_HEIGHT - GROUND_HEIGHT - BIRD_SIZE)) }
-    }
+  // 3. Atualizar moedas e gerar para novos pipes
+  newCoins = newCoins
+    .map((coin) => ({ ...coin, x: coin.x - currentPipeSpeed }))
+    .filter((coin) => coin.x + coin.width > 0 && !coin.collected)
 
-    return { ...prevBird, y: newY, velocity: newVelocity }
-  })
-
-  setPipes((prevPipes) => {
-    const now = Date.now()
-    const newPipes = prevPipes
-      .map((pipe) => ({ ...pipe, x: pipe.x - currentPipeSpeed }))
-      .filter((pipe) => pipe.x + pipe.width > 0)
-
-    // Spawn new pipes
-    if (now - lastPipeSpawnTimeRef.current > PIPE_INTERVAL) {
-      const minPipeY = CANVAS_HEIGHT * 0.2
-      const maxPipeY = (CANVAS_HEIGHT - GROUND_HEIGHT) * 0.8
-      const randomY = Math.random() * (maxPipeY - minPipeY - PIPE_GAP) + minPipeY + PIPE_GAP
-      newPipes.push({
-        x: CANVAS_WIDTH,
-        y: randomY,
-        width: PIPE_WIDTH,
-        gap: PIPE_GAP,
-        passed: false,
+  newPipes.forEach((pipe) => {
+    const coinExists = newCoins.some(coin => 
+      Math.abs(coin.x - (pipe.x + pipe.width / 2)) < 10
+    )
+    
+    if (!coinExists && pipe.x > CANVAS_WIDTH - 100) {
+      newCoins.push({
+        x: pipe.x + pipe.width / 2 - COIN_SIZE / 2,
+        y: pipe.y - pipe.gap / 2 - COIN_SIZE / 2,
+        width: COIN_SIZE,
+        height: COIN_SIZE,
+        collected: false,
       })
-      lastPipeSpawnTimeRef.current = now
     }
-    return newPipes
   })
 
-  // Atualizar moedas
-  setCoins((prevCoins) => {
-    return prevCoins
-      .map((coin) => ({ ...coin, x: coin.x - currentPipeSpeed }))
-      .filter((coin) => coin.x + coin.width > 0 && !coin.collected)
-  })
-
-  // Gerar moedas para novos pipes
-  setPipes((currentPipes) => {
-    setCoins((currentCoins) => {
-      const newCoins = [...currentCoins]
+  // 4. Verificar colisões com moedas
+  newCoins = newCoins.map((coin) => {
+    if (!coin.collected &&
+        newBird.x + BIRD_SIZE > coin.x &&
+        newBird.x < coin.x + coin.width &&
+        newBird.y + BIRD_SIZE > coin.y &&
+        newBird.y < coin.y + coin.height) {
       
-      currentPipes.forEach((pipe) => {
-        const coinExists = newCoins.some(coin => 
-          Math.abs(coin.x - (pipe.x + pipe.width / 2)) < 10
-        )
-        
-        if (!coinExists && pipe.x > CANVAS_WIDTH - 100) {
-          newCoins.push({
-            x: pipe.x + pipe.width / 2 - COIN_SIZE / 2,
-            y: pipe.y - pipe.gap / 2 - COIN_SIZE / 2,
-            width: COIN_SIZE,
-            height: COIN_SIZE,
-            collected: false,
-          })
-        }
+      setCoinAnimation({
+        x: coin.x,
+        y: coin.y,
+        show: true
       })
       
-      return newCoins
-    })
-    return currentPipes
+      setTimeout(() => {
+        setCoinAnimation(prev => ({ ...prev, show: false }))
+      }, 1000)
+      
+      setCoinsCollected(prev => prev + 1)
+      setScore(prev => prev + 1) // Cada moeda coletada vale 1 ponto
+      return { ...coin, collected: true }
+    }
+    return coin
   })
 
-  // Verificar colisões com moedas
-  setBird((currentBird) => {
-    setCoins((currentCoins) => {
-      const updatedCoins = currentCoins.map((coin) => {
-        if (!coin.collected &&
-            currentBird.x + BIRD_SIZE > coin.x &&
-            currentBird.x < coin.x + coin.width &&
-            currentBird.y + BIRD_SIZE > coin.y &&
-            currentBird.y < coin.y + coin.height) {
-          
-          // Mostrar animação +1
-          setCoinAnimation({
-            x: coin.x,
-            y: coin.y,
-            show: true
-          })
-          
-          setTimeout(() => {
-            setCoinAnimation(prev => ({ ...prev, show: false }))
-          }, 1000)
-          
-          setCoinsCollected(prev => prev + 1)
-          setScore(prev => prev + 1) // Cada moeda coletada vale 1 ponto
-          return { ...coin, collected: true }
-        }
-        return coin
-      })
-      return updatedCoins
-    })
-    return currentBird
+  // 5. Verificar colisões com pipes
+  newPipes.forEach((pipe) => {
+    const birdRight = newBird.x + BIRD_SIZE
+    const birdBottom = newBird.y + BIRD_SIZE
+    const pipeRight = pipe.x + pipe.width
+
+    const collidedWithBottomPipe =
+      birdRight > pipe.x &&
+      newBird.x < pipeRight &&
+      birdBottom > pipe.y
+
+    const collidedWithTopPipe =
+      birdRight > pipe.x &&
+      newBird.x < pipeRight &&
+      newBird.y < pipe.y - pipe.gap
+
+    if (collidedWithBottomPipe || collidedWithTopPipe) {
+      currentFrameGameOver = true // Define a flag local
+    }
   })
 
-  // Check collisions (pipes) - Removida a lógica de score por passar pipes
-  setBird((currentBird) => {
-    let currentGameOver = gameOver
+  // Atualiza todos os estados de uma vez após todos os cálculos para este frame
+  setBird(newBird)
+  setPipes(newPipes)
+  setCoins(newCoins)
 
-    setPipes((currentPipes) => {
-      const updatedPipes = currentPipes.map((pipe) => {
-        const birdRight = currentBird.x + BIRD_SIZE
-        const birdBottom = currentBird.y + BIRD_SIZE
-        const pipeRight = pipe.x + pipe.width
+  // Se Game Over devido a colisão com pipe, atualiza o estado e para o loop
+  if (currentFrameGameOver) {
+    setGameOver(true)
+    return // Interrompe a execução do game loop para este frame
+  }
 
-        const collidedWithBottomPipe =
-          birdRight > pipe.x &&
-          currentBird.x < pipeRight &&
-          birdBottom > pipe.y
-
-        const collidedWithTopPipe =
-          birdRight > pipe.x &&
-          currentBird.x < pipeRight &&
-          currentBird.y < pipe.y - pipe.gap
-
-        if (collidedWithBottomPipe || collidedWithTopPipe) {
-          currentGameOver = true
-        }
-        return pipe
-      })
-
-      setGameOver(currentGameOver)
-      return updatedPipes
-    })
-
-    return currentBird
-  })
-
+  // Se não houve Game Over, agende o próximo frame
   gameLoopRef.current = requestAnimationFrame(gameLoop)
-}, [gameOver, isPaused, coinsCollected])
+}, [gameOver, isPaused, bird, pipes, coins, coinsCollected]) // Dependências atualizadas
 
 useEffect(() => {
   if (gameStarted && !gameOver && !isPaused) {
@@ -377,10 +366,7 @@ return (
           <div className="text-sm text-gray-400">Score</div>
           <div className="text-lg font-bold text-yellow-400">{score}</div>
         </div>
-        <div className="text-center">
-          <div className="text-sm text-gray-400">Coins</div>
-          <div className="text-lg font-bold text-yellow-400">🪙 {coinsCollected}</div>
-        </div>
+        {/* REMOVIDO: Display de Coins */}
         <div className="text-center">
           <div className="text-sm text-gray-400">Best</div>
           <div className="text-lg font-bold text-green-400">{highScore}</div>
@@ -466,7 +452,7 @@ return (
               <h2 className="text-xl font-bold mb-4 text-red-500">Game Over!</h2>
               <div className="mb-4">
                 <p className="text-lg mb-2">Final Score: {score}</p>
-                <p className="text-sm text-gray-300">Coins: {coinsCollected}</p>
+                {/* REMOVIDO: Coins no Game Over Screen */}
                 {score === highScore && score > 0 && (
                   <p className="text-sm text-yellow-400 mt-2">🎉 New High Score!</p>
                 )}
