@@ -354,7 +354,8 @@ export default function SnakeGameMobile({ onClose }: SnakeGameMobileProps) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black z-50 flex flex-col"
+      // Removed fixed inset-0 bg-black z-50 to allow it to render within GameModal
+      className="flex flex-col h-full w-full" // Ensure it fills the modal space
     >
       {/* Header */}
       <div className="flex items-center justify-between p-4 bg-black/90 backdrop-blur-sm border-b border-white/10">
@@ -394,8 +395,8 @@ export default function SnakeGameMobile({ onClose }: SnakeGameMobileProps) {
       </div>
 
       {/* Game Area - Adjusted to be higher */}
-      <div className="flex-1 flex flex-col items-center justify-center p-4"> {/* Changed justify-start to justify-center, removed pt-16 */}
-        <div className="relative mt-[-160px]"> {/* Adjusted negative top margin to pull it up further */}
+      <div className="flex-1 flex flex-col items-center justify-center p-4">
+        <div className="relative"> {/* Removed mt-[-160px] */}
           <canvas
             ref={canvasRef}
             width={CANVAS_WIDTH}
