@@ -248,7 +248,7 @@ export default function SpaceShooterMobile({ onClose }: SpaceShooterMobileProps)
     // Check player-enemy collisions
     setEnemies((prevEnemies) => {
       const collidingEnemies = prevEnemies.filter((enemy) => checkCollision(player, enemy))
-      if (collidingEnrolling.length > 0) {
+      if (collidingEnemies.length > 0) {
         setPlayer((prev) => {
           const newHealth = prev.health - 1
           if (newHealth <= 0) {
