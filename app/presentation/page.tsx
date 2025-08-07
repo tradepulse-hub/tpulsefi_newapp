@@ -119,7 +119,8 @@ en: {
     title: "Big Rewards at HoldStation!",
     description: "$10,000 in play! Don't want to miss our partner HoldStation's trading competition and cheaper fees on World? Take advantage!",
     moreInfo: "(More information available in the HoldStation App)",
-    cta: "Get Started"
+    figamesTitle: "FiGames - Incredible Gameplay!",
+    figamesDescription: "FiGames - Incredible gameplay in our app that is still under development.",
   },
 },
 pt: {
@@ -179,7 +180,8 @@ pt: {
     title: "Grandes Recompensas na HoldStation!",
     description: "10000$ em jogo! Vais querer perder a competição de trade do nosso parceiro HoldStation e as taxas mais baratas na World? Aproveita!",
     moreInfo: "(Mais informações disponíveis na App HoldStation)",
-    cta: "Começar"
+    figamesTitle: "FiGames - Jogabilidade Incrível!",
+    figamesDescription: "FiGames - Uma jogabilidade incrível no nosso aplicativo que ainda está em desenvolvimento.",
   },
 },
 es: {
@@ -240,7 +242,8 @@ es: {
     title: "Grandes Recompensas en HoldStation!",
     description: "¡10.000$ en juego! ¿Quieres perderte la competición de trading de nuestro socio HoldStation y las tarifas más baratas en World? ¡Aprovecha!",
     moreInfo: "(Más información disponible en la App de HoldStation)",
-    cta: "Comenzar"
+    figamesTitle: "FiGames - ¡Jugabilidad Increíble!",
+    figamesDescription: "FiGames - Una jugabilidad increíble en nuestra aplicación que aún está en desarrollo.",
   },
 },
 id: {
@@ -300,7 +303,8 @@ id: {
     title: "Hadiah Besar di HoldStation!",
     description: "10.000$ dalam permainan! Tidak ingin melewatkan kompetisi trading mitra kami HoldStation dan biaya lebih murah di World? Manfaatkan!",
     moreInfo: "(Informasi lebih lanjut tersedia di Aplikasi HoldStation)",
-    cta: "Mulai"
+    figamesTitle: "FiGames - Gameplay Luar Biasa!",
+    figamesDescription: "FiGames - Gameplay luar biasa di aplikasi kami yang masih dalam pengembangan.",
   },
 },
 }
@@ -411,7 +415,7 @@ const handleCopyLink = async () => {
   try {
     await navigator.clipboard.writeText(INVITE_URL)
     setLinkCopied(true)
-    setTimeout(() => setLinkCopied(false), 2000)
+    setTimeout(() => setCopied(false), 2000)
   } catch (error) {
     console.error("Failed to copy link:", error)
   }
@@ -1302,24 +1306,41 @@ return (
               <X className="w-4 h-4 text-white" />
             </button>
 
-            {/* Imagem Promocional */}
-            <a href="https://worldcoin.org/mini-app?app_id=app_0d4b759921490adc1f2bd569fda9b53a&app_mode=mini-app" target="_blank" rel="noopener noreferrer" className="block mb-6">
-              <Image
-                src="/images/holdstation-promotionpopup.jpg"
-                alt="SWAP TO EARN BIG $10,000 Rewards"
-                width={800} // Tamanho fixo para controle de proporção
-                height={450} // Tamanho fixo para controle de proporção
-                className="mx-auto rounded-lg shadow-xl w-3/4 object-contain" // Ajustado para 3/4 da largura do pop-up
-              />
-            </a>
+            {/* HoldStation Section */}
+            <div className="mb-8">
+              <a href="https://worldcoin.org/mini-app?app_id=app_0d4b759921490adc1f2bd569fda9b53a&app_mode=mini-app" target="_blank" rel="noopener noreferrer" className="block mb-4">
+                <Image
+                  src="/images/holdstation-promotionpopup.jpg"
+                  alt="SWAP TO EARN BIG $10,000 Rewards"
+                  width={800} // Tamanho fixo para controle de proporção
+                  height={450} // Tamanho fixo para controle de proporção
+                  className="mx-auto rounded-lg shadow-xl w-3/4 object-contain" // Ajustado para 3/4 da largura do pop-up
+                />
+              </a>
+              <h2 className="text-2xl font-bold mb-2">{t.popup?.title || "Grandes Recompensas na HoldStation!"}</h2>
+              <p className="text-gray-300 mb-2">
+                {t.popup?.description || "10000$ em jogo! Vais querer perder a competição de trade do nosso parceiro HoldStation e as taxas mais baratas na World? Aproveita!"}
+              </p>
+              <p className="text-gray-400 text-sm">
+                {t.popup?.moreInfo || "(Mais informações disponíveis na App HoldStation)"}
+              </p>
+            </div>
 
-            <h2 className="text-2xl font-bold mb-4">{t.popup?.title || "Grandes Recompensas na HoldStation!"}</h2>
-            <p className="text-gray-300 mb-2">
-              {t.popup?.description || "10000$ em jogo! Vais querer perder a competição de trade do nosso parceiro HoldStation e as taxas mais baratas na World? Aproveita!"}
-            </p>
-            <p className="text-gray-400 text-sm mb-6">
-              {t.popup?.moreInfo || "(Mais informações disponíveis na App HoldStation)"}
-            </p>
+            {/* FiGames Section */}
+            <div className="mb-8">
+              <Image
+                src="/images/figamespopup.jpg"
+                alt="FiGames - Play and Have Fun!"
+                width={800}
+                height={450}
+                className="mx-auto rounded-lg shadow-xl w-3/4 object-contain"
+              />
+              <h2 className="text-2xl font-bold mt-4 mb-2">{t.popup?.figamesTitle || "FiGames - Jogabilidade Incrível!"}</h2>
+              <p className="text-gray-300">
+                {t.popup?.figamesDescription || "FiGames - Uma jogabilidade incrível no nosso aplicativo que ainda está em desenvolvimento."}
+              </p>
+            </div>
+
             <button
               onClick={handleCloseWelcomeModal}
               className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg"
