@@ -13,7 +13,7 @@ export default function PartnershipsPage() {
     {
       id: "holdstation",
       name: "HoldStation",
-      image: "/images/holdstation-logo.jpg",
+      image: "/images/holdstation-logo.png",
       gradient: "from-blue-500 to-purple-600",
       url: "https://world.org/mini-app?app_id=app_0d4b759921490adc1f2bd569fda9b53a&path=/ref/f5S3wA",
     },
