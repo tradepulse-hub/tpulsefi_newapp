@@ -31,8 +31,8 @@ interface SpaceShooterMobileProps {
   onClose: () => void
 }
 
-const GAME_WIDTH = 300 // Diminuído de 350
-const GAME_HEIGHT = 500 // Diminuído de 600
+const GAME_WIDTH = 280 // Diminuído de 300
+const GAME_HEIGHT = 480 // Diminuído de 500
 const BULLET_SPEED = 6
 const ENEMY_SPEED = 1.5
 
@@ -248,7 +248,7 @@ export default function SpaceShooterMobile({ onClose }: SpaceShooterMobileProps)
     // Check player-enemy collisions
     setEnemies((prevEnemies) => {
       const collidingEnemies = prevEnemies.filter((enemy) => checkCollision(player, enemy))
-      if (collidingEnemies.length > 0) {
+      if (collidingEnrolling.length > 0) {
         setPlayer((prev) => {
           const newHealth = prev.health - 1
           if (newHealth <= 0) {
