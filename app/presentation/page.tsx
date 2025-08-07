@@ -115,6 +115,12 @@ en: {
     "and let's",
     "give value to TPulseFi",
   ],
+  popup: {
+    title: "Big Rewards at HoldStation!",
+    description: "$10,000 in play! Don't want to miss our partner HoldStation's trading competition and cheaper fees on World? Take advantage!",
+    moreInfo: "(More information available in the HoldStation App)",
+    cta: "Get Started"
+  },
 },
 pt: {
   presentation: {
@@ -169,6 +175,12 @@ pt: {
     "e vamos",
     "dar valor a TPulseFi",
   ],
+  popup: {
+    title: "Grandes Recompensas na HoldStation!",
+    description: "10000$ em jogo! Vais querer perder a competição de trade do nosso parceiro HoldStation e as taxas mais baratas na World? Aproveita!",
+    moreInfo: "(Mais informações disponíveis na App HoldStation)",
+    cta: "Começar"
+  },
 },
 es: {
   presentation: {
@@ -224,6 +236,12 @@ es: {
     "y vamos a",
     "dar valor a TPulseFi",
   ],
+  popup: {
+    title: "Grandes Recompensas en HoldStation!",
+    description: "¡10.000$ en juego! ¿Quieres perderte la competición de trading de nuestro socio HoldStation y las tarifas más baratas en World? ¡Aprovecha!",
+    moreInfo: "(Más información disponible en la App de HoldStation)",
+    cta: "Comenzar"
+  },
 },
 id: {
   presentation: {
@@ -278,6 +296,12 @@ id: {
     "dan mari",
     "berikan nilai pada TPulseFi",
   ],
+  popup: {
+    title: "Hadiah Besar di HoldStation!",
+    description: "10.000$ dalam permainan! Tidak ingin melewatkan kompetisi trading mitra kami HoldStation dan biaya lebih murah di World? Manfaatkan!",
+    moreInfo: "(Informasi lebih lanjut tersedia di Aplikasi HoldStation)",
+    cta: "Mulai"
+  },
 },
 }
 
@@ -1267,7 +1291,7 @@ return (
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.8, opacity: 0, y: 50 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="relative bg-black/90 backdrop-blur-xl border border-white/20 rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl text-white text-center"
+            className="relative bg-black/90 backdrop-blur-xl border border-white/20 rounded-2xl p-8 max-w-2xl w-full mx-4 shadow-2xl text-white text-center" // Aumentado para max-w-2xl e p-8
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close Button */}
@@ -1278,15 +1302,29 @@ return (
               <X className="w-4 h-4 text-white" />
             </button>
 
-            <h2 className="text-2xl font-bold mb-4">Bem-vindo à TPulseFi!</h2>
-            <p className="text-gray-300 mb-6">
-              Explore o futuro das finanças descentralizadas. Conecte a sua carteira, descubra eventos ao vivo e junte-se à nossa comunidade!
+            {/* Imagem Promocional */}
+            <a href="https://worldcoin.org/mini-app?app_id=app_0d4b759921490adc1f2bd569fda9b53a&app_mode=mini-app" target="_blank" rel="noopener noreferrer" className="block mb-6">
+              <Image
+                src="/images/holdstation-promotionpopup.jpg"
+                alt="SWAP TO EARN BIG $10,000 Rewards"
+                width={800} // Tamanho fixo para controle de proporção
+                height={450} // Tamanho fixo para controle de proporção
+                className="mx-auto rounded-lg shadow-xl w-3/4 object-contain" // Ajustado para 3/4 da largura do pop-up
+              />
+            </a>
+
+            <h2 className="text-2xl font-bold mb-4">{t.popup?.title || "Grandes Recompensas na HoldStation!"}</h2>
+            <p className="text-gray-300 mb-2">
+              {t.popup?.description || "10000$ em jogo! Vais querer perder a competição de trade do nosso parceiro HoldStation e as taxas mais baratas na World? Aproveita!"}
+            </p>
+            <p className="text-gray-400 text-sm mb-6">
+              {t.popup?.moreInfo || "(Mais informações disponíveis na App HoldStation)"}
             </p>
             <button
               onClick={handleCloseWelcomeModal}
               className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg"
             >
-              Começar
+              {t.popup?.cta || "Começar"}
             </button>
           </motion.div>
         </motion.div>
