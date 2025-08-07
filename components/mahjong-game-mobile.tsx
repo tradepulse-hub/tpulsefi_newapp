@@ -1,8 +1,7 @@
 "use client"
-
 import { useState, useEffect, useCallback } from "react"
 import { motion } from "framer-motion"
-import { ArrowLeft, RotateCcw, Lightbulb, Shuffle } from "lucide-react"
+import { ArrowLeft, RotateCcw, Lightbulb, Shuffle } from 'lucide-react'
 
 // Tipos de peças Mahjong com símbolos Unicode e cores
 const TILE_TYPES = [
@@ -201,7 +200,6 @@ export default function MahjongGameMobile({ onClose }: MahjongGameMobileProps) {
 
     // Calcular bloqueios
     updateTileBlocking(newTiles)
-
     setTiles(newTiles)
     setGameStats({
       score: 0,
@@ -236,7 +234,6 @@ export default function MahjongGameMobile({ onClose }: MahjongGameMobileProps) {
           otherTile.x === tile.x - 1 &&
           otherTile.y === tile.y,
       )
-
       const rightBlocked = tileList.some(
         (otherTile) =>
           !otherTile.isMatched &&
@@ -269,18 +266,15 @@ export default function MahjongGameMobile({ onClose }: MahjongGameMobileProps) {
           }
           return { ...t, isSelected: false }
         })
-
         updateTileBlocking(newTiles)
         setTiles(newTiles)
         setSelectedTiles([])
-
         const remaining = newTiles.filter((t) => !t.isMatched).length
         setGameStats((prev) => ({
           ...prev,
           score: prev.score + 10,
           tilesRemaining: remaining,
         }))
-
         if (remaining === 0) {
           setGameWon(true)
         }
@@ -301,7 +295,6 @@ export default function MahjongGameMobile({ onClose }: MahjongGameMobileProps) {
   // Encontrar dica
   const findHint = () => {
     const availableTiles = tiles.filter((t) => !t.isBlocked && !t.isMatched)
-
     for (let i = 0; i < availableTiles.length; i++) {
       for (let j = i + 1; j < availableTiles.length; j++) {
         if (availableTiles[i].type.symbol === availableTiles[j].type.symbol) {
@@ -331,7 +324,6 @@ export default function MahjongGameMobile({ onClose }: MahjongGameMobileProps) {
       }
       return tile
     })
-
     setTiles(newTiles)
     setHint([])
   }
@@ -359,7 +351,7 @@ export default function MahjongGameMobile({ onClose }: MahjongGameMobileProps) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black z-50 flex flex-col"
+      className="flex flex-col h-full w-full bg-black text-white" // Adjusted to fill modal space
     >
       {/* Header */}
       <div className="flex items-center justify-between p-4 bg-black/90 backdrop-blur-sm border-b border-white/10">
@@ -370,7 +362,6 @@ export default function MahjongGameMobile({ onClose }: MahjongGameMobileProps) {
           <ArrowLeft className="w-5 h-5" />
           <span>Back</span>
         </button>
-
         <div className="flex items-center space-x-4">
           <div className="text-center">
             <div className="text-sm text-gray-400">Score</div>
@@ -385,7 +376,6 @@ export default function MahjongGameMobile({ onClose }: MahjongGameMobileProps) {
             <div className="text-lg font-bold text-green-400">{highScore}</div>
           </div>
         </div>
-
         <button
           onClick={initializeGame}
           className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all duration-200"
@@ -393,7 +383,6 @@ export default function MahjongGameMobile({ onClose }: MahjongGameMobileProps) {
           <RotateCcw className="w-5 h-5" />
         </button>
       </div>
-
       {/* Game Area */}
       <div className="flex-1 flex flex-col p-4">
         {/* Controls */}
@@ -413,7 +402,6 @@ export default function MahjongGameMobile({ onClose }: MahjongGameMobileProps) {
             <span>Shuffle</span>
           </button>
         </div>
-
         {/* Game Board */}
         <div className="flex-1 flex items-center justify-center">
           <div className="relative bg-gray-900/50 rounded-lg p-4 border border-gray-700">
@@ -452,11 +440,9 @@ export default function MahjongGameMobile({ onClose }: MahjongGameMobileProps) {
             </div>
           </div>
         </div>
-
         {/* Stats */}
         <div className="text-center text-gray-400 text-sm">Tiles Remaining: {gameStats.tilesRemaining}</div>
       </div>
-
       {/* Start Screen */}
       {!gameStarted && (
         <div className="absolute inset-0 bg-black/90 flex items-center justify-center">
@@ -478,7 +464,6 @@ export default function MahjongGameMobile({ onClose }: MahjongGameMobileProps) {
           </div>
         </div>
       )}
-
       {/* Game Won Screen */}
       {gameWon && (
         <div className="absolute inset-0 bg-black/90 flex items-center justify-center">
