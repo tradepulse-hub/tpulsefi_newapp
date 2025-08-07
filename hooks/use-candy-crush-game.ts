@@ -4,10 +4,7 @@ import { BOARD_SIZE, NUM_CANDY_TYPES, EMPTY_CANDY } from '@/data/candy-types';
 type Board = number[][];
 type SelectedCandy = { row: number; col: number } | null;
 
-export function useCandyCrushGame(
-  onScoreUpdate: (newScore: number) => void,
-  onXpGainDisplay: (amount: number) => void
-) {
+export function useCandyCrushGame() {
   const [board, setBoard] = useState<Board>([]);
   const [selectedCandy, setSelectedCandy] = useState<SelectedCandy>(null);
   const [score, setScore] = useState(0); // New score state
@@ -46,8 +43,7 @@ export function useCandyCrushGame(
   useEffect(() => {
     setBoard(createBoard());
     setScore(0); // Reset score on new game
-    onScoreUpdate(0); // Notify initial score
-  }, [createBoard, onScoreUpdate]);
+  }, [createBoard]);
 
   // Find all matches (horizontal and vertical)
   const findMatches = useCallback((currentBoard: Board) => {
@@ -148,12 +144,7 @@ export function useCandyCrushGame(
 
     // Award Score based on matches
     const scoreGained = matches.length * 10; // Example score calculation
-    setScore(prevScore => {
-      const newScore = prevScore + scoreGained;
-      onScoreUpdate(newScore); // Notify parent about score update
-      onXpGainDisplay(scoreGained / 2); // Notify parent about XP gain
-      return newScore;
-    });
+    setScore(prevScore => prevScore + scoreGained); // Update score
 
     let nextBoard = removeMatches(currentBoard, matches);
     nextBoard = applyGravity(nextBoard);
@@ -163,7 +154,7 @@ export function useCandyCrushGame(
     await new Promise((resolve) => setTimeout(resolve, 200));
 
     return processMatches(nextBoard); // Recurse
-  }, [findMatches, removeMatches, applyGravity, fillEmptySpaces, onScoreUpdate, onXpGainDisplay]);
+  }, [findMatches, removeMatches, applyGravity, fillEmptySpaces]);
 
   // Swap two candies
   const swapCandies = useCallback((r1: number, c1: number, r2: number, c2: number) => {
