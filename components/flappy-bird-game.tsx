@@ -34,13 +34,14 @@ interface Coin {
 const CANVAS_WIDTH = 300
 const CANVAS_HEIGHT = 480
 const BIRD_SIZE = 30
-const GRAVITY = 0.3 // Reduzido de 0.5
-const FLAP_STRENGTH = -8
+const GRAVITY = 0.3
+const FLAP_STRENGTH = -6 // Reduzido de -8 para -6
 const PIPE_WIDTH = 50
-const PIPE_GAP = 120 // Gap between top and bottom pipes
+const PIPE_GAP = 120
 const PIPE_SPEED = 2
-const PIPE_INTERVAL = 1500 // Milliseconds between new pipes
+const PIPE_INTERVAL = 1500
 const COIN_SIZE = 20
+const GROUND_HEIGHT = 50
 
 export default function FlappyBirdGame({ onClose }: FlappyBirdGameProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -106,21 +107,21 @@ export default function FlappyBirdGame({ onClose }: FlappyBirdGameProps) {
   // Game loop
   const gameLoop = useCallback(() => {
     if (gameOver || isPaused) {
-      gameLoopRef.current = requestAnimationFrame(gameLoop) // Keep requesting to draw game over/paused screen
+      gameLoopRef.current = requestAnimationFrame(gameLoop)
       return
     }
 
-    // Velocidade dinâmica baseada nas moedas coletadas
-    const currentPipeSpeed = PIPE_SPEED + Math.floor(coinsCollected / 5) * 0.5
+    // Velocidade dinâmica baseada nas moedas coletadas (0.5% por moeda)
+    const currentPipeSpeed = PIPE_SPEED * (1 + (coinsCollected * 0.005))
 
     setBird((prevBird) => {
       const newVelocity = prevBird.velocity + GRAVITY
       let newY = prevBird.y + newVelocity
 
-      // Check ground/ceiling collision
-      if (newY + BIRD_SIZE > CANVAS_HEIGHT || newY < 0) {
+      // Check ground/ceiling collision - corrigido
+      if (newY + BIRD_SIZE >= CANVAS_HEIGHT - GROUND_HEIGHT || newY <= 0) {
         setGameOver(true)
-        return { ...prevBird, y: Math.max(0, Math.min(newY, CANVAS_HEIGHT - BIRD_SIZE)) }
+        return { ...prevBird, y: Math.max(0, Math.min(newY, CANVAS_HEIGHT - GROUND_HEIGHT - BIRD_SIZE)) }
       }
 
       return { ...prevBird, y: newY, velocity: newVelocity }
@@ -130,12 +131,12 @@ export default function FlappyBirdGame({ onClose }: FlappyBirdGameProps) {
       const now = Date.now()
       const newPipes = prevPipes
         .map((pipe) => ({ ...pipe, x: pipe.x - currentPipeSpeed }))
-        .filter((pipe) => pipe.x + pipe.width > 0) // Remove pipes off-screen
+        .filter((pipe) => pipe.x + pipe.width > 0)
 
       // Spawn new pipes
       if (now - lastPipeSpawnTimeRef.current > PIPE_INTERVAL) {
         const minPipeY = CANVAS_HEIGHT * 0.2
-        const maxPipeY = CANVAS_HEIGHT * 0.8
+        const maxPipeY = (CANVAS_HEIGHT - GROUND_HEIGHT) * 0.8 // Ajustado para considerar o chão
         const randomY = Math.random() * (maxPipeY - minPipeY - PIPE_GAP) + minPipeY + PIPE_GAP
         newPipes.push({
           x: CANVAS_WIDTH,
@@ -284,12 +285,12 @@ export default function FlappyBirdGame({ onClose }: FlappyBirdGameProps) {
 
     // Draw ground
     ctx.fillStyle = "#ded895" // Ground color
-    ctx.fillRect(0, CANVAS_HEIGHT - 50, CANVAS_WIDTH, 50)
+    ctx.fillRect(0, CANVAS_HEIGHT - GROUND_HEIGHT, CANVAS_WIDTH, GROUND_HEIGHT)
     ctx.strokeStyle = "#5a4e3a" // Ground border
     ctx.lineWidth = 2
     ctx.beginPath()
-    ctx.moveTo(0, CANVAS_HEIGHT - 50)
-    ctx.lineTo(CANVAS_WIDTH, CANVAS_HEIGHT - 50)
+    ctx.moveTo(0, CANVAS_HEIGHT - GROUND_HEIGHT)
+    ctx.lineTo(CANVAS_WIDTH, CANVAS_HEIGHT - GROUND_HEIGHT)
     ctx.stroke()
 
     // Draw pipes
@@ -420,7 +421,7 @@ export default function FlappyBirdGame({ onClose }: FlappyBirdGameProps) {
             height={CANVAS_HEIGHT}
             className="border-2 border-gray-600 rounded-lg shadow-2xl bg-blue-300"
             onClick={flap}
-            style={{ touchAction: "none" }} // Prevent default touch actions
+            style={{ touchAction: "none" }}
           />
 
           {/* Start Screen */}
@@ -473,6 +474,7 @@ export default function FlappyBirdGame({ onClose }: FlappyBirdGameProps) {
                 <h2 className="text-xl font-bold mb-4 text-red-500">Game Over!</h2>
                 <div className="mb-4">
                   <p className="text-lg mb-2">Final Score: {score}</p>
+                  <p className="text-sm text-gray-300">Coins: {coinsCollected}</p>
                   {score === highScore && score > 0 && (
                     <p className="text-sm text-yellow-400 mt-2">🎉 New High Score!</p>
                   )}
