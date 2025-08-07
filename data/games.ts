@@ -36,7 +36,7 @@ export const allGames: Game[] = [
     id: "mahjong-solitaire",
     title: "Mahjong Solitaire",
     description: "Classic tile matching puzzle! Find matching pairs to clear the board.",
-    image: "/images/mahjonggame-logo.png",
+    image: "/images/mahjonggame-logo.jpg", // Updated image path
     category: "mahjong",
     playable: true,
     component: MahjongGameMobile,
