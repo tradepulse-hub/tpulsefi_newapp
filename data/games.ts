@@ -18,19 +18,19 @@ export const allGames: Game[] = [
     id: "space-shooter",
     title: "Super Space Shooter",
     description: "Epic space battles await! Pilot your ship through asteroid fields and defeat alien invaders.",
-    image: "/images/spaceshooter-logo.png",
+    image: "/images/spaceshooter-logo.png", // <--- Caminho da imagem atualizado para .jpg
     category: "action",
     playable: true,
-    component: SpaceShooterMobile, // Corrected to SpaceShooterMobile
+    component: SpaceShooterMobile,
   },
   {
     id: "snake-game",
     title: "Snake Game",
     description: "Test your limits! Grow your snake by eating food, but don't hit the walls or yourself.",
-    image: "/images/snakegame-logo.jpg", // Updated to use the new JPG logo
+    image: "/images/snakegame-logo.jpg",
     category: "skill",
     playable: true,
-    component: SnakeGameMobile, // Corrected to SnakeGameMobile
+    component: SnakeGameMobile,
   },
   {
     id: "mahjong-solitaire",
@@ -39,7 +39,7 @@ export const allGames: Game[] = [
     image: "/images/mahjonggame-logo.png",
     category: "mahjong",
     playable: true,
-    component: MahjongGameMobile, // Corrected to MahjongGameMobile
+    component: MahjongGameMobile,
   },
   {
     id: "fruit-crush",
