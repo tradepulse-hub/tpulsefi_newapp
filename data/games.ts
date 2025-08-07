@@ -4,7 +4,8 @@ import SpaceShooterMobile from "@/components/space-shooter-mobile"
 import FruitCrushGame from "@/components/fruit-crush-game"
 import FlappyBirdGame from "@/components/flappy-bird-game"
 import SimonSaysGame from "@/components/simon-says-game"
-import PacManGame from "@/components/pac-man-game" // Import PacManGame
+import PacManGame from "@/components/pac-man-game"
+import BrickBreakerGame from "@/components/brick-breaker-game" // Import BrickBreakerGame
 
 export interface Game {
   id: string
@@ -76,8 +77,17 @@ export const allGames: Game[] = [
     title: "Pac-Man",
     description: "Eat all the pellets and avoid the ghosts in this arcade classic!",
     image: "/images/pac-man-logo.png",
-    category: "action", // Or 'arcade', 'classic' if you add those categories
+    category: "action",
     playable: true,
     component: PacManGame,
+  },
+  {
+    id: "brick-breaker", // Novo jogo: Brick Breaker
+    title: "Brick Breaker",
+    description: "Break all the bricks with your ball and paddle!",
+    image: "/images/brick-breaker-logo.png",
+    category: "arcade", // Nova categoria ou 'skill'
+    playable: true,
+    component: BrickBreakerGame,
   },
 ]
