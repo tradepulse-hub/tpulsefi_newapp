@@ -35,10 +35,10 @@ const CANVAS_WIDTH = 300
 const CANVAS_HEIGHT = 480
 const BIRD_SIZE = 30
 const GRAVITY = 0.3
-const FLAP_STRENGTH = -6 // Reduzido de -8 para -6
+const FLAP_STRENGTH = -6
 const PIPE_WIDTH = 50
 const PIPE_GAP = 120
-const PIPE_SPEED = 2
+const PIPE_SPEED = 1 // Reduzido de 2 para 1 (metade da velocidade inicial)
 const PIPE_INTERVAL = 1500
 const COIN_SIZE = 20
 const GROUND_HEIGHT = 50
@@ -79,7 +79,7 @@ export default function FlappyBirdGame({ onClose }: FlappyBirdGameProps) {
     setBird({ x: 50, y: CANVAS_HEIGHT / 2 - BIRD_SIZE / 2, velocity: 0 })
     setPipes([])
     setCoins([])
-    setScore(0)
+    setScore(0) // Resetar score
     setCoinsCollected(0)
     setCoinAnimation({x: 0, y: 0, show: false})
     setGameOver(false)
@@ -118,7 +118,7 @@ export default function FlappyBirdGame({ onClose }: FlappyBirdGameProps) {
       const newVelocity = prevBird.velocity + GRAVITY
       let newY = prevBird.y + newVelocity
 
-      // Check ground/ceiling collision - corrigido
+      // Check ground/ceiling collision
       if (newY + BIRD_SIZE >= CANVAS_HEIGHT - GROUND_HEIGHT || newY <= 0) {
         setGameOver(true)
         return { ...prevBird, y: Math.max(0, Math.min(newY, CANVAS_HEIGHT - GROUND_HEIGHT - BIRD_SIZE)) }
@@ -136,7 +136,7 @@ export default function FlappyBirdGame({ onClose }: FlappyBirdGameProps) {
       // Spawn new pipes
       if (now - lastPipeSpawnTimeRef.current > PIPE_INTERVAL) {
         const minPipeY = CANVAS_HEIGHT * 0.2
-        const maxPipeY = (CANVAS_HEIGHT - GROUND_HEIGHT) * 0.8 // Ajustado para considerar o chão
+        const maxPipeY = (CANVAS_HEIGHT - GROUND_HEIGHT) * 0.8
         const randomY = Math.random() * (maxPipeY - minPipeY - PIPE_GAP) + minPipeY + PIPE_GAP
         newPipes.push({
           x: CANVAS_WIDTH,
@@ -205,6 +205,7 @@ export default function FlappyBirdGame({ onClose }: FlappyBirdGameProps) {
             }, 1000)
             
             setCoinsCollected(prev => prev + 1)
+            setScore(prev => prev + 1) // Cada moeda coletada vale 1 ponto
             return { ...coin, collected: true }
           }
           return coin
@@ -214,14 +215,12 @@ export default function FlappyBirdGame({ onClose }: FlappyBirdGameProps) {
       return currentBird
     })
 
-    // Check collisions and update score
+    // Check collisions (pipes)
     setBird((currentBird) => {
-      let currentScore = score
       let currentGameOver = gameOver
 
       setPipes((currentPipes) => {
         const updatedPipes = currentPipes.map((pipe) => {
-          // Check collision with pipes
           const birdRight = currentBird.x + BIRD_SIZE
           const birdBottom = currentBird.y + BIRD_SIZE
           const pipeRight = pipe.x + pipe.width
@@ -239,16 +238,10 @@ export default function FlappyBirdGame({ onClose }: FlappyBirdGameProps) {
           if (collidedWithBottomPipe || collidedWithTopPipe) {
             currentGameOver = true
           }
-
-          // Check if bird passed pipe
-          if (currentBird.x > pipeRight && !pipe.passed) {
-            currentScore += 1
-            return { ...pipe, passed: true }
-          }
+          // Remover lógica de score por passar pipes
           return pipe
         })
 
-        setScore(currentScore)
         setGameOver(currentGameOver)
         return updatedPipes
       })
@@ -257,7 +250,7 @@ export default function FlappyBirdGame({ onClose }: FlappyBirdGameProps) {
     })
 
     gameLoopRef.current = requestAnimationFrame(gameLoop)
-  }, [gameOver, isPaused, score, coinsCollected])
+  }, [gameOver, isPaused, coinsCollected]) // Removido 'score' do useCallback, pois é atualizado internamente
 
   useEffect(() => {
     if (gameStarted && !gameOver && !isPaused) {
