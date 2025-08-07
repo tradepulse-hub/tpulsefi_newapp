@@ -23,6 +23,7 @@ const gameCategories = [
   { id: "match3", name: "Match 3", icon: Sparkles, gradient: "from-orange-500 to-yellow-500", emoji: "🍬", playable: true },
   { id: "girls", name: "Girls", icon: Heart, gradient: "from-pink-500 to-purple-500", emoji: "👧", playable: false },
   { id: "logic", name: "Logic", icon: Brain, gradient: "from-teal-500 to-cyan-500", emoji: "🧠", playable: false },
+  { id: "arcade", name: "Arcade", icon: Play, gradient: "from-purple-500 to-pink-500", emoji: "🕹️", playable: true },
 ]
 
 // Featured games for slideshow
