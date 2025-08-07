@@ -15,7 +15,7 @@ export default function FruitCrushGame({ onClose }: FruitCrushGameProps) {
 
   return (
     <div
-      className="flex flex-col h-full w-full bg-black text-white items-center justify-center p-4" // Adjusted classes
+      className="flex flex-col h-full w-full bg-black text-white items-center justify-center p-4"
     >
       <Button
         variant="ghost"
@@ -26,7 +26,7 @@ export default function FruitCrushGame({ onClose }: FruitCrushGameProps) {
         Back
       </Button>
 
-      {/* Removed the h1 title for Fruit Crush */}
+      {/* O título <h1> "Fruit Crush" foi removido daqui. */}
 
       {/* Score Display */}
       <div className="absolute top-4 right-4 bg-black/70 backdrop-blur-sm rounded-full px-4 py-2 text-lg font-bold shadow-lg z-20">
