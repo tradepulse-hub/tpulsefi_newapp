@@ -7,7 +7,7 @@ import CandyCrushBoard from "@/components/candy-crush-board"
 import { useState, useCallback, useEffect } from "react"
 
 interface FruitCrushGameProps {
-  onClose: () => void; // Reintroduce onClose prop
+  onClose: () => void;
 }
 
 export default function FruitCrushGame({ onClose }: FruitCrushGameProps) {
@@ -15,16 +15,11 @@ export default function FruitCrushGame({ onClose }: FruitCrushGameProps) {
 
   return (
     <div
-      className="relative flex h-screen overflow-hidden flex-col items-center justify-center p-4 text-white"
-      style={{
-        backgroundImage: 'url("/images/map-background.png")',
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
+      className="flex flex-col h-full w-full bg-black text-white items-center justify-center p-4" // Adjusted classes
     >
       <Button
         variant="ghost"
-        onClick={onClose} // Call onClose prop
+        onClick={onClose}
         className="absolute top-4 left-4 text-white bg-black hover:bg-gray-800 z-20"
       >
         <ChevronLeft className="h-6 w-6" />
