@@ -15,26 +15,34 @@ export default function FruitCrushGame({ onClose }: FruitCrushGameProps) {
 
   return (
     <div
-      className="flex flex-col h-full w-full bg-black text-white items-center justify-center p-4"
+      className="flex flex-col h-full w-full bg-black text-white items-center justify-between" // Adjusted to justify-between for header/footer separation
     >
-      <Button
-        variant="ghost"
-        onClick={onClose}
-        className="absolute top-8 left-4 text-white bg-black hover:bg-gray-800 z-20"
-      >
-        <ChevronLeft className="h-6 w-6" />
-        Back
-      </Button>
+      {/* Header */}
+      <div className="flex items-center justify-between w-full p-4 bg-black/90 backdrop-blur-sm border-b border-white/10 z-20">
+        <Button
+          variant="ghost"
+          onClick={onClose}
+          className="text-white bg-black hover:bg-gray-800" // Removed absolute positioning
+        >
+          <ChevronLeft className="h-6 w-6" />
+          Back
+        </Button>
 
-      {/* O título <h1> "Fruit Crush" foi removido daqui. */}
-
-      {/* Score Display */}
-      <div className="absolute top-8 right-4 bg-black/70 backdrop-blur-sm rounded-full px-4 py-2 text-lg font-bold shadow-lg z-20">
-        Score: {score}
+        {/* Score Display */}
+        <div className="bg-black/70 backdrop-blur-sm rounded-full px-4 py-2 text-lg font-bold shadow-lg"> {/* Removed absolute positioning */}
+          Score: {score}
+        </div>
       </div>
 
-      <CandyCrushBoard board={board} onCandyClick={handleCandyClick} selectedCandy={selectedCandy} />
-      <p className="mt-8 text-lg text-white/80 text-center max-w-md">Click on adjacent candies to swap them and make matches of 3 or more!</p>
+      {/* Game Board - Centered in the remaining space */}
+      <div className="flex-1 flex items-center justify-center p-4">
+        <CandyCrushBoard board={board} onCandyClick={handleCandyClick} selectedCandy={selectedCandy} />
+      </div>
+
+      {/* Instructions - Moved to a footer-like area */}
+      <div className="w-full p-4 bg-black/90 backdrop-blur-sm border-t border-white/10 z-20">
+        <p className="text-lg text-white/80 text-center max-w-md mx-auto">Click on adjacent candies to swap them and make matches of 3 or more!</p>
+      </div>
     </div>
   )
 }
