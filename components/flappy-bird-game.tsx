@@ -23,15 +23,24 @@ interface Pipe {
   passed: boolean
 }
 
+interface Coin {
+  x: number
+  y: number
+  width: number
+  height: number
+  collected: boolean
+}
+
 const CANVAS_WIDTH = 300
 const CANVAS_HEIGHT = 480
 const BIRD_SIZE = 30
-const GRAVITY = 0.5
+const GRAVITY = 0.3 // Reduzido de 0.5
 const FLAP_STRENGTH = -8
 const PIPE_WIDTH = 50
 const PIPE_GAP = 120 // Gap between top and bottom pipes
 const PIPE_SPEED = 2
 const PIPE_INTERVAL = 1500 // Milliseconds between new pipes
+const COIN_SIZE = 20
 
 export default function FlappyBirdGame({ onClose }: FlappyBirdGameProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -45,6 +54,9 @@ export default function FlappyBirdGame({ onClose }: FlappyBirdGameProps) {
   const [gameOver, setGameOver] = useState(false)
   const [gameStarted, setGameStarted] = useState(false)
   const [isPaused, setIsPaused] = useState(false)
+  const [coins, setCoins] = useState<Coin[]>([])
+  const [coinsCollected, setCoinsCollected] = useState(0)
+  const [coinAnimation, setCoinAnimation] = useState<{x: number, y: number, show: boolean}>({x: 0, y: 0, show: false})
 
   // Load high score from localStorage
   useEffect(() => {
@@ -65,11 +77,14 @@ export default function FlappyBirdGame({ onClose }: FlappyBirdGameProps) {
   const resetGame = useCallback(() => {
     setBird({ x: 50, y: CANVAS_HEIGHT / 2 - BIRD_SIZE / 2, velocity: 0 })
     setPipes([])
+    setCoins([])
     setScore(0)
+    setCoinsCollected(0)
+    setCoinAnimation({x: 0, y: 0, show: false})
     setGameOver(false)
     setGameStarted(true)
     setIsPaused(false)
-    lastPipeSpawnTimeRef.current = Date.now() // Reset pipe spawn timer
+    lastPipeSpawnTimeRef.current = Date.now()
   }, [])
 
   const startGame = useCallback(() => {
@@ -95,6 +110,9 @@ export default function FlappyBirdGame({ onClose }: FlappyBirdGameProps) {
       return
     }
 
+    // Velocidade dinâmica baseada nas moedas coletadas
+    const currentPipeSpeed = PIPE_SPEED + Math.floor(coinsCollected / 5) * 0.5
+
     setBird((prevBird) => {
       const newVelocity = prevBird.velocity + GRAVITY
       let newY = prevBird.y + newVelocity
@@ -111,14 +129,14 @@ export default function FlappyBirdGame({ onClose }: FlappyBirdGameProps) {
     setPipes((prevPipes) => {
       const now = Date.now()
       const newPipes = prevPipes
-        .map((pipe) => ({ ...pipe, x: pipe.x - PIPE_SPEED }))
+        .map((pipe) => ({ ...pipe, x: pipe.x - currentPipeSpeed }))
         .filter((pipe) => pipe.x + pipe.width > 0) // Remove pipes off-screen
 
       // Spawn new pipes
       if (now - lastPipeSpawnTimeRef.current > PIPE_INTERVAL) {
-        const minPipeY = CANVAS_HEIGHT * 0.2 // 20% from top
-        const maxPipeY = CANVAS_HEIGHT * 0.8 // 80% from top
-        const randomY = Math.random() * (maxPipeY - minPipeY - PIPE_GAP) + minPipeY + PIPE_GAP // Bottom pipe top Y
+        const minPipeY = CANVAS_HEIGHT * 0.2
+        const maxPipeY = CANVAS_HEIGHT * 0.8
+        const randomY = Math.random() * (maxPipeY - minPipeY - PIPE_GAP) + minPipeY + PIPE_GAP
         newPipes.push({
           x: CANVAS_WIDTH,
           y: randomY,
@@ -129,6 +147,70 @@ export default function FlappyBirdGame({ onClose }: FlappyBirdGameProps) {
         lastPipeSpawnTimeRef.current = now
       }
       return newPipes
+    })
+
+    // Atualizar moedas
+    setCoins((prevCoins) => {
+      return prevCoins
+        .map((coin) => ({ ...coin, x: coin.x - currentPipeSpeed }))
+        .filter((coin) => coin.x + coin.width > 0 && !coin.collected)
+    })
+
+    // Gerar moedas para novos pipes
+    setPipes((currentPipes) => {
+      setCoins((currentCoins) => {
+        const newCoins = [...currentCoins]
+        
+        currentPipes.forEach((pipe) => {
+          const coinExists = newCoins.some(coin => 
+            Math.abs(coin.x - (pipe.x + pipe.width / 2)) < 10
+          )
+          
+          if (!coinExists && pipe.x > CANVAS_WIDTH - 100) {
+            newCoins.push({
+              x: pipe.x + pipe.width / 2 - COIN_SIZE / 2,
+              y: pipe.y - pipe.gap / 2 - COIN_SIZE / 2,
+              width: COIN_SIZE,
+              height: COIN_SIZE,
+              collected: false,
+            })
+          }
+        })
+        
+        return newCoins
+      })
+      return currentPipes
+    })
+
+    // Verificar colisões com moedas
+    setBird((currentBird) => {
+      setCoins((currentCoins) => {
+        const updatedCoins = currentCoins.map((coin) => {
+          if (!coin.collected &&
+              currentBird.x + BIRD_SIZE > coin.x &&
+              currentBird.x < coin.x + coin.width &&
+              currentBird.y + BIRD_SIZE > coin.y &&
+              currentBird.y < coin.y + coin.height) {
+            
+            // Mostrar animação +1
+            setCoinAnimation({
+              x: coin.x,
+              y: coin.y,
+              show: true
+            })
+            
+            setTimeout(() => {
+              setCoinAnimation(prev => ({ ...prev, show: false }))
+            }, 1000)
+            
+            setCoinsCollected(prev => prev + 1)
+            return { ...coin, collected: true }
+          }
+          return coin
+        })
+        return updatedCoins
+      })
+      return currentBird
     })
 
     // Check collisions and update score
@@ -174,7 +256,7 @@ export default function FlappyBirdGame({ onClose }: FlappyBirdGameProps) {
     })
 
     gameLoopRef.current = requestAnimationFrame(gameLoop)
-  }, [gameOver, isPaused, score])
+  }, [gameOver, isPaused, score, coinsCollected])
 
   useEffect(() => {
     if (gameStarted && !gameOver && !isPaused) {
@@ -225,6 +307,30 @@ export default function FlappyBirdGame({ onClose }: FlappyBirdGameProps) {
       ctx.strokeRect(pipe.x, 0, pipe.width, pipe.y - pipe.gap)
     })
 
+    // Draw coins
+    coins.forEach((coin) => {
+      if (!coin.collected) {
+        // Coin glow effect
+        ctx.shadowColor = "#ffd700"
+        ctx.shadowBlur = 10
+        
+        // Coin body
+        ctx.fillStyle = "#ffd700"
+        ctx.beginPath()
+        ctx.arc(coin.x + coin.width / 2, coin.y + coin.height / 2, coin.width / 2, 0, Math.PI * 2)
+        ctx.fill()
+        
+        // Coin inner circle
+        ctx.fillStyle = "#ffed4e"
+        ctx.beginPath()
+        ctx.arc(coin.x + coin.width / 2, coin.y + coin.height / 2, coin.width / 3, 0, Math.PI * 2)
+        ctx.fill()
+        
+        // Reset shadow
+        ctx.shadowBlur = 0
+      }
+    })
+
     // Draw bird
     ctx.fillStyle = "#ffeb3b" // Bird yellow
     ctx.strokeStyle = "#c5a000" // Bird border
@@ -247,7 +353,15 @@ export default function FlappyBirdGame({ onClose }: FlappyBirdGameProps) {
     ctx.lineTo(bird.x + BIRD_SIZE + 10, bird.y + BIRD_SIZE * 0.5)
     ctx.lineTo(bird.x + BIRD_SIZE, bird.y + BIRD_SIZE * 0.6)
     ctx.fill()
-  }, [bird, pipes])
+
+    // Draw coin animation
+    if (coinAnimation.show) {
+      ctx.fillStyle = "#ffd700"
+      ctx.font = "bold 20px Arial"
+      ctx.textAlign = "center"
+      ctx.fillText("+1", coinAnimation.x + 10, coinAnimation.y - 10)
+    }
+  }, [bird, pipes, coins, coinAnimation])
 
   return (
     <motion.div
@@ -269,6 +383,10 @@ export default function FlappyBirdGame({ onClose }: FlappyBirdGameProps) {
           <div className="text-center">
             <div className="text-sm text-gray-400">Score</div>
             <div className="text-lg font-bold text-yellow-400">{score}</div>
+          </div>
+          <div className="text-center">
+            <div className="text-sm text-gray-400">Coins</div>
+            <div className="text-lg font-bold text-yellow-400">🪙 {coinsCollected}</div>
           </div>
           <div className="text-center">
             <div className="text-sm text-gray-400">Best</div>
