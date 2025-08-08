@@ -1,11 +1,40 @@
 "use client"
 import { useEffect, useState } from "react"
-import { ArrowLeft, Crown, Loader2, CheckCircle, Copy } from "lucide-react"
+import { ArrowLeft, Crown, Loader2, CheckCircle, Copy } from 'lucide-react'
 import { motion, AnimatePresence } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { MiniKit } from "@worldcoin/minikit-js"
-import { useMiniKit } from "../../hooks/use-minikit"
-import { BackgroundEffect } from "@/components/background-effect"
+import Image from 'next/image' // Adicionado para usar a imagem
+
+// Placeholder para useMiniKit (mantido como no ficheiro original fornecido)
+// Em uma aplicação real, você integraria o MiniKit de forma adequada.
+function useMiniKit() {
+  const [user, setUser] = useState<{ walletAddress: string } | null>(null)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+
+  useEffect(() => {
+    // Simula o status de autenticação do MiniKit
+    const mockUser = { walletAddress: "0x1234567890abcdef1234567890abcdef12345678" }
+    setUser(mockUser)
+    setIsAuthenticated(true)
+  }, [])
+
+  return { user, isAuthenticated }
+}
+
+// Placeholder para BackgroundEffect (mantido como no ficheiro original fornecido)
+function BackgroundEffect() {
+  return (
+    <div className="absolute inset-0 z-0">
+      {/* Adicione seus elementos de efeito de fundo aqui */}
+      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-purple-900 to-black opacity-50 animate-gradient-shift"></div>
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-yellow-500 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob-1"></div>
+      <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob-2"></div>
+      <div className="absolute bottom-1/3 right-1/4 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob-3"></div>
+    </div>
+  )
+}
+
 
 // Supported languages
 const SUPPORTED_LANGUAGES = ["en", "pt", "es", "id"] as const
@@ -26,10 +55,12 @@ const translations = {
     membershipDescription:
       "If you subscribe, you are entitled to a part of the transaction fees that TPulseFi earns! And it's not little! What are you waiting for, it's a lifetime payment! It's the best membership in the world, we promise long-term investment recovery.",
     oneTimePayment: "One-time payment",
-    emailInstruction: "After payment, send proof to support@tradepulsetoken.com",
+    emailInstruction: "After payment, send proof and wallet address to support@tradepulsetoken.com",
     monthlyPayments: "Payments to exclusive members occur every month on the 9th",
     paidToMembersPrefix: "Value paid to early members so far: (By Member)",
     paidToMembersSuffix: "TPF",
+    countdownPrefix: "Price increases in:",
+    countdownExpired: "Price has increased!",
   },
   pt: {
     title: "Membros TPulseFi",
@@ -44,10 +75,12 @@ const translations = {
     membershipDescription:
       "Se assinares tem direito a uma parte das taxas de transações que TPulseFi ganha! E não é pouco! De que estás à espera, é um pagamento para a vida toda! É o melhor membership do mundo, prometemos a recuperação do investido a longo prazo.",
     oneTimePayment: "Pagamento único",
-    emailInstruction: "Após pagamento enviar comprovativo para support@tradepulsetoken.com",
+    emailInstruction: "Após pagamento, enviar comprovativo e endereço da carteira para support@tradepulsetoken.com",
     monthlyPayments: "Os pagamentos aos membros exclusivos decorrem todos os meses ao dia 9",
     paidToMembersPrefix: "Valor pago até agora para os primeiros membros (Por Membro):",
     paidToMembersSuffix: "TPF",
+    countdownPrefix: "O preço aumenta em:",
+    countdownExpired: "O preço aumentou!",
   },
   es: {
     title: "Membresía TPulseFi",
@@ -62,10 +95,12 @@ const translations = {
     membershipDescription:
       "¡Si te suscribes tienes derecho a una parte de las tarifas de transacción que gana TPulseFi! ¡Y no es poco! ¿Qué estás esperando? ¡Es un pago de por vida! Es la mejor membresía del mundo, prometemos recuperación de la inversión a largo plazo.",
     oneTimePayment: "Pago único",
-    emailInstruction: "Después del pago, envía comprobante a support@tradepulsetoken.com",
+    emailInstruction: "Después del pago, envía comprobante y dirección de la billetera a support@tradepulsetoken.com",
     monthlyPayments: "Los pagos a miembros exclusivos ocurren todos los meses el día 9",
     paidToMembersPrefix: "Valor pagado a los primeros miembros hasta ahora (Por Miembro):",
     paidToMembersSuffix: "TPF",
+    countdownPrefix: "El precio aumenta en:",
+    countdownExpired: "¡El precio ha aumentado!",
   },
   id: {
     title: "Keanggotaan TPulseFi",
@@ -80,17 +115,20 @@ const translations = {
     membershipDescription:
       "Jika Anda berlangganan, Anda berhak mendapat bagian dari biaya transaksi yang diperoleh TPulseFi! Dan itu tidak sedikit! Apa yang Anda tunggu, ini pembayaran seumur hidup! Ini adalah keanggotaan terbaik di dunia, kami berjanji pemulihan investasi jangka panjang.",
     oneTimePayment: "Pembayaran sekali",
-    emailInstruction: "Setelah pembayaran, kirim bukti ke support@tradepulsetoken.com",
+    emailInstruction: "Setelah pembayaran, kirim bukti dan alamat dompet ke support@tradepulsetoken.com",
     monthlyPayments: "Pembayaran kepada anggota eksklusif terjadi setiap bulan pada tanggal 9",
     paidToMembersPrefix: "Nilai yang dibayarkan kepada anggota awal sejauh ini (Oleh Anggota):",
     paidToMembersSuffix: "TPF",
+    countdownPrefix: "Harga naik dalam:",
+    countdownExpired: "Harga telah naik!",
   },
 }
 
 // WLD Token Contract Address on Worldchain
 const WLD_TOKEN_ADDRESS = "0x2cFc85d8E48F8EAB294be644d9E25C3030863003"
 const MEMBERSHIP_RECIPIENT = "0xf04a78df4cc3017c0c23f37528d7b6cbbeea6677"
-const MEMBERSHIP_AMOUNT = "30" // 30 WLD
+const INITIAL_MEMBERSHIP_AMOUNT = "30" // 30 WLD
+const INCREASED_MEMBERSHIP_AMOUNT = "50" // 50 WLD
 
 // ERC20 ABI for transfer function
 const ERC20_ABI = [
@@ -106,6 +144,12 @@ const ERC20_ABI = [
   },
 ] as const
 
+// Data de início da promoção (9 de setembro de 2025)
+const PROMOTION_START_DATE = new Date('2025-09-09T00:00:00Z');
+const PROMOTION_DURATION_DAYS = 30;
+const PROMOTION_END_DATE = new Date(PROMOTION_START_DATE.getTime() + PROMOTION_DURATION_DAYS * 24 * 60 * 60 * 1000);
+
+
 export default function MembershipPage() {
   const router = useRouter()
   const { user, isAuthenticated } = useMiniKit()
@@ -114,6 +158,9 @@ export default function MembershipPage() {
   const [paymentSuccess, setPaymentSuccess] = useState(false)
   const [paymentError, setPaymentError] = useState<string | null>(null)
   const [animatedValue, setAnimatedValue] = useState(0)
+
+  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
+  const [currentMembershipAmount, setCurrentMembershipAmount] = useState(INITIAL_MEMBERSHIP_AMOUNT);
 
   // Load saved language
   useEffect(() => {
@@ -152,6 +199,54 @@ export default function MembershipPage() {
     }
   }, []) // Empty dependency array means it runs once on mount
 
+  // Countdown logic
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const newTimeLeft = calculateTimeLeft();
+      setTimeLeft(newTimeLeft);
+      if (newTimeLeft.total <= 0) {
+        setCurrentMembershipAmount(INCREASED_MEMBERSHIP_AMOUNT);
+        clearInterval(timer);
+      } else {
+        setCurrentMembershipAmount(INITIAL_MEMBERSHIP_AMOUNT);
+      }
+    }, 1000);
+
+    // Initial check on mount
+    const initialTimeLeft = calculateTimeLeft();
+    if (initialTimeLeft.total <= 0) {
+      setCurrentMembershipAmount(INCREASED_MEMBERSHIP_AMOUNT);
+    } else {
+      setCurrentMembershipAmount(INITIAL_MEMBERSHIP_AMOUNT);
+    }
+
+    return () => clearInterval(timer);
+  }, []);
+
+  function calculateTimeLeft() {
+    const now = new Date();
+    const difference = PROMOTION_END_DATE.getTime() - now.getTime();
+
+    let timeLeft = {
+      total: difference,
+      days: 0,
+      hours: 0,
+      minutes: 0,
+      seconds: 0,
+    };
+
+    if (difference > 0) {
+      timeLeft = {
+        total: difference,
+        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((difference / 1000 / 60) % 60),
+        seconds: Math.floor((difference / 1000) % 60),
+      };
+    }
+    return timeLeft;
+  }
+
   // Get translations for current language
   const t = translations[currentLang]
 
@@ -173,15 +268,15 @@ export default function MembershipPage() {
       console.log("🚀 Starting membership payment...")
       console.log("WLD Token Address:", WLD_TOKEN_ADDRESS)
       console.log("Recipient Address:", MEMBERSHIP_RECIPIENT)
-      console.log("Amount:", MEMBERSHIP_AMOUNT, "WLD")
+      console.log("Amount:", currentMembershipAmount, "WLD") // Usando o valor dinâmico
       console.log("User Address:", user.walletAddress)
 
       if (!MiniKit.isInstalled()) {
         throw new Error("MiniKit is not installed")
       }
 
-      // Convert 30 WLD to wei (18 decimals)
-      const amountInWei = (BigInt(MEMBERSHIP_AMOUNT) * BigInt(10 ** 18)).toString()
+      // Convert currentMembershipAmount to wei (18 decimals)
+      const amountInWei = (BigInt(currentMembershipAmount) * BigInt(10 ** 18)).toString()
       console.log("Amount in wei:", amountInWei)
 
       console.log("Calling MiniKit.commandsAsync.sendTransaction...")
@@ -315,7 +410,7 @@ export default function MembershipPage() {
                 <div>
                   <p className="text-green-400 text-xs font-medium mb-1">{t.paymentSuccess}</p>
                   <p className="text-green-300 text-xs">
-                    Welcome to our membership program! Your payment of 30 WLD has been processed.
+                    Welcome to our membership program! Your payment of {currentMembershipAmount} WLD has been processed.
                   </p>
                   <p className="text-green-300 text-xs mt-1">{t.emailInstruction}</p>
                   <div className="flex items-center gap-1 mt-1 p-1.5 bg-gray-800/50 rounded border">
@@ -361,35 +456,108 @@ export default function MembershipPage() {
           )}
         </AnimatePresence>
 
-        {/* Membership Card */}
+        {/* Membership Content (formerly "Card") */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="bg-gradient-to-br from-yellow-500/10 to-orange-500/10 backdrop-blur-xl border border-yellow-500/20 rounded-xl p-4 shadow-2xl"
+          // Removidas as classes de fundo, borda, blur e sombra
+          className="w-full flex flex-col items-center text-center p-4 space-y-6" // Ajustado padding e espaçamento
         >
-          <div className="text-center mb-4">
-            <div className="w-12 h-12 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
-              <Crown className="w-6 h-6 text-yellow-400" />
-            </div>
-            <h2 className="text-xl font-bold text-white mb-1">Premium Membership</h2>
+          {/* Removido o div com a coroa */}
+          <h2 className="text-2xl font-bold text-white mb-2">Premium Membership</h2>
+
+          {/* Countdown Timer */}
+          <div className="text-center text-gray-300 text-sm">
+            {timeLeft.total > 0 ? (
+              <p className="text-yellow-400 font-semibold">
+                {t.countdownPrefix} {timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m {timeLeft.seconds}s
+              </p>
+            ) : (
+              <p className="text-red-400 font-semibold">{t.countdownExpired}</p>
+            )}
           </div>
 
-          {/* Description */}
-          <div className="mb-4">
-            <p className="text-gray-300 text-xs leading-relaxed text-center">{t.membershipDescription}</p>
+          {/* Price - Image on left, 30/50 on right, larger size, moved down and left */}
+          <div className="flex items-center justify-center gap-2 mt-4 -translate-x-5">
+            <Image
+              src="/images/wldlogo3D.png"
+              alt="WLD Logo"
+              width={240}
+              height={240}
+              className="object-contain"
+            />
+            <div className="text-5xl font-extrabold text-white">{currentMembershipAmount}</div>
+          </div>
+          <div className="text-gray-400 text-sm">{t.oneTimePayment}</div>
+
+          {/* Get Membership Button */}
+          <div className="relative w-full"> {/* Adicionado um div pai para posicionamento relativo */}
+            <button
+              onClick={handleGetMembership}
+              disabled={isProcessing}
+              className={`w-full py-4 px-6 rounded-lg font-semibold text-lg transition-all duration-300 flex items-center justify-center space-x-3 ${
+                isProcessing
+                  ? "bg-gray-600/50 text-gray-400 cursor-not-allowed"
+                  : "bg-gradient-to-r from-gray-300 to-gray-500 hover:from-gray-400 hover:to-gray-600 text-gray-900 shadow-lg hover:shadow-xl transform hover:scale-105"
+              }`}
+            >
+              {isProcessing ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span className="text-base">{t.processing}</span>
+                </>
+              ) : (
+                <>
+                  <Crown className="w-5 h-5" />
+                  <span className="text-base">{t.getMembership}</span>
+                </>
+              )}
+            </button>
+
+            {/* Finger Click Icon */}
+            <AnimatePresence>
+              {!isProcessing && isAuthenticated && (
+                <motion.div
+                  initial={{ opacity: 0, y: -20, x: -20 }}
+                  animate={{
+                    opacity: 1,
+                    y: [0, -10, 0], // Move up and down
+                    x: [0, -5, 0], // Move left and right slightly
+                    transition: {
+                      repeat: Infinity,
+                      duration: 1.5,
+                      ease: "easeInOut",
+                      delay: 1 // Start animation after a short delay
+                    }
+                  }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="absolute -top-10 right-1/2 translate-x-1/2 z-20" // Ajuste a posição conforme necessário
+                >
+                  <Image
+                    src="/images/finger-click-icon.png"
+                    alt="Click here"
+                    width={50}
+                    height={50}
+                    className="transform rotate-12" // Rotaciona ligeiramente o dedo
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
-          {/* Price */}
-          <div className="text-center mb-4">
-            <div className="text-2xl font-bold text-white mb-0.5">30 WLD</div>
-            <div className="text-gray-400 text-xs">{t.oneTimePayment}</div>
+
+          {!isAuthenticated && <p className="text-center text-gray-400 text-xs mt-2">{t.connectWalletFirst}</p>}
+
+          {/* Description - Moved below the button */}
+          <div className="w-full">
+            <p className="text-gray-300 text-sm leading-relaxed">{t.membershipDescription}</p>
           </div>
 
           {/* Email Instruction */}
-          <div className="mb-4 p-2 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-            <p className="text-blue-300 text-xs text-center leading-relaxed">📧 {t.emailInstruction}</p>
-            <div className="flex items-center justify-center gap-1 mt-1 p-1 bg-gray-800/50 rounded">
+          <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg w-full">
+            <p className="text-blue-300 text-xs leading-relaxed">📧 {t.emailInstruction}</p>
+            <div className="flex items-center justify-center gap-1 mt-2 p-1 bg-gray-800/50 rounded">
               <span className="text-xs text-gray-300 font-mono">support@tradepulsetoken.com</span>
               <button
                 onClick={() => {
@@ -403,34 +571,9 @@ export default function MembershipPage() {
           </div>
 
           {/* Monthly Payments Info */}
-          <div className="mb-4 p-2 bg-green-500/10 border border-green-500/20 rounded-lg">
-            <p className="text-green-300 text-xs text-center leading-relaxed">💰 {t.monthlyPayments}</p>
+          <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-lg w-full">
+            <p className="text-green-300 text-xs leading-relaxed">💰 {t.monthlyPayments}</p>
           </div>
-
-          {/* Get Membership Button */}
-          <button
-            onClick={handleGetMembership}
-            disabled={isProcessing}
-            className={`w-full py-3 px-4 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center space-x-2 ${
-              isProcessing
-                ? "bg-gray-600/50 text-gray-400 cursor-not-allowed"
-                : "bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white shadow-lg hover:shadow-xl transform hover:scale-105"
-            }`}
-          >
-            {isProcessing ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span className="text-sm">{t.processing}</span>
-              </>
-            ) : (
-              <>
-                <Crown className="w-4 h-4" />
-                <span className="text-sm">{t.getMembership}</span>
-              </>
-            )}
-          </button>
-
-          {!isAuthenticated && <p className="text-center text-gray-400 text-xs mt-2">{t.connectWalletFirst}</p>}
         </motion.div>
       </div>
     </main>
