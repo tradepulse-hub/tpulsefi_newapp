@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { MiniKit } from "@worldcoin/minikit-js"
 import Image from 'next/image' // Adicionado para usar a imagem
+import { BackgroundEffect } from "../../components/background-effect" // Import the new BackgroundEffect
 
 // Placeholder para useMiniKit (mantido como no ficheiro original fornecido)
 // Em uma aplicação real, você integraria o MiniKit de forma adequada.
@@ -21,20 +22,6 @@ function useMiniKit() {
 
   return { user, isAuthenticated }
 }
-
-// Placeholder para BackgroundEffect (mantido como no ficheiro original fornecido)
-function BackgroundEffect() {
-  return (
-    <div className="absolute inset-0 z-0">
-      {/* Adicione seus elementos de efeito de fundo aqui */}
-      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-purple-900 to-black opacity-50 animate-gradient-shift"></div>
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-yellow-500 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob-1"></div>
-      <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob-2"></div>
-      <div className="absolute bottom-1/3 right-1/4 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob-3"></div>
-    </div>
-  )
-}
-
 
 // Supported languages
 const SUPPORTED_LANGUAGES = ["en", "pt", "es", "id"] as const
