@@ -159,7 +159,7 @@ export default function MembershipPage() {
 
   // Animation for the paid value
   useEffect(() => {
-    const targetValue = 74555
+    const targetValue = 160539 // 74555 + 85984 = 160539
     const duration = 5000 // 5 seconds
     const frameRate = 60 // frames per second
     const totalFrames = (duration / 1000) * frameRate
