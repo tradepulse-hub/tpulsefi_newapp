@@ -1470,7 +1470,7 @@ return (
         style={{
           animation: "vibrateLogo 0.08s linear infinite",
         }}
-      />
+      > {/* Adicionado o fechamento da tag aqui */}
         <div
           className="absolute inset-0 bg-white rounded-full shadow-2xl"
           style={{
@@ -1490,7 +1490,7 @@ return (
               animation: "vibrateLogoImage 0.1s linear infinite",
             }}
           />
-        </div>
+        </div> {/* Esta é a tag de fechamento que faltava */}
       </div>
     </div>
 
