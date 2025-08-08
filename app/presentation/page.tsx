@@ -121,6 +121,10 @@ popup: {
   moreInfo: "(More info in HoldStation App)",
   figamesTitle: "FiGames - Amazing Gameplay!",
   figamesDescription: "FiGames - Amazing gameplay in our app, still in development.",
+  rateUsTitle: "Rate us with 5 stars",
+  rateUsDescription: "A small gesture that helps us strengthen and achieve success.",
+  shareFriendsTitle: "Share with your friends and family",
+  shareFriendsDescription: "Do your part and contribute to TPulseFi truly growing, together we are stronger.",
 },
 },
 pt: {
@@ -182,6 +186,10 @@ popup: {
   moreInfo: "(Mais info na App HoldStation)",
   figamesTitle: "FiGames - Jogabilidade Incrível!",
   figamesDescription: "FiGames - Uma jogabilidade incrível no nosso app, ainda em desenvolvimento.",
+  rateUsTitle: "Classifique-nos com 5 estrelas",
+  rateUsDescription: "Um pequeno gesto que nos ajuda a fortalecer e alcançar o sucesso.",
+  shareFriendsTitle: "Partilhe com os seus amigos e família",
+  shareFriendsDescription: "Faça a sua parte e contribua para que TPulseFi cresça verdadeiramente, juntos somos mais fortes.",
 },
 },
 es: {
@@ -244,6 +252,10 @@ popup: {
   moreInfo: "(Más info en la App de HoldStation)",
   figamesTitle: "FiGames - ¡Jugabilidad Increíble!",
   figamesDescription: "FiGames - Una jugabilidad increíble en nuestra app, aún en desarrollo.",
+  rateUsTitle: "Califícanos con 5 estrellas",
+  rateUsDescription: "Un pequeño gesto que nos ayuda a fortalecer y alcanzar el éxito.",
+  shareFriendsTitle: "Comparte con tus amigos y familiares",
+  shareFriendsDescription: "Haz tu parte y contribuye a que TPulseFi crezca de verdad, juntos somos más fuertes.",
 },
 },
 id: {
@@ -305,6 +317,10 @@ popup: {
   moreInfo: "(Info lebih lanjut di Aplikasi HoldStation)",
   figamesTitle: "FiGames - Gameplay Luar Biasa!",
   figamesDescription: "FiGames - Gameplay luar biasa di aplikasi kami, masih dalam pengembangan.",
+  rateUsTitle: "Beri kami 5 bintang",
+  rateUsDescription: "Sebuah isyarat kecil yang membantu kami memperkuat dan mencapai kesuksesan.",
+  shareFriendsTitle: "Bagikan dengan teman dan keluarga Anda",
+  shareFriendsDescription: "Lakukan bagian Anda dan berkontribusi agar TPulseFi benar-benar tumbuh, bersama kita lebih kuat.",
 },
 },
 }
@@ -1344,18 +1360,24 @@ return (
             </p>
           </div>
 
-          {/* Placeholder Section 3 */}
-          <div className="flex flex-col items-center justify-center p-2 bg-gray-800/50 rounded-lg border border-white/10 min-h-[150px]"> {/* Reduzido p-3 para p-2, min-h-[200px] para min-h-[150px] */}
-            <Gamepad2 className="w-8 h-8 text-gray-500 mb-1" /> {/* Reduzido w-12 h-12 para w-8 h-8, mb-2 para mb-1 */}
-            <h3 className="text-base font-bold text-gray-400 mb-0.5">Em Breve</h3> {/* Reduzido text-lg para text-base, mb-1 para mb-0.5 */}
-            <p className="text-gray-500 text-xs">Mais conteúdo emocionante a caminho!</p> {/* Reduzido text-sm para text-xs */}
+          {/* Rate Us Section */}
+          <div className="flex flex-col items-center justify-center p-2 bg-gray-800/50 rounded-lg border border-white/10 min-h-[150px]">
+            <div className="flex mb-1">
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} className="w-6 h-6 text-yellow-400 fill-yellow-400" />
+              ))}
+            </div>
+            <h3 className="text-base font-bold text-gray-400 mb-0.5">{t.popup?.rateUsTitle || "Classifique-nos com 5 estrelas"}</h3>
+            <p className="text-gray-500 text-xs text-center px-2">{t.popup?.rateUsDescription || "Um pequeno gesto que nos ajuda a fortalecer e alcançar o sucesso."}</p>
           </div>
 
-          {/* Placeholder Section 4 */}
-          <div className="flex flex-col items-center justify-center p-2 bg-gray-800/50 rounded-lg border border-white/10 min-h-[150px]"> {/* Reduzido p-3 para p-2, min-h-[200px] para min-h-[150px] */}
-            <Star className="w-8 h-8 text-gray-500 mb-1" /> {/* Reduzido w-12 h-12 para w-8 h-8, mb-2 para mb-1 */}
-            <h3 className="text-base font-bold text-gray-400 mb-0.5">Novidades</h3> {/* Reduzido text-lg para text-base, mb-1 para mb-0.5 */}
-            <p className="text-gray-500 text-xs">Fique atento às últimas atualizações.</p> {/* Reduzido text-sm para text-xs */}
+          {/* Share with Friends Section */}
+          <div className="flex flex-col items-center justify-center p-2 bg-gray-800/50 rounded-lg border border-white/10 min-h-[150px]">
+            <button onClick={() => setShowShareModal(true)} className="flex flex-col items-center">
+              <Share2 className="w-8 h-8 text-blue-400 mb-1" />
+              <h3 className="text-base font-bold text-gray-400 mb-0.5">{t.popup?.shareFriendsTitle || "Partilhe com os seus amigos e família"}</h3>
+              <p className="text-gray-500 text-xs text-center px-2">{t.popup?.shareFriendsDescription || "Faça a sua parte e contribua para que TPulseFi cresça verdadeiramente, juntos somos mais fortes."}</p>
+            </button>
           </div>
         </div>
 
