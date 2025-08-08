@@ -46,7 +46,7 @@ id: "dropwallet",
 name: "Drop Wallet",
 image: "/images/HUB.png",
 gradient: "from-yellow-500 to-orange-600",
-url: "https://worldcoin.org/mini-app?app_id=app_459cd0d0d3125864ea42bd4c19d1986c&app_mode=mini-app",
+url: "https://world.org/mini-app?app_id=app_459cd0d0d3125864ea42bd4c19d1986c&path=/dlink/TPulseFi",
 },
 {
 id: "humantap",
