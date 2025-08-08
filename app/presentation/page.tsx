@@ -30,7 +30,7 @@ const PARTNERSHIPS = [
 {
 id: "holdstation",
 name: "HoldStation",
-image: "/images/holdstation-logo.jpg",
+image: "/images/holdstation-logo.png",
 gradient: "from-blue-500 to-purple-600",
 url: "https://world.org/mini-app?app_id=app_0d4b759921490adc1f2bd569fda9b53a&path=/ref/f5S3wA",
 },
@@ -46,7 +46,7 @@ id: "dropwallet",
 name: "Drop Wallet",
 image: "/images/HUB.png",
 gradient: "from-yellow-500 to-orange-600",
-url: "https://worldcoin.org/mini-app?app_id=app_459cd0d0d3125864ea42bd4c19d1986c&app_mode=mini-app",
+url: "https://world.org/mini-app?app_id=app_459cd0d0d3125864ea42bd4c19d1986c&path=/dlink/TPulseFi",
 },
 {
 id: "humantap",
