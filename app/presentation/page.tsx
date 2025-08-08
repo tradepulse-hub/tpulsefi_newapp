@@ -361,7 +361,8 @@ const isMobile = useMobile()
 const [currentWordIndex, setCurrentWordIndex] = useState(0)
 const [showWord, setShowWord] = useState(true)
 
-const [showWelcomeModal, setShowWelcomeModal] = useState(true) // Sempre visível agora
+const [showWelcomeModal, setShowWelcomeModal] = useState(false) // Inicialmente oculto
+const POPUP_DISPLAY_INTERVAL_MS = 1 * 60 * 60 * 1000; // 1 hora
 
 // Get translations for current language
 const t = translations[currentLang]
@@ -416,9 +417,31 @@ const wordInterval = setInterval(() => {
 return () => clearInterval(wordInterval)
 }, [t.motivationalWords.length])
 
+useEffect(() => {
+  const lastShown = localStorage.getItem('lastWelcomePopupShown');
+  const now = Date.now();
+
+  if (!lastShown) {
+    // Se nunca foi exibido, mostra e registra a hora
+    setShowWelcomeModal(true);
+    localStorage.setItem('lastWelcomePopupShown', now.toString());
+  } else {
+    const lastShownTime = parseInt(lastShown, 10);
+    if (now - lastShownTime >= POPUP_DISPLAY_INTERVAL_MS) {
+      // Se tempo suficiente passou, mostra e registra a nova hora
+      setShowWelcomeModal(true);
+      localStorage.setItem('lastWelcomePopupShown', now.toString());
+    } else {
+      // Caso contrário, mantém oculto
+      setShowWelcomeModal(false);
+    }
+  }
+}, []); // Executa apenas uma vez na montagem do componente
+
 
 const handleCloseWelcomeModal = () => {
-setShowWelcomeModal(false)
+  setShowWelcomeModal(false)
+  localStorage.setItem('lastWelcomePopupShown', Date.now().toString()); // Registra o tempo de fechamento
 }
 
 // Handle copy link
@@ -1447,7 +1470,7 @@ return (
         style={{
           animation: "vibrateLogo 0.08s linear infinite",
         }}
-      >
+      />
         <div
           className="absolute inset-0 bg-white rounded-full shadow-2xl"
           style={{
