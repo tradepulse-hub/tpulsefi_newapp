@@ -88,6 +88,7 @@ common: {
   linkCopied: "Link copied!",
   shareVia: "Share via",
   copyLink: "Copy Link",
+  start: "Start", // Added translation for "Start"
 },
 partnerships: {
   visitApp: "Visit App",
@@ -153,6 +154,7 @@ common: {
   linkCopied: "Link copiado!",
   shareVia: "Partilhar via",
   copyLink: "Copiar Link",
+  start: "Começar", // Added translation for "Começar"
 },
 partnerships: {
   visitApp: "Visitar App",
@@ -218,6 +220,7 @@ common: {
   linkCopied: "¡Enlace copiado!",
   shareVia: "Compartir vía",
   copyLink: "Copiar Enlace",
+  start: "Comenzar", // Added translation for "Comenzar"
 },
 partnerships: {
   visitApp: "Visitar App",
@@ -284,6 +287,7 @@ common: {
   linkCopied: "Link disalin!",
   shareVia: "Bagikan via",
   copyLink: "Salin Link",
+  start: "Mulai", // Added translation for "Mulai"
 },
 partnerships: {
   visitApp: "Kunjungi App",
@@ -355,7 +359,7 @@ const isMobile = useMobile()
 
 // Adiciona um novo estado para controlar as palavras que aparecem:
 const [currentWordIndex, setCurrentWordIndex] = useState(0)
-const [showWord, setShowWord] = useState(true)
+const [showWord, setShowWord] = true)
 
 const [showWelcomeModal, setShowWelcomeModal] = useState(true) // Novo estado para o pop-up de boas-vindas
 
@@ -617,7 +621,6 @@ return (
             <Calendar className="w-3 h-3 text-orange-300 relative z-10" /> {/* Reduced icon size */}
             <span className="text-xs font-medium relative z-10">
               {" "}
-              {/* Reduced text size */}
               {t.events?.eventButton || "Evento"}
             </span>
             {/* Live Indicator */}
@@ -1386,7 +1389,7 @@ return (
           onClick={handleCloseWelcomeModal}
           className="mt-4 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg text-xs" // Reduzido mt-6 para mt-4, px-5 py-2.5 para px-4 py-2, text-sm para text-xs
         >
-          Começar
+          {t.common?.start || "Começar"}
         </button>
       </motion.div>
     </motion.div>
