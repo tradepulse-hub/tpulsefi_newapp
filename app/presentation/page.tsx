@@ -359,9 +359,14 @@ const isMobile = useMobile()
 
 // Adiciona um novo estado para controlar as palavras que aparecem:
 const [currentWordIndex, setCurrentWordIndex] = useState(0)
-const [showWord, setShowWord] = true)
+const [showWord, setShowWord] = useState(true)
 
-const [showWelcomeModal, setShowWelcomeModal] = useState(true) // Novo estado para o pop-up de boas-vindas
+const [showWelcomeModal, setShowWelcomeModal] = useState(false) // Inicialmente oculto
+
+// Define o intervalo para exibir o pop-up
+// Para "dia a dia" (24 horas): 24 * 60 * 60 * 1000
+// Para "6h em 6h" (6 horas): 6 * 60 * 60 * 1000
+const POPUP_DISPLAY_INTERVAL_MS = 24 * 60 * 60 * 1000; // Padrão: 24 horas
 
 // Get translations for current language
 const t = translations[currentLang]
@@ -384,6 +389,28 @@ if (savedLanguage && translations[savedLanguage]) {
   setCurrentLang(savedLanguage)
 }
 }, [])
+
+// Lógica para exibir o pop-up com base no intervalo
+useEffect(() => {
+const lastShown = localStorage.getItem('lastWelcomePopupShown');
+const now = Date.now();
+
+if (!lastShown) {
+  // Se nunca foi exibido, mostra e registra a hora
+  setShowWelcomeModal(true);
+  localStorage.setItem('lastWelcomePopupShown', now.toString());
+} else {
+  const lastShownTime = parseInt(lastShown, 10);
+  if (now - lastShownTime >= POPUP_DISPLAY_INTERVAL_MS) {
+    // Se tempo suficiente passou, mostra e registra a nova hora
+    setShowWelcomeModal(true);
+    localStorage.setItem('lastWelcomePopupShown', now.toString());
+  } else {
+    // Caso contrário, mantém oculto
+    setShowWelcomeModal(false);
+  }
+}
+}, []); // Executa apenas uma vez na montagem do componente
 
 // Show mini wallet when authenticated
 useEffect(() => {
@@ -416,18 +443,12 @@ const wordInterval = setInterval(() => {
 return () => clearInterval(wordInterval)
 }, [t.motivationalWords.length])
 
-// Show welcome modal on initial load
-useEffect(() => {
-// You might want to add logic here to only show it once, e.g., using localStorage
-// if (!localStorage.getItem('welcomeModalShown')) {
-//   setShowWelcomeModal(true);
-//   localStorage.setItem('welcomeModalShown', 'true');
-// }
-setShowWelcomeModal(true); // For demonstration, always show on load
-}, []);
 
 const handleCloseWelcomeModal = () => {
 setShowWelcomeModal(false)
+// O timestamp já é atualizado quando o pop-up é exibido.
+// Não precisamos atualizá-lo novamente ao fechar, para que o próximo
+// aparecimento seja baseado na última vez que ele foi *mostrado*.
 }
 
 // Handle copy link
