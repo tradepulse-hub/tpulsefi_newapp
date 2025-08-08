@@ -361,12 +361,7 @@ const isMobile = useMobile()
 const [currentWordIndex, setCurrentWordIndex] = useState(0)
 const [showWord, setShowWord] = useState(true)
 
-const [showWelcomeModal, setShowWelcomeModal] = useState(false) // Inicialmente oculto
-
-// Define o intervalo para exibir o pop-up
-// Para "dia a dia" (24 horas): 24 * 60 * 60 * 1000
-// Para "6h em 6h" (6 horas): 6 * 60 * 60 * 1000
-const POPUP_DISPLAY_INTERVAL_MS = 24 * 60 * 60 * 1000; // Padrão: 24 horas
+const [showWelcomeModal, setShowWelcomeModal] = useState(true) // Sempre visível agora
 
 // Get translations for current language
 const t = translations[currentLang]
@@ -389,28 +384,6 @@ if (savedLanguage && translations[savedLanguage]) {
   setCurrentLang(savedLanguage)
 }
 }, [])
-
-// Lógica para exibir o pop-up com base no intervalo
-useEffect(() => {
-const lastShown = localStorage.getItem('lastWelcomePopupShown');
-const now = Date.now();
-
-if (!lastShown) {
-  // Se nunca foi exibido, mostra e registra a hora
-  setShowWelcomeModal(true);
-  localStorage.setItem('lastWelcomePopupShown', now.toString());
-} else {
-  const lastShownTime = parseInt(lastShown, 10);
-  if (now - lastShownTime >= POPUP_DISPLAY_INTERVAL_MS) {
-    // Se tempo suficiente passou, mostra e registra a nova hora
-    setShowWelcomeModal(true);
-    localStorage.setItem('lastWelcomePopupShown', now.toString());
-  } else {
-    // Caso contrário, mantém oculto
-    setShowWelcomeModal(false);
-  }
-}
-}, []); // Executa apenas uma vez na montagem do componente
 
 // Show mini wallet when authenticated
 useEffect(() => {
@@ -446,9 +419,6 @@ return () => clearInterval(wordInterval)
 
 const handleCloseWelcomeModal = () => {
 setShowWelcomeModal(false)
-// O timestamp já é atualizado quando o pop-up é exibido.
-// Não precisamos atualizá-lo novamente ao fechar, para que o próximo
-// aparecimento seja baseado na última vez que ele foi *mostrado*.
 }
 
 // Handle copy link
@@ -1358,11 +1328,11 @@ return (
                 className="mx-auto rounded-lg shadow-xl w-full object-contain"
               />
             </a>
-            <h2 className="text-base font-bold mb-0.5">{t.popup?.title || "Grandes Recompensas na HoldStation!"}</h2> {/* Reduzido text-lg para text-base, mb-2 para mb-0.5 */}
-            <p className="text-gray-300 text-xs mb-0.5"> {/* Reduzido text-sm para text-xs, mb-1 para mb-0.5 */}
+            <h2 className="text-[0.7rem] font-bold mb-0.5">{t.popup?.title || "Grandes Recompensas na HoldStation!"}</h2> {/* Reduzido text-base para text-[0.7rem] */}
+            <p className="text-[0.5rem] mb-0.5"> {/* Reduzido text-xs para text-[0.5rem] */}
               {t.popup?.description || "10000$ em jogo! Vais querer perder a competição de trade do nosso parceiro HoldStation e as taxas mais baratas na World? Aproveita!"}
             </p>
-            <p className="text-gray-400 text-[0.6rem]"> {/* Reduzido text-sm para text-[0.6rem] */}
+            <p className="text-[0.4rem]"> {/* Reduzido text-[0.6rem] para text-[0.4rem] */}
               {t.popup?.moreInfo || "(Mais informações disponíveis na App HoldStation)"}
             </p>
           </div>
@@ -1378,8 +1348,8 @@ return (
                 className="mx-auto rounded-lg shadow-xl w-full object-contain"
               />
             </div>
-            <h2 className="text-base font-bold mt-2 mb-0.5">{t.popup?.figamesTitle || "FiGames - Jogabilidade Incrível!"}</h2> {/* Reduzido text-lg para text-base, mt-4 para mt-2, mb-2 para mb-0.5 */}
-            <p className="text-gray-300 text-xs"> {/* Reduzido text-sm para text-xs */}
+            <h2 className="text-[0.7rem] font-bold mt-2 mb-0.5">{t.popup?.figamesTitle || "FiGames - Jogabilidade Incrível!"}</h2> {/* Reduzido text-base para text-[0.7rem] */}
+            <p className="text-[0.5rem]"> {/* Reduzido text-xs para text-[0.5rem] */}
               {t.popup?.figamesDescription || "FiGames - Uma jogabilidade incrível no nosso aplicativo que ainda está em desenvolvimento."}
             </p>
           </div>
@@ -1391,16 +1361,16 @@ return (
                 <Star key={i} className="w-6 h-6 text-yellow-400 fill-yellow-400" />
               ))}
             </div>
-            <h3 className="text-base font-bold text-gray-400 mb-0.5">{t.popup?.rateUsTitle || "Classifique-nos com 5 estrelas"}</h3>
-            <p className="text-gray-500 text-xs text-center px-2">{t.popup?.rateUsDescription || "Um pequeno gesto que nos ajuda a fortalecer e alcançar o sucesso."}</p>
+            <h3 className="text-[0.7rem] font-bold text-gray-400 mb-0.5">{t.popup?.rateUsTitle || "Classifique-nos com 5 estrelas"}</h3> {/* Reduzido text-base para text-[0.7rem] */}
+            <p className="text-gray-500 text-[0.5rem] text-center px-2">{t.popup?.rateUsDescription || "Um pequeno gesto que nos ajuda a fortalecer e alcançar o sucesso."}</p> {/* Reduzido text-xs para text-[0.5rem] */}
           </div>
 
           {/* Share with Friends Section */}
           <div className="flex flex-col items-center justify-center p-2 bg-gray-800/50 rounded-lg border border-white/10 min-h-[150px]">
             <button onClick={() => setShowShareModal(true)} className="flex flex-col items-center">
               <Share2 className="w-8 h-8 text-blue-400 mb-1" />
-              <h3 className="text-base font-bold text-gray-400 mb-0.5">{t.popup?.shareFriendsTitle || "Partilhe com os seus amigos e família"}</h3>
-              <p className="text-gray-500 text-xs text-center px-2">{t.popup?.shareFriendsDescription || "Faça a sua parte e contribua para que TPulseFi cresça verdadeiramente, juntos somos mais fortes."}</p>
+              <h3 className="text-[0.7rem] font-bold text-gray-400 mb-0.5">{t.popup?.shareFriendsTitle || "Partilhe com os seus amigos e família"}</h3> {/* Reduzido text-base para text-[0.7rem] */}
+              <p className="text-gray-500 text-[0.5rem] text-center px-2">{t.popup?.shareFriendsDescription || "Faça a sua parte e contribua para que TPulseFi cresça verdadeiramente, juntos somos mais fortes."}</p> {/* Reduzido text-xs para text-[0.5rem] */}
             </button>
           </div>
         </div>
@@ -1408,7 +1378,7 @@ return (
         {/* CTA Button */}
         <button
           onClick={handleCloseWelcomeModal}
-          className="mt-4 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg text-xs" // Reduzido mt-6 para mt-4, px-5 py-2.5 para px-4 py-2, text-sm para text-xs
+          className="mt-4 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg text-[0.5rem]" // Reduzido text-xs para text-[0.5rem]
         >
           {t.common?.start || "Começar"}
         </button>
