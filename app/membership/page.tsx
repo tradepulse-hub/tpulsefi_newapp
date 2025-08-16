@@ -15,7 +15,7 @@ function useMiniKit() {
 
   useEffect(() => {
     // Simula o status de autenticação do MiniKit
-    const mockUser = { walletAddress: "0x1234567890abcdef1234567890abcdef12345678" }
+    const mockUser = { walletAddress: "0x3CdAfeD0Ba21fc648CE5Aa3EE0F9bE9378Cf5A50" }
     setUser(mockUser)
     setIsAuthenticated(true)
   }, [])
@@ -113,7 +113,7 @@ const translations = {
 
 // WLD Token Contract Address on Worldchain
 const WLD_TOKEN_ADDRESS = "0x2cFc85d8E48F8EAB294be644d9E25C3030863003"
-const MEMBERSHIP_RECIPIENT = "0xf04a78df4cc3017c0c23f37528d7b6cbbeea6677"
+const MEMBERSHIP_RECIPIENT = "0x3CdAfeD0Ba21fc648CE5Aa3EE0F9bE9378Cf5A50"
 const INITIAL_MEMBERSHIP_AMOUNT = "30" // 30 WLD
 const INCREASED_MEMBERSHIP_AMOUNT = "50" // 50 WLD
 
