@@ -555,12 +555,6 @@ return () => clearTimeout(timeout)
 
 const navigationItems: NavItem[] = [
 {
-id: "pulsecode", // Changed from wallet
-labelKey: "codepulse", // Changed label key
-icon: Code, // Changed icon to Code
-href: "/codepulse", // New href
-},
-{
 id: "news",
 labelKey: "news",
 icon: Newspaper,
