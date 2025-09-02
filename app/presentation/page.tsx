@@ -90,7 +90,7 @@ const PARTNERSHIPS = [
 ]
 
 const generateInviteUrl = (userId: string) => {
-  return `https://worldcoin.org/mini-app?app_id=app_a3a55e132983350c67923dd57dc22c5e&app_mode=mini-app&invited_by=${userId}`
+  return `https://worldcoin.org/mini-app?app_id=app_a3a55e132983350c67923dd57dc22c5e&app_mode=mini-app&invited_by=user_${userId}`
 }
 
 // URL do convite
@@ -124,7 +124,7 @@ const translations = {
       linkCopied: "Link copied!",
       shareVia: "Share via",
       copyLink: "Copy Link",
-      start: "Start", // Added translation for "Start"
+      start: "Start",
     },
     partnerships: {
       visitApp: "Visit App",
@@ -132,11 +132,10 @@ const translations = {
     events: {
       title: "Invitations",
       liveEvent: "INVITE & EARN REWARDS",
-      eventTitle: "Invite and Earn Rewards",
-      eventDescription:
-        "Invite friends and earn rewards for each successful referral. The more you invite, the more you earn.",
-      eventDetails: "Track your invitations and see how many people clicked your invite link.",
-      eventWarning: "Start inviting now and maximize your earning potential!",
+      eventTitle: "How the Invitation System Works",
+      eventDescription: "You can start inviting, it's already counting while we prepare everything perfectly.",
+      eventDetails: "Win prizes in WLD! Invite friends and earn rewards for each successful referral.",
+      eventWarning: "The more you invite, the more rewards you earn!",
       eventPeriod: "Invitation Stats",
       eventDates: `${0} people invited • ${0} clicks`,
       participateNow: "Rewards 0/10 guests",
@@ -168,7 +167,7 @@ const translations = {
   },
   pt: {
     presentation: {
-      tagline: "THE GLOBAL CRYPTO BRIDGE",
+      tagline: "A PONTE CRIPTO GLOBAL",
       connectWallet: "Conectar Carteira",
     },
     navigation: {
@@ -189,25 +188,24 @@ const translations = {
       close: "Fechar",
       back: "Voltar",
       invite: "CONVIDAR",
-      linkCopiado: "Link copiado!",
-      shareVia: "Partilhar via",
+      linkCopied: "Link copiado!",
+      shareVia: "Compartilhar via",
       copyLink: "Copiar Link",
-      start: "Começar", // Added translation for "Começar"
+      start: "Começar",
     },
     partnerships: {
       visitApp: "Visitar App",
     },
     events: {
       title: "Convites",
-      liveEvent: "CONVIDA E GANHA PRÉMIOS",
-      eventTitle: "Convida e Ganha Prémios",
-      eventDescription:
-        "Convida amigos e ganha recompensas por cada indicação bem-sucedida. Quanto mais convidares, mais ganhas.",
-      eventDetails: "Acompanha os teus convites e vê quantas pessoas clicaram no teu link de convite.",
-      eventWarning: "Começa a convidar agora e maximiza o teu potencial de ganhos!",
+      liveEvent: "CONVIDE E GANHE RECOMPENSAS",
+      eventTitle: "Como Funciona o Sistema de Convites",
+      eventDescription: "Podes começar a convidar já está a contar, enquanto preparamos tudo de forma perfeita.",
+      eventDetails: "Ganha prémios em WLD! Convida amigos e ganha recompensas por cada referência bem-sucedida.",
+      eventWarning: "Quanto mais convidares, mais recompensas ganhas!",
       eventPeriod: "Estatísticas de Convites",
       eventDates: `${0} pessoas convidadas • ${0} cliques`,
-      participateNow: "Prêmios 0/10 convidados",
+      participateNow: "Prémios 0/10 convidados",
       termsConditions: "Convidados",
       eventButton: "Convites",
     },
@@ -237,7 +235,7 @@ const translations = {
   },
   es: {
     presentation: {
-      tagline: "THE GLOBAL CRYPTO BRIDGE",
+      tagline: "EL PUENTE CRIPTO GLOBAL",
       connectWallet: "Conectar Billetera",
     },
     navigation: {
@@ -247,7 +245,7 @@ const translations = {
       airdrop: "Airdrop",
       fistaking: "Fi Staking",
       figames: "Fi Games",
-      membership: "Membresía",
+      membership: "Miembros",
       partnerships: "Asociaciones",
       about: "Acerca de",
     },
@@ -261,18 +259,18 @@ const translations = {
       linkCopied: "¡Enlace copiado!",
       shareVia: "Compartir vía",
       copyLink: "Copiar Enlace",
-      start: "Comenzar", // Added translation for "Comenzar"
+      start: "Comenzar",
     },
     partnerships: {
       visitApp: "Visitar App",
     },
     events: {
       title: "Invitaciones",
-      liveEvent: "INVITA Y GANA PREMIOS",
-      eventTitle: "Invita y Gana Premios",
-      eventDescription: "Invita amigos y gana recompensas por cada referencia exitosa. Cuanto más invites, más ganas.",
-      eventDetails: "Rastrea tus invitaciones y ve cuántas personas hicieron clic en tu enlace de invitación.",
-      eventWarning: "¡Comienza a invitar ahora y maximiza tu potencial de ganancias!",
+      liveEvent: "INVITA Y GANA RECOMPENSAS",
+      eventTitle: "Cómo Funciona el Sistema de Invitaciones",
+      eventDescription: "Puedes empezar a invitar ya está contando, mientras preparamos todo de forma perfecta.",
+      eventDetails: "¡Gana premios en WLD! Invita amigos y gana recompensas por cada referencia exitosa.",
+      eventWarning: "¡Cuanto más invites, más recompensas ganas!",
       eventPeriod: "Estadísticas de Invitaciones",
       eventDates: `${0} personas invitadas • ${0} clics`,
       participateNow: "Premios 0/10 invitados",
@@ -304,7 +302,7 @@ const translations = {
   },
   id: {
     presentation: {
-      tagline: "THE GLOBAL CRYPTO BRIDGE",
+      tagline: "JEMBATAN KRIPTO GLOBAL",
       connectWallet: "Hubungkan Dompet",
     },
     navigation: {
@@ -326,21 +324,21 @@ const translations = {
       back: "Kembali",
       invite: "UNDANG",
       linkCopied: "Link disalin!",
-      shareVia: "Bagikan via",
+      shareVia: "Bagikan melalui",
       copyLink: "Salin Link",
-      start: "Mulai", // Added translation for "Mulai"
+      start: "Mulai",
     },
     partnerships: {
       visitApp: "Kunjungi App",
     },
     events: {
       title: "Undangan",
-      liveEvent: "UNDANG DAN MENANGKAN HADIAH",
-      eventTitle: "Undang dan Menangkan Hadiah",
+      liveEvent: "UNDANG & DAPATKAN HADIAH",
+      eventTitle: "Cara Kerja Sistem Undangan",
       eventDescription:
-        "Undang teman dan dapatkan hadiah untuk setiap rujukan yang berhasil. Semakin banyak Anda mengundang, semakin banyak yang Anda peroleh.",
-      eventDetails: "Lacak undangan Anda dan lihat berapa banyak orang yang mengklik tautan undangan Anda.",
-      eventWarning: "Mulai mengundang sekarang dan maksimalkan potensi penghasilan Anda!",
+        "Anda bisa mulai mengundang sudah terhitung, sementara kami mempersiapkan semuanya dengan sempurna.",
+      eventDetails: "Menangkan hadiah dalam WLD! Undang teman dan dapatkan hadiah untuk setiap rujukan yang berhasil.",
+      eventWarning: "Semakin banyak Anda mengundang, semakin banyak hadiah yang Anda dapatkan!",
       eventPeriod: "Statistik Undangan",
       eventDates: `${0} orang diundang • ${0} klik`,
       participateNow: "Hadiah 0/10 tamu",
@@ -544,7 +542,8 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
   }
 
   const handleCopyLink = async () => {
-    const inviteUrl = generateInviteUrl(currentUserId)
+    const walletAddress = user?.wallet_address || currentUserId
+    const inviteUrl = generateInviteUrl(walletAddress)
     try {
       await navigator.clipboard.writeText(inviteUrl)
       setLinkCopied(true)
@@ -562,8 +561,8 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
       return
     }
 
-    // Fallback to traditional web sharing
-    const inviteUrl = generateInviteUrl(currentUserId)
+    const walletAddress = user?.wallet_address || currentUserId
+    const inviteUrl = generateInviteUrl(walletAddress)
     const message = `Join TPulseFi - The Future of Decentralized Finance! ${inviteUrl}`
     const encodedMessage = encodeURIComponent(message)
     const encodedUrl = encodeURIComponent(inviteUrl)
@@ -598,7 +597,8 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
   }
 
   const shareCommand = async () => {
-    const inviteUrl = generateInviteUrl(currentUserId)
+    const walletAddress = user?.wallet_address || currentUserId
+    const inviteUrl = generateInviteUrl(walletAddress)
 
     try {
       await MiniKit.commandsAsync.share({
@@ -939,118 +939,123 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                 <X className="w-4 h-4 text-white" />
               </button>
 
-              {/* Modal Header with TPF Logo */}
-              <div className="text-center mb-3">
-                {/* Back Button */}
+              <div className="text-center mb-4">
                 <button
                   onClick={() => setShowEventsModal(false)}
-                  className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors mb-2"
+                  className="absolute top-4 left-4 w-8 h-8 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all duration-200"
                 >
-                  <ArrowLeft className="w-4 h-4" />
+                  <ArrowLeft className="w-4 h-4 text-white" />
                   <span className="text-sm">{t.common?.back || "Back"}</span>
                 </button>
-                {/* Animated TPF Logo */}
+
                 <div className="relative mb-2 flex justify-center">
                   {/* Glow Effects */}
-                  <div className="absolute w-12 h-12 bg-gradient-to-r from-yellow-400/30 to-orange-400/30 rounded-full blur-xl animate-pulse" />
+                  <div className="absolute w-16 h-16 bg-gradient-to-r from-blue-400/30 to-cyan-400/30 rounded-full blur-xl animate-pulse" />
                   <div
-                    className="absolute w-10 h-10 bg-gradient-to-r from-white/20 to-white/10 rounded-full blur-lg animate-pulse"
+                    className="absolute w-14 h-14 bg-gradient-to-r from-white/20 to-white/10 rounded-full blur-lg animate-pulse"
                     style={{ animationDelay: "0.5s" }}
                   />
 
                   {/* Logo Container */}
-                  <div className="relative w-12 h-12 bg-white rounded-full p-2 shadow-2xl animate-bounce">
+                  <div className="relative w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full p-2 shadow-2xl animate-bounce">
                     <Image
-                      src="/images/logo-tpf.png"
-                      alt="TPulseFi Logo"
-                      width={32}
-                      height={32}
+                      src="/images/wldlogo3D.png"
+                      alt="WLD Logo"
+                      width={48}
+                      height={48}
                       className="w-full h-full object-contain"
                     />
                   </div>
                 </div>
 
                 {/* Live Badge */}
-                <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-red-500 to-pink-500 px-2 py-0.5 rounded-full mb-1">
+                <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-cyan-500 px-3 py-1 rounded-full mb-2">
                   <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
-                  <span className="text-white text-xs font-bold tracking-wider">
-                    {t.events?.liveEvent || "LIVE EVENT"}
+                  <span className="text-white text-sm font-bold tracking-wider">
+                    {t.events?.liveEvent || "INVITE & EARN REWARDS"}
                   </span>
                 </div>
 
-                <h2 className="text-sm font-bold text-white mb-1">{t.events?.title || "Live Events"}</h2>
+                <h2 className="text-lg font-bold text-white mb-2 text-shadow-lg">{t.events?.title || "Invitations"}</h2>
               </div>
 
               {/* Event Content */}
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {/* Event Title */}
-                <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 rounded-lg p-2">
+                <div className="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-500/30 rounded-lg p-3 backdrop-blur-sm">
                   <div className="flex items-center space-x-2 mb-2">
-                    <Star className="w-3 h-3 text-yellow-400" />
-                    <h3 className="text-xs font-semibold text-white">
-                      {t.events?.eventTitle || "FiStaking Boost Event"}
+                    <Star className="w-4 h-4 text-cyan-400" />
+                    <h3 className="text-sm font-semibold text-white">
+                      {t.events?.eventTitle || "How the Invitation System Works"}
                     </h3>
                   </div>
 
                   <div className="flex items-center space-x-2 mb-2">
-                    <TrendingUp className="w-3 h-3 text-green-400" />
-                    <p className="text-green-300 text-xs">
+                    <TrendingUp className="w-4 h-4 text-green-400" />
+                    <p className="text-cyan-300 text-sm">
                       {t.events?.eventDescription ||
-                        "Until the 20th of next month two FiStaking tokens increased the % gain, take advantage."}
+                        "You can start inviting, it's already counting while we prepare everything perfectly."}
                     </p>
                   </div>
 
-                  <p className="text-gray-300 text-xs">
-                    {t.events?.eventDetails || "The more TPF you have, the more you earn."}
+                  <p className="text-blue-200 text-sm font-medium">
+                    {t.events?.eventDetails ||
+                      "Win prizes in WLD! Invite friends and earn rewards for each successful referral."}
                   </p>
                 </div>
 
                 {/* Warning */}
-                <div className="bg-gradient-to-r from-red-500/20 to-pink-500/20 border border-red-500/30 rounded-lg p-2">
+                <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/30 rounded-lg p-3 backdrop-blur-sm">
                   <div className="flex items-start space-x-2">
-                    <AlertTriangle className="w-3 h-3 text-red-400 mt-0.5 flex-shrink-0" />
-                    <p className="text-red-300 text-xs">
-                      {t.events?.eventWarning ||
-                        "Don't miss this limited time opportunity to maximize your FiStaking rewards!"}
+                    <AlertTriangle className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" />
+                    <p className="text-green-300 text-sm">
+                      {t.events?.eventWarning || "The more you invite, the more rewards you earn!"}
                     </p>
                   </div>
                 </div>
 
                 {/* Event Period */}
-                <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 rounded-lg p-2">
+                <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-lg p-3 backdrop-blur-sm">
                   <div className="flex items-center space-x-2 mb-2">
-                    <Clock className="w-3 h-3 text-blue-400" />
-                    <h4 className="text-white text-xs">{t.events?.eventPeriod || "Event Period"}</h4>
+                    <Clock className="w-4 h-4 text-purple-400" />
+                    <h4 className="text-white text-sm font-semibold">{t.events?.eventPeriod || "Invitation Stats"}</h4>
                   </div>
-                  <p className="text-blue-300 font-mono text-xs">
-                    {t.events?.eventDates || "July 15, 2025 - August 15, 2025"}
+                  <p className="text-purple-300 font-mono text-sm">
+                    {t.events?.eventDates || `${invitedUsers.length} people invited • ${clickedUsers.length} clicks`}
                   </p>
                 </div>
 
                 {/* Action Buttons */}
                 <div className="flex space-x-3 pt-2">
-                  <button className="flex-1 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-semibold py-2 px-3 rounded-lg transition-all duration-300 transform hover:scale-105 text-xs">
+                  <button
+                    onClick={() => setShowShareModal(true)}
+                    className="flex-1 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 text-sm shadow-lg"
+                  >
                     {t.events?.participateNow || "Rewards 0/10 guests"}
                   </button>
-                  <button className="px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all duration-300 text-xs">
+                  <button className="px-4 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all duration-300 text-sm backdrop-blur-sm border border-white/20">
                     {t.events?.termsConditions || "Guests"}
                   </button>
                 </div>
               </div>
 
-              {/* Floating Particles */}
-              {[...Array(8)].map((_, i) => (
+              {[...Array(12)].map((_, i) => (
                 <div
                   key={`modal-particle-${i}`}
                   className="absolute rounded-full animate-ping"
                   style={{
-                    width: `${2 + Math.random() * 3}px`,
-                    height: `${2 + Math.random() * 3}px`,
-                    backgroundColor: i % 2 === 0 ? "rgba(255,215,0,0.6)" : "rgba(255,165,0,0.4)",
-                    left: `${10 + Math.random() * 80}%`,
-                    top: `${10 + Math.random() * 80}%`,
-                    animationDelay: `${Math.random() * 2}s`,
-                    animationDuration: `${1 + Math.random() * 2}s`,
+                    width: `${2 + Math.random() * 4}px`,
+                    height: `${2 + Math.random() * 4}px`,
+                    backgroundColor:
+                      i % 3 === 0
+                        ? "rgba(59,130,246,0.6)"
+                        : i % 3 === 1
+                          ? "rgba(34,211,238,0.6)"
+                          : "rgba(255,255,255,0.4)",
+                    left: `${5 + Math.random() * 90}%`,
+                    top: `${5 + Math.random() * 90}%`,
+                    animationDelay: `${Math.random() * 3}s`,
+                    animationDuration: `${1.5 + Math.random() * 2}s`,
                   }}
                 />
               ))}
