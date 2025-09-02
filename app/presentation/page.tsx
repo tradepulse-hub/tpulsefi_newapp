@@ -27,12 +27,12 @@ import {
   Copy,
   Check,
 } from "lucide-react"
-import { useMiniKit } from "../../hooks/use-minikit"
-import MiniWallet from "../../components/mini-wallet"
+import { useMiniKit } from "../hooks/use-minikit"
+import MiniWallet from "../components/mini-wallet"
 import { AnimatePresence, motion } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { useMobile } from "@/hooks/use-mobile"
-import { BackgroundEffect } from "../../components/background-effect" // Import the new BackgroundEffect
+import { BackgroundEffect } from "../components/background-effect"
 
 import { MiniKit, ResponseEvent } from "@worldcoin/minikit-js"
 
@@ -136,12 +136,28 @@ const translations = {
       eventDescription:
         "Invite friends and earn rewards for each successful referral. The more you invite, the more you earn.",
       eventDetails: "Track your invitations and see how many people clicked your invite link.",
-      eventWarning: "Start inviting now and maximize your earning potential!",
-      eventPeriod: "Invitation Stats",
+      eventWarning: "Podes começar a convidar já está a contar, enquanto preparamos tudo de forma perfeita",
+      eventPeriod: "Ganha prémios em WLD",
       eventDates: `${0} people invited • ${0} clicks`,
       participateNow: "Start Inviting",
-      termsConditions: "Terms & Conditions",
+      termsConditions: "Convidados",
       eventButton: "Invitations",
+      milestones: {
+        current: "Current Progress",
+        next: "Next Milestone",
+        rewards: [
+          { count: 10, reward: "Basic Reward" },
+          { count: 25, reward: "Bronze Reward" },
+          { count: 50, reward: "Silver Reward" },
+          { count: 75, reward: "Gold Reward" },
+          { count: 100, reward: "Platinum Reward" },
+          { count: 200, reward: "Diamond Reward" },
+          { count: 500, reward: "Elite Reward" },
+          { count: 1000, reward: "Master Reward" },
+          { count: 5000, reward: "Legend Reward" },
+          { count: 10000, reward: "Ultimate Reward" },
+        ],
+      },
     },
     motivationalWords: [
       "Trust",
@@ -199,18 +215,33 @@ const translations = {
     },
     events: {
       title: "Convites",
-      liveEvent: "CONVITE & GANHE RECOMPENSAS",
-      eventTitle: "Sistema de Convites",
+      liveEvent: "CONVIDA & GANHA PRÉMIOS",
+      eventTitle: "Convida e Ganha Prémios",
       eventDescription:
-        "Convide amigos usando o seu endereço de carteira único. Cada convite é rastreado automaticamente através do seu endereço wallet conectado.",
-      eventDetails:
-        "Podes começar a convidar já está a contar, enquanto preparamos tudo de forma perfeita. Ganha prémios em WLD por cada pessoa que convidares com sucesso.",
-      eventWarning: "Comece a convidar agora e maximize o seu potencial de ganhos!",
-      eventPeriod: "Como Funciona",
-      eventDates: "O seu link único é gerado com o endereço da sua carteira conectada",
+        "Convida amigos e ganha prémios por cada referência bem-sucedida. Quanto mais convidares, mais ganhas.",
+      eventDetails: "Acompanha os teus convites e vê quantas pessoas clicaram no teu link de convite.",
+      eventWarning: "Podes começar a convidar já está a contar, enquanto preparamos tudo de forma perfeita",
+      eventPeriod: "Ganha prémios em WLD",
+      eventDates: `${0} pessoas convidadas • ${0} cliques`,
       participateNow: "Começar a Convidar",
-      termsConditions: "Termos & Condições",
+      termsConditions: "Convidados",
       eventButton: "Convites",
+      milestones: {
+        current: "Progresso Atual",
+        next: "Próximo Marco",
+        rewards: [
+          { count: 10, reward: "Prémio Básico" },
+          { count: 25, reward: "Prémio Bronze" },
+          { count: 50, reward: "Prémio Prata" },
+          { count: 75, reward: "Prémio Ouro" },
+          { count: 100, reward: "Prémio Platina" },
+          { count: 200, reward: "Prémio Diamante" },
+          { count: 500, reward: "Prémio Elite" },
+          { count: 1000, reward: "Prémio Mestre" },
+          { count: 5000, reward: "Prémio Lenda" },
+          { count: 10000, reward: "Prémio Supremo" },
+        ],
+      },
     },
     motivationalWords: [
       "Confiança",
@@ -269,16 +300,32 @@ const translations = {
     },
     events: {
       title: "Invitaciones",
-      liveEvent: "INVITA Y GANA PREMIOS",
-      eventTitle: "Invita y Gana Premios",
+      liveEvent: "INVITA Y GANA RECOMPENSAS",
+      eventTitle: "Invita y Gana Recompensas",
       eventDescription: "Invita amigos y gana recompensas por cada referencia exitosa. Cuanto más invites, más ganas.",
       eventDetails: "Rastrea tus invitaciones y ve cuántas personas hicieron clic en tu enlace de invitación.",
-      eventWarning: "¡Comienza a invitar ahora y maximiza tu potencial de ganancias!",
-      eventPeriod: "Estadísticas de Invitaciones",
+      eventWarning: "Podes começar a convidar já está a contar, enquanto preparamos tudo de forma perfeita",
+      eventPeriod: "Ganha prémios em WLD",
       eventDates: `${0} personas invitadas • ${0} clics`,
       participateNow: "Comenzar a Invitar",
-      termsConditions: "Términos y Condiciones",
+      termsConditions: "Invitados",
       eventButton: "Invitaciones",
+      milestones: {
+        current: "Progreso Actual",
+        next: "Siguiente Hito",
+        rewards: [
+          { count: 10, reward: "Recompensa Básica" },
+          { count: 25, reward: "Recompensa Bronce" },
+          { count: 50, reward: "Recompensa Plata" },
+          { count: 75, reward: "Recompensa Oro" },
+          { count: 100, reward: "Recompensa Platino" },
+          { count: 200, reward: "Recompensa Diamante" },
+          { count: 500, reward: "Recompensa Elite" },
+          { count: 1000, reward: "Recompensa Maestro" },
+          { count: 5000, reward: "Recompensa Leyenda" },
+          { count: 10000, reward: "Recompensa Suprema" },
+        ],
+      },
     },
     motivationalWords: [
       "Confianza",
@@ -544,8 +591,15 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
     localStorage.setItem("lastWelcomePopupShown", Date.now().toString()) // Registra o tempo de fechamento
   }
 
+  const getCurrentMilestone = (inviteCount: number) => {
+    const milestones = [10, 25, 50, 75, 100, 200, 500, 1000, 5000, 10000]
+    const currentMilestone = milestones.find((milestone) => inviteCount < milestone) || 10000
+    const previousMilestone = milestones[milestones.indexOf(currentMilestone) - 1] || 0
+    return { current: currentMilestone, previous: previousMilestone }
+  }
+
   const handleCopyLink = async () => {
-    const walletAddress = currentUserId // Assuming currentUserId contains wallet address
+    const walletAddress = user?.walletAddress || currentUserId // Use actual wallet address
     const inviteUrl = generateInviteUrl(walletAddress)
     try {
       await navigator.clipboard.writeText(inviteUrl)
@@ -564,8 +618,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
       return
     }
 
-    // Fallback to traditional web sharing
-    const walletAddress = currentUserId // Assuming currentUserId contains wallet address
+    const walletAddress = user?.walletAddress || currentUserId
     const inviteUrl = generateInviteUrl(walletAddress)
     const message = `Junte-se ao sistema de convites WLD! Ganha prémios em WLD! ${inviteUrl}`
     const encodedMessage = encodeURIComponent(message)
@@ -601,18 +654,18 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
   }
 
   const shareCommand = async () => {
-    const inviteUrl = generateInviteUrl(currentUserId)
+    const walletAddress = user?.walletAddress || currentUserId
+    const inviteUrl = generateInviteUrl(walletAddress)
 
     try {
       await MiniKit.commandsAsync.share({
-        title: "Join TPulseFi - The Future of DeFi!",
-        text: "Use this invite link to join TPulseFi and explore decentralized finance together!",
+        title: "Join WLD Invite System - Ganha prémios em WLD!",
+        text: "Use this invite link to join and earn WLD rewards!",
         url: inviteUrl,
       })
 
-      // Track the share attempt
       const shareRecord = {
-        userId: currentUserId,
+        userId: walletAddress,
         timestamp: new Date().toISOString(),
         url: inviteUrl,
       }
