@@ -18,21 +18,18 @@ import {
   ExternalLink,
   Calendar,
   Star,
-  Clock,
-  AlertTriangle,
-  ArrowLeft,
   Gamepad2,
   Send,
   Share2,
   Copy,
   Check,
 } from "lucide-react"
-import { useMiniKit } from "../hooks/use-minikit"
-import MiniWallet from "../components/mini-wallet"
+import { useMiniKit } from "../../hooks/use-minikit"
+import MiniWallet from "../../components/mini-wallet"
 import { AnimatePresence, motion } from "framer-motion"
 import { useRouter } from "next/navigation"
-import { useMobile } from "../hooks/use-mobile"
-import { BackgroundEffect } from "../components/background-effect"
+import { useMobile } from "@/hooks/use-mobile"
+import { BackgroundEffect } from "../../components/background-effect" // Import the new BackgroundEffect
 
 import { MiniKit, ResponseEvent } from "@worldcoin/minikit-js"
 
@@ -84,7 +81,7 @@ const PARTNERSHIPS = [
     id: "redlightgreenlight",
     name: "Red Light Green Light",
     image: "/images/redlightgreenlight-logo.png",
-    gradient: "from-red-500 to-green-500",
+    gradient: "from-red-500 to-green-500", // Um gradiente que combine com o tema do jogo
     url: "https://world.org/mini-app?app_id=app_f11a49a98aab37a10e7dcfd20139f605",
   },
 ]
@@ -138,7 +135,7 @@ const translations = {
       eventWarning: "The more you invite, the more rewards you earn!",
       eventPeriod: "Invitation Stats",
       eventDates: `${0} people invited • ${0} clicks`,
-      participateNow: "Rewards",
+      participateNow: "Rewards 0/10 guests",
       termsConditions: "Guests",
       eventButton: "Invitations",
     },
@@ -188,7 +185,7 @@ const translations = {
       close: "Fechar",
       back: "Voltar",
       invite: "CONVIDAR",
-      linkCopiado: "Link copiado!",
+      linkCopied: "Link copiado!",
       shareVia: "Compartilhar via",
       copyLink: "Copiar Link",
       start: "Começar",
@@ -205,7 +202,7 @@ const translations = {
       eventWarning: "Quanto mais convidares, mais recompensas ganhas!",
       eventPeriod: "Estatísticas de Convites",
       eventDates: `${0} pessoas convidadas • ${0} cliques`,
-      participateNow: "Prémios",
+      participateNow: "Prémios 0/10 convidados",
       termsConditions: "Convidados",
       eventButton: "Convites",
     },
@@ -273,14 +270,14 @@ const translations = {
       eventWarning: "¡Cuanto más invites, más recompensas ganas!",
       eventPeriod: "Estadísticas de Invitaciones",
       eventDates: `${0} personas invitadas • ${0} clics`,
-      participateNow: "Premios",
+      participateNow: "Premios 0/10 invitados",
       termsConditions: "Invitados",
       eventButton: "Invitaciones",
     },
     motivationalWords: [
       "Confianza",
       "Enfoque a largo plazo",
-      "Compromisso",
+      "Compromiso",
       "son palabras que tienen sentido para nosotros",
       "apoya nuestro proyecto",
       "invita a amigos y familiares",
@@ -341,7 +338,7 @@ const translations = {
       eventWarning: "Semakin banyak Anda mengundang, semakin banyak hadiah yang Anda dapatkan!",
       eventPeriod: "Statistik Undangan",
       eventDates: `${0} orang diundang • ${0} klik`,
-      participateNow: "Hadiah",
+      participateNow: "Hadiah 0/10 tamu",
       termsConditions: "Tamu",
       eventButton: "Undangan",
     },
@@ -393,7 +390,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
   const [showLanguageMenu, setShowLanguageMenu] = useState(false)
   const [showEventsModal, setShowEventsModal] = useState(false)
   const [showShareModal, setShowShareModal] = useState(false)
-  const [showRewardsModal, setShowRewardsModal] = useState(false)
   const [linkCopied, setLinkCopied] = useState(false)
   const [currentLang, setCurrentLang] = useState<keyof typeof translations>("en")
   const [currentPartnerIndex, setCurrentPartnerIndex] = useState(0)
@@ -784,19 +780,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
     window.open(currentPartner.url, "_blank")
   }
 
-  const rewardTiers = [
-    { guests: 10, reward: "5 WLD", difficulty: "Easy" },
-    { guests: 25, reward: "15 WLD", difficulty: "Medium" },
-    { guests: 50, reward: "35 WLD", difficulty: "Medium" },
-    { guests: 75, reward: "60 WLD", difficulty: "Hard" },
-    { guests: 100, reward: "100 WLD", difficulty: "Hard" },
-    { guests: 200, reward: "200 WLD", difficulty: "Very Hard" },
-    { guests: 500, reward: "350 WLD", difficulty: "Very Hard" },
-    { guests: 1000, reward: "500 WLD", difficulty: "Extreme" },
-    { guests: 5000, reward: "1000 WLD", difficulty: "Extreme" },
-    { guests: 10000, reward: "2000 WLD", difficulty: "Legendary" },
-  ]
-
   return (
     <div className="min-h-screen bg-black relative overflow-hidden flex items-center justify-center">
       {/* New Background Effect */}
@@ -923,133 +906,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
         )}
       </AnimatePresence>
 
-      <AnimatePresence>
-        {showRewardsModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            onClick={() => setShowRewardsModal(false)}
-          >
-            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
-
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0, y: 50 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.8, opacity: 0, y: 50 }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="relative bg-black/90 backdrop-blur-xl border border-white/20 rounded-2xl p-4 max-w-md w-full mx-4 shadow-2xl max-h-[80vh] overflow-y-auto"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <button
-                onClick={() => setShowRewardsModal(false)}
-                className="absolute top-4 right-4 w-8 h-8 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all duration-200"
-              >
-                <X className="w-4 h-4 text-white" />
-              </button>
-
-              <div className="text-center mb-6">
-                <div className="relative mb-4 flex justify-center">
-                  <div className="relative w-16 h-16 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-full p-2 shadow-2xl">
-                    <Image
-                      src="/images/wldlogo3D.png"
-                      alt="WLD Logo"
-                      width={48}
-                      height={48}
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                </div>
-                <h2 className="text-xl font-bold text-white mb-2">Reward Tiers</h2>
-                <p className="text-gray-300 text-sm">Invite friends and unlock amazing WLD rewards!</p>
-              </div>
-
-              <div className="space-y-3">
-                {rewardTiers.map((tier, index) => (
-                  <div
-                    key={index}
-                    className={`p-3 rounded-lg border backdrop-blur-sm ${
-                      invitedUsers.length >= tier.guests
-                        ? "bg-green-500/20 border-green-500/30"
-                        : "bg-white/5 border-white/10"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div
-                          className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                            invitedUsers.length >= tier.guests ? "bg-green-500" : "bg-gray-600"
-                          }`}
-                        >
-                          {invitedUsers.length >= tier.guests ? (
-                            <Check className="w-4 h-4 text-white" />
-                          ) : (
-                            <span className="text-white text-xs font-bold">{index + 1}</span>
-                          )}
-                        </div>
-                        <div>
-                          <div className="text-white font-semibold">
-                            {invitedUsers.length}/{tier.guests} guests
-                          </div>
-                          <div
-                            className={`text-xs ${
-                              tier.difficulty === "Easy"
-                                ? "text-green-400"
-                                : tier.difficulty === "Medium"
-                                  ? "text-yellow-400"
-                                  : tier.difficulty === "Hard"
-                                    ? "text-orange-400"
-                                    : tier.difficulty === "Very Hard"
-                                      ? "text-red-400"
-                                      : tier.difficulty === "Extreme"
-                                        ? "text-purple-400"
-                                        : "text-pink-400"
-                            }`}
-                          >
-                            {tier.difficulty}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-yellow-400 font-bold">{tier.reward}</div>
-                        <div className="text-xs text-gray-400">WLD Reward</div>
-                      </div>
-                    </div>
-
-                    {invitedUsers.length < tier.guests && (
-                      <div className="mt-2">
-                        <div className="w-full bg-gray-700 rounded-full h-2">
-                          <div
-                            className="bg-gradient-to-r from-blue-500 to-cyan-500 h-2 rounded-full transition-all duration-300"
-                            style={{ width: `${Math.min((invitedUsers.length / tier.guests) * 100, 100)}%` }}
-                          />
-                        </div>
-                        <div className="text-xs text-gray-400 mt-1">
-                          {tier.guests - invitedUsers.length} more guests needed
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-6 text-center">
-                <button
-                  onClick={() => {
-                    setShowRewardsModal(false)
-                    setShowShareModal(true)
-                  }}
-                  className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105"
-                >
-                  Start Inviting Now
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Events Modal */}
       <AnimatePresence>
         {showEventsModal && (
@@ -1061,7 +917,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             onClick={() => setShowEventsModal(false)}
           >
             {/* Backdrop */}
-            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+            <div className="absolute inset-0 bg-black/90 backdrop-blur-sm" />
 
             {/* Modal */}
             <motion.div
@@ -1069,7 +925,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.8, opacity: 0, y: 50 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="relative bg-black/90 backdrop-blur-xl border border-white/20 rounded-2xl p-3 max-w-xs w-full mx-4 shadow-2xl"
+              className="relative bg-black/95 backdrop-blur-xl border border-white/30 rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Close Button */}
@@ -1080,25 +936,16 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                 <X className="w-4 h-4 text-white" />
               </button>
 
-              <div className="text-center mb-4">
-                <button
-                  onClick={() => setShowEventsModal(false)}
-                  className="absolute top-4 left-4 w-8 h-8 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all duration-200"
-                >
-                  <ArrowLeft className="w-4 h-4 text-white" />
-                  <span className="text-sm">{t.common?.back || "Back"}</span>
-                </button>
-
-                <div className="relative mb-2 flex justify-center">
-                  {/* Glow Effects */}
-                  <div className="absolute w-16 h-16 bg-gradient-to-r from-blue-400/30 to-cyan-400/30 rounded-full blur-xl animate-pulse" />
+              <div className="text-center mb-6">
+                <div className="relative mb-4 flex justify-center">
+                  <div className="absolute w-20 h-20 bg-white/20 rounded-full blur-2xl animate-pulse" />
                   <div
-                    className="absolute w-14 h-14 bg-gradient-to-r from-white/20 to-white/10 rounded-full blur-lg animate-pulse"
+                    className="absolute w-16 h-16 bg-white/30 rounded-full blur-xl animate-pulse"
                     style={{ animationDelay: "0.5s" }}
                   />
 
                   {/* Logo Container */}
-                  <div className="relative w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full p-2 shadow-2xl animate-bounce">
+                  <div className="relative w-16 h-16 bg-gradient-to-br from-white/20 to-white/10 rounded-full p-2 shadow-2xl border border-white/30">
                     <Image
                       src="/images/wldlogo3D.png"
                       alt="WLD Logo"
@@ -1109,101 +956,64 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                   </div>
                 </div>
 
-                {/* Live Badge */}
-                <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-cyan-500 px-3 py-1 rounded-full mb-2">
-                  <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
-                  <span className="text-white text-sm font-bold tracking-wider">
-                    {t.events?.liveEvent || "INVITE & EARN REWARDS"}
-                  </span>
-                </div>
-
-                <h2 className="text-lg font-bold text-white mb-2 text-shadow-lg">{t.events?.title || "Invitations"}</h2>
+                <h2 className="text-2xl font-bold text-white mb-4 drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">
+                  {t.events?.title || "Convites"}
+                </h2>
               </div>
 
-              {/* Event Content */}
-              <div className="space-y-3">
-                {/* Event Title */}
-                <div className="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-500/30 rounded-lg p-3 backdrop-blur-sm">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <Star className="w-4 h-4 text-cyan-400" />
-                    <h3 className="text-sm font-semibold text-white">
-                      {t.events?.eventTitle || "How the Invitation System Works"}
-                    </h3>
-                  </div>
+              <div className="space-y-4">
+                {/* How it works section */}
+                <div className="bg-white/5 border border-white/20 rounded-xl p-4 backdrop-blur-sm">
+                  <h3 className="text-white font-semibold mb-3 drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">
+                    {t.events?.eventTitle || "Como Funciona o Sistema de Convites"}
+                  </h3>
 
-                  <div className="flex items-center space-x-2 mb-2">
-                    <TrendingUp className="w-4 h-4 text-green-400" />
-                    <p className="text-cyan-300 text-sm">
-                      {t.events?.eventDescription ||
-                        "You can start inviting, it's already counting while we prepare everything perfectly."}
-                    </p>
-                  </div>
+                  <p className="text-white/90 text-sm mb-3 drop-shadow-[0_0_6px_rgba(255,255,255,0.2)]">
+                    {t.events?.eventDescription ||
+                      "Podes começar a convidar já está a contar, enquanto preparamos tudo de forma perfeita"}
+                  </p>
 
-                  <p className="text-blue-200 text-sm font-medium">
-                    {t.events?.eventDetails ||
-                      "Win prizes in WLD! Invite friends and earn rewards for each successful referral."}
+                  <p className="text-white/80 text-sm font-medium drop-shadow-[0_0_6px_rgba(255,255,255,0.2)]">
+                    {t.events?.eventDetails || "Ganha prémios em WLD"}
                   </p>
                 </div>
 
-                {/* Warning */}
-                <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/30 rounded-lg p-3 backdrop-blur-sm">
-                  <div className="flex items-start space-x-2">
-                    <AlertTriangle className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" />
-                    <p className="text-green-300 text-sm">
-                      {t.events?.eventWarning || "The more you invite, the more rewards you earn!"}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Event Period */}
-                <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-lg p-3 backdrop-blur-sm">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <Clock className="w-4 h-4 text-purple-400" />
-                    <h4 className="text-white text-sm font-semibold">{t.events?.eventPeriod || "Invitation Stats"}</h4>
-                  </div>
-                  <p className="text-purple-300 font-mono text-sm">
-                    {t.events?.eventDates || `${invitedUsers.length} people invited • ${clickedUsers.length} clicks`}
+                {/* Stats section */}
+                <div className="bg-white/5 border border-white/20 rounded-xl p-4 backdrop-blur-sm">
+                  <h4 className="text-white font-semibold mb-2 drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">
+                    {t.events?.eventPeriod || "Estatísticas de Convites"}
+                  </h4>
+                  <p className="text-white/90 font-mono text-sm drop-shadow-[0_0_6px_rgba(255,255,255,0.2)]">
+                    {t.events?.eventDates ||
+                      `${invitedUsers.length} pessoas convidadas • ${clickedUsers.length} cliques`}
                   </p>
                 </div>
 
                 <div className="flex space-x-3 pt-2">
                   <button
-                    onClick={() => {
-                      setShowEventsModal(false)
-                      setShowRewardsModal(true)
-                    }}
-                    className="flex-1 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 text-sm shadow-lg"
+                    onClick={() => setShowShareModal(true)}
+                    className="flex-1 bg-white/10 hover:bg-white/20 border border-white/30 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 text-sm backdrop-blur-sm drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]"
                   >
-                    {t.events?.participateNow || "Rewards"}
+                    {t.events?.participateNow || "Prémios"}
                   </button>
-                  <button
-                    onClick={() => {
-                      // Show guests statistics
-                    }}
-                    className="px-4 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all duration-300 text-sm backdrop-blur-sm border border-white/20"
-                  >
-                    {t.events?.termsConditions || "Guests"}
+                  <button className="px-4 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all duration-300 text-sm backdrop-blur-sm border border-white/30 drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">
+                    {t.events?.termsConditions || "Convidados"}
                   </button>
                 </div>
               </div>
 
-              {[...Array(12)].map((_, i) => (
+              {[...Array(6)].map((_, i) => (
                 <div
                   key={`modal-particle-${i}`}
                   className="absolute rounded-full animate-ping"
                   style={{
-                    width: `${2 + Math.random() * 4}px`,
-                    height: `${2 + Math.random() * 4}px`,
-                    backgroundColor:
-                      i % 3 === 0
-                        ? "rgba(59,130,246,0.6)"
-                        : i % 3 === 1
-                          ? "rgba(34,211,238,0.6)"
-                          : "rgba(255,255,255,0.4)",
-                    left: `${5 + Math.random() * 90}%`,
-                    top: `${5 + Math.random() * 90}%`,
-                    animationDelay: `${Math.random() * 3}s`,
-                    animationDuration: `${1.5 + Math.random() * 2}s`,
+                    width: `${2 + Math.random() * 3}px`,
+                    height: `${2 + Math.random() * 3}px`,
+                    backgroundColor: "rgba(255,255,255,0.3)",
+                    left: `${10 + Math.random() * 80}%`,
+                    top: `${10 + Math.random() * 80}%`,
+                    animationDelay: `${Math.random() * 2}s`,
+                    animationDuration: `${2 + Math.random() * 1}s`,
                   }}
                 />
               ))}
