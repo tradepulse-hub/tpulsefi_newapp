@@ -130,17 +130,18 @@ const translations = {
       visitApp: "Visit App",
     },
     events: {
-      title: "Live Events",
-      liveEvent: "LIVE EVENT",
-      eventTitle: "FiStaking Boost Event",
-      eventDescription: "Until the 20th of next month two FiStaking tokens increased the % gain, take advantage.",
-      eventDetails: "The more TPF you have, the more you earn.",
-      eventWarning: "Don't miss this limited time opportunity to maximize your FiStaking rewards!",
-      eventPeriod: "Event Period",
-      eventDates: "July 15, 2025 - August 15, 2025",
-      participateNow: "Participate Now",
+      title: "Invitations",
+      liveEvent: "INVITE & EARN REWARDS",
+      eventTitle: "Invite and Earn Rewards",
+      eventDescription:
+        "Invite friends and earn rewards for each successful referral. The more you invite, the more you earn.",
+      eventDetails: "Track your invitations and see how many people clicked your invite link.",
+      eventWarning: "Start inviting now and maximize your earning potential!",
+      eventPeriod: "Invitation Stats",
+      eventDates: `${0} people invited • ${0} clicks`,
+      participateNow: "Start Inviting",
       termsConditions: "Terms & Conditions",
-      eventButton: "Event",
+      eventButton: "Invitations",
     },
     motivationalWords: [
       "Trust",
@@ -197,17 +198,18 @@ const translations = {
       visitApp: "Visitar App",
     },
     events: {
-      title: "Eventos Ao Vivo",
-      liveEvent: "EVENTO AO VIVO",
-      eventTitle: "Evento de Aumento FiStaking",
-      eventDescription: "Até ao dia 20 do próximo mês dois tokens do FiStaking aumentaram a % de ganho, aproveita.",
-      eventDetails: "Quanto mais TPF tiveres, mais ganhas.",
-      eventWarning: "Não percas esta oportunidade de tempo limitado para maximizar as tuas recompensas FiStaking!",
-      eventPeriod: "Período do Evento",
-      eventDates: "15 de Julho, 2025 - 15 de Agosto, 2025",
-      participateNow: "Participar Agora",
+      title: "Convites",
+      liveEvent: "CONVIDA E GANHA PRÉMIOS",
+      eventTitle: "Convida e Ganha Prémios",
+      eventDescription:
+        "Convida amigos e ganha recompensas por cada indicação bem-sucedida. Quanto mais convidares, mais ganhas.",
+      eventDetails: "Acompanha os teus convites e vê quantas pessoas clicaram no teu link de convite.",
+      eventWarning: "Começa a convidar agora e maximiza o teu potencial de ganhos!",
+      eventPeriod: "Estatísticas de Convites",
+      eventDates: `${0} pessoas convidadas • ${0} cliques`,
+      participateNow: "Começar a Convidar",
       termsConditions: "Termos e Condições",
-      eventButton: "Evento",
+      eventButton: "Convites",
     },
     motivationalWords: [
       "Confiança",
@@ -265,18 +267,17 @@ const translations = {
       visitApp: "Visitar App",
     },
     events: {
-      title: "Eventos En Vivo",
-      liveEvent: "EVENTO EN VIVO",
-      eventTitle: "Evento de Impulso FiStaking",
-      eventDescription:
-        "Hasta el día 20 del próximo mes dos tokens de FiStaking aumentaron el % de ganancia, aprovecha.",
-      eventDetails: "Cuanto más TPF tengas, más ganas.",
-      eventWarning: "¡No te pierdas esta oportunidad de tiempo limitado para maximizar tus recompensas FiStaking!",
-      eventPeriod: "Período del Evento",
-      eventDates: "15 de Julio, 2025 - 15 de Agosto, 2025",
-      participateNow: "Participar Ahora",
+      title: "Invitaciones",
+      liveEvent: "INVITA Y GANA PREMIOS",
+      eventTitle: "Invita y Gana Premios",
+      eventDescription: "Invita amigos y gana recompensas por cada referencia exitosa. Cuanto más invites, más ganas.",
+      eventDetails: "Rastrea tus invitaciones y ve cuántas personas hicieron clic en tu enlace de invitación.",
+      eventWarning: "¡Comienza a invitar ahora y maximiza tu potencial de ganancias!",
+      eventPeriod: "Estadísticas de Invitaciones",
+      eventDates: `${0} personas invitadas • ${0} clics`,
+      participateNow: "Comenzar a Invitar",
       termsConditions: "Términos y Condiciones",
-      eventButton: "Evento",
+      eventButton: "Invitaciones",
     },
     motivationalWords: [
       "Confianza",
@@ -333,17 +334,18 @@ const translations = {
       visitApp: "Kunjungi App",
     },
     events: {
-      title: "Acara Langsung",
-      liveEvent: "ACARA LANGSUNG",
-      eventTitle: "Acara Peningkatan FiStaking",
-      eventDescription: "Sampai tanggal 20 bulan depan dua token FiStaking meningkatkan % keuntungan, manfaatkan.",
-      eventDetails: "Semakin banyak TPF yang Anda miliki, semakin banyak yang Anda peroleh.",
-      eventWarning: "Jangan lewatkan kesempatan terbatas ini para memaksimalkan hadiah FiStaking Anda!",
-      eventPeriod: "Periode Acara",
-      eventDates: "15 Juli, 2025 - 15 Agustus, 2025",
-      participateNow: "Berpartisipasi Sekarang",
+      title: "Undangan",
+      liveEvent: "UNDANG DAN MENANGKAN HADIAH",
+      eventTitle: "Undang dan Menangkan Hadiah",
+      eventDescription:
+        "Undang teman dan dapatkan hadiah untuk setiap rujukan yang berhasil. Semakin banyak Anda mengundang, semakin banyak yang Anda peroleh.",
+      eventDetails: "Lacak undangan Anda dan lihat berapa banyak orang yang mengklik tautan undangan Anda.",
+      eventWarning: "Mulai mengundang sekarang dan maksimalkan potensi penghasilan Anda!",
+      eventPeriod: "Statistik Undangan",
+      eventDates: `${0} orang diundang • ${0} klik`,
+      participateNow: "Mulai Mengundang",
       termsConditions: "Syarat & Ketentuan",
-      eventButton: "Acara",
+      eventButton: "Undangan",
     },
     motivationalWords: [
       "Kepercayaan",
@@ -407,6 +409,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
   const POPUP_DISPLAY_INTERVAL_MS = 1 * 60 * 60 * 1000 // 1 hora
 
   const [invitedUsers, setInvitedUsers] = useState<string[]>([])
+  const [clickedUsers, setClickedUsers] = useState<string[]>([])
   const [currentUserId] = useState(() => `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`)
 
   // Get translations for current language
@@ -512,11 +515,27 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
       }
       inviterInvites.push(newInvite)
       localStorage.setItem(`invites_${invitedBy}`, JSON.stringify(inviterInvites))
+
+      // Track the click
+      const clickRecord = {
+        userId: currentUserId,
+        timestamp: new Date().toISOString(),
+      }
+      const existingClicks = JSON.parse(localStorage.getItem(`clicks_${invitedBy}`) || "[]")
+      existingClicks.push(clickRecord)
+      localStorage.setItem(`clicks_${invitedBy}`, JSON.stringify(existingClicks))
+
+      // Update clicked users state
+      setClickedUsers(existingClicks)
     }
 
     // Load current user's invites
     const userInvites = JSON.parse(localStorage.getItem(`invites_${currentUserId}`) || "[]")
     setInvitedUsers(userInvites)
+
+    // Load clicked users for the current user
+    const userClicks = JSON.parse(localStorage.getItem(`clicks_${currentUserId}`) || "[]")
+    setClickedUsers(userClicks)
   }, [currentUserId])
 
   const handleCloseWelcomeModal = () => {
