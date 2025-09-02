@@ -956,7 +956,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                   </div>
                 </div>
 
-                <h2 className="text-2xl font-bold text-white mb-4 drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">
+                <h2 className="text-xl font-bold text-white mb-4 drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">
                   {t.events?.title || "Convites"}
                 </h2>
               </div>
@@ -964,26 +964,26 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
               <div className="space-y-4">
                 {/* How it works section */}
                 <div className="bg-white/5 border border-white/20 rounded-xl p-4 backdrop-blur-sm">
-                  <h3 className="text-white font-semibold mb-3 drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">
+                  <h3 className="text-white font-semibold mb-3 drop-shadow-[0_0_8px_rgba(255,255,255,0.3)] text-sm">
                     {t.events?.eventTitle || "Como Funciona o Sistema de Convites"}
                   </h3>
 
-                  <p className="text-white/90 text-sm mb-3 drop-shadow-[0_0_6px_rgba(255,255,255,0.2)]">
+                  <p className="text-white/90 text-xs mb-3 drop-shadow-[0_0_6px_rgba(255,255,255,0.2)]">
                     {t.events?.eventDescription ||
                       "Podes começar a convidar já está a contar, enquanto preparamos tudo de forma perfeita"}
                   </p>
 
-                  <p className="text-white/80 text-sm font-medium drop-shadow-[0_0_6px_rgba(255,255,255,0.2)]">
+                  <p className="text-white/80 text-xs font-medium drop-shadow-[0_0_6px_rgba(255,255,255,0.2)]">
                     {t.events?.eventDetails || "Ganha prémios em WLD"}
                   </p>
                 </div>
 
                 {/* Stats section */}
                 <div className="bg-white/5 border border-white/20 rounded-xl p-4 backdrop-blur-sm">
-                  <h4 className="text-white font-semibold mb-2 drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">
+                  <h4 className="text-white font-semibold mb-2 drop-shadow-[0_0_8px_rgba(255,255,255,0.3)] text-sm">
                     {t.events?.eventPeriod || "Estatísticas de Convites"}
                   </h4>
-                  <p className="text-white/90 font-mono text-sm drop-shadow-[0_0_6px_rgba(255,255,255,0.2)]">
+                  <p className="text-white/90 font-mono text-xs drop-shadow-[0_0_6px_rgba(255,255,255,0.2)]">
                     {t.events?.eventDates ||
                       `${invitedUsers.length} pessoas convidadas • ${clickedUsers.length} cliques`}
                   </p>
@@ -992,11 +992,11 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                 <div className="flex space-x-3 pt-2">
                   <button
                     onClick={() => setShowShareModal(true)}
-                    className="flex-1 bg-white/10 hover:bg-white/20 border border-white/30 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 text-sm backdrop-blur-sm drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]"
+                    className="flex-1 bg-white/10 hover:bg-white/20 border border-white/30 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 text-xs backdrop-blur-sm drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]"
                   >
                     {t.events?.participateNow || "Prémios"}
                   </button>
-                  <button className="px-4 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all duration-300 text-sm backdrop-blur-sm border border-white/30 drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">
+                  <button className="px-4 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all duration-300 text-xs backdrop-blur-sm border border-white/30 drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">
                     {t.events?.termsConditions || "Convidados"}
                   </button>
                 </div>
