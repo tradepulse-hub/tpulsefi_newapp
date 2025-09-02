@@ -27,12 +27,12 @@ import {
   Copy,
   Check,
 } from "lucide-react"
-import { useMiniKit } from "../hooks/use-minikit"
-import MiniWallet from "../components/mini-wallet"
+import { useMiniKit } from "../../hooks/use-minikit"
+import MiniWallet from "../../components/mini-wallet"
 import { AnimatePresence, motion } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { useMobile } from "@/hooks/use-mobile"
-import { BackgroundEffect } from "../components/background-effect"
+import { BackgroundEffect } from "../../components/background-effect" // Import the new BackgroundEffect
 
 import { MiniKit, ResponseEvent } from "@worldcoin/minikit-js"
 
@@ -89,8 +89,8 @@ const PARTNERSHIPS = [
   },
 ]
 
-const generateInviteUrl = (walletAddress: string) => {
-  return `https://worldcoin.org/mini-app?app_id=app_a3a55e132983350c67923dd57dc22c5e&app_mode=mini-app&invited_by=user_${walletAddress}`
+const generateInviteUrl = (userId: string) => {
+  return `https://worldcoin.org/mini-app?app_id=app_a3a55e132983350c67923dd57dc22c5e&app_mode=mini-app&invited_by=${userId}`
 }
 
 // URL do convite
@@ -136,28 +136,12 @@ const translations = {
       eventDescription:
         "Invite friends and earn rewards for each successful referral. The more you invite, the more you earn.",
       eventDetails: "Track your invitations and see how many people clicked your invite link.",
-      eventWarning: "Podes começar a convidar já está a contar, enquanto preparamos tudo de forma perfeita",
-      eventPeriod: "Ganha prémios em WLD",
+      eventWarning: "Start inviting now and maximize your earning potential!",
+      eventPeriod: "Invitation Stats",
       eventDates: `${0} people invited • ${0} clicks`,
-      participateNow: "Start Inviting",
-      termsConditions: "Convidados",
+      participateNow: "Rewards 0/10 guests",
+      termsConditions: "Guests",
       eventButton: "Invitations",
-      milestones: {
-        current: "Current Progress",
-        next: "Next Milestone",
-        rewards: [
-          { count: 10, reward: "Basic Reward" },
-          { count: 25, reward: "Bronze Reward" },
-          { count: 50, reward: "Silver Reward" },
-          { count: 75, reward: "Gold Reward" },
-          { count: 100, reward: "Platinum Reward" },
-          { count: 200, reward: "Diamond Reward" },
-          { count: 500, reward: "Elite Reward" },
-          { count: 1000, reward: "Master Reward" },
-          { count: 5000, reward: "Legend Reward" },
-          { count: 10000, reward: "Ultimate Reward" },
-        ],
-      },
     },
     motivationalWords: [
       "Trust",
@@ -215,33 +199,17 @@ const translations = {
     },
     events: {
       title: "Convites",
-      liveEvent: "CONVIDA & GANHA PRÉMIOS",
+      liveEvent: "CONVIDA E GANHA PRÉMIOS",
       eventTitle: "Convida e Ganha Prémios",
       eventDescription:
-        "Convida amigos e ganha prémios por cada referência bem-sucedida. Quanto mais convidares, mais ganhas.",
+        "Convida amigos e ganha recompensas por cada indicação bem-sucedida. Quanto mais convidares, mais ganhas.",
       eventDetails: "Acompanha os teus convites e vê quantas pessoas clicaram no teu link de convite.",
-      eventWarning: "Podes começar a convidar já está a contar, enquanto preparamos tudo de forma perfeita",
-      eventPeriod: "Ganha prémios em WLD",
+      eventWarning: "Começa a convidar agora e maximiza o teu potencial de ganhos!",
+      eventPeriod: "Estatísticas de Convites",
       eventDates: `${0} pessoas convidadas • ${0} cliques`,
-      participateNow: "Começar a Convidar",
+      participateNow: "Prêmios 0/10 convidados",
       termsConditions: "Convidados",
       eventButton: "Convites",
-      milestones: {
-        current: "Progresso Atual",
-        next: "Próximo Marco",
-        rewards: [
-          { count: 10, reward: "Prémio Básico" },
-          { count: 25, reward: "Prémio Bronze" },
-          { count: 50, reward: "Prémio Prata" },
-          { count: 75, reward: "Prémio Ouro" },
-          { count: 100, reward: "Prémio Platina" },
-          { count: 200, reward: "Prémio Diamante" },
-          { count: 500, reward: "Prémio Elite" },
-          { count: 1000, reward: "Prémio Mestre" },
-          { count: 5000, reward: "Prémio Lenda" },
-          { count: 10000, reward: "Prémio Supremo" },
-        ],
-      },
     },
     motivationalWords: [
       "Confiança",
@@ -300,32 +268,16 @@ const translations = {
     },
     events: {
       title: "Invitaciones",
-      liveEvent: "INVITA Y GANA RECOMPENSAS",
-      eventTitle: "Invita y Gana Recompensas",
+      liveEvent: "INVITA Y GANA PREMIOS",
+      eventTitle: "Invita y Gana Premios",
       eventDescription: "Invita amigos y gana recompensas por cada referencia exitosa. Cuanto más invites, más ganas.",
       eventDetails: "Rastrea tus invitaciones y ve cuántas personas hicieron clic en tu enlace de invitación.",
-      eventWarning: "Podes começar a convidar já está a contar, enquanto preparamos tudo de forma perfeita",
-      eventPeriod: "Ganha prémios em WLD",
+      eventWarning: "¡Comienza a invitar ahora y maximiza tu potencial de ganancias!",
+      eventPeriod: "Estadísticas de Invitaciones",
       eventDates: `${0} personas invitadas • ${0} clics`,
-      participateNow: "Comenzar a Invitar",
+      participateNow: "Premios 0/10 invitados",
       termsConditions: "Invitados",
       eventButton: "Invitaciones",
-      milestones: {
-        current: "Progreso Actual",
-        next: "Siguiente Hito",
-        rewards: [
-          { count: 10, reward: "Recompensa Básica" },
-          { count: 25, reward: "Recompensa Bronce" },
-          { count: 50, reward: "Recompensa Plata" },
-          { count: 75, reward: "Recompensa Oro" },
-          { count: 100, reward: "Recompensa Platino" },
-          { count: 200, reward: "Recompensa Diamante" },
-          { count: 500, reward: "Recompensa Elite" },
-          { count: 1000, reward: "Recompensa Maestro" },
-          { count: 5000, reward: "Recompensa Leyenda" },
-          { count: 10000, reward: "Recompensa Suprema" },
-        ],
-      },
     },
     motivationalWords: [
       "Confianza",
@@ -391,8 +343,8 @@ const translations = {
       eventWarning: "Mulai mengundang sekarang dan maksimalkan potensi penghasilan Anda!",
       eventPeriod: "Statistik Undangan",
       eventDates: `${0} orang diundang • ${0} klik`,
-      participateNow: "Mulai Mengundang",
-      termsConditions: "Syarat & Ketentuan",
+      participateNow: "Hadiah 0/10 tamu",
+      termsConditions: "Tamu",
       eventButton: "Undangan",
     },
     motivationalWords: [
@@ -591,16 +543,8 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
     localStorage.setItem("lastWelcomePopupShown", Date.now().toString()) // Registra o tempo de fechamento
   }
 
-  const getCurrentMilestone = (inviteCount: number) => {
-    const milestones = [10, 25, 50, 75, 100, 200, 500, 1000, 5000, 10000]
-    const currentMilestone = milestones.find((milestone) => inviteCount < milestone) || 10000
-    const previousMilestone = milestones[milestones.indexOf(currentMilestone) - 1] || 0
-    return { current: currentMilestone, previous: previousMilestone }
-  }
-
   const handleCopyLink = async () => {
-    const walletAddress = user?.walletAddress || currentUserId // Use actual wallet address
-    const inviteUrl = generateInviteUrl(walletAddress)
+    const inviteUrl = generateInviteUrl(currentUserId)
     try {
       await navigator.clipboard.writeText(inviteUrl)
       setLinkCopied(true)
@@ -618,9 +562,9 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
       return
     }
 
-    const walletAddress = user?.walletAddress || currentUserId
-    const inviteUrl = generateInviteUrl(walletAddress)
-    const message = `Junte-se ao sistema de convites WLD! Ganha prémios em WLD! ${inviteUrl}`
+    // Fallback to traditional web sharing
+    const inviteUrl = generateInviteUrl(currentUserId)
+    const message = `Join TPulseFi - The Future of Decentralized Finance! ${inviteUrl}`
     const encodedMessage = encodeURIComponent(message)
     const encodedUrl = encodeURIComponent(inviteUrl)
 
@@ -654,18 +598,18 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
   }
 
   const shareCommand = async () => {
-    const walletAddress = user?.walletAddress || currentUserId
-    const inviteUrl = generateInviteUrl(walletAddress)
+    const inviteUrl = generateInviteUrl(currentUserId)
 
     try {
       await MiniKit.commandsAsync.share({
-        title: "Join WLD Invite System - Ganha prémios em WLD!",
-        text: "Use this invite link to join and earn WLD rewards!",
+        title: "Join TPulseFi - The Future of DeFi!",
+        text: "Use this invite link to join TPulseFi and explore decentralized finance together!",
         url: inviteUrl,
       })
 
+      // Track the share attempt
       const shareRecord = {
-        userId: walletAddress,
+        userId: currentUserId,
         timestamp: new Date().toISOString(),
         url: inviteUrl,
       }
@@ -976,7 +920,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             onClick={() => setShowEventsModal(false)}
           >
             {/* Backdrop */}
-            <div className="absolute inset-0 bg-black backdrop-blur-sm" />
+            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
 
             {/* Modal */}
             <motion.div
@@ -984,138 +928,129 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.8, opacity: 0, y: 50 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="relative bg-black border border-white/30 rounded-2xl p-3 max-w-xs w-full mx-4 shadow-2xl shadow-white/10"
+              className="relative bg-black/90 backdrop-blur-xl border border-white/20 rounded-2xl p-3 max-w-xs w-full mx-4 shadow-2xl"
               onClick={(e) => e.stopPropagation()}
-              style={{
-                background: "linear-gradient(135deg, rgba(0,0,0,0.95) 0%, rgba(20,20,20,0.95) 100%)",
-                boxShadow: "0 0 50px rgba(255,255,255,0.1), inset 0 0 20px rgba(255,255,255,0.05)",
-              }}
             >
               {/* Close Button */}
               <button
                 onClick={() => setShowEventsModal(false)}
-                className="absolute top-4 right-4 w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg shadow-white/20"
+                className="absolute top-4 right-4 w-8 h-8 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all duration-200"
               >
                 <X className="w-4 h-4 text-white" />
               </button>
 
-              {/* Modal Header with WLD Logo */}
+              {/* Modal Header with TPF Logo */}
               <div className="text-center mb-3">
                 {/* Back Button */}
                 <button
                   onClick={() => setShowEventsModal(false)}
-                  className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors mb-2"
+                  className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors mb-2"
                 >
                   <ArrowLeft className="w-4 h-4" />
-                  <span className="text-sm">{t.common?.back || "Voltar"}</span>
+                  <span className="text-sm">{t.common?.back || "Back"}</span>
                 </button>
-
+                {/* Animated TPF Logo */}
                 <div className="relative mb-2 flex justify-center">
-                  {/* Enhanced Glow Effects */}
-                  <div className="absolute w-16 h-16 bg-white/30 rounded-full blur-2xl animate-pulse" />
+                  {/* Glow Effects */}
+                  <div className="absolute w-12 h-12 bg-gradient-to-r from-yellow-400/30 to-orange-400/30 rounded-full blur-xl animate-pulse" />
                   <div
-                    className="absolute w-12 h-12 bg-white/40 rounded-full blur-xl animate-pulse"
+                    className="absolute w-10 h-10 bg-gradient-to-r from-white/20 to-white/10 rounded-full blur-lg animate-pulse"
                     style={{ animationDelay: "0.5s" }}
                   />
-                  <div
-                    className="absolute w-8 h-8 bg-white/50 rounded-full blur-lg animate-pulse"
-                    style={{ animationDelay: "1s" }}
-                  />
 
-                  {/* WLD Logo Container */}
-                  <div className="relative w-12 h-12 bg-gradient-to-br from-white/20 to-white/10 rounded-full p-2 shadow-2xl shadow-white/30 animate-bounce border border-white/30">
+                  {/* Logo Container */}
+                  <div className="relative w-12 h-12 bg-white rounded-full p-2 shadow-2xl animate-bounce">
                     <Image
-                      src="/images/wldlogo3D.png"
-                      alt="WLD Logo"
+                      src="/images/logo-tpf.png"
+                      alt="TPulseFi Logo"
                       width={32}
                       height={32}
-                      className="w-full h-full object-contain filter drop-shadow-lg"
+                      className="w-full h-full object-contain"
                     />
                   </div>
                 </div>
 
                 {/* Live Badge */}
-                <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-white/20 to-white/10 px-2 py-0.5 rounded-full mb-1 border border-white/30 shadow-lg shadow-white/20">
-                  <div className="w-2 h-2 bg-white rounded-full animate-pulse shadow-lg shadow-white/50" />
-                  <span className="text-white text-xs font-bold tracking-wider drop-shadow-lg">
-                    {t.events?.liveEvent || "CONVITE & GANHE RECOMPENSAS"}
+                <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-red-500 to-pink-500 px-2 py-0.5 rounded-full mb-1">
+                  <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                  <span className="text-white text-xs font-bold tracking-wider">
+                    {t.events?.liveEvent || "LIVE EVENT"}
                   </span>
                 </div>
 
-                <h2 className="text-sm font-bold text-white mb-1 drop-shadow-lg">{t.events?.title || "Convites"}</h2>
+                <h2 className="text-sm font-bold text-white mb-1">{t.events?.title || "Live Events"}</h2>
               </div>
 
               {/* Event Content */}
               <div className="space-y-2">
                 {/* Event Title */}
-                <div className="bg-gradient-to-r from-white/10 to-white/5 border border-white/30 rounded-lg p-2 shadow-lg shadow-white/10">
+                <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 rounded-lg p-2">
                   <div className="flex items-center space-x-2 mb-2">
-                    <Star className="w-3 h-3 text-white drop-shadow-lg" />
-                    <h3 className="text-xs font-semibold text-white drop-shadow-lg">
-                      {t.events?.eventTitle || "Sistema de Convites"}
+                    <Star className="w-3 h-3 text-yellow-400" />
+                    <h3 className="text-xs font-semibold text-white">
+                      {t.events?.eventTitle || "FiStaking Boost Event"}
                     </h3>
                   </div>
 
                   <div className="flex items-center space-x-2 mb-2">
-                    <TrendingUp className="w-3 h-3 text-white drop-shadow-lg" />
-                    <p className="text-white/90 text-xs drop-shadow-lg">
+                    <TrendingUp className="w-3 h-3 text-green-400" />
+                    <p className="text-green-300 text-xs">
                       {t.events?.eventDescription ||
-                        "Convide amigos usando o seu endereço de carteira único. Cada convite é rastreado automaticamente."}
+                        "Until the 20th of next month two FiStaking tokens increased the % gain, take advantage."}
                     </p>
                   </div>
 
-                  <p className="text-white/80 text-xs drop-shadow-lg">
-                    {t.events?.eventDetails ||
-                      "Podes começar a convidar já está a contar, enquanto preparamos tudo de forma perfeita. Ganha prémios em WLD!"}
+                  <p className="text-gray-300 text-xs">
+                    {t.events?.eventDetails || "The more TPF you have, the more you earn."}
                   </p>
                 </div>
 
                 {/* Warning */}
-                <div className="bg-gradient-to-r from-white/15 to-white/10 border border-white/40 rounded-lg p-2 shadow-lg shadow-white/20">
+                <div className="bg-gradient-to-r from-red-500/20 to-pink-500/20 border border-red-500/30 rounded-lg p-2">
                   <div className="flex items-start space-x-2">
-                    <AlertTriangle className="w-3 h-3 text-white mt-0.5 flex-shrink-0 drop-shadow-lg" />
-                    <p className="text-white/90 text-xs drop-shadow-lg">
-                      {t.events?.eventWarning || "Não perca esta oportunidade de maximizar os seus ganhos em WLD!"}
+                    <AlertTriangle className="w-3 h-3 text-red-400 mt-0.5 flex-shrink-0" />
+                    <p className="text-red-300 text-xs">
+                      {t.events?.eventWarning ||
+                        "Don't miss this limited time opportunity to maximize your FiStaking rewards!"}
                     </p>
                   </div>
                 </div>
 
                 {/* Event Period */}
-                <div className="bg-gradient-to-r from-white/10 to-white/5 border border-white/30 rounded-lg p-2 shadow-lg shadow-white/10">
+                <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 rounded-lg p-2">
                   <div className="flex items-center space-x-2 mb-2">
-                    <Clock className="w-3 h-3 text-white drop-shadow-lg" />
-                    <h4 className="text-white text-xs drop-shadow-lg">{t.events?.eventPeriod || "Como Funciona"}</h4>
+                    <Clock className="w-3 h-3 text-blue-400" />
+                    <h4 className="text-white text-xs">{t.events?.eventPeriod || "Event Period"}</h4>
                   </div>
-                  <p className="text-white/80 font-mono text-xs drop-shadow-lg">
-                    {t.events?.eventDates || "O seu link único é gerado com o endereço da sua carteira conectada"}
+                  <p className="text-blue-300 font-mono text-xs">
+                    {t.events?.eventDates || "July 15, 2025 - August 15, 2025"}
                   </p>
                 </div>
 
                 {/* Action Buttons */}
                 <div className="flex space-x-3 pt-2">
-                  <button className="flex-1 bg-gradient-to-r from-white/20 to-white/10 hover:from-white/30 hover:to-white/20 text-white font-semibold py-2 px-3 rounded-lg transition-all duration-300 transform hover:scale-105 text-xs border border-white/30 shadow-lg shadow-white/20 drop-shadow-lg">
-                    {t.events?.participateNow || "Começar a Convidar"}
+                  <button className="flex-1 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-semibold py-2 px-3 rounded-lg transition-all duration-300 transform hover:scale-105 text-xs">
+                    {t.events?.participateNow || "Rewards 0/10 guests"}
                   </button>
-                  <button className="px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all duration-300 text-xs border border-white/20 shadow-lg shadow-white/10">
-                    {t.events?.termsConditions || "Termos & Condições"}
+                  <button className="px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all duration-300 text-xs">
+                    {t.events?.termsConditions || "Guests"}
                   </button>
                 </div>
               </div>
 
-              {/* Enhanced Floating Particles */}
-              {[...Array(12)].map((_, i) => (
+              {/* Floating Particles */}
+              {[...Array(8)].map((_, i) => (
                 <div
                   key={`modal-particle-${i}`}
                   className="absolute rounded-full animate-ping"
                   style={{
-                    width: `${2 + Math.random() * 4}px`,
-                    height: `${2 + Math.random() * 4}px`,
-                    backgroundColor: `rgba(255,255,255,${0.3 + Math.random() * 0.4})`,
+                    width: `${2 + Math.random() * 3}px`,
+                    height: `${2 + Math.random() * 3}px`,
+                    backgroundColor: i % 2 === 0 ? "rgba(255,215,0,0.6)" : "rgba(255,165,0,0.4)",
                     left: `${10 + Math.random() * 80}%`,
                     top: `${10 + Math.random() * 80}%`,
-                    animationDelay: `${Math.random() * 3}s`,
-                    animationDuration: `${1 + Math.random() * 3}s`,
-                    boxShadow: `0 0 10px rgba(255,255,255,${0.5 + Math.random() * 0.5})`,
+                    animationDelay: `${Math.random() * 2}s`,
+                    animationDuration: `${1 + Math.random() * 2}s`,
                   }}
                 />
               ))}
