@@ -81,8 +81,15 @@ const PARTNERSHIPS = [
     id: "redlightgreenlight",
     name: "Red Light Green Light",
     image: "/images/redlightgreenlight-logo.png",
-    gradient: "from-red-500 to-green-500", // Um gradiente que combine com o tema do jogo
+    gradient: "from-red-500 to-green-500",
     url: "https://world.org/mini-app?app_id=app_f11a49a98aab37a10e7dcfd20139f605",
+  },
+  {
+    id: "pulse",
+    name: "Pulse",
+    image: "/images/pulse-logo.png",
+    gradient: "from-cyan-500 to-blue-600",
+    url: "https://worldcoin.org/mini-app?app_id=app_91043e97761ffc609071cc48447b6eba&app_mode=mini-app",
   },
 ]
 
@@ -154,6 +161,8 @@ const translations = {
       description:
         "$10,000 in play! Don't want to miss our partner HoldStation's trading competition and cheaper fees on World? Take advantage!",
       moreInfo: "(More info in HoldStation App)",
+      pulseTitle: "Earn TPulseFi while you play!",
+      pulseDescription: "Earn a lot with TPulseFi, while you play Pulse you earn TPulseFi",
       figamesTitle: "FiGames - Amazing Gameplay!",
       figamesDescription: "FiGames - Amazing gameplay in our app, still in development.",
       rateUsTitle: "Rate us with 5 stars",
@@ -221,6 +230,8 @@ const translations = {
       description:
         "10000$ em jogo! Vais querer perder a competição de trade do nosso parceiro HoldStation e as taxas mais baratas na World? Aproveita!",
       moreInfo: "(Mais info na App HoldStation)",
+      pulseTitle: "Ganha TPulseFi enquanto jogas!",
+      pulseDescription: "Ganha muito com TPulseFi, enquanto jogas Pulse ganhas TPulseFi",
       figamesTitle: "FiGames - Jogabilidade Incrível!",
       figamesDescription: "FiGames - Uma jogabilidade incrível no nosso app, ainda em desenvolvimento.",
       rateUsTitle: "Classifique-nos com 5 estrelas",
@@ -289,6 +300,8 @@ const translations = {
       description:
         "¡10.000$ en juego! ¿Quieres perderte la competición de trading de nuestro socio HoldStation y las tarifas más baratas en World? ¡Aprovecha!",
       moreInfo: "(Más info en la App de HoldStation)",
+      pulseTitle: "¡Gana TPulseFi mientras juegas!",
+      pulseDescription: "Gana mucho con TPulseFi, mientras juegas Pulse ganas TPulseFi",
       figamesTitle: "FiGames - ¡Jugabilidad Increíble!",
       figamesDescription: "FiGames - Una jugabilidad increíble en nuestra app, aún en desarrollo.",
       rateUsTitle: "Califícanos con 5 estrellas",
@@ -357,6 +370,8 @@ const translations = {
       description:
         "10.000$ dalam permainan! Tidak ingin melewatkan kompetisi trading mitra kami HoldStation dan biaya lebih murah di World? Manfaatkan!",
       moreInfo: "(Info lebih lanjut di Aplikasi HoldStation)",
+      pulseTitle: "Dapatkan TPulseFi sambil bermain!",
+      pulseDescription: "Dapatkan banyak dengan TPulseFi, sambil bermain Pulse Anda mendapatkan TPulseFi",
       figamesTitle: "FiGames - Gameplay Luar Biasa!",
       figamesDescription: "FiGames - Gameplay luar biasa di aplikasi kami, masih dalam pengembangan.",
       rateUsTitle: "Beri kami 5 bintang",
@@ -1578,40 +1593,27 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
               <div className="grid grid-cols-2 gap-3">
                 {" "}
                 {/* Reduzido gap-4 para gap-3 */}
-                {/* HoldStation Section */}
+                {/* Pulse Section */}
                 <div className="flex flex-col items-center p-2 bg-gray-800/50 rounded-lg border border-white/10">
-                  {" "}
-                  {/* Reduzido p-3 para p-2 */}
                   <a
-                    href="https://worldcoin.org/mini-app?app_id=app_0d4b759921490adc1f2bd569fda9b53a&app_mode=mini-app"
+                    href="https://worldcoin.org/mini-app?app_id=app_91043e97761ffc609071cc48447b6eba&app_mode=mini-app"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="block mb-1 w-full"
                   >
-                    {" "}
-                    {/* Reduzido mb-2 para mb-1 */}
                     <Image
-                      src="/images/holdstation-promotionpopup.jpg"
-                      alt="SWAP TO EARN BIG $10,000 Rewards"
+                      src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/promotion-banner.jpg-IGbrXlqPLwzdEiRUmGuOJ2oRV8pcPp.jpeg"
+                      alt="Earn TPulseFi while you play Pulse"
                       width={800}
                       height={450}
                       className="mx-auto rounded-lg shadow-xl w-full object-contain"
                     />
                   </a>
                   <h2 className="text-[0.7rem] font-bold mb-0.5">
-                    {t.popup?.title || "Grandes Recompensas na HoldStation!"}
-                  </h2>{" "}
-                  {/* Reduzido text-base para text-[0.7rem] */}
+                    {t.popup?.pulseTitle || "Ganha TPulseFi enquanto jogas!"}
+                  </h2>
                   <p className="text-[0.5rem] mb-0.5">
-                    {" "}
-                    {/* Reduzido text-xs para text-[0.5rem] */}
-                    {t.popup?.description ||
-                      "10000$ em jogo! Vais querer perder a competição de trade do nosso parceiro HoldStation e as taxas mais baratas na World? Aproveita!"}
-                  </p>
-                  <p className="text-[0.4rem]">
-                    {" "}
-                    {/* Reduzido text-[0.6rem] para text-[0.4rem] */}
-                    {t.popup?.moreInfo || "(Mais informações disponíveis na App HoldStation)"}
+                    {t.popup?.pulseDescription || "Ganha muito com TPulseFi, enquanto jogas Pulse ganhas TPulseFi"}
                   </p>
                 </div>
                 {/* FiGames Section */}
