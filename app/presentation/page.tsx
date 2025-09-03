@@ -390,6 +390,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
   const [showLanguageMenu, setShowLanguageMenu] = useState(false)
   const [showEventsModal, setShowEventsModal] = useState(false)
   const [showShareModal, setShowShareModal] = useState(false)
+  const [showInvitationStats, setShowInvitationStats] = useState(false)
   const [linkCopied, setLinkCopied] = useState(false)
   const [currentLang, setCurrentLang] = useState<keyof typeof translations>("en")
   const [currentPartnerIndex, setCurrentPartnerIndex] = useState(0)
@@ -978,14 +979,34 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                   </p>
                 </div>
 
+                {showInvitationStats && (
+                  <div className="bg-white/5 border border-white/20 rounded-xl p-6 backdrop-blur-sm text-center">
+                    <div className="flex flex-col items-center space-y-3">
+                      <Users className="w-12 h-12 text-white/80" />
+                      <div>
+                        <div className="text-3xl font-bold text-white mb-1">{invitedUsers.length}</div>
+                        <div className="text-white/70 text-sm">
+                          {invitedUsers.length === 1 ? "Pessoa Convidada" : "Pessoas Convidadas"}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="flex space-x-3 pt-2">
                   <button
-                    onClick={() => setShowShareModal(true)}
+                    onClick={() => {
+                      setShowInvitationStats(false)
+                      setShowShareModal(true)
+                    }}
                     className="flex-1 bg-white/10 hover:bg-white/20 border border-white/30 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 text-xs backdrop-blur-sm drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]"
                   >
                     {t.events?.participateNow || "Prémios"}
                   </button>
-                  <button className="px-4 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all duration-300 text-xs backdrop-blur-sm border border-white/30 drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">
+                  <button
+                    onClick={() => setShowInvitationStats(!showInvitationStats)}
+                    className="px-4 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all duration-300 text-xs backdrop-blur-sm border border-white/30 drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]"
+                  >
                     {t.events?.termsConditions || "Convidados"}
                   </button>
                 </div>
