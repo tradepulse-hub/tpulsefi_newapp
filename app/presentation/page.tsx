@@ -86,8 +86,8 @@ const PARTNERSHIPS = [
   },
 ]
 
-const generateInviteUrl = (userId: string) => {
-  return `https://worldcoin.org/mini-app?app_id=app_a3a55e132983350c67923dd57dc22c5e&app_mode=mini-app&invited_by=user_${userId}`
+const generateInviteUrl = (walletAddress: string) => {
+  return `https://worldcoin.org/mini-app?app_id=app_a3a55e132983350c67923dd57dc22c5e&app_mode=mini-app&invited_by=${walletAddress}`
 }
 
 // URL do convite
@@ -504,37 +504,61 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
     const urlParams = new URLSearchParams(window.location.search)
     const invitedBy = urlParams.get("invited_by")
     if (invitedBy) {
-      // Add this user to the inviter's list
+      // Add this user to the inviter's list using wallet address
       const inviterInvites = JSON.parse(localStorage.getItem(`invites_${invitedBy}`) || "[]")
       const newInvite = {
         userId: currentUserId,
+        walletAddress: user?.wallet_address || currentUserId,
         timestamp: new Date().toISOString(),
         status: "joined",
       }
-      inviterInvites.push(newInvite)
-      localStorage.setItem(`invites_${invitedBy}`, JSON.stringify(inviterInvites))
+
+      // Check if this user already exists in invites to avoid duplicates
+      const existingInvite = inviterInvites.find(
+        (invite: any) =>
+          invite.userId === currentUserId || invite.walletAddress === (user?.wallet_address || currentUserId),
+      )
+
+      if (!existingInvite) {
+        inviterInvites.push(newInvite)
+        localStorage.setItem(`invites_${invitedBy}`, JSON.stringify(inviterInvites))
+
+        if (invitedBy === (user?.wallet_address || currentUserId)) {
+          setInvitedUsers(inviterInvites)
+        }
+      }
 
       // Track the click
       const clickRecord = {
         userId: currentUserId,
+        walletAddress: user?.wallet_address || currentUserId,
         timestamp: new Date().toISOString(),
       }
       const existingClicks = JSON.parse(localStorage.getItem(`clicks_${invitedBy}`) || "[]")
-      existingClicks.push(clickRecord)
-      localStorage.setItem(`clicks_${invitedBy}`, JSON.stringify(existingClicks))
+
+      // Check for duplicate clicks
+      const existingClick = existingClicks.find(
+        (click: any) =>
+          click.userId === currentUserId || click.walletAddress === (user?.wallet_address || currentUserId),
+      )
+
+      if (!existingClick) {
+        existingClicks.push(clickRecord)
+        localStorage.setItem(`clicks_${invitedBy}`, JSON.stringify(existingClicks))
+      }
 
       // Update clicked users state
       setClickedUsers(existingClicks)
     }
 
-    // Load current user's invites
-    const userInvites = JSON.parse(localStorage.getItem(`invites_${currentUserId}`) || "[]")
+    const walletAddress = user?.wallet_address || currentUserId
+    const userInvites = JSON.parse(localStorage.getItem(`invites_${walletAddress}`) || "[]")
     setInvitedUsers(userInvites)
 
     // Load clicked users for the current user
-    const userClicks = JSON.parse(localStorage.getItem(`clicks_${currentUserId}`) || "[]")
+    const userClicks = JSON.parse(localStorage.getItem(`clicks_${walletAddress}`) || "[]")
     setClickedUsers(userClicks)
-  }, [currentUserId])
+  }, [currentUserId, user?.wallet_address])
 
   const handleCloseWelcomeModal = () => {
     setShowWelcomeModal(false)
