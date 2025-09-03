@@ -965,9 +965,26 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
               <div className="space-y-4">
                 {/* How it works section */}
                 <div className="bg-white/5 border border-white/20 rounded-xl p-4 backdrop-blur-sm">
-                  <h3 className="text-white font-semibold mb-3 drop-shadow-[0_0_8px_rgba(255,255,255,0.3)] text-sm">
-                    {t.events?.eventTitle || "Como Funciona o Sistema de Convites"}
-                  </h3>
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-white font-semibold drop-shadow-[0_0_8px_rgba(255,255,255,0.3)] text-sm">
+                      {t.events?.eventTitle || "Como Funciona o Sistema de Convites"}
+                    </h3>
+                    <div className="relative group">
+                      <div className="w-5 h-5 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center cursor-help transition-all duration-200">
+                        <span className="text-white text-xs font-bold">i</span>
+                      </div>
+                      {/* Tooltip */}
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-black/90 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10 border border-white/20">
+                        <div className="text-center">
+                          <p className="font-semibold mb-1">Sistema de Convites</p>
+                          <p className="text-white/80">Convida amigos e ganha prémios em WLD</p>
+                          <p className="text-white/80">Cada convite conta para os teus prémios</p>
+                        </div>
+                        {/* Arrow */}
+                        <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-black/90"></div>
+                      </div>
+                    </div>
+                  </div>
 
                   <p className="text-white/90 text-xs mb-3 drop-shadow-[0_0_6px_rgba(255,255,255,0.2)]">
                     {t.events?.eventDescription ||
@@ -983,12 +1000,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                   <div className="bg-white/5 border border-white/20 rounded-xl p-6 backdrop-blur-sm text-center">
                     <div className="flex flex-col items-center space-y-3">
                       <Users className="w-12 h-12 text-white/80" />
-                      <div>
-                        <div className="text-3xl font-bold text-white mb-1">{invitedUsers.length}</div>
-                        <div className="text-white/70 text-sm">
-                          {invitedUsers.length === 1 ? "Pessoa Convidada" : "Pessoas Convidadas"}
-                        </div>
-                      </div>
+                      <div className="text-3xl font-bold text-white">{invitedUsers.length}</div>
                     </div>
                   </div>
                 )}
