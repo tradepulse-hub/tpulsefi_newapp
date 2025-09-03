@@ -185,7 +185,7 @@ const translations = {
       close: "Fechar",
       back: "Voltar",
       invite: "CONVIDAR",
-      linkCopied: "Link copiado!",
+      linkCopiado: "Link copiado!",
       shareVia: "Compartilhar via",
       copyLink: "Copiar Link",
       start: "Começar",
@@ -407,6 +407,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
   const [invitedUsers, setInvitedUsers] = useState<string[]>([])
   const [clickedUsers, setClickedUsers] = useState<string[]>([])
   const [currentUserId] = useState(() => `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`)
+  const [invitedUsernames, setInvitedUsernames] = useState<{ [key: string]: string }>({})
 
   const [modalContent, setModalContent] = useState<"prizes" | "invitations" | null>(null)
 
@@ -484,6 +485,34 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
     }
   }, []) // Executa apenas uma vez na montagem do componente
 
+  const getUsernameByAddress = async (walletAddress: string): Promise<string> => {
+    try {
+      if (MiniKit && MiniKit.getUserByAddress) {
+        const worldIdUser = await MiniKit.getUserByAddress(walletAddress)
+        return worldIdUser?.username || `User ${walletAddress.slice(-8)}`
+      }
+    } catch (error) {
+      console.error("Failed to get username:", error)
+    }
+    return `User ${walletAddress.slice(-8)}`
+  }
+
+  const loadUsernamesForInvitedUsers = async (invites: any[]) => {
+    const usernameMap: { [key: string]: string } = {}
+
+    for (const invite of invites) {
+      const walletAddress = invite.walletAddress || invite.userId
+      if (!invitedUsernames[walletAddress]) {
+        const username = await getUsernameByAddress(walletAddress)
+        usernameMap[walletAddress] = username
+      }
+    }
+
+    if (Object.keys(usernameMap).length > 0) {
+      setInvitedUsernames((prev) => ({ ...prev, ...usernameMap }))
+    }
+  }
+
   useEffect(() => {
     // Subscribe to share events
     MiniKit.subscribe(ResponseEvent.MiniAppShare, (payload) => {
@@ -554,6 +583,10 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
     const walletAddress = user?.wallet_address || currentUserId
     const userInvites = JSON.parse(localStorage.getItem(`invites_${walletAddress}`) || "[]")
     setInvitedUsers(userInvites)
+
+    if (userInvites.length > 0) {
+      loadUsernamesForInvitedUsers(userInvites)
+    }
 
     // Load clicked users for the current user
     const userClicks = JSON.parse(localStorage.getItem(`clicks_${walletAddress}`) || "[]")
@@ -1195,12 +1228,17 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                     People You Invited ({invitedUsers.length})
                   </h4>
                   <div className="space-y-2 max-h-32 overflow-y-auto">
-                    {invitedUsers.map((invite, index) => (
-                      <div key={index} className="flex items-center justify-between text-xs">
-                        <span className="text-gray-300">User {invite.userId.slice(-8)}</span>
-                        <span className="text-gray-400">{new Date(invite.timestamp).toLocaleDateString()}</span>
-                      </div>
-                    ))}
+                    {invitedUsers.map((invite, index) => {
+                      const walletAddress = invite.walletAddress || invite.userId
+                      const displayName = invitedUsernames[walletAddress] || `User ${walletAddress.slice(-8)}`
+
+                      return (
+                        <div key={index} className="flex items-center justify-between text-xs">
+                          <span className="text-gray-300">{displayName}</span>
+                          <span className="text-gray-400">{new Date(invite.timestamp).toLocaleDateString()}</span>
+                        </div>
+                      )
+                    })}
                   </div>
                 </div>
               )}
