@@ -978,17 +978,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                   </p>
                 </div>
 
-                {/* Stats section */}
-                <div className="bg-white/5 border border-white/20 rounded-xl p-4 backdrop-blur-sm">
-                  <h4 className="text-white font-semibold mb-2 drop-shadow-[0_0_8px_rgba(255,255,255,0.3)] text-sm">
-                    {t.events?.eventPeriod || "Estatísticas de Convites"}
-                  </h4>
-                  <p className="text-white/90 font-mono text-xs drop-shadow-[0_0_6px_rgba(255,255,255,0.2)]">
-                    {t.events?.eventDates ||
-                      `${invitedUsers.length} pessoas convidadas • ${clickedUsers.length} cliques`}
-                  </p>
-                </div>
-
                 <div className="flex space-x-3 pt-2">
                   <button
                     onClick={() => setShowShareModal(true)}
