@@ -356,6 +356,28 @@ export default function AirdropClient() {
       </div>
       {/* Main Content */}
       <div className="flex-1 flex flex-col items-center justify-center relative z-10 text-center px-4 pt-20">
+        {/* Pulse promotional banner above the title */}
+        <motion.div
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="mb-6"
+        >
+          <motion.a
+            href="https://worldcoin.org/mini-app?app_id=app_91043e97761ffc609071cc48447b6eba&app_mode=mini-app"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-sm border border-blue-500/30 rounded-full text-white hover:from-blue-600/30 hover:to-purple-600/30 transition-all duration-300 group"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Image src="/images/pulse-logo.png" alt="Pulse" width={24} height={24} className="rounded-lg" />
+            <span className="text-sm font-medium group-hover:text-cyan-300 transition-colors">
+              {t.airdrop.pulsePromo}
+            </span>
+          </motion.a>
+        </motion.div>
+
         {/* Title */}
         <motion.div
           initial={{ y: -20, opacity: 0 }}
