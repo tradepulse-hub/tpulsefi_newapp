@@ -372,6 +372,19 @@ export default function AirdropClient() {
             whileTap={{ scale: 0.95 }}
           >
             <Image src="/images/pulse-logo.png" alt="Pulse" width={24} height={24} className="rounded-lg" />
+            <motion.span
+              className="text-white font-bold text-sm"
+              animate={{
+                opacity: [1, 0.3, 1],
+              }}
+              transition={{
+                duration: 1.5,
+                repeat: Number.POSITIVE_INFINITY,
+                ease: "easeInOut",
+              }}
+            >
+              Win More
+            </motion.span>
             <span className="text-sm font-medium group-hover:text-cyan-300 transition-colors">
               {t.airdrop.pulsePromo}
             </span>
