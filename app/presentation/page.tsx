@@ -109,7 +109,6 @@ const translations = {
       fistaking: "Fi Staking",
       figames: "Fi Games",
       membership: "Membership",
-      partnerships: "Partnerships",
       about: "About",
     },
     common: {
@@ -175,7 +174,6 @@ const translations = {
       fistaking: "Fi Staking",
       figames: "Fi Games",
       membership: "Membros",
-      partnerships: "Parcerias",
       about: "Sobre",
     },
     common: {
@@ -245,7 +243,6 @@ const translations = {
       fistaking: "Fi Staking",
       figames: "Fi Games",
       membership: "Miembros",
-      partnerships: "Asociaciones",
       about: "Acerca de",
     },
     common: {
@@ -314,7 +311,6 @@ const translations = {
       fistaking: "Fi Staking",
       figames: "Fi Games",
       membership: "Keanggotaan",
-      partnerships: "Kemitraan",
       about: "Tentang",
     },
     common: {
