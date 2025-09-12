@@ -49,13 +49,7 @@ const LANGUAGES = [
 
 // Partnerships data
 const PARTNERSHIPS = [
-  {
-    id: "holdstation",
-    name: "HoldStation",
-    image: "/images/holdstation-logo.png",
-    gradient: "from-blue-500 to-purple-600",
-    url: "https://world.org/mini-app?app_id=app_0d4b759921490adc1f2bd569fda9b53a&path=/ref/f5S3wA",
-  },
+ 
   {
     id: "axo",
     name: "AXO",
@@ -157,10 +151,7 @@ const translations = {
       "give value to TPulseFi",
     ],
     popup: {
-      title: "Big Rewards at HoldStation!",
-      description:
-        "$10,000 in play! Don't want to miss our partner HoldStation's trading competition and cheaper fees on World? Take advantage!",
-      moreInfo: "(More info in HoldStation App)",
+     
       pulseTitle: "Earn TPulseFi while you play!",
       pulseDescription: "Earn a lot with TPulseFi, while you play Pulse you earn TPulseFi",
       figamesTitle: "FiGames - Amazing Gameplay!",
