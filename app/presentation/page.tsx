@@ -1550,133 +1550,50 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
 
       {/* Welcome Modal */}
       <AnimatePresence>
-        {showWelcomeModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4"
-            onClick={handleCloseWelcomeModal}
-          >
-            {/* Backdrop */}
-            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+  {showWelcomeModal && (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+      onClick={handleCloseWelcomeModal}
+    >
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
 
-            {/* Modal */}
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0, y: 50 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.8, opacity: 0, y: 50 }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="relative bg-black/90 backdrop-blur-xl border border-white/20 rounded-2xl p-3 max-w-4xl w-full mx-4 shadow-2xl text-white text-center" // Reduzido p-4 para p-3
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Close Button */}
-              <button
-                onClick={handleCloseWelcomeModal}
-                className="absolute top-2 right-2 w-6 h-6 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all duration-200" // Reduzido w-7 h-7 para w-6 h-6
-              >
-                <X className="w-3 h-3 text-white" />
-              </button>
+      {/* Modal */}
+      <motion.div
+        initial={{ scale: 0.8, opacity: 0, y: 50 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.8, opacity: 0, y: 50 }}
+        transition={{ type: "spring", damping: 25, stiffness: 300 }}
+        className="relative bg-black/90 backdrop-blur-xl border border-white/20 rounded-2xl p-4 max-w-2xl w-full mx-4 shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Close Button */}
+        <button
+          onClick={handleCloseWelcomeModal}
+          className="absolute top-3 right-3 w-6 h-6 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all duration-200"
+        >
+          <X className="w-3 h-3 text-white" />
+        </button>
 
-              <div className="grid grid-cols-2 gap-3">
-                {" "}
-                {/* Reduzido gap-4 para gap-3 */}
-                {/* Pulse Section */}
-                <div className="flex flex-col items-center p-2 bg-gray-800/50 rounded-lg border border-white/10">
-                  <a
-                    href="https://worldcoin.org/mini-app?app_id=app_91043e97761ffc609071cc48447b6eba&app_mode=mini-app"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block mb-1 w-full"
-                  >
-                    <Image
-                      src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/promotion-banner.jpg-IGbrXlqPLwzdEiRUmGuOJ2oRV8pcPp.jpeg"
-                      alt="Earn TPulseFi while you play Pulse"
-                      width={800}
-                      height={450}
-                      className="mx-auto rounded-lg shadow-xl w-full object-contain"
-                    />
-                  </a>
-                  <h2 className="text-[0.7rem] font-bold mb-0.5">
-                    {t.popup?.pulseTitle || "Ganha TPulseFi enquanto jogas!"}
-                  </h2>
-                  <p className="text-[0.5rem] mb-0.5">
-                    {t.popup?.pulseDescription || "Ganha muito com TPulseFi, enquanto jogas Pulse ganhas TPulseFi"}
-                  </p>
-                </div>
-                {/* FiGames Section */}
-                <div className="flex flex-col items-center p-2 bg-gray-800/50 rounded-lg border border-white/10">
-                  {" "}
-                  {/* Reduzido p-3 para p-2 */}
-                  <div className="block mb-1 w-full">
-                    {" "}
-                    {/* Reduzido mb-2 para mb-1 */}
-                    <Image
-                      src="/images/figamespopup.jpg"
-                      alt="FiGames - Play and Have Fun!"
-                      width={800}
-                      height={450}
-                      className="mx-auto rounded-lg shadow-xl w-full object-contain"
-                    />
-                  </div>
-                  <h2 className="text-[0.7rem] font-bold mt-2 mb-0.5">
-                    {t.popup?.figamesTitle || "FiGames - Jogabilidade Incrível!"}
-                  </h2>{" "}
-                  {/* Reduzido text-base para text-[0.7rem] */}
-                  <p className="text-[0.5rem]">
-                    {" "}
-                    {/* Reduzido text-xs para text-[0.5rem] */}
-                    {t.popup?.figamesDescription ||
-                      "FiGames - Uma jogabilidade incrível no nosso aplicativo que ainda está em desenvolvimento."}
-                  </p>
-                </div>
-                {/* Rate Us Section */}
-                <div className="flex flex-col items-center justify-center p-2 bg-gray-800/50 rounded-lg border border-white/10 min-h-[150px]">
-                  <div className="flex mb-1">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-6 h-6 text-yellow-400 fill-yellow-400" />
-                    ))}
-                  </div>
-                  <h3 className="text-[0.7rem] font-bold text-gray-400 mb-0.5">
-                    {t.popup?.rateUsTitle || "Classifique-nos com 5 estrelas"}
-                  </h3>{" "}
-                  {/* Reduzido text-base para text-[0.7rem] */}
-                  <p className="text-gray-500 text-[0.5rem] text-center px-2">
-                    {t.popup?.rateUsDescription || "Um pequeno gesto que nos ajuda a fortalecer e alcançar o sucesso."}
-                  </p>{" "}
-                  {/* Reduzido text-xs para text-[0.5rem] */}
-                </div>
-                {/* Share with Friends Section */}
-                <div className="flex flex-col items-center justify-center p-2 bg-gray-800/50 rounded-lg border border-white/10 min-h-[150px]">
-                  <button onClick={() => shareCommand()} className="flex flex-col items-center">
-                    <Share2 className="w-8 h-8 text-blue-400 mb-1" />
-                    <h3 className="text-[0.7rem] font-bold text-gray-400 mb-0.5">
-                      {t.popup?.shareFriendsTitle || "Partilhe com os seus amigos e família"}
-                    </h3>
-                    <p className="text-gray-500 text-[0.5rem] text-center px-2">
-                      {t.popup?.shareFriendsDescription ||
-                        "Faça a sua parte e contribua para que TPulseFi cresça verdadeiramente, juntos somos mais fortes."}
-                    </p>
-                    {invitedUsers.length > 0 && (
-                      <div className="mt-2 px-2 py-1 bg-blue-500/20 rounded-full">
-                        <span className="text-blue-400 text-[0.5rem] font-semibold">{invitedUsers.length} invited</span>
-                      </div>
-                    )}
-                  </button>
-                </div>
-              </div>
+        {/* AdSense Ad */}
+        <div className="w-full">
+          <AdSenseAd adSlot="1171772282" />
+        </div>
 
-              {/* CTA Button */}
-              <button
-                onClick={handleCloseWelcomeModal}
-                className="mt-4 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg text-[0.5rem]" // Reduzido text-xs para text-[0.5rem]
-              >
-                {t.common?.start || "Começar"}
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+        {/* CTA Button */}
+        <button
+          onClick={handleCloseWelcomeModal}
+          className="mt-4 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg text-sm w-full"
+        >
+          {t.common?.start || "Começar"}
+        </button>
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
       {/* Main Content */}
       <div className="relative z-10 text-center">
         {/* Logo with Ultra Vibrant Auras and Vibration - COMPACTED */}
