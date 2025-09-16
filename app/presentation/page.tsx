@@ -51,18 +51,39 @@ const LANGUAGES = [
 const PARTNERSHIPS = [
  
   {
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3463665547694991"
-     crossorigin="anonymous"></script>
-<!-- Ad -->
-<ins class="adsbygoogle"
-     style="display:block"
-     data-ad-client="ca-pub-3463665547694991"
-     data-ad-slot="1171772282"
-     data-ad-format="auto"
-     data-full-width-responsive="true"></ins>
-<script>
-     (adsbygoogle = window.adsbygoogle || []).push({});
-</script>
+    id: "axo",
+    name: "AXO",
+    image: "/images/axo.jpg",
+    gradient: "from-pink-500 to-rose-600",
+    url: "https://worldcoin.org/mini-app?app_id=app_8aeb55d57b7be834fb8d67e2f803d258&app_mode=mini-app",
+  },
+  {
+    id: "dropwallet",
+    name: "Drop Wallet",
+    image: "/images/HUB.png",
+    gradient: "from-yellow-500 to-orange-600",
+    url: "https://world.org/mini-app?app_id=app_459cd0d0d3125864ea42bd4c19d1986c&path=/dlink/TPulseFi",
+  },
+  {
+    id: "humantap",
+    name: "Human Tap",
+    image: "/images/human-tap.jpg",
+    gradient: "from-green-500 to-emerald-600",
+    url: "https://worldcoin.org/mini-app?app_id=app_25cf6ee1d9660721e651d43cf126953a&app_mode=mini-app",
+  },
+  {
+    id: "redlightgreenlight",
+    name: "Red Light Green Light",
+    image: "/images/redlightgreenlight-logo.png",
+    gradient: "from-red-500 to-green-500",
+    url: "https://world.org/mini-app?app_id=app_f11a49a98aab37a10e7dcfd20139f605",
+  },
+  {
+    id: "pulse",
+    name: "Pulse",
+    image: "/images/pulse-logo.png",
+    gradient: "from-cyan-500 to-blue-600",
+    url: "https://worldcoin.org/mini-app?app_id=app_91043e97761ffc609071cc48447b6eba&app_mode=mini-app",
   },
 ]
 
