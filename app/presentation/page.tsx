@@ -29,7 +29,8 @@ import MiniWallet from "../../components/mini-wallet"
 import { AnimatePresence, motion } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { useMobile } from "@/hooks/use-mobile"
-import { BackgroundEffect } from "../../components/background-effect" // Import the new BackgroundEffect
+import { BackgroundEffect } from "../../components/background-effect"
+import AdSenseAd from "../../components/AdSenseAd" // Import the AdSenseAd component
 
 import { MiniKit, ResponseEvent } from "@worldcoin/minikit-js"
 
@@ -47,52 +48,8 @@ const LANGUAGES = [
   },
 ]
 
-// Partnerships data
-const PARTNERSHIPS = [
- 
-  {
-    id: "axo",
-    name: "AXO",
-    image: "/images/axo.jpg",
-    gradient: "from-pink-500 to-rose-600",
-    url: "https://worldcoin.org/mini-app?app_id=app_8aeb55d57b7be834fb8d67e2f803d258&app_mode=mini-app",
-  },
-  {
-    id: "dropwallet",
-    name: "Drop Wallet",
-    image: "/images/HUB.png",
-    gradient: "from-yellow-500 to-orange-600",
-    url: "https://world.org/mini-app?app_id=app_459cd0d0d3125864ea42bd4c19d1986c&path=/dlink/TPulseFi",
-  },
-  {
-    id: "humantap",
-    name: "Human Tap",
-    image: "/images/human-tap.jpg",
-    gradient: "from-green-500 to-emerald-600",
-    url: "https://worldcoin.org/mini-app?app_id=app_25cf6ee1d9660721e651d43cf126953a&app_mode=mini-app",
-  },
-  {
-    id: "redlightgreenlight",
-    name: "Red Light Green Light",
-    image: "/images/redlightgreenlight-logo.png",
-    gradient: "from-red-500 to-green-500",
-    url: "https://world.org/mini-app?app_id=app_f11a49a98aab37a10e7dcfd20139f605",
-  },
-  {
-    id: "pulse",
-    name: "Pulse",
-    image: "/images/pulse-logo.png",
-    gradient: "from-cyan-500 to-blue-600",
-    url: "https://worldcoin.org/mini-app?app_id=app_91043e97761ffc609071cc48447b6eba&app_mode=mini-app",
-  },
-]
-
-const generateInviteUrl = (walletAddress: string) => {
-  return `https://worldcoin.org/mini-app?app_id=app_a3a55e132983350c67923dd57dc22c5e&app_mode=mini-app&invited_by=${walletAddress}`
-}
-
-// URL do convite
-const INVITE_URL = "https://worldcoin.org/mini-app?app_id=app_a3a55e132983350c67923dd57dc22c5e&app_mode=mini-app"
+// Partnerships data (removed as we'll use ads instead)
+const PARTNERSHIPS = []
 
 // Translations
 const translations = {
@@ -292,7 +249,7 @@ const translations = {
       pulseDescription: "Gana mucho con TPulseFi, mientras juegas Pulse ganas TPulseFi",
       figamesTitle: "FiGames - ¡Jugabilidad Increíble!",
       figamesDescription: "FiGames - Una jugabilidad increíble en nuestra app, aún en desarrollo.",
-      rateUsTitle: "Califícanos con 5 estrellas",
+      rateUsTitle: "Califícanos con 5 estrelas",
       rateUsDescription: "Un pequeño gesto que nos ayuda a fortalecer y alcanzar el éxito.",
       shareFriendsTitle: "Comparte con tus amigos y familiares",
       shareFriendsDescription: "Haz tu parte y contribuye a que TPulseFi crezca de verdad, juntos somos más fuertes.",
@@ -444,10 +401,10 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
     }
   }, [isAuthenticated, user])
 
-  // Partnership slideshow effect
+  // Ad slideshow effect (removed partnership slideshow)
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentPartnerIndex((prev) => (prev + 1) % PARTNERSHIPS.length)
+      // Just keep the interval for potential future use
     }, 3000)
 
     return () => clearInterval(interval)
@@ -680,52 +637,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
     }
   }
 
-  // Handle copy link
-  // const handleCopyLink = async () => {
-  // try {
-  // await navigator.clipboard.writeText(INVITE_URL)
-  // setLinkCopied(true)
-  // setTimeout(() => setCopied(false), 2000)
-  // } catch (error) {
-  // console.error("Failed to copy link:", error)
-  // }
-  // }
-
-  // Handle share options
-  // const handleShare = (platform: string) => {
-  // const message = `Join TPulseFi - The Future of Decentralized Finance! ${INVITE_URL}`
-  // const encodedMessage = encodeURIComponent(message)
-  // const encodedUrl = encodeURIComponent(INVITE_URL)
-
-  // let shareUrl = ""
-
-  // switch (platform) {
-  // case "whatsapp":
-  //   shareUrl = `https://wa.me/?text=${encodedMessage}`
-  //   break
-  // case "telegram":
-  //   shareUrl = `https://t.me/share/url?url=${encodedUrl}&text=${encodeURIComponent("Join TPulseFi - The Future of Decentralized Finance!")}`
-  //   break
-  // case "twitter":
-  //   shareUrl = `https://twitter.com/intent/tweet?text=${encodedMessage}`
-  //   break
-  // case "facebook":
-  //   shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`
-  //   break
-  // case "linkedin":
-  //   shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`
-  //   break
-  // case "email":
-  //   shareUrl = `mailto:?subject=${encodeURIComponent("Join TPulseFi")}&body=${encodedMessage}`
-  //   break
-  // default:
-  //   return
-  // }
-
-  // window.open(shareUrl, "_blank", "width=600,height=400")
-  // setShowShareModal(false)
-  // }
-
   // REAL wallet connection handler
   const handleWalletConnect = async () => {
     if (!isAuthenticated) {
@@ -836,11 +747,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
   }
 
   const currentLanguage = LANGUAGES.find((lang) => lang.code === currentLang)
-  const currentPartner = PARTNERSHIPS[currentPartnerIndex]
-
-  const handlePartnerClick = () => {
-    window.open(currentPartner.url, "_blank")
-  }
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden flex items-center justify-center">
@@ -1150,7 +1056,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                 >
                   <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center mb-2">
                     <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488" />
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.150-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.130-.606.134-.133.298-.347.446-.520.149-.174.198-.298.298-.497.099-.198.050-.371-.025-.520-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.500-.669-.510-.173-.008-.371-.010-.570-.010-.198 0-.520.074-.792.372-.272.297-1.040 1.016-1.040 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.200 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.360.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.570-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.510-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.640 0 5.122 1.030 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488" />
                     </svg>
                   </div>
                   <span className="text-white text-xs">WhatsApp</span>
@@ -1249,72 +1155,11 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
         )}
       </AnimatePresence>
 
-      {/* Partnership Slideshow - Between subtitle and bottom bar */}
+      {/* AdSense Ad - Replaces Partnership Slideshow */}
       <div className="fixed bottom-20 left-6 right-6 z-30 flex justify-center">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentPartnerIndex}
-            initial={{ x: -300, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: 300, opacity: 0 }}
-            transition={{
-              type: "spring",
-              stiffness: 100,
-              damping: 20,
-              duration: 0.8,
-            }}
-            className="relative group cursor-pointer w-full max-w-xl"
-            onClick={handlePartnerClick}
-          >
-            {/* Partnership Card */}
-            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-xl p-2 hover:bg-black/60 transition-all duration-300 shadow-2xl">
-              {/* Glow Effect */}
-              <div
-                className={`absolute inset-0 bg-gradient-to-r ${currentPartner.gradient} opacity-0 group-hover:opacity-20 rounded-xl blur-xl transition-opacity duration-300`}
-              />
-
-              {/* Content */}
-              <div className="relative z-10 flex items-center space-x-3">
-                {/* Partner Logo */}
-                <div className="w-8 h-8 rounded-lg overflow-hidden bg-gray-700/50 flex-shrink-0">
-                  <Image
-                    src={currentPartner.image || "/placeholder.svg"}
-                    alt={currentPartner.name}
-                    width={32}
-                    height={32}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-
-                {/* Partner Info */}
-                <div className="flex-1">
-                  <h3 className="text-white font-semibold text-sm">{currentPartner.name}</h3>
-                  <div className={`h-0.5 w-12 bg-gradient-to-r ${currentPartner.gradient} rounded-full mt-0.5`} />
-                </div>
-
-                {/* Visit Button */}
-                <div
-                  className={`bg-gradient-to-r ${currentPartner.gradient} text-white px-3 py-1.5 rounded-lg font-medium flex items-center space-x-1.5 group-hover:scale-105 transition-transform duration-300`}
-                >
-                  <span className="text-xs">{t.partnerships?.visitApp || "Visit App"}</span>
-                  <ExternalLink className="w-3 h-3" />
-                </div>
-              </div>
-
-              {/* Progress Indicators */}
-              <div className="flex justify-center space-x-1.5 mt-2">
-                {PARTNERSHIPS.map((_, index) => (
-                  <div
-                    key={index}
-                    className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-                      index === currentPartnerIndex ? `bg-gradient-to-r ${currentPartner.gradient}` : "bg-white/20"
-                    }`}
-                  />
-                ))}
-              </div>
-            </div>
-          </motion.div>
-        </AnimatePresence>
+        <div className="relative w-full max-w-xl">
+          <AdSenseAd adSlot="your-ad-slot-id-here" />
+        </div>
       </div>
 
       {/* Bottom Navigation Bar with Wallet Icon + Menu Button */}
@@ -1354,7 +1199,7 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                 </div>
                 {/* Button Glow */}
                 <div className="absolute inset-0 bg-gradient-to-r from-gray-300/20 to-gray-400/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              </button>
+                </button>
             </div>
           </div>
         </div>
