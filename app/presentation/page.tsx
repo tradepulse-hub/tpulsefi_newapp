@@ -29,7 +29,8 @@ import MiniWallet from "../../components/mini-wallet"
 import { AnimatePresence, motion } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { useMobile } from "@/hooks/use-mobile"
-import { BackgroundEffect } from "../../components/background-effect" // Import the new BackgroundEffect
+import { BackgroundEffect } from "../../components/background-effect"
+import AdSenseAd from "../../components/AdSenseAd" // Import the AdSenseAd component
 
 import { MiniKit, ResponseEvent } from "@worldcoin/minikit-js"
 
