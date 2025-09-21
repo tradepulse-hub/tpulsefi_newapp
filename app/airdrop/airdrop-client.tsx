@@ -497,6 +497,7 @@ export default function AirdropClient() {
           </div>
         </motion.div>
 
+        {/* Verify Button */}
         <AnimatePresence>
           {!worldIdVerified && !worldIdVerifying && !isInCooldown && (
             <motion.div
