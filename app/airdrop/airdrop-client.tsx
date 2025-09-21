@@ -4,25 +4,22 @@ import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import Image from "next/image"
 import Link from "next/link"
-import { Coins, Gift, Lock, Shield, CheckCircle, ArrowLeft, X, Clock } from "lucide-react"
+import { Coins, Shield, CheckCircle, ArrowLeft, X, Clock } from "lucide-react"
 import { MiniKit, type VerifyCommandInput, VerificationLevel, type ISuccessResult } from "@worldcoin/minikit-js"
 import { useI18n } from "@/lib/i18n/context"
-import { BackgroundEffect } from "@/components/background-effect" // Import BackgroundEffect
+import { BackgroundEffect } from "@/components/background-effect"
+import { TPFCoin3D } from "@/components/tpf-coin-3d"
 
 export default function AirdropClient() {
   const { t } = useI18n()
 
-  const [chainsBreaking, setChainsBreaking] = useState(false)
-  const [chainsBroken, setChainsBroken] = useState(false)
   const [worldIdVerifying, setWorldIdVerifying] = useState(false)
   const [worldIdVerified, setWorldIdVerified] = useState(false)
   const [worldIdFailed, setWorldIdFailed] = useState(false)
-  const [boxOpened, setBoxOpened] = useState(false)
   const [canClaim, setCanClaim] = useState(false)
   const [isClaiming, setIsClaiming] = useState(false)
   const [claimSuccess, setClaimSuccess] = useState(false)
   const [claimError, setClaimError] = useState<string | null>(null)
-  const [showReward, setShowReward] = useState(false)
   const [showCountdown, setShowCountdown] = useState(false)
   const [countdownTime, setCountdownTime] = useState(24 * 60 * 60) // 24 hours in seconds
   const [isInCooldown, setIsInCooldown] = useState(false)
@@ -61,9 +58,6 @@ export default function AirdropClient() {
     if (!isInCooldown) {
       setWorldIdVerified(false)
       setWorldIdFailed(false)
-      setChainsBroken(false)
-      setBoxOpened(false)
-      setShowReward(false)
       setCanClaim(false)
     }
   }, [isInCooldown])
@@ -79,9 +73,6 @@ export default function AirdropClient() {
             setShowCountdown(false)
             setIsInCooldown(false)
             setCanClaim(false)
-            setBoxOpened(false)
-            setShowReward(false)
-            setChainsBroken(false)
             setWorldIdVerified(false)
             localStorage.removeItem("airdrop_last_claim")
             return 24 * 60 * 60 // Reset to 24 hours
@@ -107,50 +98,10 @@ export default function AirdropClient() {
   const startCooldown = () => {
     const now = Date.now()
     localStorage.setItem("airdrop_last_claim", now.toString())
-    setCountdownTime(24 * 60 * 60) // 24 hours
+    setCountdownTime(24 * 60 * 60)
     setShowCountdown(true)
     setIsInCooldown(true)
     setCanClaim(false)
-  }
-
-  const handleBoxClick = async () => {
-    // Don't allow interaction if in cooldown
-    if (isInCooldown || showCountdown) {
-      return
-    }
-
-    if (!chainsBroken && !chainsBreaking) {
-      // First phase: break chains
-      setChainsBreaking(true)
-
-      setTimeout(() => {
-        setChainsBroken(true)
-        setChainsBreaking(false)
-        // Start World ID verification
-        handleWorldIdVerification()
-      }, 1500)
-    }
-  }
-
-  const proceedAfterVerification = () => {
-    setWorldIdVerified(true)
-    setWorldIdVerifying(false)
-    setWorldIdFailed(false)
-
-    // Open box after verification
-    setTimeout(() => {
-      setBoxOpened(true)
-      setTimeout(() => {
-        setShowReward(true)
-        setCanClaim(true)
-      }, 1000)
-    }, 500)
-  }
-
-  const failVerification = () => {
-    setWorldIdVerified(false)
-    setWorldIdVerifying(false)
-    setWorldIdFailed(true)
   }
 
   const handleWorldIdVerification = async () => {
@@ -160,9 +111,11 @@ export default function AirdropClient() {
 
     try {
       if (!MiniKit.isInstalled()) {
-        console.log("MiniKit not installed, simulating error...")
+        console.log("MiniKit not installed, simulating success...")
         setTimeout(() => {
-          proceedAfterVerification() // Se der erro → World ID verificado
+          setWorldIdVerified(true)
+          setWorldIdVerifying(false)
+          setCanClaim(true)
         }, 2000)
         return
       }
@@ -176,27 +129,26 @@ export default function AirdropClient() {
       try {
         console.log("Starting World ID verification...")
 
-        // Set up a timeout - Se demorar mais de 10 segundos → World ID não verificado
         const verificationTimeout = setTimeout(() => {
           console.log("World ID verification timeout - NOT VERIFIED")
-          failVerification()
-        }, 10000) // 10 seconds timeout
+          setWorldIdVerified(false)
+          setWorldIdVerifying(false)
+          setWorldIdFailed(true)
+        }, 10000)
 
         const { finalPayload } = await MiniKit.commandsAsync.verify(verifyPayload)
-
-        // Clear the timeout since we got a response
         clearTimeout(verificationTimeout)
 
         console.log("World ID verification response:", finalPayload)
 
-        // Se clicar X (cancelar) → World ID não verificado
         if (finalPayload.status === "error") {
           console.log("World ID verification cancelled by user - NOT VERIFIED")
-          failVerification()
+          setWorldIdVerified(false)
+          setWorldIdVerifying(false)
+          setWorldIdFailed(true)
           return
         }
 
-        // Try backend verification but don't fail if it doesn't work
         try {
           const verifyResponse = await fetch("/api/verify", {
             method: "POST",
@@ -216,17 +168,20 @@ export default function AirdropClient() {
           console.log("Backend verification error, but continuing anyway:", backendError)
         }
 
-        // Success case
-        proceedAfterVerification()
+        setWorldIdVerified(true)
+        setWorldIdVerifying(false)
+        setCanClaim(true)
       } catch (verifyError) {
         console.log("World ID verification error - VERIFIED (as per requirements):", verifyError)
-        // Se der erro → World ID verificado
-        proceedAfterVerification()
+        setWorldIdVerified(true)
+        setWorldIdVerifying(false)
+        setCanClaim(true)
       }
     } catch (error) {
       console.log("General error in World ID verification - VERIFIED (as per requirements):", error)
-      // Se der erro → World ID verificado
-      proceedAfterVerification()
+      setWorldIdVerified(true)
+      setWorldIdVerifying(false)
+      setCanClaim(true)
     }
   }
 
@@ -244,7 +199,6 @@ export default function AirdropClient() {
         throw new Error("MiniKit is not installed")
       }
 
-      // Use the real contract address and ABI
       const contractAddress = "0x993814a0AEc15a7EcFa9Bd26B4Fd3F62cAd07e81"
       const contractABI = [
         {
@@ -287,14 +241,12 @@ export default function AirdropClient() {
       if (finalPayload.status === "error") {
         console.error("Error claiming airdrop:", finalPayload.message)
 
-        // Check if error is due to already claimed (24h cooldown)
         if (
           finalPayload.message &&
           (finalPayload.message.includes("Wait 24h") ||
             finalPayload.message.includes("24h between claims") ||
             finalPayload.message.includes("already claimed"))
         ) {
-          // Start cooldown even on error if it's due to already claimed
           setTimeout(() => {
             setClaimSuccess(false)
             startCooldown()
@@ -311,7 +263,6 @@ export default function AirdropClient() {
       setClaimSuccess(true)
       setCanClaim(false)
 
-      // Start cooldown after successful claim
       setTimeout(() => {
         setClaimSuccess(false)
         startCooldown()
@@ -320,7 +271,6 @@ export default function AirdropClient() {
       console.error("Error claiming airdrop:", error)
       const errorMessage = error instanceof Error ? error.message : "Unknown error"
 
-      // Check if error is due to already claimed
       if (
         errorMessage.includes("Wait 24h") ||
         errorMessage.includes("24h between claims") ||
@@ -343,7 +293,8 @@ export default function AirdropClient() {
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden flex flex-col">
-      <BackgroundEffect /> {/* Adicionado BackgroundEffect component */}
+      <BackgroundEffect />
+
       {/* Back Button */}
       <div className="absolute top-4 left-4 z-50">
         <Link
@@ -354,9 +305,10 @@ export default function AirdropClient() {
           <span className="text-sm font-medium">{t.common.back}</span>
         </Link>
       </div>
+
       {/* Main Content */}
       <div className="flex-1 flex flex-col items-center justify-center relative z-10 text-center px-4 pt-20">
-        {/* Pulse promotional banner above the title */}
+        {/* Pulse promotional banner */}
         <motion.div
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -406,7 +358,7 @@ export default function AirdropClient() {
           <p className="text-gray-400 text-sm">{t.airdrop.everyDayReward}</p>
         </motion.div>
 
-        {/* Countdown Timer - Show if in cooldown */}
+        {/* Countdown Timer */}
         <AnimatePresence>
           {showCountdown && isInCooldown && (
             <motion.div
@@ -422,7 +374,6 @@ export default function AirdropClient() {
                 </div>
 
                 <div className="flex items-center justify-center gap-4">
-                  {/* Hours */}
                   <div className="text-center">
                     <motion.div
                       className="text-3xl font-bold text-white tabular-nums"
@@ -442,7 +393,6 @@ export default function AirdropClient() {
 
                   <div className="text-2xl text-white font-bold">:</div>
 
-                  {/* Minutes */}
                   <div className="text-center">
                     <motion.div
                       className="text-3xl font-bold text-white tabular-nums"
@@ -462,7 +412,6 @@ export default function AirdropClient() {
 
                   <div className="text-2xl text-white font-bold">:</div>
 
-                  {/* Seconds */}
                   <div className="text-center">
                     <motion.div
                       className="text-3xl font-bold text-white tabular-nums"
@@ -481,7 +430,6 @@ export default function AirdropClient() {
                   </div>
                 </div>
 
-                {/* Animated border */}
                 <div className="absolute inset-0 rounded-2xl border border-cyan-400/30 animate-pulse" />
               </div>
             </motion.div>
@@ -507,7 +455,7 @@ export default function AirdropClient() {
         </AnimatePresence>
 
         <AnimatePresence>
-          {worldIdVerified && !boxOpened && !isInCooldown && (
+          {worldIdVerified && !isInCooldown && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -538,287 +486,43 @@ export default function AirdropClient() {
           )}
         </AnimatePresence>
 
-        {/* Surprise Box */}
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.2 }}
           className="mb-8 relative"
         >
-          <div className="relative w-64 h-64 mx-auto">
-            {/* Box Container */}
-            <motion.div
-              className={`absolute inset-0 ${isInCooldown ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
-              onClick={handleBoxClick}
-              whileHover={{ scale: chainsBroken || isInCooldown ? 1 : 1.05 }}
-              whileTap={{ scale: chainsBroken || isInCooldown ? 1 : 0.95 }}
-            >
-              {/* Box Base */}
-              <div className="relative w-full h-full">
-                {/* Box Bottom */}
-                <motion.div
-                  className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-48 h-32 bg-gradient-to-br from-amber-600 via-yellow-500 to-amber-700 rounded-lg shadow-2xl border-4 border-yellow-400/50"
-                  style={{
-                    boxShadow: `
-                      0 0 30px rgba(251, 191, 36, 0.5),
-                      inset 0 0 20px rgba(255, 255, 255, 0.2)
-                    `,
-                  }}
-                >
-                  {/* Box Pattern */}
-                  <div className="absolute inset-2 border-2 border-yellow-300/30 rounded" />
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                    <Gift className="w-8 h-8 text-yellow-200" />
-                  </div>
-                </motion.div>
-
-                {/* Box Lid - Moved further down from top-12 to top-16 */}
-                <AnimatePresence>
-                  {!boxOpened && (
-                    <motion.div
-                      className="absolute top-16 left-1/2 transform -translate-x-1/2 w-48 h-16 bg-gradient-to-br from-amber-500 via-yellow-400 to-amber-600 rounded-lg shadow-xl border-4 border-yellow-300/50"
-                      style={{
-                        boxShadow: `
-                          0 0 25px rgba(251, 191, 36, 0.4),
-                          inset 0 0 15px rgba(255, 255, 255, 0.3)
-                        `,
-                      }}
-                      exit={{
-                        rotateX: -120,
-                        y: -50,
-                        opacity: 0.7,
-                        transition: { duration: 0.8, ease: "easeOut" },
-                      }}
-                    >
-                      <div className="absolute inset-2 border-2 border-yellow-200/40 rounded" />
-                      {/* Ribbon */}
-                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full h-2 bg-gradient-to-r from-red-500 to-red-600 shadow-lg" />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                {/* Chain - Only Horizontal - Adjusted position to match new lid position */}
-                <AnimatePresence>
-                  {!chainsBroken && (
-                    <motion.div
-                      className="absolute top-28 left-1/2 transform -translate-x-1/2 w-52 h-1 bg-gradient-to-r from-gray-400 via-gray-500 to-gray-600 rounded-full shadow-lg"
-                      style={{
-                        boxShadow: `
-                          0 0 10px rgba(107, 114, 128, 0.8),
-                          inset 0 0 5px rgba(255, 255, 255, 0.3)
-                        `,
-                      }}
-                      exit={{
-                        scale: 0,
-                        opacity: 0,
-                        transition: { duration: 0.5, ease: "easeOut" },
-                      }}
-                    >
-                      {/* Chain Links */}
-                      {[...Array(10)].map((_, i) => (
-                        <motion.div
-                          key={`chain-link-${i}`}
-                          className="absolute w-6 h-3 border-2 border-gray-400 rounded-full bg-gradient-to-b from-gray-300 to-gray-500"
-                          style={{
-                            left: `${i * 20}px`,
-                            top: "-5px",
-                            boxShadow: "inset 0 0 3px rgba(255,255,255,0.5)",
-                          }}
-                          animate={
-                            chainsBreaking
-                              ? {
-                                  scale: [1, 0.8, 0],
-                                  opacity: [1, 0.5, 0],
-                                  y: [0, 10, 20],
-                                }
-                              : {}
-                          }
-                          transition={{ delay: i * 0.05 }}
-                        />
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                {/* Padlock - Adjusted position to match new chain position */}
-                <AnimatePresence>
-                  {!chainsBroken && (
-                    <motion.div
-                      className="absolute top-24 left-1/2 transform -translate-x-1/2 z-30"
-                      exit={{
-                        scale: 0,
-                        rotate: 180,
-                        opacity: 0,
-                        transition: { duration: 0.5, ease: "easeOut" },
-                      }}
-                    >
-                      <div className="relative">
-                        {/* Padlock Glow */}
-                        <div
-                          className="absolute inset-0 bg-gray-300 rounded-lg blur-sm"
-                          style={{
-                            boxShadow: `
-                              0 0 20px rgba(156, 163, 175, 0.8),
-                              0 0 40px rgba(156, 163, 175, 0.6)
-                            `,
-                          }}
-                        />
-                        {/* Padlock Body */}
-                        <div className="relative bg-gradient-to-br from-gray-300 via-gray-400 to-gray-500 w-10 h-12 rounded-lg border-2 border-gray-200 shadow-xl">
-                          {/* Padlock Shackle */}
-                          <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 w-8 h-8 border-4 border-gray-300 rounded-t-full bg-transparent" />
-                          {/* Keyhole */}
-                          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                            <Lock className="w-4 h-4 text-gray-700" />
-                          </div>
-                          {/* Metallic shine effect */}
-                          <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-transparent rounded-lg" />
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                {/* Chain Breaking Effect */}
-                {chainsBreaking && (
-                  <>
-                    {[...Array(15)].map((_, i) => (
-                      <motion.div
-                        key={`break-particle-${i}`}
-                        className="absolute w-1 h-1 bg-gray-400 rounded-full"
-                        initial={{
-                          x: 120,
-                          y: 120,
-                          scale: 1,
-                          opacity: 1,
-                        }}
-                        animate={{
-                          x: 120 + (Math.random() - 0.5) * 200,
-                          y: 120 + (Math.random() - 0.5) * 200,
-                          scale: [1, 0.5, 0],
-                          opacity: [1, 0.8, 0],
-                        }}
-                        transition={{
-                          duration: 1,
-                          delay: i * 0.05,
-                          ease: "easeOut",
-                        }}
-                      />
-                    ))}
-                  </>
-                )}
-
-                {/* Sparkles Effect */}
-                {boxOpened && (
-                  <>
-                    {[...Array(12)].map((_, i) => (
-                      <motion.div
-                        key={`sparkle-${i}`}
-                        className="absolute w-2 h-2 bg-yellow-300 rounded-full"
-                        initial={{
-                          x: 120,
-                          y: 120,
-                          scale: 0,
-                          opacity: 1,
-                        }}
-                        animate={{
-                          x: 120 + Math.cos((i * Math.PI * 2) / 12) * 100,
-                          y: 120 + Math.sin((i * Math.PI * 2) / 12) * 100,
-                          scale: [0, 1, 0],
-                          opacity: [1, 1, 0],
-                        }}
-                        transition={{
-                          duration: 1.5,
-                          delay: i * 0.1,
-                          ease: "easeOut",
-                        }}
-                      />
-                    ))}
-                  </>
-                )}
-
-                {/* TPF Logo Reveal */}
-                <AnimatePresence>
-                  {showReward && (
-                    <motion.div
-                      className="absolute top-4 left-1/2 transform -translate-x-1/2"
-                      initial={{ y: 50, opacity: 0, scale: 0.5 }}
-                      animate={{
-                        y: 0,
-                        opacity: 1,
-                        scale: 1,
-                        rotateY: [0, 360],
-                      }}
-                      transition={{
-                        duration: 1,
-                        rotateY: { duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "linear" },
-                      }}
-                    >
-                      <div className="relative w-24 h-24">
-                        {/* Glow Effect */}
-                        <div
-                          className="absolute inset-0 bg-white rounded-full"
-                          style={{
-                            boxShadow: `
-                              0 0 40px rgba(255, 255, 255, 0.8),
-                              0 0 80px rgba(255, 255, 255, 0.6),
-                              0 0 120px rgba(255, 255, 255, 0.4)
-                            `,
-                            animation: "pulse 1s ease-in-out infinite",
-                          }}
-                        />
-                        <div className="relative z-10 w-full h-full rounded-full overflow-hidden bg-white p-1">
-                          <Image
-                            src="/images/logo-tpf.png"
-                            alt="TPF Logo"
-                            width={88}
-                            height={88}
-                            className="w-full h-full object-contain"
-                          />
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </motion.div>
+          <div className="w-64 h-64 mx-auto flex items-center justify-center">
+            <TPFCoin3D />
           </div>
-
-          {/* Click instruction */}
-          {!chainsBroken && !chainsBreaking && !isInCooldown && (
-            <motion.p
-              className="text-gray-400 text-sm mt-4"
-              animate={{ opacity: [0.5, 1, 0.5] }}
-              transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
-            >
-              {t.airdrop.clickToBreakChain}
-            </motion.p>
-          )}
-
-          {chainsBreaking && (
-            <motion.p
-              className="text-yellow-400 text-sm mt-4 font-medium"
-              animate={{ opacity: [0.7, 1, 0.7] }}
-              transition={{ duration: 0.5, repeat: Number.POSITIVE_INFINITY }}
-            >
-              {t.airdrop.breakingChain}
-            </motion.p>
-          )}
-
-          {isInCooldown && (
-            <motion.p
-              className="text-red-400 text-sm mt-4 font-medium"
-              animate={{ opacity: [0.7, 1, 0.7] }}
-              transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
-            >
-              Wait for the countdown to finish
-            </motion.p>
-          )}
         </motion.div>
+
+        {/* Verify Button */}
+        <AnimatePresence>
+          {!worldIdVerified && !worldIdVerifying && !isInCooldown && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="mb-8 relative z-10"
+            >
+              <button
+                className="w-56 py-3 px-5 rounded-full bg-gradient-to-b from-blue-500 to-blue-600 text-white hover:from-blue-400 hover:to-blue-500 font-bold text-sm shadow-lg border border-blue-400/30 relative overflow-hidden hover:scale-105 active:scale-95 transition-all duration-200"
+                onClick={handleWorldIdVerification}
+              >
+                <div className="absolute inset-0 bg-gradient-to-b from-white/30 to-transparent opacity-70" />
+                <div className="relative flex items-center justify-center gap-2">
+                  <Shield className="w-4 h-4" />
+                  <span>Verify with World ID</span>
+                </div>
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Claim Button */}
         <AnimatePresence>
-          {showReward && !showCountdown && !isInCooldown && (
+          {worldIdVerified && !showCountdown && !isInCooldown && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
