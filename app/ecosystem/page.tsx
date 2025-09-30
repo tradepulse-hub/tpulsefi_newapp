@@ -5,9 +5,8 @@ import { ArrowLeft } from "lucide-react"
 export default function EcosystemPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex flex-col items-center justify-center relative overflow-hidden">
-      {/* Back button */}
       <Link
-        href="/"
+        href="/presentation"
         className="absolute top-8 left-8 flex items-center gap-2 text-white/70 hover:text-white transition-colors"
       >
         <ArrowLeft className="w-5 h-5" />
