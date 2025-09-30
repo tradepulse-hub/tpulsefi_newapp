@@ -40,7 +40,7 @@ export default function EcosystemPage() {
         {/* Logo container */}
         <div className="relative w-64 h-64 flex items-center justify-center">
           <Image
-            src="/images/logo-tpf.jpg"
+            src="/images/logo-tpf.png"
             alt="TPF Logo"
             width={256}
             height={256}
