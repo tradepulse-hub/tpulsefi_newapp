@@ -73,7 +73,7 @@ export default function EcosystemPage() {
 
         <button
           onClick={scrollToSection2}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 text-white/70 hover:text-white transition-colors animate-bounce"
+          className="absolute bottom-8 left-1/3 -translate-x-1/2 z-20 text-white/70 hover:text-white transition-colors animate-bounce"
           aria-label="Scroll down"
         >
           <ChevronDown className="w-8 h-8" />
