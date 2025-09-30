@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowLeft, ChevronDown, ChevronUp } from "lucide-react"
+import { ArrowLeft, ChevronDown } from "lucide-react"
 import { useRef } from "react"
 
 export default function EcosystemPage() {
@@ -129,13 +129,15 @@ export default function EcosystemPage() {
           </p>
         </div>
 
-        <button
-          onClick={scrollToSection1}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 text-white/70 hover:text-white transition-colors animate-bounce"
-          aria-label="Scroll up"
+        {/* Go App button */}
+        <a
+          href="https://worldcoin.org/mini-app?app_id=app_271b2cf77994b56f013f465c625bc275&app_mode=mini-app"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 bg-white text-black px-8 py-3 rounded-lg font-semibold hover:bg-white/90 transition-colors"
         >
-          <ChevronUp className="w-8 h-8" />
-        </button>
+          Go App
+        </a>
       </div>
     </div>
   )
