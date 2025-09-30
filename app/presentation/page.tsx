@@ -27,7 +27,6 @@ import { AnimatePresence, motion } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { useMobile } from "@/hooks/use-mobile"
 import { BackgroundEffect } from "../../components/background-effect"
-import AdSenseAd from "../../components/AdSenseAd" // Import the AdSenseAd component
 
 import { MiniKit, ResponseEvent } from "@worldcoin/minikit-js"
 
@@ -416,9 +415,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
   const [currentWordIndex, setCurrentWordIndex] = useState(0)
   const [showWord, setShowWord] = useState(true)
 
-  const [showWelcomeModal, setShowWelcomeModal] = useState(false) // Inicialmente oculto
-  const POPUP_DISPLAY_INTERVAL_MS = 1 * 60 * 60 * 1000 // 1 hora
-
   const [invitedUsers, setInvitedUsers] = useState<string[]>([])
   const [clickedUsers, setClickedUsers] = useState<string[]>([])
   const [currentUserId] = useState(() => `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`)
@@ -478,27 +474,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
 
     return () => clearInterval(wordInterval)
   }, [t.motivationalWords.length])
-
-  useEffect(() => {
-    const lastShown = localStorage.getItem("lastWelcomePopupShown")
-    const now = Date.now()
-
-    if (!lastShown) {
-      // Se nunca foi exibido, mostra e registra a hora
-      setShowWelcomeModal(true)
-      localStorage.setItem("lastWelcomePopupShown", now.toString())
-    } else {
-      const lastShownTime = Number.parseInt(lastShown, 10)
-      if (now - lastShownTime >= POPUP_DISPLAY_INTERVAL_MS) {
-        // Se tempo suficiente passou, mostra e registra a nova hora
-        setShowWelcomeModal(true)
-        localStorage.setItem("lastWelcomePopupShown", now.toString())
-      } else {
-        // Caso contrário, mantém oculto
-        setShowWelcomeModal(false)
-      }
-    }
-  }, []) // Executa apenas uma vez na montagem do componente
 
   const getUsernameByAddress = async (walletAddress: string): Promise<string> => {
     try {
@@ -607,11 +582,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
     const userClicks = JSON.parse(localStorage.getItem(`clicks_${walletAddress}`) || "[]")
     setClickedUsers(userClicks)
   }, [currentUserId, user?.wallet_address])
-
-  const handleCloseWelcomeModal = () => {
-    setShowWelcomeModal(false)
-    localStorage.setItem("lastWelcomePopupShown", Date.now().toString()) // Registra o tempo de fechamento
-  }
 
   const handleCopyLink = async () => {
     const walletAddress = user?.wallet_address || currentUserId
@@ -1304,7 +1274,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
         </div>
       </div>
 
-      {/* 3D Floating Icons Menu - No Background */}
       <AnimatePresence>
         {isMenuOpen && (
           <motion.div
@@ -1312,143 +1281,34 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: "100%", opacity: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed bottom-20 z-40 !w-screen"
-            style={{ perspective: "1000px" }}
+            className="fixed bottom-20 left-6 right-6 z-40"
           >
-            <div className="bg-gradient-to-br from-black/90 to-gray-950/90 backdrop-blur-xl border border-white/10 rounded-2xl w-full">
-              <div className="px-4 py-6 h-32 overflow-x-auto overflow-y-hidden">
-                <div className="flex gap-6 items-center justify-start min-w-max">
-                  {navigationItems.map((item, index) => (
-                    <motion.div
-                      key={item.id}
-                      initial={{ scale: 0, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      transition={{ delay: index * 0.1, type: "spring", stiffness: 200 }}
-                      className="group pointer-events-auto relative flex-shrink-0 w-16 h-16"
-                      style={{
-                        filter: "drop-shadow(0 0 10px rgba(255, 255, 255, 0.3))",
-                        boxShadow: "0 0 20px rgba(255, 255, 255, 0.2), inset 0 0 20px rgba(255, 255, 255, 0.1)",
-                      }}
-                      onClick={() => {
-                        if (item.action) {
-                          item.action()
-                        } else if (item.href) {
-                          router.push(item.href)
-                        }
-                        setIsMenuOpen(false)
-                      }}
-                    >
-                      <motion.div
-                        className="w-full h-full bg-gradient-to-br from-gray-800/90 to-gray-900/95 backdrop-blur-xl border border-gray-600/50 rounded-xl flex items-center justify-center shadow-2xl"
-                        style={{
-                          transformStyle: "preserve-3d",
-                          boxShadow:
-                            "0 8px 15px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.1), 0 0 20px rgba(255, 255, 255, 0.3)",
-                        }}
-                        animate={{
-                          rotateZ: [0, 5, -5, 0],
-                        }}
-                        transition={{
-                          duration: 4,
-                          repeat: Number.POSITIVE_INFINITY,
-                          ease: "easeInOut",
-                          delay: index * 0.5,
-                        }}
-                      >
-                        <motion.div
-                          className="absolute inset-0 bg-white/20 rounded-lg blur-sm"
-                          animate={{
-                            scale: [1, 1.3, 1],
-                            opacity: [0.2, 0.6, 0.2],
-                          }}
-                          transition={{
-                            duration: 2,
-                            repeat: Number.POSITIVE_INFINITY,
-                            ease: "easeInOut",
-                            delay: index * 0.3,
-                          }}
-                        />
-                        <div
-                          className="absolute inset-0 bg-white/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                          style={{ transform: "translateZ(2px)" }}
-                        />
-                        {/* 3D Icon with Floating Animation */}
-                        <motion.div
-                          style={{
-                            transformStyle: "preserve-3d",
-                            transform: "translateZ(3px)",
-                          }}
-                          animate={{
-                            y: [0, -2, 0],
-                            rotateY: [0, 10, -10, 0],
-                          }}
-                          transition={{
-                            duration: 3,
-                            repeat: Number.POSITIVE_INFINITY,
-                            ease: "easeInOut",
-                            delay: index * 0.4,
-                          }}
-                        >
-                          <item.icon
-                            className="w-6 h-6 text-white drop-shadow-lg"
-                            style={{ filter: "drop-shadow(0 0 8px rgba(255, 255, 255, 0.5))" }}
-                          />
-                        </motion.div>
-                        <div
-                          className="absolute inset-0 bg-white/15 rounded-xl blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                          style={{ transform: "translateZ(-5px)" }}
-                        />
-                      </motion.div>
-                      {/* Floating Label */}
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.15 + 0.3 }}
-                        className="absolute -bottom-7 left-1/2 transform -translate-x-1/2 whitespace-nowrap"
-                        style={{ transform: "translateZ(2px)" }}
-                      >
-                        <div className="px-2.5 py-1 bg-gray-800/80 backdrop-blur-md border border-gray-700/50 rounded-full">
-                          <span className="text-white text-[0.6rem] font-medium drop-shadow-lg">
-                            {t.navigation[item.labelKey]}
-                          </span>
-                        </div>
-                      </motion.div>
-                      <motion.div
-                        className="absolute inset-0 pointer-events-none"
-                        whileHover={{
-                          scale: [1, 1.5, 1],
-                          opacity: [0, 1, 0],
-                        }}
-                        transition={{ duration: 0.6 }}
-                      >
-                        {[...Array(6)].map((_, particleIndex) => (
-                          <motion.div
-                            key={particleIndex}
-                            className="absolute w-1 h-1 bg-white rounded-full"
-                            style={{
-                              top: "50%",
-                              left: "50%",
-                            }}
-                            animate={{
-                              x: Math.cos((particleIndex * Math.PI * 2) / 6) * 20,
-                              y: Math.sin((particleIndex * Math.PI * 2) / 6) * 20,
-                              opacity: [0, 1, 0],
-                              scale: [0, 1, 0],
-                            }}
-                            transition={{
-                              duration: 0.8,
-                              repeat: Number.POSITIVE_INFINITY,
-                              delay: particleIndex * 0.1,
-                            }}
-                          />
-                        ))}
-                      </motion.div>
-                    </motion.div>
-                  ))}
-                </div>
+            <div className="bg-gradient-to-br from-black/90 to-gray-950/90 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
+              <div className="grid grid-cols-3 gap-4">
+                {navigationItems.map((item, index) => (
+                  <motion.button
+                    key={item.id}
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: index * 0.05, type: "spring", stiffness: 200 }}
+                    onClick={() => {
+                      if (item.action) {
+                        item.action()
+                      } else if (item.href) {
+                        router.push(item.href)
+                      }
+                      setIsMenuOpen(false)
+                    }}
+                    className="flex flex-col items-center gap-2 p-4 bg-gradient-to-br from-gray-800/50 to-gray-900/50 hover:from-gray-700/50 hover:to-gray-800/50 rounded-xl border border-gray-700/30 transition-all duration-200 hover:scale-105"
+                  >
+                    <item.icon className="w-6 h-6 text-white" />
+                    <span className="text-white text-xs font-medium text-center">{t.navigation[item.labelKey]}</span>
+                  </motion.button>
+                ))}
               </div>
+
               {/* Menu Handle */}
-              <div className="flex justify-center pt-3 pb-1">
+              <div className="flex justify-center pt-4">
                 <div className="w-8 h-0.5 bg-gray-500 rounded-full" />
               </div>
             </div>
@@ -1456,52 +1316,6 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
         )}
       </AnimatePresence>
 
-      {/* Welcome Modal */}
-      <AnimatePresence>
-        {showWelcomeModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4"
-            onClick={handleCloseWelcomeModal}
-          >
-            {/* Backdrop */}
-            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
-
-            {/* Modal */}
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0, y: 50 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.8, opacity: 0, y: 50 }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="relative bg-black/90 backdrop-blur-xl border border-white/20 rounded-2xl p-4 max-w-2xl w-full mx-4 shadow-2xl"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Close Button */}
-              <button
-                onClick={handleCloseWelcomeModal}
-                className="absolute top-3 right-3 w-6 h-6 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all duration-200"
-              >
-                <X className="w-3 h-3 text-white" />
-              </button>
-
-              {/* AdSense Ad */}
-              <div className="w-full">
-                <AdSenseAd adSlot="1171772282" />
-              </div>
-
-              {/* CTA Button */}
-              <button
-                onClick={handleCloseWelcomeModal}
-                className="mt-4 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg text-sm w-full"
-              >
-                {t.common?.start || "Começar"}
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
       {/* Main Content */}
       <div className="relative z-10 text-center">
         {/* Logo with Ultra Vibrant Auras and Vibration - COMPACTED */}
