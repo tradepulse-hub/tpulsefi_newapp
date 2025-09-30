@@ -101,10 +101,33 @@ export default function EcosystemPage() {
           ))}
         </div>
 
+        {/* PLAY Logo with white glow */}
+        <div className="relative z-10 flex items-center justify-center mb-8">
+          {/* Outer glow layers */}
+          <div className="absolute inset-0 blur-3xl bg-white/30 rounded-full scale-150 animate-pulse" />
+          <div className="absolute inset-0 blur-2xl bg-white/40 rounded-full scale-125" />
+          <div className="absolute inset-0 blur-xl bg-white/50 rounded-full" />
+
+          {/* Logo container */}
+          <div className="relative w-64 h-64 flex items-center justify-center">
+            <Image
+              src="/images/logo-play.jpg"
+              alt="PLAY Logo"
+              width={256}
+              height={256}
+              className="relative z-10 drop-shadow-2xl"
+            />
+          </div>
+        </div>
+
         {/* Content */}
-        <div className="relative z-10 max-w-4xl px-8 text-center">
-          <h2 className="text-3xl font-bold text-white mb-6">Coming Soon</h2>
-          <p className="text-white/60 text-lg">More ecosystem features will be available here</p>
+        <div className="relative z-10 max-w-2xl px-8 text-center">
+          <h2 className="text-4xl font-bold text-white mb-6">PLAY - For Only Humans</h2>
+          <p className="text-white/70 text-lg leading-relaxed">
+            Part of the TPulseFi ecosystem, PLAY leverages World ID to bring real utility to social media and video
+            streaming platforms. By ensuring security against fake accounts and bots, PLAY creates a trusted environment
+            where authentic content creators can earn financial rewards for their work.
+          </p>
         </div>
 
         <button
