@@ -73,13 +73,14 @@ export default function EcosystemPage() {
 
         <button
           onClick={scrollToSection2}
-          className="absolute bottom-8 left-1/3 -translate-x-1/2 z-20 text-white/70 hover:text-white transition-colors animate-bounce"
+          className="absolute bottom-8 left-[47%] -translate-x-1/2 z-20 text-white/70 hover:text-white transition-colors animate-bounce"
           aria-label="Scroll down"
         >
           <ChevronDown className="w-8 h-8" />
         </button>
       </div>
 
+      {/* Section 2 - PLAY Logo */}
       <div
         ref={section2Ref}
         className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex flex-col items-center justify-center relative overflow-hidden snap-start"
