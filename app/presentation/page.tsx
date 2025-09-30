@@ -47,6 +47,13 @@ const LANGUAGES = [
 // Partnerships data
 const PARTNERSHIPS = [
   {
+    id: "play",
+    name: "PLAY - Earn Money Creating",
+    image: "/images/logo-play.png",
+    gradient: "from-purple-500 to-indigo-600",
+    url: "https://worldcoin.org/mini-app?app_id=app_271b2cf77994b56f013f465c625bc275&app_mode=mini-app",
+  },
+  {
     id: "axo",
     name: "AXO",
     image: "/images/axo.jpg",
@@ -80,13 +87,6 @@ const PARTNERSHIPS = [
     image: "/images/pulse-logo.png",
     gradient: "from-cyan-500 to-blue-600",
     url: "https://worldcoin.org/mini-app?app_id=app_91043e97761ffc609071cc48447b6eba&app_mode=mini-app",
-  },
-  {
-    id: "play",
-    name: "PLAY - Earn Money Creating",
-    image: "/images/logo-play.png",
-    gradient: "from-purple-500 to-indigo-600",
-    url: "https://worldcoin.org/mini-app?app_id=app_271b2cf77994b56f013f465c625bc275&app_mode=mini-app",
   },
 ]
 
