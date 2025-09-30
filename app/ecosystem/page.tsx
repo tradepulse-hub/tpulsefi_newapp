@@ -111,7 +111,7 @@ export default function EcosystemPage() {
           {/* Logo container */}
           <div className="relative w-64 h-64 flex items-center justify-center">
             <Image
-              src="/images/logo-play.jpg"
+              src="/images/logo-play.png"
               alt="PLAY Logo"
               width={256}
               height={256}
