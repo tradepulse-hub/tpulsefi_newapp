@@ -11,7 +11,7 @@ export default function EcosystemPage() {
         className="absolute top-8 left-8 flex items-center gap-2 text-white/70 hover:text-white transition-colors"
       >
         <ArrowLeft className="w-5 h-5" />
-        <span>Voltar</span>
+        <span>Back</span>
       </Link>
 
       {/* Animated background particles */}
@@ -52,7 +52,7 @@ export default function EcosystemPage() {
 
       {/* Title */}
       <h1 className="mt-12 text-4xl font-bold text-white text-center z-10">Ecosystem</h1>
-      <p className="mt-4 text-white/60 text-center max-w-md z-10 px-4">Explore o ecossistema TPulseFi</p>
+      <p className="mt-4 text-white/60 text-center max-w-md z-10 px-4">Explore the TPulseFi ecosystem</p>
     </div>
   )
 }
