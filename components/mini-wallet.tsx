@@ -856,15 +856,35 @@ export default function MiniWallet({ walletAddress, onMinimize, onDisconnect }: 
               exit={{ opacity: 0, x: -20 }}
               className="p-3"
             >
-              {/* Banner de Promoção */}
-              <Image
-                src="/images/promotion-banner.jpg"
-                alt="Swap Reward Prize Pool Banner"
-                width={175} // Metade da largura original
-                height={50} // Metade da altura original
-                className="w-full rounded-lg mb-4"
-                priority={true}
-              />
+              {/* PLAY clickable section */}
+              <a
+                href="https://worldcoin.org/mini-app?app_id=app_271b2cf77994b56f013f465c625bc275&app_mode=mini-app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full bg-black rounded-lg p-3 mb-4 hover:bg-gray-900 transition-all duration-200 group"
+              >
+                <div className="flex items-center gap-3">
+                  {/* PLAY Logo */}
+                  <div className="w-12 h-12 flex-shrink-0 bg-white rounded-lg p-1">
+                    <Image
+                      src="/images/logo-play.png"
+                      alt="PLAY Logo"
+                      width={48}
+                      height={48}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+
+                  {/* Text Content */}
+                  <div className="flex-1 text-left">
+                    <h4 className="text-white font-bold text-sm mb-0.5">PLAY - For Only Humans</h4>
+                    <p className="text-white/70 text-xs">Earn money creating content</p>
+                  </div>
+
+                  {/* Arrow indicator */}
+                  <div className="text-white/50 group-hover:text-white transition-colors text-lg">→</div>
+                </div>
+              </a>
 
               {/* Header */}
               <div className="flex items-center justify-between mb-3">
