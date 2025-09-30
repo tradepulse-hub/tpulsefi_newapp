@@ -21,12 +21,12 @@ import {
   Copy,
   Check,
 } from "lucide-react"
-import { useMiniKit } from "../../hooks/use-minikit"
-import MiniWallet from "../../components/mini-wallet"
+import { useMiniKit } from "@/hooks/use-minikit"
+import MiniWallet from "@/components/mini-wallet"
 import { AnimatePresence, motion } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { useMobile } from "@/hooks/use-mobile"
-import { BackgroundEffect } from "../../components/background-effect"
+import { BackgroundEffect } from "@/components/background-effect"
 
 import { MiniKit, ResponseEvent } from "@worldcoin/minikit-js"
 
@@ -108,7 +108,7 @@ const translations = {
       airdrop: "Airdrop",
       fistaking: "Fi Staking",
       figames: "Fi Games",
-      membership: "Membership",
+      ecosystem: "Ecosystem",
       about: "About",
     },
     common: {
@@ -176,7 +176,7 @@ const translations = {
       airdrop: "Airdrop",
       fistaking: "Fi Staking",
       figames: "Fi Games",
-      membership: "Membros",
+      ecosystem: "Ecossistema",
       about: "Sobre",
     },
     common: {
@@ -249,7 +249,7 @@ const translations = {
       airdrop: "Airdrop",
       fistaking: "Fi Staking",
       figames: "Fi Games",
-      membership: "Miembros",
+      ecosystem: "Ecosistema",
       about: "Acerca de",
     },
     common: {
@@ -322,7 +322,7 @@ const translations = {
       airdrop: "Airdrop",
       fistaking: "Fi Staking",
       figames: "Fi Games",
-      membership: "Keanggotaan",
+      ecosystem: "Ekosistem",
       about: "Tentang",
     },
     common: {
@@ -377,7 +377,7 @@ const translations = {
       rateUsDescription: "Sebuah isyarat kecil yang membantu kami memperkuat dan mencapai kesuksesan.",
       shareFriendsTitle: "Bagikan dengan teman dan keluarga Anda",
       shareFriendsDescription:
-        "Lakukan bagian Anda dan berkontribusi agar TPulseFi benar-benar tumbuh, bersama kita lebih kuat.",
+        "Lakukan bagian Anda dan kontribusi agar TPulseFi benar-benar tumbuh, bersama kita lebih kuat.",
     },
   },
 }
@@ -745,10 +745,10 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
       href: "/figames",
     },
     {
-      id: "membership",
-      labelKey: "membership",
-      icon: Users,
-      href: "/membership",
+      id: "ecosystem",
+      labelKey: "ecosystem",
+      icon: Globe,
+      href: "/ecosystem",
     },
     {
       id: "about",
@@ -1301,8 +1301,10 @@ const Presentation: React.FC<PresentationProps> = ({ address, shortAddress, copy
                     }}
                     className="flex flex-col items-center gap-2 p-4 bg-gradient-to-br from-gray-800/50 to-gray-900/50 hover:from-gray-700/50 hover:to-gray-800/50 rounded-xl border border-gray-700/30 transition-all duration-200 hover:scale-105"
                   >
-                    <item.icon className="w-6 h-6 text-white" />
-                    <span className="text-white text-xs font-medium text-center">{t.navigation[item.labelKey]}</span>
+                    <item.icon className="w-3 h-3 text-white" />
+                    <span className="text-white text-[10px] font-medium text-center">
+                      {t.navigation[item.labelKey]}
+                    </span>
                   </motion.button>
                 ))}
               </div>
