@@ -29,7 +29,7 @@ export default function EcosystemPage() {
           className="absolute top-8 left-8 flex items-center gap-2 text-white/70 hover:text-white transition-colors z-20"
         >
           <ArrowLeft className="w-5 h-5" />
-          <span>Back</span>
+          <span className="text-xs">Back</span>
         </Link>
 
         {/* Animated background particles */}
@@ -68,9 +68,8 @@ export default function EcosystemPage() {
           </div>
         </div>
 
-        {/* Title */}
-        <h1 className="mt-12 text-4xl font-bold text-white text-center z-10">Ecosystem</h1>
-        <p className="mt-4 text-white/60 text-center max-w-md z-10 px-4">Explore the TPulseFi ecosystem</p>
+        <h1 className="mt-12 text-2xl font-bold text-white text-center z-10">Ecosystem</h1>
+        <p className="mt-4 text-white/60 text-center max-w-md z-10 px-4 text-xs">Explore the TPulseFi ecosystem</p>
 
         <button
           onClick={scrollToSection2}
@@ -122,8 +121,8 @@ export default function EcosystemPage() {
 
         {/* Content */}
         <div className="relative z-10 max-w-2xl px-8 text-center">
-          <h2 className="text-4xl font-bold text-white mb-6">PLAY - For Only Humans</h2>
-          <p className="text-white/70 text-lg leading-relaxed">
+          <h2 className="text-2xl font-bold text-white mb-6">PLAY - For Only Humans</h2>
+          <p className="text-white/70 text-sm leading-relaxed">
             Part of the TPulseFi ecosystem, PLAY leverages World ID to bring real utility to social media and video
             streaming platforms. By ensuring security against fake accounts and bots, PLAY creates a trusted environment
             where authentic content creators can earn financial rewards for their work.
