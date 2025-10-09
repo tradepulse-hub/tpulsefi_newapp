@@ -168,13 +168,6 @@ const STAKING_CONTRACTS: Record<string, StakingContract | StakingGroup> = {
     image: "/images/eden-logo.png",
     holderType: "psc_holder",
   },
-  KPP: {
-    name: "KeplerPay",
-    symbol: "KPP",
-    address: "0x2aaeC7df37AA5799a9E721A1B338aa2d591acd64",
-    image: "/images/keplerpay-logo.png",
-    holderType: "psc_holder",
-  },
 } // Added missing semicolon here
 
 // Staking contracts configuration for FUTURE claims
