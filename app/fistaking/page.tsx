@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ArrowLeft, TrendingUp, Gift, Loader2, CheckCircle } from 'lucide-react'
+import { ArrowLeft, TrendingUp, Gift, Loader2, CheckCircle } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { MiniKit } from "@worldcoin/minikit-js"
@@ -32,7 +32,8 @@ const translations = {
     futureClaims: "Future Claims",
     noFutureClaims: "No future claims available at this time.",
     futureClaimsInfo: "These tokens will be available for staking in the future. Stay tuned!",
-    marqueeText: "Only TPF holders have these benefits. If you don't have them yet, acquire them now in our wallet (the more you have, the more you earn!)",
+    marqueeText:
+      "Only TPF holders have these benefits. If you don't have them yet, acquire them now in our wallet (the more you have, the more you earn!)",
     contactInfo: "For token listing inquiries, please contact us at support@tradepulsetoken.com",
   },
   pt: {
@@ -50,7 +51,8 @@ const translations = {
     futureClaims: "Recompensas Futuras",
     noFutureClaims: "Nenhuma recompensa futura disponível no momento.",
     futureClaimsInfo: "Esses tokens estarão disponíveis para staking no futuro. Fique ligado!",
-    marqueeText: "Apenas detentores de TPF tem estes benificios, se ainda não tens adquire já na nossa wallet (quanto mais tiveres, mais ganhas!)",
+    marqueeText:
+      "Apenas detentores de TPF tem estes benificios, se ainda não tens adquire já na nossa wallet (quanto mais tiveres, mais ganhas!)",
     contactInfo: "Para dúvidas sobre listagem de tokens, entre em contato conosco em support@tradepulsetoken.com",
   },
   es: {
@@ -68,7 +70,8 @@ const translations = {
     futureClaims: "Reclamaciones Futuras",
     noFutureClaims: "No hay reclamaciones futuras disponibles en este momento.",
     futureClaimsInfo: "Estos tokens estarán disponibles para staking en el futuro. ¡Mantente informado!",
-    marqueeText: "Solo los titulares de TPF tienen estos beneficios. Si aún no los tienes, adquiérelos ahora en nuestra billetera (¡cuanto más tengas, más ganas!)",
+    marqueeText:
+      "Solo los titulares de TPF tienen estos beneficios. Si aún no los tienes, adquiérelos ahora en nuestra billetera (¡cuanto más tengas, más ganas!)",
     contactInfo: "Para consultas sobre listado de tokens, contáctenos en support@tradepulsetoken.com",
   },
   id: {
@@ -86,7 +89,8 @@ const translations = {
     futureClaims: "Klaim Mendatang",
     noFutureClaims: "Tidak ada klaim mendatang yang tersedia saat ini.",
     futureClaimsInfo: "Token ini akan tersedia untuk staking di masa mendatang. Nantikan!",
-    marqueeText: "Hanya pemegang TPF yang memiliki manfaat ini. Jika Anda belum memilikinya, dapatkan sekarang di dompet kami (semakin banyak Anda miliki, semakin banyak yang Anda hasilkan!)",
+    marqueeText:
+      "Hanya pemegang TPF yang memiliki manfaat ini. Jika Anda belum memilikinya, dapatkan sekarang di dompet kami (semakin banyak Anda miliki, semakin banyak yang Anda hasilkan!)",
     contactInfo: "Untuk pertanyaan daftar token, silakan hubungi kami di support@tradepulsetoken.com",
   },
 }
@@ -163,7 +167,15 @@ const STAKING_CONTRACTS: Record<string, StakingContract | StakingGroup> = {
     address: "0x6BAD88b93d67590656c83371d65DCB35d17deC87",
     image: "/images/eden-logo.png",
     holderType: "psc_holder",
-  }
+  },
+  KPP: {
+    name: "KeplerPay",
+    symbol: "KPP",
+    address: "0x2aaeC7df37AA5799a9E721A1B338aa2d591acd64",
+    image: "/images/keplerpay-logo.png",
+    holderType: "psc_holder",
+  },
+} // Added missing semicolon here
 
 // Staking contracts configuration for FUTURE claims
 const FUTURE_STAKING_CONTRACTS: Record<string, StakingContract> = {
@@ -431,7 +443,7 @@ export default function FiStakingPage() {
   const [claiming, setClaiming] = useState<string | null>(null)
   const [claimSuccess, setClaimSuccess] = useState<string | null>(null)
   const [claimError, setClaimError] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState<'available' | 'future'>('available'); // New state for tabs
+  const [activeTab, setActiveTab] = useState<"available" | "future">("available") // New state for tabs
 
   // Load saved language
   useEffect(() => {
@@ -628,17 +640,19 @@ export default function FiStakingPage() {
             <div className="flex bg-gray-800/50 backdrop-blur-sm rounded-lg p-1 border border-gray-700/50 mb-4">
               <button
                 className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${
-                  activeTab === 'available' ? 'bg-purple-600 text-white shadow-md' : 'text-gray-300 hover:bg-gray-700/50'
+                  activeTab === "available"
+                    ? "bg-purple-600 text-white shadow-md"
+                    : "text-gray-300 hover:bg-gray-700/50"
                 }`}
-                onClick={() => setActiveTab('available')}
+                onClick={() => setActiveTab("available")}
               >
                 {t.availableClaims}
               </button>
               <button
                 className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${
-                  activeTab === 'future' ? 'bg-purple-600 text-white shadow-md' : 'text-gray-300 hover:bg-gray-700/50'
+                  activeTab === "future" ? "bg-purple-600 text-white shadow-md" : "text-gray-300 hover:bg-gray-700/50"
                 }`}
-                onClick={() => setActiveTab('future')}
+                onClick={() => setActiveTab("future")}
               >
                 {t.futureClaims}
               </button>
@@ -651,13 +665,11 @@ export default function FiStakingPage() {
               transition={{ duration: 0.3, delay: 0.1 }}
               className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-lg p-3 text-center text-xs text-gray-300 mb-4 overflow-hidden"
             >
-              <div className="whitespace-nowrap animate-marquee">
-                {t.marqueeText}
-              </div>
+              <div className="whitespace-nowrap animate-marquee">{t.marqueeText}</div>
             </motion.div>
 
             {/* Content based on active tab */}
-            {activeTab === 'available' ? (
+            {activeTab === "available" ? (
               <>
                 <div className="grid grid-cols-2 gap-4">
                   {Object.entries(STAKING_CONTRACTS).map(([key, entry], index) => {
@@ -684,7 +696,7 @@ export default function FiStakingPage() {
                           boxShadow: {
                             duration: 2, // Duration for the glow animation
                             ease: "easeInOut",
-                            repeat: Infinity,
+                            repeat: Number.POSITIVE_INFINITY,
                             repeatType: "reverse",
                           },
                         }}
@@ -772,11 +784,7 @@ export default function FiStakingPage() {
                 </div>
               </>
             ) : (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="space-y-4"
-              >
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -805,7 +813,7 @@ export default function FiStakingPage() {
                         boxShadow: {
                           duration: 2, // Duration for the glow animation
                           ease: "easeInOut",
-                          repeat: Infinity,
+                          repeat: Number.POSITIVE_INFINITY,
                           repeatType: "reverse",
                         },
                       }}
