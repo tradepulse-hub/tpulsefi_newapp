@@ -163,15 +163,7 @@ const STAKING_CONTRACTS: Record<string, StakingContract | StakingGroup> = {
     address: "0x6BAD88b93d67590656c83371d65DCB35d17deC87",
     image: "/images/eden-logo.png",
     holderType: "psc_holder",
-  },
-  KPP: {
-    name: "KeplerPay",
-    symbol: "KPP",
-    address: "0x2aaeC7df37AA5799a9E721A1B338aa2d591acd64",
-    image: "/images/keplerpay-logo.png",
-    holderType: "psc_holder",
-  },
-}
+  }
 
 // Staking contracts configuration for FUTURE claims
 const FUTURE_STAKING_CONTRACTS: Record<string, StakingContract> = {
